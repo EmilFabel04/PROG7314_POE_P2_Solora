@@ -25,10 +25,9 @@
         android:fillColor="#FF5D00"
         android:pathData="M128,60a20,20 0,1 1,0 40a20,20 0,1 1,0 -40z"/>
     <path
-        android:fillColor="#FF5D00"
+        android:fillColor="#00000000"
         android:pathData="M128,36v12M128,116v12M92,80H80M176,80h12M102,58l-8,-8M162,58l8,-8M102,102l-8,8M162,102l8,8"
         android:strokeWidth="4"
-        android:strokeColor="#FF5D00"
-        android:fillColor="#00000000"/>
+        android:strokeColor="#FF5D00"/>
 </vector>
 
