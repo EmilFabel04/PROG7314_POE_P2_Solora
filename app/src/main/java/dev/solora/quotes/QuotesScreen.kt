@@ -49,7 +49,7 @@ fun QuotesScreenContent(vm: QuotesViewModel) {
                 OutlinedTextField(usage.value, { usage.value = it }, label = { Text("Monthly usage kWh (optional)") }, modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(tariff.value, { tariff.value = it }, label = { Text("Tariff R/kWh") }, modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(panelWatt.value, { panelWatt.value = it }, label = { Text("Panel size W") }, modifier = Modifier.fillMaxWidth())
-                Button(onClick = { vm.calculateAndSave(ref.value, address.value, usage.value.toDoubleOrNull(), tariff.value.toDoubleOrNull() ?: 2.5, panelWatt.value.toIntOrNull() ?: 400) }, modifier = Modifier.fillMaxWidth()) {
+                Button(onClick = { vm.calculateAndSaveUsingAddress(ref.value, address.value, usage.value.toDoubleOrNull(), tariff.value.toDoubleOrNull() ?: 2.5, panelWatt.value.toIntOrNull() ?: 400) }, modifier = Modifier.fillMaxWidth()) {
                     Text("Calculate & Save")
                 }
             }
