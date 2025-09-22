@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Solora</string>
+    <string name="nav_home">Ikhaya</string>
+    <string name="nav_quotes">Iikowuti</string>
+    <string name="nav_leads">Iilidi</string>
+    <string name="nav_profile">Iprofayile</string>
+    <string name="nav_settings">Iisetingi</string>
+    <string name="calculate_quote">Bala Ikhowuti</string>
+    <string name="export_pdf">Thumela kwiPDF</string>
+    <string name="add_lead">Yongeza iLidi</string>
+</resources>
+
+

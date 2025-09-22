@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Solora</string>
+    <string name="nav_home">Tuis</string>
+    <string name="nav_quotes">Kwotasies</string>
+    <string name="nav_leads">Leads</string>
+    <string name="nav_profile">Profiel</string>
+    <string name="nav_settings">Instellings</string>
+    <string name="calculate_quote">Bereken Kwotasie</string>
+    <string name="export_pdf">Voer na PDF uit</string>
+    <string name="add_lead">Voeg Lead by</string>
+</resources>
+
+

@@ -23,6 +23,10 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import dev.solora.quote.QuoteCalculator
+import dev.solora.quote.QuoteInputs
+import dev.solora.quotes.QuotesScreenVM
+import dev.solora.leads.LeadsScreenVM
 
 class MainActivity : ComponentActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,12 +38,12 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun SoloraApp() {
 	val navController = rememberNavController()
-	MaterialTheme {
+    MaterialTheme {
 		Surface(modifier = Modifier.fillMaxSize()) {
 			NavHost(navController = navController, startDestination = "home") {
 				composable("home") { HomeScreen(onNavigate = { route -> navController.navigate(route) }) }
-				composable("quotes") { QuotesScreen() }
-				composable("leads") { LeadsScreen() }
+                composable("quotes") { QuotesScreenVM() }
+                composable("leads") { LeadsScreenVM() }
 				composable("profile") { ProfileScreen() }
 				composable("settings") { SettingsScreen() }
 			}
@@ -73,16 +77,13 @@ fun ColumnWithButtons(onNavigate: (String) -> Unit) {
 	}
 }
 
-@Composable fun QuotesScreen() { CenterText("Quotes") }
 @Composable fun LeadsScreen() { CenterText("Leads") }
 @Composable fun ProfileScreen() { CenterText("Profile") }
 @Composable fun SettingsScreen() { CenterText("Settings") }
 
 @Composable
 fun CenterText(text: String) {
-	Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-		Text(text = text, fontSize = 22.sp, fontWeight = FontWeight.Medium)
-	}
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(text = text, fontSize = 22.sp, fontWeight = FontWeight.Medium) }
 }
 
 

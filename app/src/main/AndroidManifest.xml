@@ -5,6 +5,7 @@
 
     <application
         android:allowBackup="true"
+        android:name=".SoloraApp"
         android:icon="@mipmap/ic_launcher"
         android:label="Solora"
         android:roundIcon="@mipmap/ic_launcher_round"
