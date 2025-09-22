@@ -27,6 +27,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberTabRowState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,7 +45,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.solora.data.Quote
 
 @Composable
+
 fun QuotesScreenVM(onQuoteSelected: (Long) -> Unit = {}) {
+
+fun QuotesScreenVM(onQuoteSelected: (Long) -> Unit) {
+
     val vm: QuotesViewModel = viewModel()
     val quotes by vm.quotes.collectAsState()
     val lastQuote by vm.lastQuote.collectAsState()
@@ -81,6 +86,9 @@ fun QuotesScreenContent(
             Text("Quotes", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(12.dp))
             TabRow(selectedTabIndex = tabIndex) {
+
+            TabRow(selectedTabIndex = tabIndex, state = rememberTabRowState(tabIndex)) {
+
                 tabTitles.forEachIndexed { index, title ->
                     Tab(selected = tabIndex == index, onClick = { tabIndex = index }, text = { Text(title) })
                 }
@@ -269,6 +277,7 @@ private fun MetricChip(title: String, value: String) {
 
 @Composable
 private fun RowScope.DashboardTile(title: String, value: String, accent: Color) {
+private fun DashboardTile(title: String, value: String, accent: Color) {
     Card(
         modifier = Modifier.weight(1f),
         shape = RoundedCornerShape(20.dp),
