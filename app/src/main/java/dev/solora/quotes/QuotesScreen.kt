@@ -27,7 +27,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberTabRowState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -82,8 +81,7 @@ fun QuotesScreenContent(
         Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
             Text("Quotes", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(12.dp))
-            TabRow(selectedTabIndex = tabIndex, state = rememberTabRowState(tabIndex)) {
-
+            TabRow(selectedTabIndex = tabIndex) {
                 tabTitles.forEachIndexed { index, title ->
                     Tab(selected = tabIndex == index, onClick = { tabIndex = index }, text = { Text(title) })
                 }
