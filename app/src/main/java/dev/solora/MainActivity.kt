@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.view.LayoutInflater
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -108,7 +109,7 @@ fun ColumnWithButtons(onNavigate: (String) -> Unit) {
 		horizontalAlignment = Alignment.CenterHorizontally,
 		verticalArrangement = Arrangement.spacedBy(12.dp)
 	) {
-        androidx.compose.ui.viewinterop.AndroidView(factory = { layoutInflater.inflate(R.layout.home_header, null) })
+        androidx.compose.ui.viewinterop.AndroidView(factory = { ctx -> LayoutInflater.from(ctx).inflate(R.layout.home_header, null) })
 		Button(onClick = { onNavigate("quotes") }, modifier = Modifier.fillMaxWidth()) { Text("Calculate Quote") }
 		Button(onClick = { onNavigate("leads") }, modifier = Modifier.fillMaxWidth()) { Text("Leads") }
 		Button(onClick = { onNavigate("profile") }, modifier = Modifier.fillMaxWidth()) { Text("Profile") }
