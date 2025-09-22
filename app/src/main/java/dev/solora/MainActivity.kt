@@ -47,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.compose.currentBackStackEntryAsState
 import dev.solora.theme.SoloraTheme
 import dev.solora.profile.ProfileScreenContent
+import dev.solora.settings.SettingsScreenContent
 
 class MainActivity : ComponentActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,7 +87,7 @@ fun SoloraRoot() {
                     composable("quotes") { QuotesScreenVM() }
                     composable("leads") { LeadsScreenVM() }
                     composable("profile") { ProfileScreenContent() }
-                    composable("settings") { SettingsScreen() }
+                    composable("settings") { SettingsScreenContent() }
                 }
             }
         }

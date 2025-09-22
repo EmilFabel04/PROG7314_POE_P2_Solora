@@ -8,6 +8,11 @@
     <string name="calculate_quote">Calculate Quote</string>
     <string name="export_pdf">Export to PDF</string>
     <string name="add_lead">Add Lead</string>
+    <string name="dashboard">Dashboard</string>
+    <string name="language">Language</string>
+    <string name="english">English</string>
+    <string name="afrikaans">Afrikaans</string>
+    <string name="xhosa">isiXhosa</string>
 </resources>
 
 
