@@ -2,6 +2,12 @@ package dev.solora
 
 import android.app.Application
 import dev.solora.data.AppDatabase
+import dev.solora.i18n.I18n
+import dev.solora.settings.LangStore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 class SoloraApp : Application() {
     lateinit var database: AppDatabase
@@ -10,6 +16,11 @@ class SoloraApp : Application() {
     override fun onCreate() {
         super.onCreate()
         database = AppDatabase.get(this)
+        // Apply persisted language at startup
+        CoroutineScope(Dispatchers.Default).launch {
+            val lang = LangStore.flow(this@SoloraApp).first()
+            I18n.wrap(this@SoloraApp, lang)
+        }
     }
 }
 

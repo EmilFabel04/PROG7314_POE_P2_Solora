@@ -23,6 +23,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.solora.R
 import dev.solora.i18n.I18n
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsScreenContent() {
@@ -49,6 +52,7 @@ fun SettingsScreenContent() {
                     DropdownMenuItem(text = { Text(labels[lang] ?: lang.name) }, onClick = {
                         expanded = false
                         selected = lang
+                        CoroutineScope(Dispatchers.IO).launch { LangStore.save(ctx, lang) }
                         applyLanguage(ctx, lang)
                     })
                 }
