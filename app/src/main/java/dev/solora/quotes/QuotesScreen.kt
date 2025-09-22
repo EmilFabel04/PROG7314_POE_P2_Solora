@@ -47,11 +47,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.solora.data.Quote
 
 @Composable
-fun QuotesScreenVM(onQuoteSelected: (Long) -> Unit = {}) {
-
-
-fun QuotesScreenVM(onQuoteSelected: (Long) -> Unit = {}) {
-
 fun QuotesScreenVM(onQuoteSelected: (Long) -> Unit) {
 
     val vm: QuotesViewModel = viewModel()
@@ -89,8 +84,6 @@ fun QuotesScreenContent(
         Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
             Text("Quotes", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(12.dp))
-            TabRow(selectedTabIndex = tabIndex) {
-
             TabRow(selectedTabIndex = tabIndex, state = rememberTabRowState(tabIndex)) {
 
                 tabTitles.forEachIndexed { index, title ->
@@ -281,7 +274,6 @@ private fun MetricChip(title: String, value: String) {
 
 @Composable
 private fun RowScope.DashboardTile(title: String, value: String, accent: Color) {
-private fun DashboardTile(title: String, value: String, accent: Color) {
     Card(
         modifier = Modifier.weight(1f),
         shape = RoundedCornerShape(20.dp),
