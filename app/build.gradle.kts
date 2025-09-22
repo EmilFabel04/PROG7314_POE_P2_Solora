@@ -3,6 +3,7 @@ plugins {
 	id("org.jetbrains.kotlin.android")
     kotlin("kapt")
     id("org.jetbrains.kotlin.plugin.serialization")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 android {
@@ -36,13 +37,7 @@ android {
 		jvmTarget = "17"
 	}
 
-	buildFeatures {
-		compose = true
-	}
-
-	composeOptions {
-		kotlinCompilerExtensionVersion = "1.5.14"
-	}
+    buildFeatures { compose = true }
 }
 
 dependencies {
