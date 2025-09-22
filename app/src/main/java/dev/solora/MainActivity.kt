@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.Image
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -23,6 +24,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import android.view.LayoutInflater
+import androidx.compose.ui.res.painterResource
+import dev.solora.R
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -109,7 +112,7 @@ fun ColumnWithButtons(onNavigate: (String) -> Unit) {
 		horizontalAlignment = Alignment.CenterHorizontally,
 		verticalArrangement = Arrangement.spacedBy(12.dp)
 	) {
-        androidx.compose.ui.viewinterop.AndroidView(factory = { ctx -> LayoutInflater.from(ctx).inflate(R.layout.home_header, null) })
+		Image(painter = painterResource(id = R.drawable.solora_logo), contentDescription = "Solora logo")
 		Button(onClick = { onNavigate("quotes") }, modifier = Modifier.fillMaxWidth()) { Text("Calculate Quote") }
 		Button(onClick = { onNavigate("leads") }, modifier = Modifier.fillMaxWidth()) { Text("Leads") }
 		Button(onClick = { onNavigate("profile") }, modifier = Modifier.fillMaxWidth()) { Text("Profile") }
