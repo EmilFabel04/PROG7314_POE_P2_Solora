@@ -11,6 +11,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,9 +47,15 @@ fun LeadsScreenContent(leads: List<dev.solora.data.Lead>, onAdd: (String, String
             OutlinedTextField(value = contact.value, onValueChange = { contact.value = it }, label = { Text("Contact") }, modifier = Modifier.weight(1f))
         }
         Button(onClick = { onAdd(ref.value, name.value, addr.value, contact.value) }, modifier = Modifier.fillMaxWidth()) { Text("Add Lead") }
-        LazyColumn {
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(leads) { lead ->
-                Text("${lead.reference} • ${lead.name} • ${lead.address}", modifier = Modifier.padding(vertical = 6.dp))
+                Card(colors = CardDefaults.cardColors(), modifier = Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(12.dp)) {
+                        Text(lead.name)
+                        Text(lead.reference)
+                        Text(lead.address)
+                    }
+                }
             }
         }
     }

@@ -29,6 +29,19 @@ import dev.solora.quote.QuoteCalculator
 import dev.solora.quote.QuoteInputs
 import dev.solora.quotes.QuotesScreenVM
 import dev.solora.leads.LeadsScreenVM
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.FormatListBulleted
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.RequestQuote
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.navigation.compose.currentBackStackEntryAsState
+import dev.solora.theme.SoloraTheme
 
 class MainActivity : ComponentActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,17 +53,39 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun SoloraRoot() {
 	val navController = rememberNavController()
-    MaterialTheme {
-		Surface(modifier = Modifier.fillMaxSize()) {
-			NavHost(navController = navController, startDestination = "home") {
-				composable("home") { HomeScreen(onNavigate = { route -> navController.navigate(route) }) }
-                composable("quotes") { QuotesScreenVM() }
-                composable("leads") { LeadsScreenVM() }
-				composable("profile") { ProfileScreen() }
-				composable("settings") { SettingsScreen() }
-			}
-		}
-	}
+    SoloraTheme {
+        var selected by remember { mutableStateOf("home") }
+        Scaffold(
+            bottomBar = {
+                NavigationBar {
+                    val items = listOf(
+                        Triple("home", Icons.Filled.Home, "Home"),
+                        Triple("quotes", Icons.Filled.RequestQuote, "Quotes"),
+                        Triple("leads", Icons.Filled.FormatListBulleted, "Leads"),
+                        Triple("profile", Icons.Filled.Person, "Profile")
+                    )
+                    items.forEach { (route, icon, label) ->
+                        NavigationBarItem(
+                            selected = selected == route,
+                            onClick = { selected = route; navController.navigate(route) },
+                            icon = { androidx.compose.material3.Icon(icon, contentDescription = label) },
+                            label = { Text(label) }
+                        )
+                    }
+                }
+            }
+        ) { inner ->
+            Surface(modifier = Modifier.fillMaxSize().padding(inner)) {
+                NavHost(navController = navController, startDestination = "home") {
+                    composable("home") { HomeScreen(onNavigate = { route -> navController.navigate(route) }) }
+                    composable("quotes") { QuotesScreenVM() }
+                    composable("leads") { LeadsScreenVM() }
+                    composable("profile") { ProfileScreen() }
+                    composable("settings") { SettingsScreen() }
+                }
+            }
+        }
+    }
 }
 
 @Composable

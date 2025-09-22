@@ -10,6 +10,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,20 +33,35 @@ fun QuotesScreenContent(vm: QuotesViewModel) {
     val usage = remember { mutableStateOf("") }
     val tariff = remember { mutableStateOf("2.5") }
     val panelWatt = remember { mutableStateOf("400") }
+    val tabIndex = remember { mutableStateOf(0) }
 
     Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("Calculate Quote")
-        OutlinedTextField(ref.value, { ref.value = it }, label = { Text("Reference") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(address.value, { address.value = it }, label = { Text("Address or coords") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(usage.value, { usage.value = it }, label = { Text("Monthly usage kWh (optional)") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(tariff.value, { tariff.value = it }, label = { Text("Tariff R/kWh") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(panelWatt.value, { panelWatt.value = it }, label = { Text("Panel size W") }, modifier = Modifier.fillMaxWidth())
-        Button(onClick = { vm.calculateAndSave(ref.value, address.value, usage.value.toDoubleOrNull(), tariff.value.toDoubleOrNull() ?: 2.5, panelWatt.value.toIntOrNull() ?: 400) }, modifier = Modifier.fillMaxWidth()) {
-            Text("Calculate & Save")
+        TabRow(selectedTabIndex = tabIndex.value) {
+            Tab(selected = tabIndex.value == 0, onClick = { tabIndex.value = 0 }, text = { Text("Calculate") })
+            Tab(selected = tabIndex.value == 1, onClick = { tabIndex.value = 1 }, text = { Text("View Quotes") })
+            Tab(selected = tabIndex.value == 2, onClick = { tabIndex.value = 2 }, text = { Text("Dashboard") })
         }
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(vm.quotes.value) { q ->
-                QuoteResultCard(q.panels, q.systemKw, q.inverterKw, q.savingsRands)
+        when (tabIndex.value) {
+            0 -> {
+                Text("Calculate Quote")
+                OutlinedTextField(ref.value, { ref.value = it }, label = { Text("Reference") }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(address.value, { address.value = it }, label = { Text("Address or coords") }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(usage.value, { usage.value = it }, label = { Text("Monthly usage kWh (optional)") }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(tariff.value, { tariff.value = it }, label = { Text("Tariff R/kWh") }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(panelWatt.value, { panelWatt.value = it }, label = { Text("Panel size W") }, modifier = Modifier.fillMaxWidth())
+                Button(onClick = { vm.calculateAndSave(ref.value, address.value, usage.value.toDoubleOrNull(), tariff.value.toDoubleOrNull() ?: 2.5, panelWatt.value.toIntOrNull() ?: 400) }, modifier = Modifier.fillMaxWidth()) {
+                    Text("Calculate & Save")
+                }
+            }
+            1 -> {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(vm.quotes.value) { q ->
+                        QuoteResultCard(q.panels, q.systemKw, q.inverterKw, q.savingsRands)
+                    }
+                }
+            }
+            2 -> {
+                Text("Dashboard coming soon")
             }
         }
     }
