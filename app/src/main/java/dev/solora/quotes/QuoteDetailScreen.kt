@@ -3,30 +3,111 @@ package dev.solora.quotes
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.solora.pdf.PdfExporter
 
 @Composable
-fun QuoteDetailScreen(reference: String, panels: Int, systemKw: Double, inverterKw: Double, savings: Double) {
+fun QuoteDetailScreen(id: Long, onBack: () -> Unit) {
+    val vm: QuotesViewModel = viewModel()
+    val quoteState by vm.quoteById(id).collectAsState()
+    val quote = quoteState
     val ctx = LocalContext.current
-    Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("Quote $reference")
-        Text("Panels: $panels")
-        Text("System: ${systemKw} kW, Inverter: ${inverterKw} kW")
-        Text("Savings: R ${"%.2f".format(savings)}")
-        Button(onClick = {
-            val file = PdfExporter.exportQuote(ctx, reference, panels, systemKw, inverterKw, savings)
-            Toast.makeText(ctx, "Exported to ${file.absolutePath}", Toast.LENGTH_LONG).show()
-        }) { Text("Export to PDF") }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Quote details") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
+        }
+    ) { inner ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(inner)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            if (quote == null) {
+                Text("Loading quote...", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                return@Column
+            }
+
+            Card(shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors()) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(quote.reference, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Text(quote.clientName, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+                    Text(quote.address, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+                }
+            }
+
+            Card(shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors()) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text("System overview", fontWeight = FontWeight.SemiBold)
+                    DetailRow(label = "System size", value = "${quote.systemKw} kW")
+                    DetailRow(label = "Panels", value = quote.panels.toString())
+                    DetailRow(label = "Inverter", value = "${quote.inverterKw} kW")
+                    DetailRow(label = "Estimated savings", value = "R ${"%.2f".format(quote.savingsRands)} per month")
+                }
+            }
+
+            Card(shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors()) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text("Inputs", fontWeight = FontWeight.SemiBold)
+                    DetailRow(label = "Monthly usage", value = quote.monthlyUsageKwh?.let { "${"%.0f".format(it)} kWh" } ?: "Derived from bill")
+                    quote.monthlyBillRands?.let {
+                        DetailRow(label = "Monthly bill", value = "R ${"%.2f".format(it)}")
+                    }
+                    DetailRow(label = "Tariff", value = "R ${"%.2f".format(quote.tariff)} per kWh")
+                    DetailRow(label = "Panel size", value = "${quote.panelWatt} W panels")
+                    DetailRow(label = "Sun hours used", value = "${"%.1f".format(quote.sunHours)} h/day")
+                }
+            }
+
+            Spacer(Modifier.height(12.dp))
+            Button(onClick = {
+                val file = PdfExporter.exportQuote(ctx, quote.reference, quote.panels, quote.systemKw, quote.inverterKw, quote.savingsRands)
+                Toast.makeText(ctx, "Exported to ${file.absolutePath}", Toast.LENGTH_LONG).show()
+            }, modifier = Modifier.fillMaxWidth()) {
+                Text("Export to PDF")
+            }
+        }
     }
 }
 
-
+@Composable
+private fun DetailRow(label: String, value: String) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Text(label, fontWeight = FontWeight.Medium)
+        Text(value, fontWeight = FontWeight.SemiBold)
+    }
+}

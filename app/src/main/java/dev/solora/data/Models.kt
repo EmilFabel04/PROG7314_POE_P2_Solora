@@ -16,12 +16,16 @@ data class Lead(
 data class Quote(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val reference: String,
-    val leadId: Long?,
+    val clientName: String,
+    val address: String,
+    val monthlyUsageKwh: Double?,
+    val monthlyBillRands: Double?,
+    val tariff: Double,
+    val panelWatt: Int,
+    val sunHours: Double,
     val panels: Int,
     val systemKw: Double,
     val inverterKw: Double,
     val savingsRands: Double,
     val dateEpoch: Long = System.currentTimeMillis()
 )
-
-
