@@ -48,6 +48,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import dev.solora.theme.SoloraTheme
 import dev.solora.profile.ProfileScreenContent
 import dev.solora.settings.SettingsScreenContent
+import androidx.lifecycle.viewmodel.compose.viewModel
+import dev.solora.auth.AuthViewModel
+import dev.solora.auth.LoginScreen
+import dev.solora.auth.RegisterScreen
 
 class MainActivity : ComponentActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,6 +63,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun SoloraRoot() {
 	val navController = rememberNavController()
+    val authVm: AuthViewModel = viewModel()
     SoloraTheme {
         var selected by remember { mutableStateOf("home") }
         Scaffold(
@@ -82,7 +87,20 @@ fun SoloraRoot() {
             }
         ) { inner ->
             Surface(modifier = Modifier.fillMaxSize().padding(inner)) {
-                NavHost(navController = navController, startDestination = "home") {
+                val start = if (authVm.isLoggedIn.value) "home" else "login"
+                NavHost(navController = navController, startDestination = start) {
+                    composable("login") {
+                        LoginScreen(
+                            onLogin = { e, p -> authVm.login(e, p); navController.navigate("home") { popUpTo("login") { inclusive = true } } },
+                            onCreateAccount = { navController.navigate("register") }
+                        )
+                    }
+                    composable("register") {
+                        RegisterScreen(
+                            onRegister = { n, e, p -> authVm.register(n, e, p); navController.navigate("home") { popUpTo("login") { inclusive = true } } },
+                            onBackToLogin = { navController.popBackStack() }
+                        )
+                    }
                     composable("home") { HomeScreen(onNavigate = { route -> navController.navigate(route) }) }
                     composable("quotes") { QuotesScreenVM() }
                     composable("leads") { LeadsScreenVM() }
