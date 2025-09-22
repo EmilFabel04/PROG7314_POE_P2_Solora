@@ -8,10 +8,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SmallTopAppBar
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,12 +32,12 @@ import dev.solora.leads.LeadsScreenVM
 class MainActivity : ComponentActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-		setContent { SoloraApp() }
+		setContent { SoloraRoot() }
 	}
 }
 
 @Composable
-fun SoloraApp() {
+fun SoloraRoot() {
 	val navController = rememberNavController()
     MaterialTheme {
 		Surface(modifier = Modifier.fillMaxSize()) {
@@ -53,7 +54,7 @@ fun SoloraApp() {
 
 @Composable
 fun HomeScreen(onNavigate: (String) -> Unit) {
-	Scaffold(topBar = { SmallTopAppBar(title = { Text("Solora") }) }) { _ ->
+	Scaffold(topBar = { TopAppBar(title = { Text("Solora") }) }) { _ ->
 		HomeContent(onNavigate)
 	}
 }

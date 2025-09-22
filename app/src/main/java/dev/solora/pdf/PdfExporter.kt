@@ -8,7 +8,6 @@ import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.Paragraph
-import com.itextpdf.layout.property.TextAlignment
 import java.io.File
 
 object PdfExporter {
@@ -18,7 +17,7 @@ object PdfExporter {
         val writer = PdfWriter(file)
         val pdfDoc = PdfDocument(writer)
         val doc = Document(pdfDoc, PageSize.A4)
-        doc.add(Paragraph("Solora Quote").setBold().setFontSize(20f).setTextAlignment(TextAlignment.CENTER).setFontColor(ColorConstants.ORANGE))
+        doc.add(Paragraph("Solora Quote").setBold().setFontSize(20f).setFontColor(ColorConstants.ORANGE))
         doc.add(Paragraph("Reference: $reference"))
         doc.add(Paragraph("Panels: $panels"))
         doc.add(Paragraph("System size: ${systemKw} kW"))
