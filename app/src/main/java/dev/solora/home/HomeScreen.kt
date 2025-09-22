@@ -42,6 +42,16 @@ import dev.solora.leads.LeadsViewModel
 import dev.solora.quotes.QuotesViewModel
 
 @Composable
+fun HomeScreen(onNavigate: (String) -> Unit) {
+    HomeScreen(
+        onOpenQuotes = { onNavigate("quotes") },
+        onOpenLeads = { onNavigate("leads") },
+        onOpenNotifications = { onNavigate("notifications") },
+        onOpenSettings = { onNavigate("settings") }
+    )
+}
+
+@Composable
 fun HomeScreen(
     onOpenQuotes: () -> Unit,
     onOpenLeads: () -> Unit,

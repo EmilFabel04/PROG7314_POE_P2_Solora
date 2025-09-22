@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -44,7 +45,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.solora.data.Quote
 
 @Composable
+
+fun QuotesScreenVM(onQuoteSelected: (Long) -> Unit = {}) {
+
 fun QuotesScreenVM(onQuoteSelected: (Long) -> Unit) {
+
     val vm: QuotesViewModel = viewModel()
     val quotes by vm.quotes.collectAsState()
     val lastQuote by vm.lastQuote.collectAsState()
@@ -80,7 +85,10 @@ fun QuotesScreenContent(
         Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
             Text("Quotes", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(12.dp))
+            TabRow(selectedTabIndex = tabIndex) {
+
             TabRow(selectedTabIndex = tabIndex, state = rememberTabRowState(tabIndex)) {
+
                 tabTitles.forEachIndexed { index, title ->
                     Tab(selected = tabIndex == index, onClick = { tabIndex = index }, text = { Text(title) })
                 }
@@ -268,6 +276,7 @@ private fun MetricChip(title: String, value: String) {
 }
 
 @Composable
+private fun RowScope.DashboardTile(title: String, value: String, accent: Color) {
 private fun DashboardTile(title: String, value: String, accent: Color) {
     Card(
         modifier = Modifier.weight(1f),

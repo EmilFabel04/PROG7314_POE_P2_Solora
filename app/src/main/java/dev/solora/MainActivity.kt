@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.RequestQuote
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -226,6 +227,7 @@ private fun SoloraBottomBar(navController: NavHostController, currentRoute: Stri
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NotificationsScreen() {
     Scaffold(
