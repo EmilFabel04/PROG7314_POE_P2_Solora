@@ -19,6 +19,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.solora.ui.QuoteResultCard
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.clickable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.NavController
 
@@ -58,7 +61,11 @@ fun QuotesScreenContent(vm: QuotesViewModel) {
             1 -> {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(vm.quotes.value) { q ->
-                        QuoteResultCard(q.panels, q.systemKw, q.inverterKw, q.savingsRands)
+                        Card(colors = CardDefaults.cardColors(), modifier = Modifier.fillMaxWidth().clickable {
+                            // For now show an inline card; navigation can be added with NavController
+                        }) {
+                            QuoteResultCard(q.panels, q.systemKw, q.inverterKw, q.savingsRands)
+                        }
                     }
                 }
             }
