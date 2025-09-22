@@ -44,7 +44,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.solora.data.Quote
 
 @Composable
-fun QuotesScreenVM(onQuoteSelected: (Long) -> Unit) {
+fun QuotesScreenVM(onQuoteSelected: (Long) -> Unit = {}) {
     val vm: QuotesViewModel = viewModel()
     val quotes by vm.quotes.collectAsState()
     val lastQuote by vm.lastQuote.collectAsState()
