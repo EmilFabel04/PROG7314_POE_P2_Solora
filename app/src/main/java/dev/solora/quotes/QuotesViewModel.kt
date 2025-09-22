@@ -20,6 +20,7 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     private val nasa = NasaPowerClient()
 
     val quotes = dao.observeQuotes().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    fun quoteById(id: Long) = dao.observeQuote(id).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     fun calculateAndSave(reference: String, address: String, usageKwh: Double?, tariff: Double, panelWatt: Int, sunHours: Double = 5.0) {
         val outputs = QuoteCalculator.calculate(

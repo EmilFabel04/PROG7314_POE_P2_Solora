@@ -19,6 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.solora.ui.QuoteResultCard
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavController
 
 @Composable
 fun QuotesScreenVM() {

@@ -20,6 +20,9 @@ interface QuoteDao {
     @Query("SELECT * FROM quotes ORDER BY dateEpoch DESC")
     fun observeQuotes(): Flow<List<Quote>>
 
+    @Query("SELECT * FROM quotes WHERE id = :id")
+    fun observeQuote(id: Long): Flow<Quote?>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(quote: Quote)
 }
