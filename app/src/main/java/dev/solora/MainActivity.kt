@@ -91,14 +91,14 @@ fun SoloraRoot() {
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun HomeScreen(onNavigate: (String) -> Unit) {
-	Scaffold(topBar = { TopAppBar(title = { Text("Solora") }) }) { _ ->
-		HomeContent(onNavigate)
+    Scaffold(topBar = { TopAppBar(title = { Text("Solora") }) }) { _ ->
+        HomeContent(onNavigate)
 	}
 }
 
 @Composable
 fun HomeContent(onNavigate: (String) -> Unit) {
-	ColumnWithButtons(onNavigate)
+    ColumnWithButtons(onNavigate)
 }
 
 @Composable
@@ -108,6 +108,7 @@ fun ColumnWithButtons(onNavigate: (String) -> Unit) {
 		horizontalAlignment = Alignment.CenterHorizontally,
 		verticalArrangement = Arrangement.spacedBy(12.dp)
 	) {
+        androidx.compose.ui.viewinterop.AndroidView(factory = { layoutInflater.inflate(R.layout.home_header, null) })
 		Button(onClick = { onNavigate("quotes") }, modifier = Modifier.fillMaxWidth()) { Text("Calculate Quote") }
 		Button(onClick = { onNavigate("leads") }, modifier = Modifier.fillMaxWidth()) { Text("Leads") }
 		Button(onClick = { onNavigate("profile") }, modifier = Modifier.fillMaxWidth()) { Text("Profile") }

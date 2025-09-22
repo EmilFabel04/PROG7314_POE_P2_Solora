@@ -7,8 +7,8 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-private val Orange = Color(0xFFFF7A00)
-private val OrangeDark = Color(0xFFE66900)
+private val Orange = Color(0xFFFF5D00) // #FF5D00
+private val OrangeDark = Color(0xFFFC8224) // #FC8224
 private val GrayBg = Color(0xFFF7F7F7)
 
 private val LightColors: ColorScheme = lightColorScheme(
