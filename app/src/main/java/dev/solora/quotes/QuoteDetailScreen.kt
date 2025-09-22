@@ -75,14 +75,6 @@ fun QuoteDetailScreen(
 @Composable
 private fun QuoteDetailScaffold(quote: Quote?, onBack: () -> Unit) {
     val ctx = LocalContext.current
-
-    val ctx = LocalContext.current
-    val quoteState by vm.quoteById(id).collectAsState()
-    val quote = quoteState
-    val ctx = LocalContext.current
-
-
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -123,96 +115,18 @@ private fun QuoteDetailScaffold(quote: Quote?, onBack: () -> Unit) {
                             quote.inverterKw,
                             quote.savingsRands
                         )
-                        Toast.makeText(ctx, "Exported to ${'$'}{file.absolutePath}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(ctx, "Exported to ${file.absolutePath}", Toast.LENGTH_LONG).show()
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Export to PDF")
                 }
             }
-
-
-                Text("Loading quote...", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-                return@Column
-            }
-
-            Card(shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors()) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(quote.reference, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    Text(quote.clientName, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
-                    Text(quote.address, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
-                }
-            }
-
-            Card(shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors()) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("System overview", fontWeight = FontWeight.SemiBold)
-                    DetailRow(label = "System size", value = "${quote.systemKw} kW")
-                    DetailRow(label = "Panels", value = quote.panels.toString())
-                    DetailRow(label = "Inverter", value = "${quote.inverterKw} kW")
-                    DetailRow(label = "Estimated savings", value = "R ${"%.2f".format(quote.savingsRands)} per month")
-                }
-            }
-
-            Card(shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors()) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("Inputs", fontWeight = FontWeight.SemiBold)
-                    DetailRow(label = "Monthly usage", value = quote.monthlyUsageKwh?.let { "${"%.0f".format(it)} kWh" } ?: "Derived from bill")
-                    quote.monthlyBillRands?.let {
-                        DetailRow(label = "Monthly bill", value = "R ${"%.2f".format(it)}")
-                    }
-                    DetailRow(label = "Tariff", value = "R ${"%.2f".format(quote.tariff)} per kWh")
-                    DetailRow(label = "Panel size", value = "${quote.panelWatt} W panels")
-                    DetailRow(label = "Sun hours used", value = "${"%.1f".format(quote.sunHours)} h/day")
-                }
-            }
-
-            Spacer(Modifier.height(12.dp))
-            Button(onClick = {
-                val file = PdfExporter.exportQuote(ctx, quote.reference, quote.panels, quote.systemKw, quote.inverterKw, quote.savingsRands)
-                Toast.makeText(ctx, "Exported to ${file.absolutePath}", Toast.LENGTH_LONG).show()
-            }, modifier = Modifier.fillMaxWidth()) {
-                Text("Export to PDF")
-            }
-
-
         }
     }
 }
 
 @Composable
-
-private fun QuoteHeaderCard(quote: Quote) {
-    if (quote.reference.isBlank() && quote.clientName.isBlank() && quote.address.isBlank()) {
-        return
-    }
-    Card(shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (quote.reference.isNotBlank()) {
-                Text(
-                    quote.reference,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-            if (quote.clientName.isNotBlank()) {
-                Text(
-                    quote.clientName,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-            }
-            if (quote.address.isNotBlank()) {
-                Text(
-                    quote.address,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-            }
-        }
-    }
-}
-
-
-
 private fun QuoteHeaderCard(quote: Quote) {
     if (quote.reference.isBlank() && quote.clientName.isBlank() && quote.address.isBlank()) {
         return
@@ -248,12 +162,12 @@ private fun QuoteSystemCard(quote: Quote) {
     Card(shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("System overview", fontWeight = FontWeight.SemiBold)
-            DetailRow(label = "System size", value = "${'$'}{quote.systemKw} kW")
+            DetailRow(label = "System size", value = "${quote.systemKw} kW")
             DetailRow(label = "Panels", value = quote.panels.toString())
-            DetailRow(label = "Inverter", value = "${'$'}{quote.inverterKw} kW")
+            DetailRow(label = "Inverter", value = "${quote.inverterKw} kW")
             DetailRow(
                 label = "Estimated savings",
-                value = "R ${'$'}{"%.2f".format(quote.savingsRands)} per month"
+                value = "R ${"%.2f".format(quote.savingsRands)} per month"
             )
         }
     }
@@ -262,16 +176,16 @@ private fun QuoteSystemCard(quote: Quote) {
 @Composable
 private fun QuoteInputsCard(quote: Quote) {
     val rows = mutableListOf<Pair<String, String>>()
-    quote.monthlyUsageKwh?.let { rows += "Monthly usage" to "${'$'}{"%.0f".format(it)} kWh" }
-    quote.monthlyBillRands?.let { rows += "Monthly bill" to "R ${'$'}{"%.2f".format(it)}" }
+    quote.monthlyUsageKwh?.let { rows += "Monthly usage" to "${"%.0f".format(it)} kWh" }
+    quote.monthlyBillRands?.let { rows += "Monthly bill" to "R ${"%.2f".format(it)}" }
     if (quote.tariff > 0) {
-        rows += "Tariff" to "R ${'$'}{"%.2f".format(quote.tariff)} per kWh"
+        rows += "Tariff" to "R ${"%.2f".format(quote.tariff)} per kWh"
     }
     if (quote.panelWatt > 0) {
-        rows += "Panel size" to "${'$'}{quote.panelWatt} W panels"
+        rows += "Panel size" to "${quote.panelWatt} W panels"
     }
     if (quote.sunHours > 0) {
-        rows += "Sun hours used" to "${'$'}{"%.1f".format(quote.sunHours)} h/day"
+        rows += "Sun hours used" to "${"%.1f".format(quote.sunHours)} h/day"
     }
 
     if (rows.isEmpty()) {
