@@ -9,6 +9,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.ComposeView
+import dev.solora.R
 import dev.solora.auth.AuthViewModel
 import dev.solora.auth.LoginScreen
 import dev.solora.auth.OnboardingScreen
