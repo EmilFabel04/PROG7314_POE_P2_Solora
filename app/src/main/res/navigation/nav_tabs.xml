@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_tabs"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="dev.solora.navigation.HomeFragment"
+        android:label="Home" />
+
+    <fragment
+        android:id="@+id/quotesFragment"
+        android:name="dev.solora.navigation.QuotesFragment"
+        android:label="Quotes" />
+
+    <fragment
+        android:id="@+id/leadsFragment"
+        android:name="dev.solora.navigation.LeadsFragment"
+        android:label="Leads" />
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="dev.solora.navigation.ProfileFragment"
+        android:label="Profile" />
+
+</navigation>
+
+

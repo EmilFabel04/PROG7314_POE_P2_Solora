@@ -73,7 +73,12 @@ dependencies {
 	implementation("com.itextpdf:itext7-core:7.2.5")
 
 	// Accompanist permissions
-	implementation("com.google.accompanist:accompanist-permissions:0.36.0")
+    implementation("com.google.accompanist:accompanist-permissions:0.36.0")
+
+    // Fragments and Navigation Component (for fragment-based navigation)
+    implementation("androidx.fragment:fragment-ktx:1.8.4")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.8.0")
+    implementation("androidx.navigation:navigation-ui-ktx:2.8.0")
 
 	// Debug
 	debugImplementation("androidx.compose.ui:ui-tooling")
