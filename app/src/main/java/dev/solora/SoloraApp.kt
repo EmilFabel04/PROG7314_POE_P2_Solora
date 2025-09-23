@@ -1,6 +1,9 @@
 package dev.solora
 
 import android.app.Application
+import com.google.firebase.FirebaseApp
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
 import dev.solora.data.AppDatabase
 import dev.solora.i18n.I18n
 import dev.solora.settings.LangStore
@@ -16,6 +19,11 @@ class SoloraApp : Application() {
     override fun onCreate() {
         super.onCreate()
         database = AppDatabase.get(this)
+        // Initialize Firebase
+        FirebaseApp.initializeApp(this)
+        FirebaseFirestore.getInstance().firestoreSettings = FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(true)
+            .build()
         // Apply persisted language at startup
         CoroutineScope(Dispatchers.Default).launch {
             val lang = LangStore.flow(this@SoloraApp).first()
