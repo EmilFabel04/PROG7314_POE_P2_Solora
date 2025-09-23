@@ -75,9 +75,12 @@ fun QuoteDetailScreen(
 @Composable
 private fun QuoteDetailScaffold(quote: Quote?, onBack: () -> Unit) {
     val ctx = LocalContext.current
+
+    val ctx = LocalContext.current
     val quoteState by vm.quoteById(id).collectAsState()
     val quote = quoteState
     val ctx = LocalContext.current
+
 
 
     Scaffold(
@@ -128,6 +131,7 @@ private fun QuoteDetailScaffold(quote: Quote?, onBack: () -> Unit) {
                 }
             }
 
+
                 Text("Loading quote...", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                 return@Column
             }
@@ -171,6 +175,7 @@ private fun QuoteDetailScaffold(quote: Quote?, onBack: () -> Unit) {
                 Text("Export to PDF")
             }
 
+
         }
     }
 }
@@ -205,6 +210,38 @@ private fun QuoteHeaderCard(quote: Quote) {
         }
     }
 }
+
+
+
+private fun QuoteHeaderCard(quote: Quote) {
+    if (quote.reference.isBlank() && quote.clientName.isBlank() && quote.address.isBlank()) {
+        return
+    }
+    Card(shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (quote.reference.isNotBlank()) {
+                Text(
+                    quote.reference,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            if (quote.clientName.isNotBlank()) {
+                Text(
+                    quote.clientName,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+            }
+            if (quote.address.isNotBlank()) {
+                Text(
+                    quote.address,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+            }
+        }
+    }
+}
+
 
 @Composable
 private fun QuoteSystemCard(quote: Quote) {

@@ -1,6 +1,3 @@
-package dev.solora
-
-import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
@@ -256,5 +253,6 @@ private fun NotificationCard(title: String, message: String, time: String) {
             Text(message, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
             Text(time, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), fontSize = 12.sp)
         }
+
     }
 }

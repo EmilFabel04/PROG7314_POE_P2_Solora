@@ -27,7 +27,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+
 import androidx.compose.material3.rememberTabRowState
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -45,6 +47,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.solora.data.Quote
 
 @Composable
+fun QuotesScreenVM(onQuoteSelected: (Long) -> Unit = {}) {
+
 
 fun QuotesScreenVM(onQuoteSelected: (Long) -> Unit = {}) {
 
