@@ -1,23 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Quotes"
-        android:textStyle="bold"
-        android:textSize="20sp"/>
-
-    <Button
-        android:id="@+id/btn_open_detail"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Open Quote Detail (demo)"/>
+        android:orientation="vertical">
 
-</LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Quotes"
+            android:textStyle="bold"
+            android:textSize="22sp"/>
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:tabIndicatorColor="@color/solora_orange"/>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="18dp"
+            app:cardUseCompatPadding="true"
+            android:layout_marginTop="16dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Quote Information" android:textStyle="bold"/>
+                <EditText android:id="@+id/et_ref" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Quote reference" android:layout_marginTop="8dp"/>
+                <EditText android:id="@+id/et_client" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Client name" android:layout_marginTop="8dp"/>
+                <EditText android:id="@+id/et_address" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Site address or coordinates" android:layout_marginTop="8dp"/>
+                <EditText android:id="@+id/et_usage" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Monthly usage (kWh)" android:layout_marginTop="8dp"/>
+                <EditText android:id="@+id/et_bill" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Average bill (R)" android:layout_marginTop="8dp"/>
+                <EditText android:id="@+id/et_tariff" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Tariff (R/kWh)" android:layout_marginTop="8dp" android:text="2.50"/>
+                <EditText android:id="@+id/et_panel" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Panel size (W)" android:layout_marginTop="8dp" android:text="420"/>
+                <Button android:id="@+id/btn_calculate" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Calculate & Save" android:layout_marginTop="12dp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_last"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:cardCornerRadius="20dp"
+            app:cardUseCompatPadding="true">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Latest calculation" android:textStyle="bold"/>
+                <TextView android:id="@+id/tv_latest" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <Button
+            android:id="@+id/btn_open_detail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Open Quote Detail (demo)"
+            android:layout_marginTop="12dp"/>
+    </LinearLayout>
+
+</ScrollView>
 
 

@@ -1,17 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Leads"
-        android:textStyle="bold"
-        android:textSize="20sp"/>
+        android:orientation="vertical">
 
-</LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Leads"
+            android:textStyle="bold"
+            android:textSize="22sp"/>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="24dp"
+            app:cardUseCompatPadding="true"
+            android:layout_marginTop="12dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Total leads" android:textStyle="bold"/>
+                <TextView android:id="@+id/tv_lead_count" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textSize="24sp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="24dp"
+            app:cardUseCompatPadding="true"
+            android:layout_marginTop="12dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Add new lead" android:textStyle="bold"/>
+                <EditText android:id="@+id/et_ref" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Reference number" android:layout_marginTop="8dp"/>
+                <EditText android:id="@+id/et_name" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Client name" android:layout_marginTop="8dp"/>
+                <EditText android:id="@+id/et_address" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Address" android:layout_marginTop="8dp"/>
+                <EditText android:id="@+id/et_contact" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Contact details" android:layout_marginTop="8dp"/>
+                <Button android:id="@+id/btn_save_lead" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Save lead" android:layout_marginTop="12dp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="No leads captured yet" android:gravity="center" android:layout_marginTop="24dp" android:textColor="#99000000"/>
+    </LinearLayout>
+
+</ScrollView>
 
 
