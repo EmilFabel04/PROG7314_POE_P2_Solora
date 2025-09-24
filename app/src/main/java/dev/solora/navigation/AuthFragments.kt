@@ -9,10 +9,6 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import dev.solora.R
 import dev.solora.auth.AuthViewModel
-import dev.solora.auth.LoginScreen
-import dev.solora.auth.OnboardingScreen
-import dev.solora.auth.RegisterScreen
-import dev.solora.theme.SoloraTheme
 
 class OnboardingFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {

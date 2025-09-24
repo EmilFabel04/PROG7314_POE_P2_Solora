@@ -7,10 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import dev.solora.profile.ChangePasswordScreen
-import dev.solora.profile.EditProfileScreen
 import dev.solora.profile.ProfileViewModel
-import dev.solora.quotes.QuoteDetailScreen
 import dev.solora.quotes.QuotesViewModel
 import dev.solora.R
 import android.widget.Button
