@@ -14,15 +14,18 @@ import dev.solora.auth.AuthViewModel
 import dev.solora.auth.LoginScreen
 import dev.solora.auth.OnboardingScreen
 import dev.solora.auth.RegisterScreen
+import dev.solora.theme.SoloraTheme
 
 class OnboardingFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                OnboardingScreen(
-                    onLogin = { findNavController().navigate(R.id.action_onboarding_to_login) },
-                    onCreateAccount = { findNavController().navigate(R.id.action_onboarding_to_register) }
-                )
+                SoloraTheme {
+                    OnboardingScreen(
+                        onLogin = { findNavController().navigate(R.id.action_onboarding_to_login) },
+                        onCreateAccount = { findNavController().navigate(R.id.action_onboarding_to_register) }
+                    )
+                }
             }
         }
     }
@@ -33,13 +36,15 @@ class LoginFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                LoginScreen(
-                    onLogin = { email, pass ->
-                        authViewModel.login(email, pass)
-                        findNavController().navigate(R.id.action_login_to_main)
-                    },
-                    onCreateAccount = { findNavController().navigate(R.id.action_login_to_register) }
-                )
+                SoloraTheme {
+                    LoginScreen(
+                        onLogin = { email, pass ->
+                            authViewModel.login(email, pass)
+                            findNavController().navigate(R.id.action_login_to_main)
+                        },
+                        onCreateAccount = { findNavController().navigate(R.id.action_login_to_register) }
+                    )
+                }
             }
         }
     }
@@ -50,13 +55,15 @@ class RegisterFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                RegisterScreen(
-                    onRegister = { name, email, pass ->
-                        authViewModel.register(name, email, pass)
-                        findNavController().navigate(R.id.action_register_to_main)
-                    },
-                    onBackToLogin = { findNavController().popBackStack() }
-                )
+                SoloraTheme {
+                    RegisterScreen(
+                        onRegister = { name, email, pass ->
+                            authViewModel.register(name, email, pass)
+                            findNavController().navigate(R.id.action_register_to_main)
+                        },
+                        onBackToLogin = { findNavController().popBackStack() }
+                    )
+                }
             }
         }
     }

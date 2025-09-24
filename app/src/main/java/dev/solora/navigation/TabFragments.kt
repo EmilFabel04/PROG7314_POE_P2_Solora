@@ -16,17 +16,20 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import dev.solora.quotes.QuotesScreenVM
 import dev.solora.R
+import dev.solora.theme.SoloraTheme
 
 class HomeFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                HomeScreen(
-                    onOpenQuotes = { findNavController().navigate(R.id.quotesFragment) },
-                    onOpenLeads = { findNavController().navigate(R.id.leadsFragment) },
-                    onOpenNotifications = { findNavController().navigate(R.id.action_to_notifications) },
-                    onOpenSettings = { findNavController().navigate(R.id.action_to_settings) }
-                )
+                SoloraTheme {
+                    HomeScreen(
+                        onOpenQuotes = { findNavController().navigate(R.id.quotesFragment) },
+                        onOpenLeads = { findNavController().navigate(R.id.leadsFragment) },
+                        onOpenNotifications = { findNavController().navigate(R.id.action_to_notifications) },
+                        onOpenSettings = { findNavController().navigate(R.id.action_to_settings) }
+                    )
+                }
             }
         }
     }
@@ -36,10 +39,12 @@ class QuotesFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                QuotesScreenVM(onQuoteSelected = { id ->
-                    val bundle = Bundle().apply { putLong("id", id) }
-                    findNavController().navigate(R.id.quoteDetailFragment, bundle)
-                })
+                SoloraTheme {
+                    QuotesScreenVM(onQuoteSelected = { id ->
+                        val bundle = Bundle().apply { putLong("id", id) }
+                        findNavController().navigate(R.id.quoteDetailFragment, bundle)
+                    })
+                }
             }
         }
     }
@@ -47,7 +52,7 @@ class QuotesFragment : Fragment() {
 
 class LeadsFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return ComposeView(requireContext()).apply { setContent { LeadsScreenVM() } }
+        return ComposeView(requireContext()).apply { setContent { SoloraTheme { LeadsScreenVM() } } }
     }
 }
 
@@ -56,16 +61,18 @@ class ProfileFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                val profileState by profileViewModel.profile.collectAsStateWithLifecycle()
-                ProfileScreen(
-                    profile = profileState,
-                    onEditProfile = { findNavController().navigate(R.id.action_to_edit_profile) },
-                    onChangePassword = { findNavController().navigate(R.id.action_to_change_password) },
-                    onOpenSettings = { findNavController().navigate(R.id.action_to_settings) },
-                    onLogout = {
-                        findNavController().navigate(R.id.action_start_to_auth)
-                    }
-                )
+                SoloraTheme {
+                    val profileState by profileViewModel.profile.collectAsStateWithLifecycle()
+                    ProfileScreen(
+                        profile = profileState,
+                        onEditProfile = { findNavController().navigate(R.id.action_to_edit_profile) },
+                        onChangePassword = { findNavController().navigate(R.id.action_to_change_password) },
+                        onOpenSettings = { findNavController().navigate(R.id.action_to_settings) },
+                        onLogout = {
+                            findNavController().navigate(R.id.action_start_to_auth)
+                        }
+                    )
+                }
             }
         }
     }

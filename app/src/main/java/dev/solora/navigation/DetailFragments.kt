@@ -13,11 +13,12 @@ import dev.solora.profile.EditProfileScreen
 import dev.solora.profile.ProfileViewModel
 import dev.solora.quotes.QuoteDetailScreen
 import dev.solora.quotes.QuotesViewModel
+import dev.solora.theme.SoloraTheme
 
 class SettingsFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return ComposeView(requireContext()).apply {
-            setContent { dev.solora.settings.SettingsScreenContent() }
+            setContent { SoloraTheme { dev.solora.settings.SettingsScreenContent() } }
         }
     }
 }
@@ -25,11 +26,7 @@ class SettingsFragment : Fragment() {
 class NotificationsFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return ComposeView(requireContext()).apply {
-            setContent {
-                // Reuse the compose NotificationsScreen from previous MainActivity if needed
-                // For now show a simple placeholder
-                dev.solora.ui.Center("Notifications")
-            }
+            setContent { SoloraTheme { dev.solora.ui.Center("Notifications") } }
         }
     }
 }
@@ -39,12 +36,14 @@ class EditProfileFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                val profile = profileViewModel.profile.value
-                EditProfileScreen(
-                    initial = profile,
-                    onSave = { profileViewModel.updateProfile(it) },
-                    onBack = { findNavController().popBackStack() }
-                )
+                SoloraTheme {
+                    val profile = profileViewModel.profile.value
+                    EditProfileScreen(
+                        initial = profile,
+                        onSave = { profileViewModel.updateProfile(it) },
+                        onBack = { findNavController().popBackStack() }
+                    )
+                }
             }
         }
     }
@@ -55,10 +54,12 @@ class ChangePasswordFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                ChangePasswordScreen(
-                    onSubmit = { current, new -> profileViewModel.changePassword(current, new) },
-                    onDone = { findNavController().popBackStack() }
-                )
+                SoloraTheme {
+                    ChangePasswordScreen(
+                        onSubmit = { current, new -> profileViewModel.changePassword(current, new) },
+                        onDone = { findNavController().popBackStack() }
+                    )
+                }
             }
         }
     }
@@ -69,8 +70,10 @@ class QuoteDetailFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                val id = requireArguments().getLong("id", 0L)
-                QuoteDetailScreen(id = id, onBack = { findNavController().popBackStack() })
+                SoloraTheme {
+                    val id = requireArguments().getLong("id", 0L)
+                    QuoteDetailScreen(id = id, onBack = { findNavController().popBackStack() })
+                }
             }
         }
     }
