@@ -31,9 +31,9 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        val emailInput = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.et_email)
-        val passwordInput = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.et_password)
-        val submitButton = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_submit)
+        val emailInput = view.findViewById<android.widget.EditText>(R.id.et_email)
+        val passwordInput = view.findViewById<android.widget.EditText>(R.id.et_password)
+        val submitButton = view.findViewById<android.widget.Button>(R.id.btn_submit)
         
         // Observe auth state
         authViewModel.authState.asLiveData().observe(viewLifecycleOwner) { state ->
@@ -89,10 +89,10 @@ class RegisterFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        val nameInput = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.et_name)
-        val emailInput = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.et_email)
-        val passwordInput = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.et_password)
-        val registerButton = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_register)
+        val nameInput = view.findViewById<android.widget.EditText>(R.id.et_name)
+        val emailInput = view.findViewById<android.widget.EditText>(R.id.et_email)
+        val passwordInput = view.findViewById<android.widget.EditText>(R.id.et_password)
+        val registerButton = view.findViewById<android.widget.Button>(R.id.btn_register)
         
         // Observe auth state
         authViewModel.authState.asLiveData().observe(viewLifecycleOwner) { state ->
