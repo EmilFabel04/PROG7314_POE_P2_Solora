@@ -13,7 +13,6 @@ import dev.solora.profile.ProfileViewModel
 import dev.solora.quotes.QuoteDetailScreen
 import dev.solora.quotes.QuotesViewModel
 import dev.solora.R
-import android.view.View
 import android.widget.Button
 import android.widget.TextView
 
