@@ -66,6 +66,7 @@ dependencies {
 	// Networking
 	implementation("io.ktor:ktor-client-android:2.3.12")
 	implementation("io.ktor:ktor-client-content-negotiation:2.3.12")
+	implementation("io.ktor:ktor-client-logging:2.3.12")
 	implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.12")
 
 	// PDF
@@ -78,6 +79,10 @@ dependencies {
     implementation("androidx.fragment:fragment-ktx:1.8.4")
     implementation("androidx.navigation:navigation-fragment-ktx:2.8.0")
     implementation("androidx.navigation:navigation-ui-ktx:2.8.0")
+    
+    // Lifecycle
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")
 
     // Debug
 }

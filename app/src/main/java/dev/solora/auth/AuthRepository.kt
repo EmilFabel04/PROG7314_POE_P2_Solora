@@ -96,7 +96,7 @@ class AuthRepository(private val context: Context) {
         }
     }
 
-    suspend fun getCurrentUserInfo(): Flow<UserInfo?> {
+    fun getCurrentUserInfo(): Flow<UserInfo?> {
         return context.dataStore.data.catch { e -> 
             if (e is IOException) emit(emptyPreferences()) else throw e 
         }.map { prefs ->

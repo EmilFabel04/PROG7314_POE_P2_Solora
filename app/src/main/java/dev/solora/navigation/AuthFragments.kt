@@ -6,8 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.viewLifecycleOwner
 import androidx.navigation.fragment.findNavController
+import androidx.lifecycle.asLiveData
 import dev.solora.R
 import dev.solora.auth.AuthState
 import dev.solora.auth.AuthViewModel
@@ -36,7 +36,7 @@ class LoginFragment : Fragment() {
         val submitButton = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_submit)
         
         // Observe auth state
-        authViewModel.authState.observe(viewLifecycleOwner) { state ->
+        authViewModel.authState.asLiveData().observe(viewLifecycleOwner) { state ->
             when (state) {
                 is AuthState.Loading -> {
                     submitButton.isEnabled = false
@@ -95,7 +95,7 @@ class RegisterFragment : Fragment() {
         val registerButton = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_register)
         
         // Observe auth state
-        authViewModel.authState.observe(viewLifecycleOwner) { state ->
+        authViewModel.authState.asLiveData().observe(viewLifecycleOwner) { state ->
             when (state) {
                 is AuthState.Loading -> {
                     registerButton.isEnabled = false

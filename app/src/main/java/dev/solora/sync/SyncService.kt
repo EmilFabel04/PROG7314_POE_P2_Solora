@@ -97,15 +97,15 @@ class SyncService(
                 reference = quote.reference,
                 clientName = quote.clientName,
                 address = quote.address,
-                usageKwh = quote.usageKwh,
-                billRands = quote.billRands,
+                usageKwh = quote.monthlyUsageKwh,
+                billRands = quote.monthlyBillRands,
                 tariff = quote.tariff,
                 panelWatt = quote.panelWatt,
                 sunHours = quote.sunHours,
-                systemKwp = quote.systemKwp,
-                estimatedGeneration = quote.estimatedGeneration,
-                paybackMonths = quote.paybackMonths,
-                savingsFirstYear = quote.savingsFirstYear,
+                systemKwp = quote.systemKw,
+                estimatedGeneration = quote.systemKw * quote.sunHours * 30, // Estimate
+                paybackMonths = if (quote.savingsRands > 0) (quote.systemKw * 1000 / quote.savingsRands * 12).toInt() else 0, // Estimate
+                savingsFirstYear = quote.savingsRands * 12,
                 dateEpoch = quote.dateEpoch
             )
         }
@@ -118,10 +118,10 @@ class SyncService(
             LeadData(
                 id = lead.id.toString(),
                 name = lead.name,
-                email = lead.email,
-                phone = lead.phone,
-                status = lead.status,
-                notes = lead.notes
+                email = lead.contact, // Using contact as email fallback
+                phone = lead.contact, // Using contact as phone fallback
+                status = "new", // Default status
+                notes = "Reference: ${lead.reference}, Address: ${lead.address}"
             )
         }
         
