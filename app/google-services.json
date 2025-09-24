@@ -1,0 +1,29 @@
+{
+    "project_info": {
+      "project_number": "570014568272",
+      "project_id": "solora-e00a4",
+      "storage_bucket": "solora-e00a4.firebasestorage.app"
+    },
+    "client": [
+      {
+        "client_info": {
+          "mobilesdk_app_id": "1:570014568272:android:1f0dfc9c63c25ce1ce2655",
+          "android_client_info": {
+            "package_name": "dev.solora"
+          }
+        },
+        "oauth_client": [],
+        "api_key": [
+          {
+            "current_key": "AIzaSyCAfU_ngJElc7SNXMpH2r2yq5rUsPcxrZc"
+          }
+        ],
+        "services": {
+          "appinvite_service": {
+            "other_platform_oauth_client": []
+          }
+        }
+      }
+    ],
+    "configuration_version": "1"
+  }
