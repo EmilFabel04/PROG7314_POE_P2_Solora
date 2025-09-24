@@ -1,7 +1,9 @@
 <resources>
-    <color name="solora_orange">#FF7A00</color>
-    <color name="solora_orange_dark">#E66900</color>
-    <color name="solora_gray">#F5F5F5</color>
+    <color name="solora_orange">#FF5D00</color>
+    <color name="solora_orange_dark">#FC8224</color>
+    <color name="solora_gray">#F7F7F7</color>
+    <color name="solora_on_primary">#FFFFFF</color>
+    <color name="solora_on_surface">#1E1E1E</color>
 </resources>
 
 

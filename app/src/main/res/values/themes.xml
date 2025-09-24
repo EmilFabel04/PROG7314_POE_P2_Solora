@@ -1,6 +1,10 @@
 <resources>
     <style name="Theme.Solora" parent="Theme.Material3.Light">
         <item name="android:statusBarColor">@color/solora_orange_dark</item>
+        <item name="colorPrimary">@color/solora_orange</item>
+        <item name="colorOnPrimary">@color/solora_on_primary</item>
+        <item name="colorPrimaryContainer">@color/solora_orange_dark</item>
+        <item name="android:navigationBarColor">@color/solora_orange</item>
     </style>
 </resources>
 
