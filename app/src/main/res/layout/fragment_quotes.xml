@@ -43,7 +43,7 @@
                 <EditText android:id="@+id/et_bill" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Average bill (R)" android:layout_marginTop="8dp"/>
                 <EditText android:id="@+id/et_tariff" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Tariff (R/kWh)" android:layout_marginTop="8dp" android:text="2.50"/>
                 <EditText android:id="@+id/et_panel" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Panel size (W)" android:layout_marginTop="8dp" android:text="420"/>
-                <Button android:id="@+id/btn_calculate" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Calculate & Save" android:layout_marginTop="12dp"/>
+                <Button android:id="@+id/btn_calculate" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Calculate &amp; Save" android:layout_marginTop="12dp"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
