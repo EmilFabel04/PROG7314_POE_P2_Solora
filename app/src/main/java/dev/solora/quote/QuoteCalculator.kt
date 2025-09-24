@@ -1,24 +1,105 @@
 package dev.solora.quote
 
 import kotlin.math.ceil
+import kotlin.math.max
+import kotlin.math.min
 
 data class QuoteInputs(
     val monthlyUsageKwh: Double?,
     val monthlyBillRands: Double?,
     val tariffRPerKwh: Double,
     val panelWatt: Int,
-    val sunHoursPerDay: Double
+    val sunHoursPerDay: Double,
+    val location: LocationInputs? = null,
+    val preferences: CustomerPreferences? = null
+)
+
+data class LocationInputs(
+    val latitude: Double,
+    val longitude: Double,
+    val address: String,
+    val roofArea: Double? = null,
+    val roofTilt: Double? = null,
+    val roofAzimuth: Double? = null // degrees from south
+)
+
+data class CustomerPreferences(
+    val maxBudget: Double? = null,
+    val targetPaybackYears: Int? = null,
+    val environmentalPriority: Boolean = false,
+    val preferredBrands: List<String> = emptyList()
 )
 
 data class QuoteOutputs(
     val panels: Int,
     val systemKw: Double,
     val inverterKw: Double,
-    val estimatedMonthlySavingsR: Double
+    val estimatedMonthlySavingsR: Double,
+    val detailedAnalysis: DetailedAnalysis? = null
+)
+
+data class DetailedAnalysis(
+    val monthlyGeneration: Map<Int, Double>, // kWh per month
+    val seasonalPerformance: Map<String, Double>, // percentage of annual generation
+    val financialProjection: FinancialProjection,
+    val environmentalImpact: EnvironmentalImpact,
+    val systemOptimization: SystemOptimization
+)
+
+data class FinancialProjection(
+    val installationCost: Double,
+    val annualSavings: Double,
+    val paybackPeriodYears: Double,
+    val totalLifetimeSavings: Double, // 25 years
+    val yearlyProjections: List<YearlyProjection>
+)
+
+data class YearlyProjection(
+    val year: Int,
+    val generation: Double,
+    val savings: Double,
+    val cumulativeSavings: Double
+)
+
+data class EnvironmentalImpact(
+    val co2ReductionKgPerYear: Double,
+    val treesEquivalent: Int,
+    val coalEquivalentKg: Double
+)
+
+data class SystemOptimization(
+    val efficiencyRating: String, // A+, A, B+, B, C
+    val performanceRatio: Double, // 0-1
+    val recommendations: List<String>
 )
 
 object QuoteCalculator {
-    fun calculate(inputs: QuoteInputs): QuoteOutputs {
+    
+    private const val PANEL_DEGRADATION_RATE = 0.005 // 0.5% per year
+    private const val SYSTEM_LIFETIME_YEARS = 25
+    private const val CO2_PER_KWH = 0.928 // kg CO2 per kWh in South Africa
+    private const val INSTALLATION_COST_PER_KW = 15000.0 // R15,000 per kW estimated
+    
+    suspend fun calculateAdvanced(
+        inputs: QuoteInputs,
+        nasaClient: NasaPowerClient? = null
+    ): Result<QuoteOutputs> {
+        return try {
+            // Basic calculation
+            val basicOutputs = calculateBasic(inputs)
+            
+            // Enhanced calculation with NASA data if location provided
+            val detailedAnalysis = if (inputs.location != null && nasaClient != null) {
+                calculateDetailedAnalysis(inputs, basicOutputs, nasaClient)
+            } else null
+            
+            Result.success(basicOutputs.copy(detailedAnalysis = detailedAnalysis))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    fun calculateBasic(inputs: QuoteInputs): QuoteOutputs {
         val usageKwh = inputs.monthlyUsageKwh ?: run {
             val bill = inputs.monthlyBillRands ?: 0.0
             if (bill <= 0) 0.0 else bill / inputs.tariffRPerKwh
@@ -30,7 +111,189 @@ object QuoteCalculator {
         val panels = if (panelKw <= 0) 0 else ceil(systemKw / panelKw).toInt()
         val inverterKw = (systemKw * 0.8).coerceAtLeast(1.0)
         val savings = usageKwh * inputs.tariffRPerKwh * 0.8
-        return QuoteOutputs(panels = panels, systemKw = round2(systemKw), inverterKw = round2(inverterKw), estimatedMonthlySavingsR = round2(savings))
+        
+        return QuoteOutputs(
+            panels = panels, 
+            systemKw = round2(systemKw), 
+            inverterKw = round2(inverterKw), 
+            estimatedMonthlySavingsR = round2(savings)
+        )
+    }
+    
+    private suspend fun calculateDetailedAnalysis(
+        inputs: QuoteInputs,
+        basicOutputs: QuoteOutputs,
+        nasaClient: NasaPowerClient
+    ): DetailedAnalysis? {
+        val location = inputs.location ?: return null
+        
+        // Get NASA solar data
+        val nasaDataResult = nasaClient.getSolarData(location.latitude, location.longitude)
+        if (nasaDataResult.isFailure) return null
+        
+        val nasaData = nasaDataResult.getOrNull() ?: return null
+        
+        // Calculate monthly generation
+        val monthlyGeneration = mutableMapOf<Int, Double>()
+        var totalAnnualGeneration = 0.0
+        
+        for (month in 1..12) {
+            val monthData = nasaData.monthlyData[month] ?: continue
+            val daysInMonth = getDaysInMonth(month)
+            val monthlyGen = basicOutputs.systemKw * monthData.estimatedSunHours * daysInMonth * getPerformanceFactor(month, location)
+            monthlyGeneration[month] = round2(monthlyGen)
+            totalAnnualGeneration += monthlyGen
+        }
+        
+        // Calculate seasonal performance
+        val seasonalPerformance = mapOf(
+            "Spring" to round2((monthlyGeneration[9]!! + monthlyGeneration[10]!! + monthlyGeneration[11]!!) / totalAnnualGeneration * 100),
+            "Summer" to round2((monthlyGeneration[12]!! + monthlyGeneration[1]!! + monthlyGeneration[2]!!) / totalAnnualGeneration * 100),
+            "Autumn" to round2((monthlyGeneration[3]!! + monthlyGeneration[4]!! + monthlyGeneration[5]!!) / totalAnnualGeneration * 100),
+            "Winter" to round2((monthlyGeneration[6]!! + monthlyGeneration[7]!! + monthlyGeneration[8]!!) / totalAnnualGeneration * 100)
+        )
+        
+        // Financial projection
+        val installationCost = basicOutputs.systemKw * INSTALLATION_COST_PER_KW
+        val firstYearSavings = totalAnnualGeneration * inputs.tariffRPerKwh
+        val paybackPeriod = if (firstYearSavings > 0) installationCost / firstYearSavings else 0.0
+        
+        val yearlyProjections = mutableListOf<YearlyProjection>()
+        var cumulativeSavings = 0.0
+        
+        for (year in 1..SYSTEM_LIFETIME_YEARS) {
+            val degradationFactor = 1.0 - (PANEL_DEGRADATION_RATE * (year - 1))
+            val yearGeneration = totalAnnualGeneration * degradationFactor
+            val yearSavings = yearGeneration * inputs.tariffRPerKwh
+            cumulativeSavings += yearSavings
+            
+            yearlyProjections.add(YearlyProjection(
+                year = year,
+                generation = round2(yearGeneration),
+                savings = round2(yearSavings),
+                cumulativeSavings = round2(cumulativeSavings)
+            ))
+        }
+        
+        val financialProjection = FinancialProjection(
+            installationCost = round2(installationCost),
+            annualSavings = round2(firstYearSavings),
+            paybackPeriodYears = round2(paybackPeriod),
+            totalLifetimeSavings = round2(cumulativeSavings - installationCost),
+            yearlyProjections = yearlyProjections
+        )
+        
+        // Environmental impact
+        val annualCO2Reduction = totalAnnualGeneration * CO2_PER_KWH
+        val environmentalImpact = EnvironmentalImpact(
+            co2ReductionKgPerYear = round2(annualCO2Reduction),
+            treesEquivalent = (annualCO2Reduction / 21.8).toInt(), // 21.8 kg CO2 per tree per year
+            coalEquivalentKg = round2(annualCO2Reduction / 2.23) // 2.23 kg CO2 per kg coal
+        )
+        
+        // System optimization
+        val performanceRatio = calculatePerformanceRatio(basicOutputs, nasaData, location)
+        val recommendations = generateRecommendations(performanceRatio, location, inputs.preferences)
+        val efficiencyRating = getEfficiencyRating(performanceRatio)
+        
+        val systemOptimization = SystemOptimization(
+            efficiencyRating = efficiencyRating,
+            performanceRatio = round2(performanceRatio),
+            recommendations = recommendations
+        )
+        
+        return DetailedAnalysis(
+            monthlyGeneration = monthlyGeneration,
+            seasonalPerformance = seasonalPerformance,
+            financialProjection = financialProjection,
+            environmentalImpact = environmentalImpact,
+            systemOptimization = systemOptimization
+        )
+    }
+    
+    private fun getDaysInMonth(month: Int): Int {
+        return when (month) {
+            2 -> 28 // Simplification, not accounting for leap years
+            4, 6, 9, 11 -> 30
+            else -> 31
+        }
+    }
+    
+    private fun getPerformanceFactor(month: Int, location: LocationInputs): Double {
+        // Adjust for roof tilt and azimuth
+        val tiltFactor = when {
+            location.roofTilt == null -> 1.0
+            location.roofTilt < 10 -> 0.92
+            location.roofTilt in 10.0..35.0 -> 1.0
+            location.roofTilt in 35.0..45.0 -> 0.98
+            else -> 0.85
+        }
+        
+        val azimuthFactor = when {
+            location.roofAzimuth == null -> 1.0 // Assume optimal
+            kotlin.math.abs(location.roofAzimuth) <= 15 -> 1.0 // Perfect south
+            kotlin.math.abs(location.roofAzimuth) <= 45 -> 0.95
+            kotlin.math.abs(location.roofAzimuth) <= 90 -> 0.85
+            else -> 0.7
+        }
+        
+        // Seasonal temperature derating (South African climate)
+        val temperatureFactor = when (month) {
+            12, 1, 2 -> 0.88 // Hot summer months
+            3, 4, 5, 9, 10, 11 -> 0.95 // Mild months
+            else -> 1.0 // Cool winter months
+        }
+        
+        return tiltFactor * azimuthFactor * temperatureFactor * 0.85 // Overall system efficiency
+    }
+    
+    private fun calculatePerformanceRatio(
+        outputs: QuoteOutputs,
+        nasaData: NasaPowerClient.LocationData,
+        location: LocationInputs
+    ): Double {
+        val theoreticalGeneration = outputs.systemKw * nasaData.averageAnnualSunHours * 365
+        val actualGeneration = theoreticalGeneration * getPerformanceFactor(6, location) // Use winter month as baseline
+        return actualGeneration / theoreticalGeneration
+    }
+    
+    private fun generateRecommendations(
+        performanceRatio: Double,
+        location: LocationInputs,
+        preferences: CustomerPreferences?
+    ): List<String> {
+        val recommendations = mutableListOf<String>()
+        
+        if (performanceRatio < 0.75) {
+            recommendations.add("Consider optimizing roof tilt angle to ${location.latitude.toInt()}° for better performance")
+        }
+        
+        if (location.roofAzimuth != null && kotlin.math.abs(location.roofAzimuth) > 45) {
+            recommendations.add("Roof orientation is not optimal. Consider adjusting panel placement if possible")
+        }
+        
+        if (preferences?.environmentalPriority == true) {
+            recommendations.add("Consider adding a battery system to maximize renewable energy usage")
+        }
+        
+        if (preferences?.maxBudget != null) {
+            recommendations.add("System sized within budget constraints. Consider phased installation for future expansion")
+        }
+        
+        recommendations.add("Regular cleaning and maintenance will ensure optimal performance")
+        recommendations.add("Monitor system performance monthly to detect any issues early")
+        
+        return recommendations
+    }
+    
+    private fun getEfficiencyRating(performanceRatio: Double): String {
+        return when {
+            performanceRatio >= 0.85 -> "A+"
+            performanceRatio >= 0.80 -> "A"
+            performanceRatio >= 0.75 -> "B+"
+            performanceRatio >= 0.70 -> "B"
+            else -> "C"
+        }
     }
 
     private fun round2(x: Double): Double = kotlin.math.round(x * 100.0) / 100.0
