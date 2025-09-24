@@ -3,7 +3,6 @@ plugins {
 	id("org.jetbrains.kotlin.android")
     kotlin("kapt")
     id("org.jetbrains.kotlin.plugin.serialization")
-    
     id("com.google.gms.google-services")
 }
 
@@ -49,13 +48,11 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-analytics-ktx")
-    implementation("androidx.core:core-ktx:1.13.1")
+	implementation("androidx.core:core-ktx:1.13.1")
     implementation("com.google.android.material:material:1.12.0")
         implementation("androidx.navigation:navigation-fragment-ktx:2.8.0")
         implementation("androidx.navigation:navigation-ui-ktx:2.8.0")
-    
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
-    
     implementation("androidx.datastore:datastore-preferences:1.1.1")
 
 	// Room
@@ -82,8 +79,7 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment-ktx:2.8.0")
     implementation("androidx.navigation:navigation-ui-ktx:2.8.0")
 
-	// Debug
-    
+    // Debug
 }
 
 
