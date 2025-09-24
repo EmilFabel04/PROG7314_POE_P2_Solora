@@ -6,13 +6,11 @@ import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
-import io.ktor.client.plugins.timeout.HttpTimeout
 import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlin.time.Duration.Companion.seconds
 
 class NasaPowerClient {
     private val client = HttpClient(Android) {
@@ -25,11 +23,8 @@ class NasaPowerClient {
         install(Logging) {
             level = LogLevel.INFO
         }
-        install(HttpTimeout) {
-            requestTimeoutMillis = 30.seconds.inWholeMilliseconds
-            connectTimeoutMillis = 15.seconds.inWholeMilliseconds
-            socketTimeoutMillis = 15.seconds.inWholeMilliseconds
-        }
+        // Note: HttpTimeout plugin is not available in Ktor client Android
+        // Using default timeouts from the Android engine
     }
 
     @Serializable

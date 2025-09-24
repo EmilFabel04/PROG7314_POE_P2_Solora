@@ -8,6 +8,7 @@ import dev.solora.SoloraApp
 import dev.solora.api.ApiRepository
 import dev.solora.api.NetworkMonitor
 import dev.solora.auth.AuthRepository
+import com.google.firebase.auth.FirebaseAuth
 import dev.solora.data.Quote
 import dev.solora.quote.CustomerPreferences
 import dev.solora.quote.LocationInputs
@@ -39,11 +40,8 @@ sealed class SyncStatus {
     data class Error(val message: String) : SyncStatus()
 }
 
-data class NetworkStatus(
-    val isConnected: Boolean,
-    val networkType: dev.solora.api.NetworkType,
-    val isMetered: Boolean
-)
+// Simplified network status for this implementation
+// NetworkStatus removed, using Boolean directly
 
 class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     private val db = (app as SoloraApp).database
@@ -69,13 +67,11 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     val syncStatus: StateFlow<SyncStatus> = _syncStatus.asStateFlow()
 
     // Network and sync status
-    val networkStatus = combine(
-        networkMonitor.isConnected,
-        networkMonitor.networkType,
-        networkMonitor.isMetered
-    ) { connected, type, metered ->
-        NetworkStatus(connected, type, metered)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), NetworkStatus(false, dev.solora.api.NetworkType.NONE, false))
+    val networkStatus = networkMonitor.isOnline.stateIn(
+        viewModelScope, 
+        SharingStarted.WhileSubscribed(5000), 
+        false
+    )
 
     // Enhanced calculation with NASA API integration
     fun calculateAdvanced(
@@ -113,7 +109,7 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                     preferences = preferences
                 )
                 
-                val result = if (networkStatus.value.isConnected && locationInputs != null) {
+                val result = if (networkStatus.value && locationInputs != null) {
                     QuoteCalculator.calculateAdvanced(inputs, nasa)
                 } else {
                     Result.success(QuoteCalculator.calculateBasic(inputs))
@@ -230,7 +226,7 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     // API Integration Methods
     fun syncQuotes() {
         viewModelScope.launch {
-            if (!networkStatus.value.isConnected) {
+            if (!networkStatus.value) {
                 _syncStatus.value = SyncStatus.Error("No internet connection")
                 return@launch
             }
@@ -238,13 +234,13 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
             _syncStatus.value = SyncStatus.Syncing
             
             try {
-                val user = authRepository.currentUser
+                val user = FirebaseAuth.getInstance().currentUser
                 if (user == null) {
                     _syncStatus.value = SyncStatus.Error("User not authenticated")
                     return@launch
                 }
 
-                val token = user.getIdToken(false).result?.token
+                val token = authRepository.getFirebaseIdToken()
                 if (token == null) {
                     _syncStatus.value = SyncStatus.Error("Failed to get auth token")
                     return@launch
@@ -296,6 +292,5 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     override fun onCleared() {
         super.onCleared()
         nasa.close()
-        networkMonitor.unregister()
     }
 }

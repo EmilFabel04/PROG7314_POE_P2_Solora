@@ -109,6 +109,14 @@ class AuthRepository(private val context: Context) {
             } else null
         }
     }
+
+    suspend fun getFirebaseIdToken(): String? {
+        return try {
+            firebaseAuth.currentUser?.getIdToken(false)?.await()?.token
+        } catch (e: Exception) {
+            null
+        }
+    }
 }
 
 data class UserInfo(

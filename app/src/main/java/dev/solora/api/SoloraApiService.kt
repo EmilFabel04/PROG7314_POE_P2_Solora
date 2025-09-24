@@ -35,11 +35,8 @@ class SoloraApiService(
                 level = LogLevel.INFO
             }
         }
-        install(io.ktor.client.plugins.timeout.HttpTimeout) {
-            requestTimeoutMillis = 30000
-            connectTimeoutMillis = 15000
-            socketTimeoutMillis = 15000
-        }
+                // HttpTimeout plugin is not available in Ktor client Android
+                // Using default timeouts from the Android engine
         defaultRequest {
             url(baseUrl)
             contentType(ContentType.Application.Json)
