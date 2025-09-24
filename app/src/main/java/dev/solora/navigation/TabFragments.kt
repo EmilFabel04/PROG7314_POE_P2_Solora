@@ -13,8 +13,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import dev.solora.R
 import dev.solora.theme.SoloraTheme
-import android.widget.Button
-import android.widget.TextView
+import android.view.View
 
 class HomeFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -22,10 +21,10 @@ class HomeFragment : Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        view.findViewById<Button>(R.id.btn_quotes).setOnClickListener { findNavController().navigate(R.id.quotesFragment) }
-        view.findViewById<Button>(R.id.btn_leads).setOnClickListener { findNavController().navigate(R.id.leadsFragment) }
-        view.findViewById<Button>(R.id.btn_notifications).setOnClickListener { findNavController().navigate(R.id.action_to_notifications) }
-        view.findViewById<Button>(R.id.btn_settings).setOnClickListener { findNavController().navigate(R.id.action_to_settings) }
+        view.findViewById<View>(R.id.btn_quotes).setOnClickListener { findNavController().navigate(R.id.quotesFragment) }
+        view.findViewById<View>(R.id.btn_leads).setOnClickListener { findNavController().navigate(R.id.leadsFragment) }
+        view.findViewById<View>(R.id.btn_notifications).setOnClickListener { findNavController().navigate(R.id.action_to_notifications) }
+        view.findViewById<View>(R.id.btn_settings).setOnClickListener { findNavController().navigate(R.id.action_to_settings) }
     }
 }
 
@@ -35,7 +34,7 @@ class QuotesFragment : Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        view.findViewById<Button>(R.id.btn_open_detail).setOnClickListener {
+        view.findViewById<View>(R.id.btn_open_detail).setOnClickListener {
             val bundle = Bundle().apply { putLong("id", 1L) }
             findNavController().navigate(R.id.quoteDetailFragment, bundle)
         }
@@ -55,10 +54,10 @@ class ProfileFragment : Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        view.findViewById<Button>(R.id.btn_edit_profile).setOnClickListener { findNavController().navigate(R.id.action_to_edit_profile) }
-        view.findViewById<Button>(R.id.btn_change_password).setOnClickListener { findNavController().navigate(R.id.action_to_change_password) }
-        view.findViewById<Button>(R.id.btn_settings).setOnClickListener { findNavController().navigate(R.id.action_to_settings) }
-        view.findViewById<Button>(R.id.btn_logout).setOnClickListener { findNavController().navigate(R.id.action_start_to_auth) }
+        view.findViewById<View>(R.id.btn_edit_profile).setOnClickListener { findNavController().navigate(R.id.action_to_edit_profile) }
+        view.findViewById<View>(R.id.btn_change_password).setOnClickListener { findNavController().navigate(R.id.action_to_change_password) }
+        view.findViewById<View>(R.id.btn_settings).setOnClickListener { findNavController().navigate(R.id.action_to_settings) }
+        view.findViewById<View>(R.id.btn_logout).setOnClickListener { findNavController().navigate(R.id.action_start_to_auth) }
     }
 }
 
