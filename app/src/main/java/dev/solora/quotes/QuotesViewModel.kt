@@ -67,7 +67,7 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     val syncStatus: StateFlow<SyncStatus> = _syncStatus.asStateFlow()
 
     // Network and sync status
-    val networkStatus = networkMonitor.isOnline.stateIn(
+    val networkStatus = networkMonitor.isConnected.stateIn(
         viewModelScope, 
         SharingStarted.WhileSubscribed(5000), 
         false
@@ -292,5 +292,6 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     override fun onCleared() {
         super.onCleared()
         nasa.close()
+        networkMonitor.unregister()
     }
 }
