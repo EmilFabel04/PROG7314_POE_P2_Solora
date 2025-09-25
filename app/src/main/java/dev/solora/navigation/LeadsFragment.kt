@@ -58,6 +58,11 @@ class LeadsFragment : Fragment() {
         fabAddLead = view.findViewById(R.id.fab_add_lead)
         overlayAddLead = view.findViewById(R.id.overlay_add_lead)
         
+        android.util.Log.d("LeadsFragment", "Views initialized. FAB found: ${fabAddLead != null}")
+        if (fabAddLead != null) {
+            android.util.Log.d("LeadsFragment", "FAB visibility: ${fabAddLead.visibility}, alpha: ${fabAddLead.alpha}")
+        }
+        
         // Form elements
         etFirstName = view.findViewById(R.id.et_first_name)
         etLastName = view.findViewById(R.id.et_last_name)
@@ -79,7 +84,10 @@ class LeadsFragment : Fragment() {
     }
     
     private fun setupClickListeners() {
+        android.util.Log.d("LeadsFragment", "Setting up click listeners. FAB found: ${::fabAddLead.isInitialized}")
+        
         fabAddLead.setOnClickListener {
+            android.util.Log.d("LeadsFragment", "FAB clicked - showing add lead modal")
             showAddLeadModal()
         }
         
