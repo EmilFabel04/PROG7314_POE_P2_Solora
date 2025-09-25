@@ -31,6 +31,8 @@ class LeadsFragment : Fragment() {
     private lateinit var layoutEmptyLeads: View
     private lateinit var fabAddLead: FloatingActionButton
     private lateinit var btnAddLeadFallback: Button
+    private lateinit var btnAddLeadHeader: Button
+    private lateinit var btnAddLeadEmpty: Button
     private lateinit var overlayAddLead: View
     
     // Form elements
@@ -70,6 +72,8 @@ class LeadsFragment : Fragment() {
         layoutEmptyLeads = view.findViewById(R.id.layout_empty_leads)
         fabAddLead = view.findViewById(R.id.fab_add_lead)
         btnAddLeadFallback = view.findViewById(R.id.btn_add_lead_fallback)
+        btnAddLeadHeader = view.findViewById(R.id.btn_add_lead_header)
+        btnAddLeadEmpty = view.findViewById(R.id.btn_add_lead_empty)
         overlayAddLead = view.findViewById(R.id.overlay_add_lead)
         
         android.util.Log.d("LeadsFragment", "Views initialized. FAB found: ${fabAddLead != null}")
@@ -124,6 +128,18 @@ class LeadsFragment : Fragment() {
         // Also setup fallback button click listener
         btnAddLeadFallback.setOnClickListener {
             android.util.Log.d("LeadsFragment", "Fallback button clicked - showing add lead modal")
+            showAddLeadModal()
+        }
+
+        // Setup header button click listener
+        btnAddLeadHeader.setOnClickListener {
+            android.util.Log.d("LeadsFragment", "Header button clicked - showing add lead modal")
+            showAddLeadModal()
+        }
+
+        // Setup empty state button click listener
+        btnAddLeadEmpty.setOnClickListener {
+            android.util.Log.d("LeadsFragment", "Empty state button clicked - showing add lead modal")
             showAddLeadModal()
         }
         
@@ -208,9 +224,11 @@ class LeadsFragment : Fragment() {
         val contactInfo = if (email.isNotEmpty()) "$email | $contact" else contact
         
         // Add lead
-        leadsViewModel.addLead(reference, fullName, address, contactInfo)
+        android.util.Log.d("LeadsFragment", "Adding lead: $fullName, $address, $contactInfo, $source")
+        leadsViewModel.addLead(reference, fullName, address, contactInfo, source)
         
-        // Hide modal and show success
+        // Clear form and hide modal
+        clearForm()
         hideAddLeadModal()
         Toast.makeText(requireContext(), "Lead added successfully!", Toast.LENGTH_SHORT).show()
     }
