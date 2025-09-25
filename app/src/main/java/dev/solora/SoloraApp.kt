@@ -37,5 +37,3 @@ class SoloraApp : Application() {
         SyncService.scheduleSyncWork(this)
     }
 }
-
-
