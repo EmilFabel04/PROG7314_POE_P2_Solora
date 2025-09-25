@@ -8,11 +8,14 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface LeadDao {
-    @Query("SELECT * FROM leads ORDER BY id DESC")
+    @Query("SELECT * FROM leads ORDER BY createdAt DESC")
     fun observeLeads(): Flow<List<Lead>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(lead: Lead)
+    suspend fun insert(lead: Lead): Long // Returns the generated ID
+    
+    @Query("UPDATE leads SET status = :status, notes = :notes, updatedAt = :updatedAt WHERE id = :id")
+    suspend fun updateLeadStatus(id: Long, status: String, notes: String, updatedAt: Long)
 }
 
 @Dao

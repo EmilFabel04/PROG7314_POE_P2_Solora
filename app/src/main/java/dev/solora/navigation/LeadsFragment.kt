@@ -4,13 +4,212 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.EditText
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dev.solora.R
+import dev.solora.leads.LeadsViewModel
+import dev.solora.data.Lead
+import kotlinx.coroutines.launch
 
 class LeadsFragment : Fragment() {
+    
+    private val leadsViewModel: LeadsViewModel by viewModels()
+    private lateinit var leadsAdapter: LeadsAdapter
+    
+    // UI Elements
+    private lateinit var rvLeads: RecyclerView
+    private lateinit var layoutEmptyLeads: View
+    private lateinit var fabAddLead: FloatingActionButton
+    private lateinit var overlayAddLead: View
+    
+    // Form elements
+    private lateinit var etFirstName: EditText
+    private lateinit var etLastName: EditText
+    private lateinit var etAddress: EditText
+    private lateinit var etEmail: EditText
+    private lateinit var etContact: EditText
+    private lateinit var btnAdd: Button
+    private lateinit var btnCancel: Button
+    
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_leads, container, false)
     }
+    
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        
+        initializeViews(view)
+        setupRecyclerView()
+        setupClickListeners()
+        observeLeads()
+    }
+    
+    private fun initializeViews(view: View) {
+        rvLeads = view.findViewById(R.id.rv_leads)
+        layoutEmptyLeads = view.findViewById(R.id.layout_empty_leads)
+        fabAddLead = view.findViewById(R.id.fab_add_lead)
+        overlayAddLead = view.findViewById(R.id.overlay_add_lead)
+        
+        // Form elements
+        etFirstName = view.findViewById(R.id.et_first_name)
+        etLastName = view.findViewById(R.id.et_last_name)
+        etAddress = view.findViewById(R.id.et_address)
+        etEmail = view.findViewById(R.id.et_email)
+        etContact = view.findViewById(R.id.et_contact)
+        btnAdd = view.findViewById(R.id.btn_add)
+        btnCancel = view.findViewById(R.id.btn_cancel)
+    }
+    
+    private fun setupRecyclerView() {
+        leadsAdapter = LeadsAdapter { lead ->
+            // Handle lead click - could navigate to lead detail
+            Toast.makeText(requireContext(), "Lead: ${lead.name}", Toast.LENGTH_SHORT).show()
+        }
+        
+        rvLeads.layoutManager = LinearLayoutManager(requireContext())
+        rvLeads.adapter = leadsAdapter
+    }
+    
+    private fun setupClickListeners() {
+        fabAddLead.setOnClickListener {
+            showAddLeadModal()
+        }
+        
+        btnCancel.setOnClickListener {
+            hideAddLeadModal()
+        }
+        
+        btnAdd.setOnClickListener {
+            addLead()
+        }
+        
+        // Close modal when clicking outside
+        overlayAddLead.setOnClickListener {
+            hideAddLeadModal()
+        }
+    }
+    
+    private fun observeLeads() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            leadsViewModel.leads.collect { leads ->
+                leadsAdapter.submitList(leads)
+                
+                // Show/hide empty state
+                if (leads.isEmpty()) {
+                    rvLeads.visibility = View.GONE
+                    layoutEmptyLeads.visibility = View.VISIBLE
+                } else {
+                    rvLeads.visibility = View.VISIBLE
+                    layoutEmptyLeads.visibility = View.GONE
+                }
+            }
+        }
+    }
+    
+    private fun showAddLeadModal() {
+        overlayAddLead.visibility = View.VISIBLE
+        clearForm()
+    }
+    
+    private fun hideAddLeadModal() {
+        overlayAddLead.visibility = View.GONE
+    }
+    
+    private fun clearForm() {
+        etFirstName.text.clear()
+        etLastName.text.clear()
+        etAddress.text.clear()
+        etEmail.text.clear()
+        etContact.text.clear()
+    }
+    
+    private fun addLead() {
+        val firstName = etFirstName.text.toString().trim()
+        val lastName = etLastName.text.toString().trim()
+        val address = etAddress.text.toString().trim()
+        val email = etEmail.text.toString().trim()
+        val contact = etContact.text.toString().trim()
+        
+        // Validation
+        if (firstName.isEmpty()) {
+            Toast.makeText(requireContext(), "Please enter first name", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (lastName.isEmpty()) {
+            Toast.makeText(requireContext(), "Please enter last name", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (address.isEmpty()) {
+            Toast.makeText(requireContext(), "Please enter address", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (contact.isEmpty()) {
+            Toast.makeText(requireContext(), "Please enter contact information", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        // Generate reference number
+        val reference = generateLeadReference()
+        val fullName = "$firstName $lastName"
+        val contactInfo = if (email.isNotEmpty()) "$email | $contact" else contact
+        
+        // Add lead
+        leadsViewModel.addLead(reference, fullName, address, contactInfo)
+        
+        // Hide modal and show success
+        hideAddLeadModal()
+        Toast.makeText(requireContext(), "Lead added successfully!", Toast.LENGTH_SHORT).show()
+    }
+    
+    private fun generateLeadReference(): String {
+        // Generate a simple reference number
+        return (10000..99999).random().toString()
+    }
 }
 
-
+// RecyclerView Adapter
+class LeadsAdapter(
+    private val onLeadClick: (Lead) -> Unit
+) : RecyclerView.Adapter<LeadsAdapter.LeadViewHolder>() {
+    
+    private var leads: List<Lead> = emptyList()
+    
+    fun submitList(newLeads: List<Lead>) {
+        leads = newLeads
+        notifyDataSetChanged()
+    }
+    
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LeadViewHolder {
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_lead, parent, false)
+        return LeadViewHolder(view)
+    }
+    
+    override fun onBindViewHolder(holder: LeadViewHolder, position: Int) {
+        holder.bind(leads[position])
+    }
+    
+    override fun getItemCount(): Int = leads.size
+    
+    inner class LeadViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val tvReference = itemView.findViewById<android.widget.TextView>(R.id.tv_reference)
+        private val tvName = itemView.findViewById<android.widget.TextView>(R.id.tv_name)
+        private val tvAddress = itemView.findViewById<android.widget.TextView>(R.id.tv_address)
+        private val clickableArea = itemView.findViewById<LinearLayout>(R.id.clickable_area) ?: itemView
+        
+        fun bind(lead: Lead) {
+            tvReference.text = lead.reference
+            tvName.text = lead.name
+            tvAddress.text = lead.address
+            
+            clickableArea.setOnClickListener { onLeadClick(lead) }
+        }
+    }
+}

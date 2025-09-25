@@ -1,65 +1,320 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingStart="16dp"
-    android:paddingEnd="16dp"
-    android:paddingTop="16dp"
-    android:clipToPadding="false">
+    android:background="#F5F5F5">
 
+    <!-- Main Content -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingBottom="32dp">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Leads"
-            android:textStyle="bold"
-            android:textSize="22sp"/>
-
-        <com.google.android.material.card.MaterialCardView
+        <!-- Orange Header -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="24dp"
-            app:cardUseCompatPadding="true"
-            android:layout_marginTop="12dp">
-            <LinearLayout
-                android:layout_width="match_parent"
+            android:background="@color/solora_orange"
+            android:orientation="vertical"
+            android:padding="20dp">
+            
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Total leads" android:textStyle="bold"/>
-                <TextView android:id="@+id/tv_lead_count" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textSize="24sp"/>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+                android:text="Leads"
+                android:textColor="@android:color/white"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
-        <com.google.android.material.card.MaterialCardView
+        <!-- Content Area -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="24dp"
-            app:cardUseCompatPadding="true"
-            android:layout_marginTop="12dp">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Add new lead" android:textStyle="bold"/>
-                <EditText android:id="@+id/et_ref" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Reference number" android:layout_marginTop="8dp"/>
-                <EditText android:id="@+id/et_name" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Client name" android:layout_marginTop="8dp"/>
-                <EditText android:id="@+id/et_address" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Address" android:layout_marginTop="8dp"/>
-                <EditText android:id="@+id/et_contact" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Contact details" android:layout_marginTop="8dp"/>
-                <Button android:id="@+id/btn_save_lead" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Save lead" android:layout_marginTop="12dp"/>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:padding="16dp">
 
-        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="No leads captured yet" android:gravity="center" android:layout_marginTop="24dp" android:textColor="#99000000"/>
+            <!-- Leads Table Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:cardUseCompatPadding="true">
+                
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+                    
+                    <!-- Table Header -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="16dp"
+                        android:background="#F8F8F8">
+                        
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1.5"
+                            android:text="Ref no."
+                            android:textStyle="bold"
+                            android:textSize="14sp"
+                            android:textColor="#666666" />
+                            
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:text="Name"
+                            android:textStyle="bold"
+                            android:textSize="14sp"
+                            android:textColor="#666666" />
+                            
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2.5"
+                            android:text="Address"
+                            android:textStyle="bold"
+                            android:textSize="14sp"
+                            android:textColor="#666666" />
+                    </LinearLayout>
+
+                    <!-- Divider -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#E0E0E0" />
+
+                    <!-- Leads List -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_leads"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:padding="0dp" />
+                        
+                    <!-- Empty State -->
+                    <LinearLayout
+                        android:id="@+id/layout_empty_leads"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:padding="32dp"
+                        android:visibility="gone">
+                        
+                        <ImageView
+                            android:layout_width="64dp"
+                            android:layout_height="64dp"
+                            android:src="@android:drawable/ic_menu_myplaces"
+                            android:tint="@color/solora_orange"
+                            android:alpha="0.6" />
+                            
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="No leads yet"
+                            android:textStyle="bold"
+                            android:textSize="18sp"
+                            android:layout_marginTop="16dp" />
+                            
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Start by adding your first lead"
+                            android:textColor="#666666"
+                            android:gravity="center"
+                            android:layout_marginTop="8dp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
     </LinearLayout>
 
-</ScrollView>
+    <!-- Floating Add Button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_add_lead"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="24dp"
+        android:src="@android:drawable/ic_input_add"
+        app:backgroundTint="@color/solora_orange"
+        app:tint="@android:color/white" />
 
+    <!-- Add Lead Modal Overlay -->
+    <LinearLayout
+        android:id="@+id/overlay_add_lead"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000"
+        android:gravity="center"
+        android:padding="16dp"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true">
+        
+        <!-- Add Lead Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp"
+            android:layout_marginHorizontal="16dp">
+            
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@color/solora_orange"
+                android:padding="24dp">
+                
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Add Lead"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="20dp" />
+                
+                <!-- First Name -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="First Name"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp" />
+                    
+                <EditText
+                    android:id="@+id/et_first_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/edit_text_background"
+                    android:hint="e.g. Samantha"
+                    android:textColorHint="#99000000"
+                    android:paddingHorizontal="16dp"
+                    android:layout_marginBottom="16dp" />
+                
+                <!-- Last Name -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Last Name"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp" />
+                    
+                <EditText
+                    android:id="@+id/et_last_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/edit_text_background"
+                    android:hint="e.g. Knowles"
+                    android:textColorHint="#99000000"
+                    android:paddingHorizontal="16dp"
+                    android:layout_marginBottom="16dp" />
+                
+                <!-- Address -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Address"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp" />
+                    
+                <EditText
+                    android:id="@+id/et_address"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/edit_text_background"
+                    android:hint="e.g. 123 Main Road"
+                    android:textColorHint="#99000000"
+                    android:paddingHorizontal="16dp"
+                    android:layout_marginBottom="16dp" />
+                
+                <!-- Email -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Email"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp" />
+                    
+                <EditText
+                    android:id="@+id/et_email"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/edit_text_background"
+                    android:hint="samantha.knowles@gmail.com"
+                    android:textColorHint="#99000000"
+                    android:paddingHorizontal="16dp"
+                    android:inputType="textEmailAddress"
+                    android:layout_marginBottom="16dp" />
+                
+                <!-- Contact Number -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Contact Number"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp" />
+                    
+                <EditText
+                    android:id="@+id/et_contact"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/edit_text_background"
+                    android:hint="e.g. 067 896 5432"
+                    android:textColorHint="#99000000"
+                    android:paddingHorizontal="16dp"
+                    android:inputType="phone"
+                    android:layout_marginBottom="24dp" />
+                
+                <!-- Buttons -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center">
+                    
+                    <Button
+                        android:id="@+id/btn_cancel"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:text="Cancel"
+                        android:textColor="@android:color/white"
+                        app:strokeColor="@android:color/white"
+                        android:layout_marginEnd="8dp" />
+                        
+                    <Button
+                        android:id="@+id/btn_add"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:text="add"
+                        android:backgroundTint="@android:color/white"
+                        android:textColor="@color/solora_orange"
+                        android:textStyle="bold"
+                        android:textAllCaps="false"
+                        android:layout_marginStart="8dp" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
 
+</FrameLayout>
