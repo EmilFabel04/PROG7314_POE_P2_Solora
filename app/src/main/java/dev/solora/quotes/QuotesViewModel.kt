@@ -58,7 +58,7 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
 
     private val _lastQuote = MutableStateFlow<Quote?>(null)
     val lastQuote: StateFlow<Quote?> = _lastQuote.asStateFlow()
-    
+
     private val _calculationState = MutableStateFlow<CalculationState>(CalculationState.Idle)
     val calculationState: StateFlow<CalculationState> = _calculationState.asStateFlow()
     
@@ -199,12 +199,12 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
         sunHours: Double
     ) {
         val inputs = QuoteInputs(
-            monthlyUsageKwh = usageKwh,
-            monthlyBillRands = billRands,
-            tariffRPerKwh = tariff,
-            panelWatt = panelWatt,
-            sunHoursPerDay = sunHours
-        )
+                monthlyUsageKwh = usageKwh,
+                monthlyBillRands = billRands,
+                tariffRPerKwh = tariff,
+                panelWatt = panelWatt,
+                sunHoursPerDay = sunHours
+            )
         val outputs = QuoteCalculator.calculateBasic(inputs)
         saveQuoteFromOutputs(reference, clientName, address, inputs, outputs)
     }
@@ -291,25 +291,37 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
             try {
                 val ctx = getApplication<SoloraApp>().applicationContext
                 
-                // Step 1: Geocode the address to get coordinates
+                // Step 1: Geocode the address to get coordinates with fallback
+                var latitude: Double
+                var longitude: Double
+                
                 val geocoder = Geocoder(ctx)
                 val addresses = try {
-                    geocoder.getFromLocationName(address, 1)
+                    android.util.Log.d("QuotesViewModel", "Attempting to geocode: $address")
+                    if (Geocoder.isPresent()) {
+                        geocoder.getFromLocationName(address, 3)
+                    } else {
+                        android.util.Log.w("QuotesViewModel", "Geocoder not available on this device")
+                        null
+                    }
                 } catch (e: Exception) {
                     android.util.Log.e("QuotesViewModel", "Geocoding failed: ${e.message}")
                     null
                 }
                 
-                if (addresses.isNullOrEmpty()) {
-                    _calculationState.value = CalculationState.Error("Unable to find location for address: $address")
-                    return@launch
+                if (!addresses.isNullOrEmpty()) {
+                    // Use geocoded coordinates
+                    val location = addresses[0]
+                    latitude = location.latitude
+                    longitude = location.longitude
+                    android.util.Log.d("QuotesViewModel", "Address geocoded: $address -> ($latitude, $longitude)")
+                } else {
+                    // Fallback: Use predefined coordinates for common South African cities
+                    val fallbackCoords = getFallbackCoordinates(address)
+                    latitude = fallbackCoords.first
+                    longitude = fallbackCoords.second
+                    android.util.Log.d("QuotesViewModel", "Using fallback coordinates for: $address -> ($latitude, $longitude)")
                 }
-                
-                val location = addresses[0]
-                val latitude = location.latitude
-                val longitude = location.longitude
-                
-                android.util.Log.d("QuotesViewModel", "Address geocoded: $address -> ($latitude, $longitude)")
                 
                 // Step 2: Get NASA API solar data for the location
                 val nasaResult = nasa.getSolarData(latitude, longitude)
@@ -349,18 +361,18 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                 val co2Savings = outputs.systemKw * 1500 // Rough estimate: 1.5 tons CO2 per kW per year
                 
                 // Step 5: Create enhanced quote with all data
-                val quote = Quote(
-                    reference = reference,
-                    clientName = clientName,
-                    address = address,
+        val quote = Quote(
+            reference = reference,
+            clientName = clientName,
+            address = address,
                     monthlyUsageKwh = inputs.monthlyUsageKwh,
                     monthlyBillRands = inputs.monthlyBillRands,
                     tariff = inputs.tariffRPerKwh,
                     panelWatt = inputs.panelWatt,
                     sunHours = inputs.sunHoursPerDay,
-                    panels = outputs.panels,
-                    systemKw = outputs.systemKw,
-                    inverterKw = outputs.inverterKw,
+            panels = outputs.panels,
+            systemKw = outputs.systemKw,
+            inverterKw = outputs.inverterKw,
                     savingsRands = outputs.estimatedMonthlySavingsR,
                     // NASA API and location data
                     latitude = latitude,
@@ -380,8 +392,8 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                 )
                 
                 // Step 6: Save to local database
-                dao.insert(quote)
-                _lastQuote.value = quote
+        dao.insert(quote)
+        _lastQuote.value = quote
                 
                 // Step 7: Save to Firebase with enhanced data
                 try {
@@ -395,9 +407,15 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                     android.util.Log.e("QuotesViewModel", "Firebase save error: ${e.message}")
                 }
                 
+                val locationNote = if (addresses.isNullOrEmpty()) {
+                    " (Using approximate location)"
+                } else {
+                    ""
+                }
+                
                 _calculationState.value = CalculationState.Success(
                     "Quote calculated and saved! System: ${String.format("%.2f", outputs.systemKw)}kW, " +
-                    "Monthly savings: R${String.format("%.2f", outputs.estimatedMonthlySavingsR)}"
+                    "Monthly savings: R${String.format("%.2f", outputs.estimatedMonthlySavingsR)}$locationNote"
                 )
                 
             } catch (e: Exception) {
@@ -450,6 +468,50 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
             } catch (e: Exception) {
                 _syncStatus.value = SyncStatus.Error("Sync failed: ${e.message}")
             }
+        }
+    }
+
+    private fun getFallbackCoordinates(address: String): Pair<Double, Double> {
+        val addressLower = address.lowercase()
+        
+        return when {
+            // Cape Town area (including Durbanville)
+            addressLower.contains("cape town") || 
+            addressLower.contains("durbanville") || 
+            addressLower.contains("bellville") ||
+            addressLower.contains("stellenbosch") ||
+            addressLower.contains("paarl") -> Pair(-33.9249, 18.4241) // Cape Town center
+            
+            // Johannesburg area
+            addressLower.contains("johannesburg") || 
+            addressLower.contains("joburg") || 
+            addressLower.contains("sandton") ||
+            addressLower.contains("randburg") -> Pair(-26.2041, 28.0473) // Johannesburg center
+            
+            // Pretoria area
+            addressLower.contains("pretoria") || 
+            addressLower.contains("centurion") -> Pair(-25.7479, 28.2293) // Pretoria center
+            
+            // Durban area
+            addressLower.contains("durban") ||
+            addressLower.contains("pinetown") ||
+            addressLower.contains("umhlanga") -> Pair(-29.8587, 31.0218) // Durban center
+            
+            // Port Elizabeth / Gqeberha
+            addressLower.contains("port elizabeth") ||
+            addressLower.contains("gqeberha") -> Pair(-33.9608, 25.6022)
+            
+            // Bloemfontein
+            addressLower.contains("bloemfontein") -> Pair(-29.1217, 26.2148)
+            
+            // East London
+            addressLower.contains("east london") -> Pair(-33.0153, 27.9116)
+            
+            // Kimberley
+            addressLower.contains("kimberley") -> Pair(-28.7282, 24.7499)
+            
+            // Default to Cape Town if no match (good solar conditions)
+            else -> Pair(-33.9249, 18.4241)
         }
     }
 
