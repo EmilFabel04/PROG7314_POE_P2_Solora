@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 
 class QuotesFragment : Fragment() {
     private val quotesViewModel: QuotesViewModel by viewModels()
+    private var isFirebaseTest = false
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_quotes, container, false)
@@ -58,16 +59,24 @@ class QuotesFragment : Fragment() {
                         btnCalculate.text = "Calculate & Save"
                         Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
                         
-                        // Navigate to quote detail after successful calculation
-                        quotesViewModel.lastQuote.value?.let { quote ->
-                            val bundle = Bundle().apply { putLong("id", quote.id) }
-                            findNavController().navigate(R.id.quoteDetailFragment, bundle)
+                        // Only navigate to quote detail after successful calculation (not Firebase tests)
+                        if (!isFirebaseTest) {
+                            quotesViewModel.lastQuote.value?.let { quote ->
+                                val bundle = Bundle().apply { putLong("id", quote.id) }
+                                findNavController().navigate(R.id.quoteDetailFragment, bundle)
+                            }
                         }
+                        
+                        // Reset firebase test flag
+                        isFirebaseTest = false
                     }
                     is CalculationState.Error -> {
                         btnCalculate.isEnabled = true
                         btnCalculate.text = "Calculate & Save"
                         Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
+                        
+                        // Reset firebase test flag
+                        isFirebaseTest = false
                     }
                 }
             }
@@ -149,6 +158,7 @@ class QuotesFragment : Fragment() {
         
         // Handle Firebase test button
         btnTestFirebase.setOnClickListener {
+            isFirebaseTest = true
             quotesViewModel.testFirebaseConnection()
         }
         
