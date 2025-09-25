@@ -30,6 +30,7 @@ class LeadsFragment : Fragment() {
     private lateinit var rvLeads: RecyclerView
     private lateinit var layoutEmptyLeads: View
     private lateinit var fabAddLead: FloatingActionButton
+    private lateinit var btnAddLeadFallback: Button
     private lateinit var overlayAddLead: View
     
     // Form elements
@@ -59,11 +60,22 @@ class LeadsFragment : Fragment() {
         rvLeads = view.findViewById(R.id.rv_leads)
         layoutEmptyLeads = view.findViewById(R.id.layout_empty_leads)
         fabAddLead = view.findViewById(R.id.fab_add_lead)
+        btnAddLeadFallback = view.findViewById(R.id.btn_add_lead_fallback)
         overlayAddLead = view.findViewById(R.id.overlay_add_lead)
         
         android.util.Log.d("LeadsFragment", "Views initialized. FAB found: ${fabAddLead != null}")
         if (fabAddLead != null) {
             android.util.Log.d("LeadsFragment", "FAB visibility: ${fabAddLead.visibility}, alpha: ${fabAddLead.alpha}")
+            // Explicitly ensure FAB is visible
+            fabAddLead.visibility = View.VISIBLE
+            fabAddLead.alpha = 1.0f
+            fabAddLead.isClickable = true
+            fabAddLead.isFocusable = true
+            android.util.Log.d("LeadsFragment", "FAB visibility set to VISIBLE")
+        } else {
+            android.util.Log.e("LeadsFragment", "FAB not found in layout!")
+            // Show fallback button if FAB doesn't work
+            btnAddLeadFallback.visibility = View.VISIBLE
         }
         
         // Form elements
@@ -97,6 +109,12 @@ class LeadsFragment : Fragment() {
         
         fabAddLead.setOnClickListener {
             android.util.Log.d("LeadsFragment", "FAB clicked - showing add lead modal")
+            showAddLeadModal()
+        }
+
+        // Also setup fallback button click listener
+        btnAddLeadFallback.setOnClickListener {
+            android.util.Log.d("LeadsFragment", "Fallback button clicked - showing add lead modal")
             showAddLeadModal()
         }
         
