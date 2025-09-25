@@ -323,22 +323,29 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                     android.util.Log.d("QuotesViewModel", "Using fallback coordinates for: $address -> ($latitude, $longitude)")
                 }
                 
-                // Step 2: Get NASA API solar data for the location
+                // Step 2: Get NASA API solar data for the location with fallback
                 val nasaResult = nasa.getSolarData(latitude, longitude)
-                if (nasaResult.isFailure) {
-                    _calculationState.value = CalculationState.Error("Failed to get solar data: ${nasaResult.exceptionOrNull()?.message}")
-                    return@launch
+                val (sunHours, nasaData) = if (nasaResult.isSuccess) {
+                    val data = nasaResult.getOrThrow()
+                    Pair(data.averageAnnualSunHours, data)
+                } else {
+                    android.util.Log.w("QuotesViewModel", "NASA API failed: ${nasaResult.exceptionOrNull()?.message}")
+                    // Fallback to regional average sun hours for South Africa
+                    val fallbackSunHours = getFallbackSunHours(latitude, longitude)
+                    android.util.Log.d("QuotesViewModel", "Using fallback sun hours: $fallbackSunHours for location ($latitude, $longitude)")
+                    Pair(fallbackSunHours, null)
                 }
                 
-                val nasaData = nasaResult.getOrThrow()
-                val sunHours = nasaData.averageAnnualSunHours
-                
-                // Get optimal month data
-                val optimalResult = nasa.getOptimalSolarMonth(latitude, longitude)
-                val (optimalMonth, optimalData) = if (optimalResult.isSuccess) {
-                    optimalResult.getOrThrow()
+                // Get optimal month data (only if NASA API worked)
+                val (optimalMonth, optimalData) = if (nasaData != null) {
+                    val optimalResult = nasa.getOptimalSolarMonth(latitude, longitude)
+                    if (optimalResult.isSuccess) {
+                        optimalResult.getOrThrow()
+                    } else {
+                        12 to null // December is typically optimal for South Africa
+                    }
                 } else {
-                    1 to null
+                    12 to null // December fallback
                 }
                 
                 android.util.Log.d("QuotesViewModel", "NASA data: avg sun hours = $sunHours, optimal month = $optimalMonth")
@@ -374,11 +381,11 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
             systemKw = outputs.systemKw,
             inverterKw = outputs.inverterKw,
                     savingsRands = outputs.estimatedMonthlySavingsR,
-                    // NASA API and location data
+                    // NASA API and location data (with fallbacks)
                     latitude = latitude,
                     longitude = longitude,
-                    averageAnnualIrradiance = nasaData.averageAnnualIrradiance,
-                    averageAnnualSunHours = nasaData.averageAnnualSunHours,
+                    averageAnnualIrradiance = nasaData?.averageAnnualIrradiance,
+                    averageAnnualSunHours = nasaData?.averageAnnualSunHours ?: sunHours,
                     optimalMonth = optimalMonth,
                     optimalMonthIrradiance = optimalData?.solarIrradiance,
                     temperature = optimalData?.temperature,
@@ -413,9 +420,15 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                     ""
                 }
                 
+                val nasaNote = if (nasaData == null) {
+                    " (Using regional solar estimates)"
+                } else {
+                    ""
+                }
+                
                 _calculationState.value = CalculationState.Success(
                     "Quote calculated and saved! System: ${String.format("%.2f", outputs.systemKw)}kW, " +
-                    "Monthly savings: R${String.format("%.2f", outputs.estimatedMonthlySavingsR)}$locationNote"
+                    "Monthly savings: R${String.format("%.2f", outputs.estimatedMonthlySavingsR)}$locationNote$nasaNote"
                 )
                 
             } catch (e: Exception) {
@@ -468,6 +481,29 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
             } catch (e: Exception) {
                 _syncStatus.value = SyncStatus.Error("Sync failed: ${e.message}")
             }
+        }
+    }
+
+    private fun getFallbackSunHours(latitude: Double, longitude: Double): Double {
+        // Regional sun hour estimates for South Africa based on location
+        return when {
+            // Northern Cape (highest solar irradiance in SA)
+            latitude > -31.0 && longitude > 18.0 && longitude < 25.0 -> 7.5
+            
+            // Western Cape coast (good solar, but more variable weather)
+            latitude < -33.0 && longitude < 19.0 -> 6.8
+            
+            // Johannesburg/Gauteng area (high altitude, good solar)
+            latitude > -27.0 && latitude < -25.0 && longitude > 27.0 && longitude < 29.0 -> 7.2
+            
+            // Eastern coast (Durban area - more humid, slightly lower)
+            longitude > 29.0 -> 6.5
+            
+            // Central regions (Free State, North West)
+            latitude > -30.0 && latitude < -26.0 -> 7.0
+            
+            // Default for South Africa (conservative estimate)
+            else -> 6.5
         }
     }
 
