@@ -5,6 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Toast
@@ -36,6 +38,7 @@ class LeadsFragment : Fragment() {
     private lateinit var etAddress: EditText
     private lateinit var etEmail: EditText
     private lateinit var etContact: EditText
+    private lateinit var spinnerSource: AutoCompleteTextView
     private lateinit var btnAdd: Button
     private lateinit var btnCancel: Button
     
@@ -69,8 +72,14 @@ class LeadsFragment : Fragment() {
         etAddress = view.findViewById(R.id.et_address)
         etEmail = view.findViewById(R.id.et_email)
         etContact = view.findViewById(R.id.et_contact)
+        spinnerSource = view.findViewById(R.id.spinner_source)
         btnAdd = view.findViewById(R.id.btn_add)
         btnCancel = view.findViewById(R.id.btn_cancel)
+        
+        // Setup spinner with lead sources
+        val leadSources = arrayOf("Website", "Referral", "Cold Call", "Social Media", "Advertisement", "Other")
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, leadSources)
+        spinnerSource.setAdapter(adapter)
     }
     
     private fun setupRecyclerView() {
@@ -137,6 +146,7 @@ class LeadsFragment : Fragment() {
         etAddress.text.clear()
         etEmail.text.clear()
         etContact.text.clear()
+        spinnerSource.text.clear()
     }
     
     private fun addLead() {
@@ -145,6 +155,7 @@ class LeadsFragment : Fragment() {
         val address = etAddress.text.toString().trim()
         val email = etEmail.text.toString().trim()
         val contact = etContact.text.toString().trim()
+        val source = spinnerSource.text.toString().trim().ifEmpty { "Other" }
         
         // Validation
         if (firstName.isEmpty()) {
