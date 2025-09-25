@@ -144,40 +144,10 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
         panelWatt: Int,
         sunHours: Double = 5.0
     ) {
-        calculateAdvanced(reference, clientName, address, usageKwh, billRands, tariff, panelWatt, sunHours)
+        // Delegate to the enhanced calculation method
+        calculateAndSaveUsingAddress(reference, clientName, address, usageKwh, billRands, tariff, panelWatt)
     }
 
-    fun calculateAndSaveUsingAddress(
-        reference: String,
-        clientName: String,
-        address: String,
-        usageKwh: Double?,
-        billRands: Double?,
-        tariff: Double,
-        panelWatt: Int
-    ) {
-        viewModelScope.launch {
-            val ctx = getApplication<Application>().applicationContext
-            var sun = 5.0
-            var latitude: Double? = null
-            var longitude: Double? = null
-            
-            try {
-                val geocoder = Geocoder(ctx)
-                val results = geocoder.getFromLocationName(address, 1)
-                if (!results.isNullOrEmpty()) {
-                    val loc = results.first()
-                    latitude = loc.latitude
-                    longitude = loc.longitude
-                    val month = Calendar.getInstance().get(Calendar.MONTH) + 1
-                    nasa.getMonthlySunHours(loc.latitude, loc.longitude, month).getOrNull()?.let { sun = it }
-                }
-            } catch (_: Exception) {
-            }
-
-            calculateAdvanced(reference, clientName, address, usageKwh, billRands, tariff, panelWatt, sun, latitude, longitude)
-        }
-    }
 
     private suspend fun saveQuoteFromOutputs(
         reference: String,
