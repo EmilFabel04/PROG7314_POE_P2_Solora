@@ -226,14 +226,20 @@ class FirebaseRepository {
     
     suspend fun testConnection(): Result<String> {
         return try {
-            val userId = getCurrentUserId() ?: return Result.failure(Exception("User not authenticated"))
+            val currentUser = auth.currentUser
+            Log.d(TAG, "Current user: ${currentUser?.uid}, email: ${currentUser?.email}")
+            
+            val userId = getCurrentUserId() ?: return Result.failure(Exception("User not authenticated - no current user"))
             
             val testData = hashMapOf(
                 "test" to "Firebase connection successful",
                 "timestamp" to System.currentTimeMillis(),
                 "userId" to userId,
+                "userEmail" to currentUser?.email,
                 "appVersion" to "1.0.0"
             )
+            
+            Log.d(TAG, "Attempting to write to Firestore with userId: $userId")
             
             firestore.collection("debug")
                 .document("test_${userId}")
@@ -241,11 +247,11 @@ class FirebaseRepository {
                 .await()
             
             Log.d(TAG, "Firebase connection test successful")
-            Result.success("Firebase connection successful!")
+            Result.success("Firebase connection successful! User: ${currentUser?.email}")
             
         } catch (e: Exception) {
-            Log.e(TAG, "Firebase connection test failed", e)
-            Result.failure(e)
+            Log.e(TAG, "Firebase connection test failed: ${e.message}", e)
+            Result.failure(Exception("Firebase test failed: ${e.message}"))
         }
     }
 }
