@@ -6,62 +6,70 @@
 
     <fragment
         android:id="@+id/onboardingFragment"
-        android:name="dev.solora.ui.fragments.OnboardingFragment">
+        android:name="dev.solora.navigation.OnboardingFragment">
         <action
             android:id="@+id/action_onboarding_to_login"
             app:destination="@id/loginFragment" />
-        <action
-            android:id="@+id/action_onboarding_to_register"
-            app:destination="@id/registerFragment" />
     </fragment>
 
     <fragment
         android:id="@+id/loginFragment"
-        android:name="dev.solora.ui.fragments.LoginFragment">
+        android:name="dev.solora.navigation.LoginFragment">
         <action
             android:id="@+id/action_login_to_register"
             app:destination="@id/registerFragment" />
+
+        <action
+            android:id="@+id/action_login_to_home"
+            app:destination="@id/homeFragment" />
     </fragment>
 
     <fragment
         android:id="@+id/registerFragment"
-        android:name="dev.solora.ui.fragments.RegisterFragment" />
+        android:name="dev.solora.navigation.RegisterFragment" >
+        <action
+            android:id="@+id/action_register_to_login"
+            app:destination="@id/loginFragment" />
+        <action
+            android:id="@+id/action_register_to_home"
+            app:destination="@id/homeFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="dev.solora.ui.fragments.HomeFragment" />
+        android:name="dev.solora.navigation.HomeFragment" />
 
     <fragment
         android:id="@+id/quotesFragment"
-        android:name="dev.solora.ui.fragments.QuotesFragment" />
+        android:name="dev.solora.navigation.QuotesFragment" />
 
     <fragment
         android:id="@+id/leadsFragment"
-        android:name="dev.solora.ui.fragments.LeadsFragment" />
+        android:name="dev.solora.navigation.LeadsFragment" />
 
     <fragment
         android:id="@+id/profileFragment"
-        android:name="dev.solora.ui.fragments.ProfileFragment" />
+        android:name="dev.solora.navigation.ProfileFragment" />
 
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="dev.solora.ui.fragments.SettingsFragment" />
+        android:name="dev.solora.navigation.SettingsFragment" />
 
     <fragment
         android:id="@+id/notificationsFragment"
-        android:name="dev.solora.ui.fragments.NotificationsFragment" />
+        android:name="dev.solora.navigation.NotificationsFragment" />
 
     <fragment
         android:id="@+id/editProfileFragment"
-        android:name="dev.solora.ui.fragments.EditProfileFragment" />
+        android:name="dev.solora.navigation.EditProfileFragment" />
 
     <fragment
         android:id="@+id/changePasswordFragment"
-        android:name="dev.solora.ui.fragments.ChangePasswordFragment" />
+        android:name="dev.solora.navigation.ChangePasswordFragment" />
 
     <fragment
         android:id="@+id/quoteDetailFragment"
-        android:name="dev.solora.ui.fragments.QuoteDetailFragment">
+        android:name="dev.solora.navigation.QuoteDetailFragment">
         <argument
             android:name="id"
             app:argType="long"

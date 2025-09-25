@@ -13,6 +13,9 @@
     <string name="english">English</string>
     <string name="afrikaans">Afrikaans</string>
     <string name="xhosa">isiXhosa</string>
+    <string name="login_text"><u>Login</u></string>
+    <string name="sign_up_text"><u>Sign Up</u></string>
+    <string name="forgot_password_text"><u>Forgot password</u></string>
 </resources>
 
 

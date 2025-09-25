@@ -2,8 +2,13 @@
     <color name="solora_orange">#FF5D00</color>
     <color name="solora_orange_dark">#FC8224</color>
     <color name="solora_gray">#F7F7F7</color>
+    <color name="solora_light_grey">#D9D9D9</color>
+    <color name="solora_dark_grey">#7D7D7D</color>
+    <color name="solora_black">#000000</color>
+    <color name="solora_night_gray">#323232</color>
     <color name="solora_on_primary">#FFFFFF</color>
     <color name="solora_on_surface">#1E1E1E</color>
+    <color name="solora_bottom_nav_text_gray">#6F6F6F</color>
 </resources>
 
 

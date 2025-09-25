@@ -8,6 +8,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
+import dev.solora.data.UserInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -21,6 +22,7 @@ class AuthRepository(private val context: Context) {
     private val firestore = FirebaseFirestore.getInstance()
     private val KEY_USER_ID = stringPreferencesKey("user_id")
     private val KEY_NAME = stringPreferencesKey("name")
+    private val KEY_SURNAME = stringPreferencesKey("surname")
     private val KEY_EMAIL = stringPreferencesKey("email")
 
     val currentUser: FirebaseUser? get() = firebaseAuth.currentUser
@@ -50,7 +52,7 @@ class AuthRepository(private val context: Context) {
         }
     }
 
-    suspend fun register(name: String, email: String, password: String): Result<FirebaseUser> {
+    suspend fun register(name: String, surname: String, email: String, password: String): Result<FirebaseUser> {
         return try {
             val result = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
             val user = result.user ?: throw Exception("Registration failed: No user returned")
@@ -64,6 +66,7 @@ class AuthRepository(private val context: Context) {
             // Store user info in Firestore
             val userDoc = hashMapOf(
                 "name" to name,
+                "surname" to surname,
                 "email" to email,
                 "createdAt" to com.google.firebase.Timestamp.now()
             )
@@ -72,8 +75,9 @@ class AuthRepository(private val context: Context) {
             // Store user info locally
             context.dataStore.edit { prefs ->
                 prefs[KEY_USER_ID] = user.uid
-                prefs[KEY_EMAIL] = email
                 prefs[KEY_NAME] = name
+                prefs[KEY_SURNAME] = surname
+                prefs[KEY_EMAIL] = email
             }
             
             Result.success(user)
@@ -87,8 +91,9 @@ class AuthRepository(private val context: Context) {
             firebaseAuth.signOut()
             context.dataStore.edit { prefs ->
                 prefs.remove(KEY_USER_ID)
-                prefs.remove(KEY_EMAIL)
                 prefs.remove(KEY_NAME)
+                prefs.remove(KEY_SURNAME)
+                prefs.remove(KEY_EMAIL)
             }
             Result.success(Unit)
         } catch (e: Exception) {
@@ -102,10 +107,11 @@ class AuthRepository(private val context: Context) {
         }.map { prefs ->
             val userId = prefs[KEY_USER_ID]
             val name = prefs[KEY_NAME]
+            val surname = prefs[KEY_SURNAME]
             val email = prefs[KEY_EMAIL]
             
-            if (!userId.isNullOrEmpty() && !name.isNullOrEmpty() && !email.isNullOrEmpty()) {
-                UserInfo(userId, name, email)
+            if (!userId.isNullOrEmpty() && !name.isNullOrEmpty() && !surname.isNullOrEmpty() && !email.isNullOrEmpty()) {
+                UserInfo(userId, name, surname, email)
             } else null
         }
     }
@@ -118,11 +124,3 @@ class AuthRepository(private val context: Context) {
         }
     }
 }
-
-data class UserInfo(
-    val id: String,
-    val name: String,
-    val email: String
-)
-
-

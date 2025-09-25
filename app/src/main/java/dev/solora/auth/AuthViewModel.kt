@@ -31,10 +31,10 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun register(name: String, email: String, password: String) {
+    fun register(name: String, surname: String, email: String, password: String) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
-            val result = repo.register(name, email, password)
+            val result = repo.register(name, surname, email, password)
             _authState.value = if (result.isSuccess) {
                 AuthState.Success("Registration successful")
             } else {
@@ -66,5 +66,3 @@ sealed class AuthState {
     data class Success(val message: String) : AuthState()
     data class Error(val message: String) : AuthState()
 }
-
-
