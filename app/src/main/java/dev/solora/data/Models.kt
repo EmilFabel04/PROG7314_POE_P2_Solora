@@ -9,7 +9,47 @@ data class Lead(
     val reference: String,
     val name: String,
     val address: String,
-    val contact: String
+    val contact: String,
+    val status: String = "new", // new, contacted, qualified, proposal, closed, lost
+    val source: String = "manual", // manual, website, referral, marketing
+    val notes: String = "",
+    val createdAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis()
+)
+
+// User Profile data class (not stored in Room, only Firebase)
+data class UserProfile(
+    val userId: String,
+    val name: String,
+    val email: String,
+    val companyName: String? = null,
+    val phone: String? = null,
+    val jobTitle: String? = null,
+    val address: String? = null,
+    val profileImageUrl: String? = null,
+    val preferences: Map<String, Any> = emptyMap(),
+    val createdAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis()
+)
+
+// Analytics data classes
+data class UserStats(
+    val totalQuotes: Int,
+    val totalLeads: Int,
+    val totalSystemKw: Double,
+    val totalMonthlySavings: Double,
+    val totalAnnualSavings: Double,
+    val averageSystemSize: Double,
+    val conversionRate: Double, // leads to quotes ratio
+    val generatedAt: Long
+)
+
+data class QuoteStats(
+    val monthlyQuotes: Int,
+    val averageQuoteValue: Double,
+    val topClientType: String,
+    val mostPopularSystemSize: String,
+    val totalCo2Savings: Double
 )
 
 @Entity(tableName = "quotes")
