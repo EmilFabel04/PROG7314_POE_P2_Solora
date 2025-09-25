@@ -44,16 +44,25 @@ class LeadsFragment : Fragment() {
     private lateinit var btnCancel: Button
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.fragment_leads, container, false)
+        android.util.Log.d("LeadsFragment", "===== UPDATED LEADS FRAGMENT ONCREATEVIEW CALLED =====")
+        android.util.Log.d("LeadsFragment", "Inflating layout: R.layout.fragment_leads")
+        val view = inflater.inflate(R.layout.fragment_leads, container, false)
+        android.util.Log.d("LeadsFragment", "Layout inflated successfully. View type: ${view.javaClass.simpleName}")
+        return view
     }
     
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
+        android.util.Log.d("LeadsFragment", "===== UPDATED LEADS FRAGMENT ONVIEWCREATED CALLED =====")
+        android.util.Log.d("LeadsFragment", "View tree: ${view.javaClass.simpleName}")
+        
         initializeViews(view)
         setupRecyclerView()
         setupClickListeners()
         observeLeads()
+        
+        android.util.Log.d("LeadsFragment", "===== LEADS FRAGMENT SETUP COMPLETED =====")
     }
     
     private fun initializeViews(view: View) {
