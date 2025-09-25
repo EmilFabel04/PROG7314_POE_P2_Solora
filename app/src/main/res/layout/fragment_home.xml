@@ -45,7 +45,17 @@
 
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Quick actions" android:textStyle="bold" android:layout_marginTop="16dp"/>
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-            <com.google.android.material.card.MaterialCardView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" app:cardCornerRadius="22dp" app:cardUseCompatPadding="true" android:layout_marginEnd="8dp">
+            <com.google.android.material.card.MaterialCardView 
+                android:id="@+id/card_calculate_quote"
+                android:layout_width="0dp" 
+                android:layout_height="wrap_content" 
+                android:layout_weight="1" 
+                app:cardCornerRadius="22dp" 
+                app:cardUseCompatPadding="true" 
+                android:layout_marginEnd="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="16dp" android:gravity="center_vertical">
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Calculate quote" android:textStyle="bold"/>
@@ -54,7 +64,17 @@
                     <ImageView android:layout_width="44dp" android:layout_height="44dp" android:background="@drawable/shape_circle_icon" android:src="@android:drawable/ic_menu_edit" android:tint="@color/solora_orange"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
-            <com.google.android.material.card.MaterialCardView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" app:cardCornerRadius="22dp" app:cardUseCompatPadding="true" android:layout_marginStart="8dp">
+            <com.google.android.material.card.MaterialCardView 
+                android:id="@+id/card_view_leads"
+                android:layout_width="0dp" 
+                android:layout_height="wrap_content" 
+                android:layout_weight="1" 
+                app:cardCornerRadius="22dp" 
+                app:cardUseCompatPadding="true" 
+                android:layout_marginStart="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="16dp" android:gravity="center_vertical">
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="View leads" android:textStyle="bold"/>
@@ -64,13 +84,107 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
-        <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content" app:cardCornerRadius="22dp" app:cardUseCompatPadding="true" android:layout_marginTop="12dp">
+        <com.google.android.material.card.MaterialCardView 
+            android:id="@+id/card_notifications"
+            android:layout_width="match_parent" 
+            android:layout_height="wrap_content" 
+            app:cardCornerRadius="22dp" 
+            app:cardUseCompatPadding="true" 
+            android:layout_marginTop="12dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground">
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="16dp" android:gravity="center_vertical">
                 <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Notifications" android:textStyle="bold"/>
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Recent updates" android:textColor="#99000000"/>
                 </LinearLayout>
                 <ImageView android:layout_width="44dp" android:layout_height="44dp" android:background="@drawable/shape_circle_icon" android:src="@android:drawable/ic_dialog_info" android:tint="@color/solora_orange"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Recent Quotes Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="24dp"
+            android:gravity="center_vertical">
+            
+            <TextView 
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Recent quotes" 
+                android:textStyle="bold" />
+                
+            <TextView
+                android:id="@+id/tv_view_all_quotes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="View all"
+                android:textColor="@color/solora_orange"
+                android:textStyle="bold"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?android:attr/selectableItemBackground"
+                android:padding="8dp" />
+        </LinearLayout>
+        
+        <!-- Recent Quotes List -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_recent_quotes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:nestedScrollingEnabled="false" />
+            
+        <!-- Empty state for quotes -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_empty_quotes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardUseCompatPadding="true"
+            android:layout_marginTop="8dp"
+            android:visibility="gone">
+            
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp"
+                android:gravity="center">
+                
+                <ImageView
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:src="@android:drawable/ic_menu_edit"
+                    android:tint="@color/solora_orange"
+                    android:alpha="0.6" />
+                    
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="No quotes yet"
+                    android:textStyle="bold"
+                    android:layout_marginTop="16dp" />
+                    
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Start by creating your first solar quote"
+                    android:textColor="#99000000"
+                    android:gravity="center"
+                    android:layout_marginTop="8dp" />
+                    
+                <Button
+                    android:id="@+id/btn_create_first_quote"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Create Quote"
+                    android:backgroundTint="@color/solora_orange"
+                    android:layout_marginTop="16dp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
