@@ -60,12 +60,39 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <Button
-            android:id="@+id/btn_open_detail"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Open Quote Detail (demo)"
-            android:layout_marginTop="12dp"/>
+            android:orientation="horizontal"
+            android:layout_marginTop="12dp">
+            
+            <Button
+                android:id="@+id/btn_open_detail"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Open Detail"
+                android:layout_marginEnd="6dp"/>
+                
+            <Button
+                android:id="@+id/btn_test_firebase"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Test Firebase"
+                android:backgroundTint="@color/solora_orange"
+                android:layout_marginStart="6dp"/>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btn_sync_firebase"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Sync All to Firebase"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            app:strokeColor="@color/solora_orange"
+            android:textColor="@color/solora_orange"
+            android:layout_marginTop="8dp"/>
     </LinearLayout>
 
 </ScrollView>

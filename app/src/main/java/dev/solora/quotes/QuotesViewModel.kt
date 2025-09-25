@@ -10,6 +10,7 @@ import dev.solora.api.NetworkMonitor
 import dev.solora.auth.AuthRepository
 import com.google.firebase.auth.FirebaseAuth
 import dev.solora.data.Quote
+import dev.solora.firebase.FirebaseRepository
 import dev.solora.quote.CustomerPreferences
 import dev.solora.quote.LocationInputs
 import dev.solora.quote.NasaPowerClient
@@ -50,6 +51,7 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     private val authRepository = AuthRepository(app.applicationContext)
     private val apiRepository = ApiRepository(app.applicationContext)
     private val networkMonitor = NetworkMonitor(app.applicationContext)
+    private val firebaseRepository = FirebaseRepository()
 
     val quotes = dao.observeQuotes().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     fun quoteById(id: Long) = dao.observeQuote(id).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
@@ -198,8 +200,22 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
             inverterKw = outputs.inverterKw,
             savingsRands = outputs.estimatedMonthlySavingsR
         )
+        
+        // Save to local Room database
         dao.insert(quote)
         _lastQuote.value = quote
+        
+        // Also save to Firebase Firestore
+        try {
+            val result = firebaseRepository.saveQuote(quote)
+            if (result.isSuccess) {
+                android.util.Log.d("QuotesViewModel", "Quote saved to Firebase: ${result.getOrNull()}")
+            } else {
+                android.util.Log.e("QuotesViewModel", "Failed to save to Firebase: ${result.exceptionOrNull()?.message}")
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("QuotesViewModel", "Firebase save error: ${e.message}")
+        }
     }
 
     private suspend fun saveQuote(
@@ -287,6 +303,52 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
 
     fun clearSyncStatus() {
         _syncStatus.value = SyncStatus.Idle
+    }
+
+    // Firebase Testing and Management
+    fun testFirebaseConnection() {
+        viewModelScope.launch {
+            _calculationState.value = CalculationState.Loading
+            try {
+                val result = firebaseRepository.testConnection()
+                if (result.isSuccess) {
+                    _calculationState.value = CalculationState.Success(result.getOrThrow())
+                } else {
+                    _calculationState.value = CalculationState.Error("Firebase test failed: ${result.exceptionOrNull()?.message}")
+                }
+            } catch (e: Exception) {
+                _calculationState.value = CalculationState.Error("Firebase test error: ${e.message}")
+            }
+        }
+    }
+
+    fun syncToFirebase() {
+        viewModelScope.launch {
+            _syncStatus.value = SyncStatus.Syncing
+            try {
+                // Get all local quotes and sync to Firebase
+                val localQuotes = quotes.value
+                var successCount = 0
+                var errorCount = 0
+
+                localQuotes.forEach { quote ->
+                    val result = firebaseRepository.saveQuote(quote)
+                    if (result.isSuccess) {
+                        successCount++
+                    } else {
+                        errorCount++
+                    }
+                }
+
+                if (errorCount == 0) {
+                    _syncStatus.value = SyncStatus.Success("Successfully synced $successCount quotes to Firebase")
+                } else {
+                    _syncStatus.value = SyncStatus.Error("Synced $successCount quotes, failed $errorCount")
+                }
+            } catch (e: Exception) {
+                _syncStatus.value = SyncStatus.Error("Sync failed: ${e.message}")
+            }
+        }
     }
 
     override fun onCleared() {

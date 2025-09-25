@@ -37,6 +37,8 @@ class QuotesFragment : Fragment() {
         val etPanel = view.findViewById<EditText>(R.id.et_panel)
         val btnCalculate = view.findViewById<Button>(R.id.btn_calculate)
         val btnOpenDetail = view.findViewById<Button>(R.id.btn_open_detail)
+        val btnTestFirebase = view.findViewById<Button>(R.id.btn_test_firebase)
+        val btnSyncFirebase = view.findViewById<Button>(R.id.btn_sync_firebase)
         val tvLatest = view.findViewById<TextView>(R.id.tv_latest)
         
         // Observe calculation state
@@ -143,6 +145,16 @@ class QuotesFragment : Fragment() {
             } ?: run {
                 Toast.makeText(requireContext(), "No quote to display. Calculate one first!", Toast.LENGTH_SHORT).show()
             }
+        }
+        
+        // Handle Firebase test button
+        btnTestFirebase.setOnClickListener {
+            quotesViewModel.testFirebaseConnection()
+        }
+        
+        // Handle Firebase sync button
+        btnSyncFirebase.setOnClickListener {
+            quotesViewModel.syncToFirebase()
         }
     }
 }
