@@ -305,6 +305,138 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
         _syncStatus.value = SyncStatus.Idle
     }
 
+    // Enhanced calculation method that includes NASA API data and geocoding
+    fun calculateAndSaveUsingAddress(
+        reference: String,
+        clientName: String,
+        address: String,
+        usageKwh: Double?,
+        billRands: Double?,
+        tariff: Double,
+        panelWatt: Int
+    ) {
+        viewModelScope.launch {
+            _calculationState.value = CalculationState.Loading
+            
+            try {
+                val ctx = getApplication<SoloraApp>().applicationContext
+                
+                // Step 1: Geocode the address to get coordinates
+                val geocoder = Geocoder(ctx)
+                val addresses = try {
+                    geocoder.getFromLocationName(address, 1)
+                } catch (e: Exception) {
+                    android.util.Log.e("QuotesViewModel", "Geocoding failed: ${e.message}")
+                    null
+                }
+                
+                if (addresses.isNullOrEmpty()) {
+                    _calculationState.value = CalculationState.Error("Unable to find location for address: $address")
+                    return@launch
+                }
+                
+                val location = addresses[0]
+                val latitude = location.latitude
+                val longitude = location.longitude
+                
+                android.util.Log.d("QuotesViewModel", "Address geocoded: $address -> ($latitude, $longitude)")
+                
+                // Step 2: Get NASA API solar data for the location
+                val nasaResult = nasa.getSolarData(latitude, longitude)
+                if (nasaResult.isFailure) {
+                    _calculationState.value = CalculationState.Error("Failed to get solar data: ${nasaResult.exceptionOrNull()?.message}")
+                    return@launch
+                }
+                
+                val nasaData = nasaResult.getOrThrow()
+                val sunHours = nasaData.averageAnnualSunHours
+                
+                // Get optimal month data
+                val optimalResult = nasa.getOptimalSolarMonth(latitude, longitude)
+                val (optimalMonth, optimalData) = if (optimalResult.isSuccess) {
+                    optimalResult.getOrThrow()
+                } else {
+                    1 to null
+                }
+                
+                android.util.Log.d("QuotesViewModel", "NASA data: avg sun hours = $sunHours, optimal month = $optimalMonth")
+                
+                // Step 3: Calculate solar system using enhanced data
+                val inputs = QuoteInputs(
+                    monthlyUsageKwh = usageKwh,
+                    monthlyBillRands = billRands,
+                    tariffRPerKwh = tariff,
+                    panelWatt = panelWatt,
+                    sunHoursPerDay = sunHours
+                )
+                
+                val outputs = QuoteCalculator.calculateBasic(inputs)
+                
+                // Step 4: Calculate additional financial metrics
+                val systemCost = outputs.systemKw * 15000.0 // R15,000 per kW estimate
+                val annualSavings = outputs.estimatedMonthlySavingsR * 12
+                val paybackYears = if (annualSavings > 0) systemCost / annualSavings else null
+                val co2Savings = outputs.systemKw * 1500 // Rough estimate: 1.5 tons CO2 per kW per year
+                
+                // Step 5: Create enhanced quote with all data
+                val quote = Quote(
+                    reference = reference,
+                    clientName = clientName,
+                    address = address,
+                    monthlyUsageKwh = inputs.monthlyUsageKwh,
+                    monthlyBillRands = inputs.monthlyBillRands,
+                    tariff = inputs.tariffRPerKwh,
+                    panelWatt = inputs.panelWatt,
+                    sunHours = inputs.sunHoursPerDay,
+                    panels = outputs.panels,
+                    systemKw = outputs.systemKw,
+                    inverterKw = outputs.inverterKw,
+                    savingsRands = outputs.estimatedMonthlySavingsR,
+                    // NASA API and location data
+                    latitude = latitude,
+                    longitude = longitude,
+                    averageAnnualIrradiance = nasaData.averageAnnualIrradiance,
+                    averageAnnualSunHours = nasaData.averageAnnualSunHours,
+                    optimalMonth = optimalMonth,
+                    optimalMonthIrradiance = optimalData?.solarIrradiance,
+                    temperature = optimalData?.temperature,
+                    windSpeed = optimalData?.windSpeed,
+                    humidity = optimalData?.humidity,
+                    // Financial calculations
+                    systemCostRands = systemCost,
+                    paybackYears = paybackYears,
+                    annualSavingsRands = annualSavings,
+                    co2SavingsKgPerYear = co2Savings
+                )
+                
+                // Step 6: Save to local database
+                dao.insert(quote)
+                _lastQuote.value = quote
+                
+                // Step 7: Save to Firebase with enhanced data
+                try {
+                    val result = firebaseRepository.saveQuote(quote)
+                    if (result.isSuccess) {
+                        android.util.Log.d("QuotesViewModel", "Enhanced quote saved to Firebase: ${result.getOrNull()}")
+                    } else {
+                        android.util.Log.e("QuotesViewModel", "Failed to save enhanced quote to Firebase: ${result.exceptionOrNull()?.message}")
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("QuotesViewModel", "Firebase save error: ${e.message}")
+                }
+                
+                _calculationState.value = CalculationState.Success(
+                    "Quote calculated and saved! System: ${String.format("%.2f", outputs.systemKw)}kW, " +
+                    "Monthly savings: R${String.format("%.2f", outputs.estimatedMonthlySavingsR)}"
+                )
+                
+            } catch (e: Exception) {
+                android.util.Log.e("QuotesViewModel", "Calculation failed", e)
+                _calculationState.value = CalculationState.Error("Calculation failed: ${e.message}")
+            }
+        }
+    }
+
     // Firebase Testing and Management
     fun testFirebaseConnection() {
         viewModelScope.launch {

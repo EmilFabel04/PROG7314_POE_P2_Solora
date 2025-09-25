@@ -28,6 +28,7 @@ class FirebaseRepository {
             val userId = getCurrentUserId() ?: return Result.failure(Exception("User not authenticated"))
             
             val quoteData = hashMapOf(
+                // Basic quote information
                 "id" to quote.id,
                 "reference" to quote.reference,
                 "clientName" to quote.clientName,
@@ -42,6 +43,25 @@ class FirebaseRepository {
                 "inverterKw" to quote.inverterKw,
                 "savingsRands" to quote.savingsRands,
                 "dateEpoch" to quote.dateEpoch,
+                
+                // Location and NASA API data
+                "latitude" to quote.latitude,
+                "longitude" to quote.longitude,
+                "averageAnnualIrradiance" to quote.averageAnnualIrradiance,
+                "averageAnnualSunHours" to quote.averageAnnualSunHours,
+                "optimalMonth" to quote.optimalMonth,
+                "optimalMonthIrradiance" to quote.optimalMonthIrradiance,
+                "temperature" to quote.temperature,
+                "windSpeed" to quote.windSpeed,
+                "humidity" to quote.humidity,
+                
+                // Financial calculations
+                "systemCostRands" to quote.systemCostRands,
+                "paybackYears" to quote.paybackYears,
+                "annualSavingsRands" to quote.annualSavingsRands,
+                "co2SavingsKgPerYear" to quote.co2SavingsKgPerYear,
+                
+                // Metadata
                 "userId" to userId,
                 "createdAt" to System.currentTimeMillis(),
                 "updatedAt" to System.currentTimeMillis()

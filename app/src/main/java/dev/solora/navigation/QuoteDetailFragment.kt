@@ -42,6 +42,11 @@ class QuoteDetailFragment : Fragment() {
                         appendLine("📋 CLIENT INFORMATION")
                         appendLine("Client: ${quote.clientName}")
                         appendLine("Address: ${quote.address}")
+                        
+                        // Location data if available
+                        if (quote.latitude != null && quote.longitude != null) {
+                            appendLine("Location: ${String.format("%.4f", quote.latitude)}, ${String.format("%.4f", quote.longitude)}")
+                        }
                         appendLine()
                         
                         appendLine("⚡ ENERGY DETAILS")
@@ -58,10 +63,57 @@ class QuoteDetailFragment : Fragment() {
                         appendLine("Sun Hours: ${String.format("%.1f", quote.sunHours)} hours/day")
                         appendLine()
                         
-                        appendLine("💰 FINANCIAL BENEFITS")
+                        // NASA API solar data if available
+                        if (quote.averageAnnualIrradiance != null || quote.averageAnnualSunHours != null) {
+                            appendLine("🛰️ NASA SOLAR DATA")
+                            quote.averageAnnualIrradiance?.let { 
+                                appendLine("Annual Solar Irradiance: ${String.format("%.2f", it)} kWh/m²/day") 
+                            }
+                            quote.averageAnnualSunHours?.let { 
+                                appendLine("Average Sun Hours: ${String.format("%.1f", it)} hours/day") 
+                            }
+                            quote.optimalMonth?.let { month ->
+                                val monthName = listOf("", "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+                                                      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")[month]
+                                appendLine("Optimal Month: $monthName")
+                                quote.optimalMonthIrradiance?.let { 
+                                    appendLine("Peak Irradiance: ${String.format("%.2f", it)} kWh/m²/day") 
+                                }
+                            }
+                            appendLine()
+                        }
+                        
+                        // Environmental data if available
+                        if (quote.temperature != null || quote.windSpeed != null || quote.humidity != null) {
+                            appendLine("🌡️ ENVIRONMENTAL CONDITIONS")
+                            quote.temperature?.let { appendLine("Temperature: ${String.format("%.1f", it)}°C") }
+                            quote.windSpeed?.let { appendLine("Wind Speed: ${String.format("%.1f", it)} m/s") }
+                            quote.humidity?.let { appendLine("Humidity: ${String.format("%.1f", it)}%") }
+                            appendLine()
+                        }
+                        
+                        appendLine("💰 FINANCIAL ANALYSIS")
                         appendLine("Monthly Savings: R${String.format("%.2f", quote.savingsRands)}")
-                        appendLine("Annual Savings: R${String.format("%.2f", quote.savingsRands * 12)}")
+                        quote.annualSavingsRands?.let { 
+                            appendLine("Annual Savings: R${String.format("%.2f", it)}") 
+                        } ?: run {
+                            appendLine("Annual Savings: R${String.format("%.2f", quote.savingsRands * 12)}")
+                        }
+                        quote.systemCostRands?.let { 
+                            appendLine("System Cost: R${String.format("%.2f", it)}") 
+                        }
+                        quote.paybackYears?.let { 
+                            appendLine("Payback Period: ${String.format("%.1f", it)} years") 
+                        }
                         appendLine()
+                        
+                        // Environmental impact if available
+                        quote.co2SavingsKgPerYear?.let {
+                            appendLine("🌱 ENVIRONMENTAL IMPACT")
+                            appendLine("CO₂ Savings: ${String.format("%.0f", it)} kg/year")
+                            appendLine("Equivalent to: ${String.format("%.1f", it/1000)} tons CO₂/year")
+                            appendLine()
+                        }
                         
                         appendLine("📅 Quote Generated: ${java.text.SimpleDateFormat("dd MMM yyyy, HH:mm", java.util.Locale.getDefault()).format(java.util.Date(quote.dateEpoch))}")
                     }
