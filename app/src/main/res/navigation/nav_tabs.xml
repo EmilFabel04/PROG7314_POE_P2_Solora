@@ -12,7 +12,11 @@
     <fragment
         android:id="@+id/quotesFragment"
         android:name="dev.solora.navigation.QuotesFragment"
-        android:label="Quotes" />
+        android:label="Quotes">
+        <action
+            android:id="@+id/action_quotes_to_quote_detail"
+            app:destination="@id/quoteDetailFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/leadsFragment"
@@ -23,6 +27,16 @@
         android:id="@+id/profileFragment"
         android:name="dev.solora.navigation.ProfileFragment"
         android:label="Profile" />
+
+    <fragment
+        android:id="@+id/quoteDetailFragment"
+        android:name="dev.solora.navigation.QuoteDetailFragment"
+        android:label="Quote Details">
+        <argument
+            android:name="id"
+            app:argType="long"
+            android:defaultValue="0L" />
+    </fragment>
 
 </navigation>
 
