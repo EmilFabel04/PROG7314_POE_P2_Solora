@@ -24,7 +24,7 @@ interface QuoteDao {
     fun observeQuote(id: Long): Flow<Quote?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(quote: Quote)
+    suspend fun insert(quote: Quote): Long
 }
 
 

@@ -62,8 +62,11 @@ class QuotesFragment : Fragment() {
                         // Only navigate to quote detail after successful calculation (not Firebase tests)
                         if (!isFirebaseTest) {
                             quotesViewModel.lastQuote.value?.let { quote ->
+                                android.util.Log.d("QuotesFragment", "Navigating to quote detail with ID: ${quote.id}")
                                 val bundle = Bundle().apply { putLong("id", quote.id) }
                                 findNavController().navigate(R.id.quoteDetailFragment, bundle)
+                            } ?: run {
+                                android.util.Log.w("QuotesFragment", "No lastQuote available for navigation")
                             }
                         }
                         

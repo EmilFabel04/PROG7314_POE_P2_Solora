@@ -31,10 +31,12 @@ class QuoteDetailFragment : Fragment() {
         val btnShare = view.findViewById<Button>(R.id.btn_share)
         
         val quoteId = requireArguments().getLong("id", 0L)
+        android.util.Log.d("QuoteDetailFragment", "Looking for quote with ID: $quoteId")
         
         // Observe the specific quote
         viewLifecycleOwner.lifecycleScope.launch {
             quotesViewModel.quoteById(quoteId).collect { quote ->
+                android.util.Log.d("QuoteDetailFragment", "Received quote: ${quote?.id} - ${quote?.reference}")
                 if (quote != null) {
                     tvReference.text = "Quote ${quote.reference}"
                     

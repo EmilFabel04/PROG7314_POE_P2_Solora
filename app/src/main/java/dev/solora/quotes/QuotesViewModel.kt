@@ -54,6 +54,8 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     private val firebaseRepository = FirebaseRepository()
 
     val quotes = dao.observeQuotes().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    
+    // Method to get a specific quote by ID  
     fun quoteById(id: Long) = dao.observeQuote(id).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     private val _lastQuote = MutableStateFlow<Quote?>(null)
@@ -171,13 +173,16 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
             savingsRands = outputs.estimatedMonthlySavingsR
         )
         
-        // Save to local Room database
-        dao.insert(quote)
-        _lastQuote.value = quote
+        // Save to local Room database and get the generated ID
+        val insertedId = dao.insert(quote)
+        val savedQuote = quote.copy(id = insertedId)
+        _lastQuote.value = savedQuote
         
-        // Also save to Firebase Firestore
+        android.util.Log.d("QuotesViewModel", "Quote saved with ID: $insertedId")
+        
+        // Also save to Firebase Firestore (using the saved quote with correct ID)
         try {
-            val result = firebaseRepository.saveQuote(quote)
+            val result = firebaseRepository.saveQuote(savedQuote)
             if (result.isSuccess) {
                 android.util.Log.d("QuotesViewModel", "Quote saved to Firebase: ${result.getOrNull()}")
             } else {
@@ -398,13 +403,16 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                     co2SavingsKgPerYear = co2Savings
                 )
                 
-                // Step 6: Save to local database
-        dao.insert(quote)
-        _lastQuote.value = quote
+                // Step 6: Save to local database and get the generated ID
+                val insertedId = dao.insert(quote)
+                val savedQuote = quote.copy(id = insertedId)
+                _lastQuote.value = savedQuote
                 
-                // Step 7: Save to Firebase with enhanced data
+                android.util.Log.d("QuotesViewModel", "Quote saved with ID: $insertedId")
+                
+                // Step 7: Save to Firebase with enhanced data (using the saved quote with correct ID)
                 try {
-                    val result = firebaseRepository.saveQuote(quote)
+                    val result = firebaseRepository.saveQuote(savedQuote)
                     if (result.isSuccess) {
                         android.util.Log.d("QuotesViewModel", "Enhanced quote saved to Firebase: ${result.getOrNull()}")
                     } else {
