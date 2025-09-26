@@ -13,10 +13,28 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import dev.solora.R
 import dev.solora.quotes.QuotesViewModel
+import dev.solora.leads.LeadsViewModel
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class QuoteDetailFragment : Fragment() {
     private val quotesViewModel: QuotesViewModel by viewModels()
+    private val leadsViewModel: LeadsViewModel by viewModels()
+    
+    private lateinit var tvReference: TextView
+    private lateinit var tvDate: TextView
+    private lateinit var tvClientInfo: TextView
+    private lateinit var tvEnergyDetails: TextView
+    private lateinit var tvSystemDesign: TextView
+    private lateinit var tvFinancialAnalysis: TextView
+    private lateinit var tvEnvironmentalImpact: TextView
+    private lateinit var btnConvertToLead: Button
+    private lateinit var btnExportPdf: Button
+    private lateinit var btnShare: Button
+    
+    private var currentQuote: dev.solora.data.Quote? = null
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_quote_detail, container, false)
@@ -25,136 +43,209 @@ class QuoteDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        val tvReference = view.findViewById<TextView>(R.id.tv_reference)
-        val tvSummary = view.findViewById<TextView>(R.id.tv_summary)
-        val btnExportPdf = view.findViewById<Button>(R.id.btn_export_pdf)
-        val btnShare = view.findViewById<Button>(R.id.btn_share)
+        initializeViews(view)
+        setupClickListeners()
         
         val quoteId = requireArguments().getLong("id", 0L)
         android.util.Log.d("QuoteDetailFragment", "Looking for quote with ID: $quoteId")
         
-        // Observe the specific quote
+        observeQuote(quoteId)
+    }
+    
+    private fun initializeViews(view: View) {
+        tvReference = view.findViewById(R.id.tv_reference)
+        tvDate = view.findViewById(R.id.tv_date)
+        tvClientInfo = view.findViewById(R.id.tv_client_info)
+        tvEnergyDetails = view.findViewById(R.id.tv_energy_details)
+        tvSystemDesign = view.findViewById(R.id.tv_system_design)
+        tvFinancialAnalysis = view.findViewById(R.id.tv_financial_analysis)
+        tvEnvironmentalImpact = view.findViewById(R.id.tv_environmental_impact)
+        btnConvertToLead = view.findViewById(R.id.btn_convert_to_lead)
+        btnExportPdf = view.findViewById(R.id.btn_export_pdf)
+        btnShare = view.findViewById(R.id.btn_share)
+    }
+    
+    private fun setupClickListeners() {
+        btnConvertToLead.setOnClickListener {
+            convertToLead()
+        }
+        
+        btnExportPdf.setOnClickListener {
+            exportToPdf()
+        }
+        
+        btnShare.setOnClickListener {
+            shareQuote()
+        }
+    }
+    
+    private fun observeQuote(quoteId: Long) {
         viewLifecycleOwner.lifecycleScope.launch {
             quotesViewModel.quoteById(quoteId).collect { quote ->
                 android.util.Log.d("QuoteDetailFragment", "Received quote: ${quote?.id} - ${quote?.reference}")
-                if (quote != null) {
-                    tvReference.text = "Quote ${quote.reference}"
-                    
-                    val detailedSummary = buildString {
-                        appendLine("📋 CLIENT INFORMATION")
-                        appendLine("Client: ${quote.clientName}")
-                        appendLine("Address: ${quote.address}")
-                        
-                        // Location data if available
-                        if (quote.latitude != null && quote.longitude != null) {
-                            appendLine("Location: ${String.format("%.4f", quote.latitude)}, ${String.format("%.4f", quote.longitude)}")
-                        }
-                        appendLine()
-                        
-                        appendLine("⚡ ENERGY DETAILS")
-                        quote.monthlyUsageKwh?.let { appendLine("Monthly Usage: ${String.format("%.1f", it)} kWh") }
-                        quote.monthlyBillRands?.let { appendLine("Average Bill: R${String.format("%.2f", it)}") }
-                        appendLine("Tariff Rate: R${String.format("%.2f", quote.tariff)}/kWh")
-                        appendLine()
-                        
-                        appendLine("🌞 SOLAR SYSTEM DESIGN")
-                        appendLine("Panel Rating: ${quote.panelWatt}W each")
-                        appendLine("Number of Panels: ${quote.panels}")
-                        appendLine("System Size: ${String.format("%.2f", quote.systemKw)} kW")
-                        appendLine("Inverter Size: ${String.format("%.2f", quote.inverterKw)} kW")
-                        appendLine("Sun Hours: ${String.format("%.1f", quote.sunHours)} hours/day")
-                        appendLine()
-                        
-                        // NASA API solar data if available
-                        if (quote.averageAnnualIrradiance != null || quote.averageAnnualSunHours != null) {
-                            appendLine("🛰️ NASA SOLAR DATA")
-                            quote.averageAnnualIrradiance?.let { 
-                                appendLine("Annual Solar Irradiance: ${String.format("%.2f", it)} kWh/m²/day") 
-                            }
-                            quote.averageAnnualSunHours?.let { 
-                                appendLine("Average Sun Hours: ${String.format("%.1f", it)} hours/day") 
-                            }
-                            quote.optimalMonth?.let { month ->
-                                val monthName = listOf("", "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
-                                                      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")[month]
-                                appendLine("Optimal Month: $monthName")
-                                quote.optimalMonthIrradiance?.let { 
-                                    appendLine("Peak Irradiance: ${String.format("%.2f", it)} kWh/m²/day") 
-                                }
-                            }
-                            appendLine()
-                        }
-                        
-                        // Environmental data if available
-                        if (quote.temperature != null || quote.windSpeed != null || quote.humidity != null) {
-                            appendLine("🌡️ ENVIRONMENTAL CONDITIONS")
-                            quote.temperature?.let { appendLine("Temperature: ${String.format("%.1f", it)}°C") }
-                            quote.windSpeed?.let { appendLine("Wind Speed: ${String.format("%.1f", it)} m/s") }
-                            quote.humidity?.let { appendLine("Humidity: ${String.format("%.1f", it)}%") }
-                            appendLine()
-                        }
-                        
-                        appendLine("💰 FINANCIAL ANALYSIS")
-                        appendLine("Monthly Savings: R${String.format("%.2f", quote.savingsRands)}")
-                        quote.annualSavingsRands?.let { 
-                            appendLine("Annual Savings: R${String.format("%.2f", it)}") 
-                        } ?: run {
-                            appendLine("Annual Savings: R${String.format("%.2f", quote.savingsRands * 12)}")
-                        }
-                        quote.systemCostRands?.let { 
-                            appendLine("System Cost: R${String.format("%.2f", it)}") 
-                        }
-                        quote.paybackYears?.let { 
-                            appendLine("Payback Period: ${String.format("%.1f", it)} years") 
-                        }
-                        appendLine()
-                        
-                        // Environmental impact if available
-                        quote.co2SavingsKgPerYear?.let {
-                            appendLine("🌱 ENVIRONMENTAL IMPACT")
-                            appendLine("CO₂ Savings: ${String.format("%.0f", it)} kg/year")
-                            appendLine("Equivalent to: ${String.format("%.1f", it/1000)} tons CO₂/year")
-                            appendLine()
-                        }
-                        
-                        appendLine("📅 Quote Generated: ${java.text.SimpleDateFormat("dd MMM yyyy, HH:mm", java.util.Locale.getDefault()).format(java.util.Date(quote.dateEpoch))}")
-                    }
-                    
-                    tvSummary.text = detailedSummary
-                } else {
-                    tvReference.text = "Quote Not Found"
-                    tvSummary.text = "The requested quote could not be loaded. It may have been deleted or doesn't exist."
-                }
-            }
-        }
-        
-        // Handle export button (for now just shows success message)
-        btnExportPdf.setOnClickListener {
-            Toast.makeText(requireContext(), "PDF export functionality coming soon!", Toast.LENGTH_SHORT).show()
-        }
-        
-        // Handle share button
-        btnShare.setOnClickListener {
-            quotesViewModel.quoteById(quoteId).value?.let { quote ->
-                val shareText = "Solar Quote for ${quote.clientName}\n\n" +
-                        "System Size: ${String.format("%.2f", quote.systemKw)} kW\n" +
-                        "Panels: ${quote.panels} x ${quote.panelWatt}W\n" +
-                        "Monthly Savings: R${String.format("%.2f", quote.savingsRands)}\n" +
-                        "Annual Savings: R${String.format("%.2f", quote.savingsRands * 12)}\n\n" +
-                        "Generated by Solora Solar Solutions"
+                currentQuote = quote
                 
-                val shareIntent = android.content.Intent().apply {
-                    action = android.content.Intent.ACTION_SEND
-                    type = "text/plain"
-                    putExtra(android.content.Intent.EXTRA_TEXT, shareText)
-                    putExtra(android.content.Intent.EXTRA_SUBJECT, "Solar Quote - ${quote.reference}")
+                if (quote != null) {
+                    populateQuoteDetails(quote)
+                } else {
+                    showQuoteNotFound()
                 }
-                startActivity(android.content.Intent.createChooser(shareIntent, "Share Quote"))
-            } ?: run {
-                Toast.makeText(requireContext(), "Quote not available for sharing", Toast.LENGTH_SHORT).show()
             }
         }
     }
+    
+    private fun populateQuoteDetails(quote: dev.solora.data.Quote) {
+        // Header
+        tvReference.text = "Quote ${quote.reference}"
+        tvDate.text = "Generated on ${SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(quote.dateEpoch))}"
+        
+        // Client Information
+        tvClientInfo.text = buildString {
+            appendLine("Client: ${quote.clientName}")
+            appendLine("Address: ${quote.address}")
+            if (quote.latitude != null && quote.longitude != null) {
+                appendLine("Location: ${String.format("%.4f", quote.latitude)}, ${String.format("%.4f", quote.longitude)}")
+            }
+        }
+        
+        // Energy Details
+        tvEnergyDetails.text = buildString {
+            quote.monthlyUsageKwh?.let { 
+                appendLine("Monthly Usage: ${String.format("%.1f", it)} kWh") 
+            }
+            quote.monthlyBillRands?.let { 
+                appendLine("Average Bill: R${String.format("%.2f", it)}") 
+            }
+            appendLine("Tariff Rate: R${String.format("%.2f", quote.tariff)}/kWh")
+        }
+        
+        // System Design
+        tvSystemDesign.text = buildString {
+            appendLine("Panel Rating: ${quote.panelWatt}W each")
+            appendLine("Number of Panels: ${quote.panels}")
+            appendLine("System Size: ${String.format("%.2f", quote.systemKw)} kW")
+            appendLine("Inverter Size: ${String.format("%.2f", quote.inverterKw)} kW")
+            appendLine("Sun Hours: ${String.format("%.1f", quote.sunHours)} hours/day")
+            
+            // NASA API data if available
+            if (quote.averageAnnualSunHours != null) {
+                appendLine("Average Annual Sun Hours: ${String.format("%.1f", quote.averageAnnualSunHours)} hours/day")
+            }
+            quote.optimalMonth?.let { month ->
+                val monthName = listOf("", "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+                                      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")[month]
+                appendLine("Optimal Month: $monthName")
+            }
+        }
+        
+        // Financial Analysis
+        tvFinancialAnalysis.text = buildString {
+            appendLine("Monthly Savings: R${String.format("%.2f", quote.savingsRands)}")
+            
+            val annualSavings = quote.annualSavingsRands ?: (quote.savingsRands * 12)
+            appendLine("Annual Savings: R${String.format("%.2f", annualSavings)}")
+            
+            quote.systemCostRands?.let { 
+                appendLine("System Cost: R${String.format("%.2f", it)}")
+            }
+            quote.paybackYears?.let { 
+                appendLine("Payback Period: ${String.format("%.1f", it)} years")
+            }
+        }
+        
+        // Environmental Impact
+        quote.co2SavingsKgPerYear?.let { co2Savings ->
+            tvEnvironmentalImpact.text = buildString {
+                appendLine("CO₂ Savings: ${String.format("%.0f", co2Savings)} kg/year")
+                appendLine("Equivalent to: ${String.format("%.1f", co2Savings/1000)} tons CO₂/year")
+                appendLine("Trees Equivalent: ${String.format("%.0f", co2Savings/22)} trees planted")
+            }
+            view?.findViewById<View>(R.id.card_environmental)?.visibility = View.VISIBLE
+        } ?: run {
+            view?.findViewById<View>(R.id.card_environmental)?.visibility = View.GONE
+        }
+    }
+    
+    private fun showQuoteNotFound() {
+        tvReference.text = "Quote Not Found"
+        tvClientInfo.text = "The requested quote could not be loaded. It may have been deleted or doesn't exist."
+        tvEnergyDetails.text = ""
+        tvSystemDesign.text = ""
+        tvFinancialAnalysis.text = ""
+        tvEnvironmentalImpact.text = ""
+        
+        btnConvertToLead.isEnabled = false
+        btnShare.isEnabled = false
+    }
+    
+    private fun convertToLead() {
+        currentQuote?.let { quote ->
+            android.util.Log.d("QuoteDetailFragment", "Converting quote ${quote.reference} to lead")
+            
+            // Create lead from quote using LeadsViewModel
+            leadsViewModel.createLeadFromQuote(
+                quote = quote,
+                contactInfo = "", // Will be filled in later by the consultant
+                notes = "Lead converted from quote ${quote.reference}. System: ${String.format("%.2f", quote.systemKw)}kW, Monthly savings: R${String.format("%.2f", quote.savingsRands)}"
+            )
+            
+            Toast.makeText(
+                requireContext(), 
+                "Quote successfully converted to lead! Check the Leads tab.", 
+                Toast.LENGTH_LONG
+            ).show()
+            
+            // Navigate to leads tab
+            findNavController().navigate(R.id.leadsFragment)
+            
+        } ?: run {
+            Toast.makeText(requireContext(), "No quote available to convert", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    private fun exportToPdf() {
+        Toast.makeText(requireContext(), "PDF export functionality coming soon!", Toast.LENGTH_SHORT).show()
+    }
+    
+    private fun shareQuote() {
+        currentQuote?.let { quote ->
+            val shareText = buildString {
+                appendLine("📊 SOLAR QUOTE - ${quote.reference}")
+                appendLine("═══════════════════════════════════")
+                appendLine()
+                appendLine("👤 CLIENT: ${quote.clientName}")
+                appendLine("📍 LOCATION: ${quote.address}")
+                appendLine()
+                appendLine("🌞 SOLAR SYSTEM:")
+                appendLine("• System Size: ${String.format("%.2f", quote.systemKw)} kW")
+                appendLine("• Panels: ${quote.panels} x ${quote.panelWatt}W")
+                appendLine("• Inverter: ${String.format("%.2f", quote.inverterKw)} kW")
+                appendLine()
+                appendLine("💰 FINANCIAL BENEFITS:")
+                appendLine("• Monthly Savings: R${String.format("%.2f", quote.savingsRands)}")
+                appendLine("• Annual Savings: R${String.format("%.2f", quote.savingsRands * 12)}")
+                quote.paybackYears?.let { 
+                    appendLine("• Payback Period: ${String.format("%.1f", it)} years")
+                }
+                appendLine()
+                quote.co2SavingsKgPerYear?.let { co2 ->
+                    appendLine("🌱 ENVIRONMENTAL IMPACT:")
+                    appendLine("• CO₂ Reduction: ${String.format("%.0f", co2)} kg/year")
+                    appendLine()
+                }
+                appendLine("Generated by Solora Solar Solutions")
+                appendLine("Professional Solar Installations")
+            }
+            
+            val shareIntent = android.content.Intent().apply {
+                action = android.content.Intent.ACTION_SEND
+                type = "text/plain"
+                putExtra(android.content.Intent.EXTRA_TEXT, shareText)
+                putExtra(android.content.Intent.EXTRA_SUBJECT, "Solar Quote - ${quote.reference}")
+            }
+            startActivity(android.content.Intent.createChooser(shareIntent, "Share Quote"))
+        } ?: run {
+            Toast.makeText(requireContext(), "Quote not available for sharing", Toast.LENGTH_SHORT).show()
+        }
+    }
 }
-
-

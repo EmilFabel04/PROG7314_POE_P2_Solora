@@ -15,10 +15,12 @@ import com.google.android.material.textfield.TextInputEditText
 import dev.solora.R
 import dev.solora.quotes.QuotesViewModel
 import dev.solora.quotes.CalculationState
+import dev.solora.leads.LeadsViewModel
 import kotlinx.coroutines.launch
 
 class QuotesFragment : Fragment() {
     private val quotesViewModel: QuotesViewModel by viewModels()
+    private val leadsViewModel: LeadsViewModel by viewModels()
     private var isFirebaseTest = false
     private var currentTab = 0 // 0: calculate, 1: view, 2: dashboard
     
@@ -217,11 +219,41 @@ class QuotesFragment : Fragment() {
                 return@setOnClickListener
             }
             
-            // Here you would save the complete quote with client information
-            // For now, navigate to the quote detail
+            // Save the complete quote with client information and create lead
             quotesViewModel.lastQuote.value?.let { quote ->
+                val fullName = "$firstName $lastName"
+                val contactInfo = "$email | $contact"
+                
+                // Update the quote with client information
+                val updatedQuote = quote.copy(
+                    reference = reference,
+                    clientName = fullName,
+                    address = address
+                )
+                
+                // Save the updated quote (this will trigger Firebase save)
+                quotesViewModel.saveQuoteFromOutputs(
+                    reference = reference,
+                    clientName = fullName,
+                    address = address,
+                    inputs = quotesViewModel.lastQuoteInputs.value ?: return@setOnClickListener,
+                    outputs = quotesViewModel.lastQuoteOutputs.value ?: return@setOnClickListener
+                )
+                
+                // Create a lead from this quote with client details
+                android.util.Log.d("QuotesFragment", "Creating lead from quote with client details")
+                leadsViewModel.createLeadFromQuote(
+                    quote = updatedQuote,
+                    contactInfo = contactInfo,
+                    notes = "Lead created from quote ${reference} with full client details. Client expressed interest in ${String.format("%.2f", quote.systemKw)}kW solar system."
+                )
+                
+                Toast.makeText(requireContext(), "Quote saved and lead created successfully!", Toast.LENGTH_LONG).show()
+                
+                // Navigate to the quote detail
                 val bundle = Bundle().apply { putLong("id", quote.id) }
                 findNavController().navigate(R.id.quoteDetailFragment, bundle)
+                
             } ?: run {
                 Toast.makeText(requireContext(), "Please calculate a quote first", Toast.LENGTH_SHORT).show()
             }
