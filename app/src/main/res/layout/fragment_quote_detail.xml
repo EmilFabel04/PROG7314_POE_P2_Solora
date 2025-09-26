@@ -43,28 +43,35 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="QUOTE"
+                            android:textColor="@android:color/white"
+                            android:textSize="32sp"
+                            android:textStyle="bold" />
+
+                        <TextView
                             android:id="@+id/tv_reference"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Quote Q240926-1234"
+                            android:text="Q240926-1234"
                             android:textColor="@android:color/white"
-                            android:textSize="28sp"
-                            android:textStyle="bold"
-                            android:letterSpacing="0.02" />
+                            android:textSize="20sp"
+                            android:layout_marginTop="4dp" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Solar System Proposal"
                             android:textColor="#E0FFFFFF"
-                            android:textSize="16sp"
-                            android:layout_marginTop="4dp" />
+                            android:textSize="14sp"
+                            android:layout_marginTop="8dp" />
 
                         <TextView
                             android:id="@+id/tv_date"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Generated on 26 Sep 2024"
+                            android:text="26 Sep 2024"
                             android:textColor="#B3FFFFFF"
                             android:textSize="12sp"
                             android:layout_marginTop="8dp" />
@@ -94,29 +101,15 @@
                 android:orientation="vertical"
                 android:padding="20dp">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@android:drawable/ic_menu_myplaces"
-                        android:tint="@color/solora_orange" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="CLIENT INFORMATION"
-                        android:textStyle="bold"
-                        android:textSize="16sp"
-                        android:textColor="#333333"
-                        android:layout_marginStart="12dp"
-                        android:letterSpacing="0.1" />
-                </LinearLayout>
+                    android:text="CONTACT DETAILS"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="#333333"
+                    android:layout_marginBottom="16dp"
+                    android:letterSpacing="0.1" />
 
                 <TextView
                     android:id="@+id/tv_client_info"
@@ -142,29 +135,15 @@
                 android:orientation="vertical"
                 android:padding="20dp">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@android:drawable/ic_dialog_info"
-                        android:tint="@color/solora_orange" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="ENERGY DETAILS"
-                        android:textStyle="bold"
-                        android:textSize="16sp"
-                        android:textColor="#333333"
-                        android:layout_marginStart="12dp"
-                        android:letterSpacing="0.1" />
-                </LinearLayout>
+                    android:text="CURRENT USAGE"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="#333333"
+                    android:layout_marginBottom="16dp"
+                    android:letterSpacing="0.1" />
 
                 <TextView
                     android:id="@+id/tv_energy_details"
@@ -190,29 +169,15 @@
                 android:orientation="vertical"
                 android:padding="20dp">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@android:drawable/ic_menu_edit"
-                        android:tint="@color/solora_orange" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="SOLAR SYSTEM DESIGN"
-                        android:textStyle="bold"
-                        android:textSize="16sp"
-                        android:textColor="#333333"
-                        android:layout_marginStart="12dp"
-                        android:letterSpacing="0.1" />
-                </LinearLayout>
+                    android:text="RECOMMENDED SYSTEM"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="#333333"
+                    android:layout_marginBottom="16dp"
+                    android:letterSpacing="0.1" />
 
                 <TextView
                     android:id="@+id/tv_system_design"
@@ -238,29 +203,15 @@
                 android:orientation="vertical"
                 android:padding="20dp">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@android:drawable/ic_menu_sort_by_size"
-                        android:tint="@color/solora_orange" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="FINANCIAL ANALYSIS"
-                        android:textStyle="bold"
-                        android:textSize="16sp"
-                        android:textColor="#333333"
-                        android:layout_marginStart="12dp"
-                        android:letterSpacing="0.1" />
-                </LinearLayout>
+                    android:text="QUOTATION"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="#333333"
+                    android:layout_marginBottom="16dp"
+                    android:letterSpacing="0.1" />
 
                 <TextView
                     android:id="@+id/tv_financial_analysis"
@@ -322,6 +273,54 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Company Footer Section -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="3dp"
+            app:cardUseCompatPadding="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="80dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/solora_logo"
+                    android:tint="@color/solora_orange"
+                    android:layout_marginBottom="12dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="25 Elliot Crescent, Cape Town, South Africa, 7550"
+                    android:textSize="12sp"
+                    android:textColor="#666666"
+                    android:gravity="center"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="+27 (0)82 123 4567"
+                    android:textSize="12sp"
+                    android:textColor="#666666"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="info@solaraenergy.co.za"
+                    android:textSize="12sp"
+                    android:textColor="#666666" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
         <!-- Action Buttons -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -330,18 +329,16 @@
             android:layout_marginTop="8dp">
 
             <Button
-                android:id="@+id/btn_convert_to_lead"
+                android:id="@+id/btn_export_pdf"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:text="Convert to Lead"
+                android:text="Export to PDF"
                 android:backgroundTint="@color/solora_orange"
                 android:textColor="@android:color/white"
                 android:textStyle="bold"
                 android:textSize="16sp"
                 android:layout_marginBottom="12dp"
-                app:cornerRadius="12dp"
-                app:icon="@android:drawable/ic_menu_myplaces"
-                app:iconTint="@android:color/white" />
+                app:cornerRadius="12dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -349,18 +346,16 @@
                 android:orientation="horizontal">
 
                 <Button
-                    android:id="@+id/btn_export_pdf"
+                    android:id="@+id/btn_convert_to_lead"
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="0dp"
                     android:layout_height="56dp"
                     android:layout_weight="1"
-                    android:text="Export PDF"
+                    android:text="Convert to Lead"
                     android:textColor="@color/solora_orange"
                     android:layout_marginEnd="6dp"
                     app:strokeColor="@color/solora_orange"
-                    app:cornerRadius="12dp"
-                    app:icon="@android:drawable/ic_menu_save"
-                    app:iconTint="@color/solora_orange" />
+                    app:cornerRadius="12dp" />
 
                 <Button
                     android:id="@+id/btn_share"
@@ -372,9 +367,7 @@
                     android:textColor="@color/solora_orange"
                     android:layout_marginStart="6dp"
                     app:strokeColor="@color/solora_orange"
-                    app:cornerRadius="12dp"
-                    app:icon="@android:drawable/ic_menu_share"
-                    app:iconTint="@color/solora_orange" />
+                    app:cornerRadius="12dp" />
             </LinearLayout>
         </LinearLayout>
 

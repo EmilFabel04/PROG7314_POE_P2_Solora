@@ -96,74 +96,71 @@ class QuoteDetailFragment : Fragment() {
     
     private fun populateQuoteDetails(quote: dev.solora.data.Quote) {
         // Header
-        tvReference.text = "Quote ${quote.reference}"
-        tvDate.text = "Generated on ${SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(quote.dateEpoch))}"
+        tvReference.text = quote.reference
+        tvDate.text = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(quote.dateEpoch))
         
         // Client Information
         tvClientInfo.text = buildString {
-            appendLine("Client: ${quote.clientName}")
-            appendLine("Address: ${quote.address}")
-            if (quote.latitude != null && quote.longitude != null) {
-                appendLine("Location: ${String.format("%.4f", quote.latitude)}, ${String.format("%.4f", quote.longitude)}")
-            }
+            appendLine("To: ${quote.clientName}")
+            appendLine("${quote.address}")
+            appendLine()
+            appendLine("From: Solora")
+            appendLine("+27 (0)82 123 4567")
+            appendLine("info@solora.co.za")
         }
         
-        // Energy Details
+        // Energy Details - Current Energy Information
         tvEnergyDetails.text = buildString {
+            appendLine("CURRENT ENERGY INFORMATION")
+            appendLine()
             quote.monthlyUsageKwh?.let { 
-                appendLine("Monthly Usage: ${String.format("%.1f", it)} kWh") 
+                appendLine("Monthly Usage                    ${String.format("%.0f", it)} kWh") 
             }
             quote.monthlyBillRands?.let { 
-                appendLine("Average Bill: R${String.format("%.2f", it)}") 
+                appendLine("Average Bill                     R ${String.format("%.2f", it)}") 
             }
-            appendLine("Tariff Rate: R${String.format("%.2f", quote.tariff)}/kWh")
+            appendLine("Tariff Rate                      R ${String.format("%.2f", quote.tariff)}/kWh")
         }
         
-        // System Design
+        // System Design - Solar System Specifications
         tvSystemDesign.text = buildString {
-            appendLine("Panel Rating: ${quote.panelWatt}W each")
-            appendLine("Number of Panels: ${quote.panels}")
-            appendLine("System Size: ${String.format("%.2f", quote.systemKw)} kW")
-            appendLine("Inverter Size: ${String.format("%.2f", quote.inverterKw)} kW")
-            appendLine("Sun Hours: ${String.format("%.1f", quote.sunHours)} hours/day")
-            
-            // NASA API data if available
-            if (quote.averageAnnualSunHours != null) {
-                appendLine("Average Annual Sun Hours: ${String.format("%.1f", quote.averageAnnualSunHours)} hours/day")
-            }
-            quote.optimalMonth?.let { month ->
-                val monthName = listOf("", "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
-                                      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")[month]
-                appendLine("Optimal Month: $monthName")
-            }
+            appendLine("RECOMMENDED SYSTEM")
+            appendLine()
+            appendLine("Panel                            ${quote.panelWatt}W")
+            appendLine("Quantity                         ${quote.panels}")
+            appendLine("Recommended Inverter             ${String.format("%.0f", quote.inverterKw)}kW")
+            appendLine("Total System Size                ${String.format("%.2f", quote.systemKw)}kW")
+            appendLine("Percentage of monthly usage      ${String.format("%.0f", (quote.systemKw * quote.sunHours * 30) / (quote.monthlyUsageKwh ?: 1000) * 100)}%")
         }
         
-        // Financial Analysis
+        // Financial Analysis - Quotation breakdown like in Figma
         tvFinancialAnalysis.text = buildString {
-            appendLine("Monthly Savings: R${String.format("%.2f", quote.savingsRands)}")
+            appendLine("QUOTATION")
+            appendLine()
             
-            val annualSavings = quote.annualSavingsRands ?: (quote.savingsRands * 12)
-            appendLine("Annual Savings: R${String.format("%.2f", annualSavings)}")
+            val systemCost = quote.systemCostRands ?: (quote.systemKw * 15000)
+            val vatAmount = systemCost * 0.15
+            val totalCost = systemCost + vatAmount
             
-            quote.systemCostRands?.let { 
-                appendLine("System Cost: R${String.format("%.2f", it)}")
-            }
+            appendLine("Solar System                     R ${String.format("%.2f", systemCost)}")
+            appendLine("Installation                     R 0.00")
+            appendLine("VAT                              R ${String.format("%.2f", vatAmount)}")
+            appendLine()
+            appendLine("Subtotal                         R ${String.format("%.2f", systemCost)}")
+            appendLine("Tax                              R ${String.format("%.2f", vatAmount)}")
+            appendLine("Total Due                        R ${String.format("%.2f", totalCost)}")
+            appendLine()
+            appendLine("ESTIMATED MONTHLY SAVINGS")
+            appendLine("R ${String.format("%.2f", quote.savingsRands)}")
+            appendLine()
             quote.paybackYears?.let { 
-                appendLine("Payback Period: ${String.format("%.1f", it)} years")
+                appendLine("PAYBACK PERIOD")
+                appendLine("${String.format("%.1f", it)} years")
             }
         }
         
-        // Environmental Impact
-        quote.co2SavingsKgPerYear?.let { co2Savings ->
-            tvEnvironmentalImpact.text = buildString {
-                appendLine("CO₂ Savings: ${String.format("%.0f", co2Savings)} kg/year")
-                appendLine("Equivalent to: ${String.format("%.1f", co2Savings/1000)} tons CO₂/year")
-                appendLine("Trees Equivalent: ${String.format("%.0f", co2Savings/22)} trees planted")
-            }
-            view?.findViewById<View>(R.id.card_environmental)?.visibility = View.VISIBLE
-        } ?: run {
-            view?.findViewById<View>(R.id.card_environmental)?.visibility = View.GONE
-        }
+        // Hide environmental impact to match clean design
+        view?.findViewById<View>(R.id.card_environmental)?.visibility = View.GONE
     }
     
     private fun showQuoteNotFound() {
@@ -209,32 +206,38 @@ class QuoteDetailFragment : Fragment() {
     
     private fun shareQuote() {
         currentQuote?.let { quote ->
+            val systemCost = quote.systemCostRands ?: (quote.systemKw * 15000)
+            val vatAmount = systemCost * 0.15
+            val totalCost = systemCost + vatAmount
+            
             val shareText = buildString {
-                appendLine("📊 SOLAR QUOTE - ${quote.reference}")
+                appendLine("SOLAR QUOTE - ${quote.reference}")
                 appendLine("═══════════════════════════════════")
                 appendLine()
-                appendLine("👤 CLIENT: ${quote.clientName}")
-                appendLine("📍 LOCATION: ${quote.address}")
+                appendLine("CLIENT: ${quote.clientName}")
+                appendLine("LOCATION: ${quote.address}")
                 appendLine()
-                appendLine("🌞 SOLAR SYSTEM:")
-                appendLine("• System Size: ${String.format("%.2f", quote.systemKw)} kW")
-                appendLine("• Panels: ${quote.panels} x ${quote.panelWatt}W")
-                appendLine("• Inverter: ${String.format("%.2f", quote.inverterKw)} kW")
+                appendLine("RECOMMENDED SYSTEM:")
+                appendLine("Panel Rating: ${quote.panelWatt}W")
+                appendLine("Quantity: ${quote.panels}")
+                appendLine("System Size: ${String.format("%.2f", quote.systemKw)} kW")
+                appendLine("Inverter: ${String.format("%.2f", quote.inverterKw)} kW")
                 appendLine()
-                appendLine("💰 FINANCIAL BENEFITS:")
-                appendLine("• Monthly Savings: R${String.format("%.2f", quote.savingsRands)}")
-                appendLine("• Annual Savings: R${String.format("%.2f", quote.savingsRands * 12)}")
+                appendLine("QUOTATION:")
+                appendLine("Solar System: R ${String.format("%.2f", systemCost)}")
+                appendLine("Installation: R 0.00")
+                appendLine("VAT: R ${String.format("%.2f", vatAmount)}")
+                appendLine("Total Due: R ${String.format("%.2f", totalCost)}")
+                appendLine()
+                appendLine("ESTIMATED MONTHLY SAVINGS:")
+                appendLine("R ${String.format("%.2f", quote.savingsRands)}")
                 quote.paybackYears?.let { 
-                    appendLine("• Payback Period: ${String.format("%.1f", it)} years")
+                    appendLine("PAYBACK PERIOD: ${String.format("%.1f", it)} years")
                 }
                 appendLine()
-                quote.co2SavingsKgPerYear?.let { co2 ->
-                    appendLine("🌱 ENVIRONMENTAL IMPACT:")
-                    appendLine("• CO₂ Reduction: ${String.format("%.0f", co2)} kg/year")
-                    appendLine()
-                }
-                appendLine("Generated by Solora Solar Solutions")
-                appendLine("Professional Solar Installations")
+                appendLine("Solora Solar Solutions")
+                appendLine("+27 (0)82 123 4567")
+                appendLine("info@solora.co.za")
             }
             
             val shareIntent = android.content.Intent().apply {
