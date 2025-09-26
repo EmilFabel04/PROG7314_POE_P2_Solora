@@ -44,6 +44,7 @@ class FirebaseRepository {
                 "systemKw" to quote.systemKw,
                 "inverterKw" to quote.inverterKw,
                 "savingsRands" to quote.savingsRands,
+                "consultantId" to (quote.consultantId ?: userId), // Ensure consultantId is set
                 "dateEpoch" to quote.dateEpoch,
                 
                 // Location and NASA API data
@@ -120,7 +121,9 @@ class FirebaseRepository {
                 "status" to lead.status,
                 "source" to lead.source,
                 "notes" to lead.notes,
-                "userId" to userId,
+                "consultantId" to (lead.consultantId ?: userId), // Use provided consultantId or current user
+                "quoteId" to lead.quoteId, // Can be null if not created from a quote
+                "userId" to userId, // Keep for backward compatibility
                 "createdAt" to lead.createdAt,
                 "updatedAt" to System.currentTimeMillis()
             )
@@ -352,6 +355,98 @@ class FirebaseRepository {
             
         } catch (e: Exception) {
             Log.e(TAG, "Failed to get leads by status from Firebase", e)
+            Result.failure(e)
+        }
+    }
+    
+    // ==================== RELATIONSHIP METHODS ====================
+    
+    // Get quotes by consultant ID
+    suspend fun getQuotesByConsultant(consultantId: String? = null): Result<List<Map<String, Any>>> {
+        return try {
+            val userId = consultantId ?: getCurrentUserId() ?: return Result.failure(Exception("User not authenticated"))
+            
+            val snapshot = firestore.collection(QUOTES_COLLECTION)
+                .whereEqualTo("consultantId", userId)
+                .orderBy("dateEpoch", Query.Direction.DESCENDING)
+                .get()
+                .await()
+            
+            val quotes = snapshot.documents.mapNotNull { it.data }
+            Log.d(TAG, "Retrieved ${quotes.size} quotes for consultant: $userId")
+            Result.success(quotes)
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to get quotes by consultant from Firebase", e)
+            Result.failure(e)
+        }
+    }
+    
+    // Get leads by consultant ID
+    suspend fun getLeadsByConsultant(consultantId: String? = null): Result<List<Map<String, Any>>> {
+        return try {
+            val userId = consultantId ?: getCurrentUserId() ?: return Result.failure(Exception("User not authenticated"))
+            
+            val snapshot = firestore.collection(LEADS_COLLECTION)
+                .whereEqualTo("consultantId", userId)
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .get()
+                .await()
+            
+            val leads = snapshot.documents.mapNotNull { it.data }
+            Log.d(TAG, "Retrieved ${leads.size} leads for consultant: $userId")
+            Result.success(leads)
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to get leads by consultant from Firebase", e)
+            Result.failure(e)
+        }
+    }
+    
+    // Get leads related to a specific quote
+    suspend fun getLeadsByQuote(quoteId: Long): Result<List<Map<String, Any>>> {
+        return try {
+            val snapshot = firestore.collection(LEADS_COLLECTION)
+                .whereEqualTo("quoteId", quoteId)
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .get()
+                .await()
+            
+            val leads = snapshot.documents.mapNotNull { it.data }
+            Log.d(TAG, "Retrieved ${leads.size} leads for quote: $quoteId")
+            Result.success(leads)
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to get leads by quote from Firebase", e)
+            Result.failure(e)
+        }
+    }
+    
+    // Create a lead from quote data (useful when converting a quote to a lead)
+    suspend fun createLeadFromQuote(quote: Quote, leadSource: String = "quote"): Result<String> {
+        return try {
+            val userId = getCurrentUserId() ?: return Result.failure(Exception("User not authenticated"))
+            
+            // Generate a lead reference
+            val leadReference = "L${System.currentTimeMillis()}"
+            
+            val lead = Lead(
+                reference = leadReference,
+                name = quote.clientName,
+                address = quote.address,
+                contact = "", // Will need to be filled in later
+                status = "qualified", // Leads from quotes are typically qualified
+                source = leadSource,
+                notes = "Lead created from quote ${quote.reference}. System: ${quote.systemKw}kW, Savings: R${quote.savingsRands}/month",
+                consultantId = quote.consultantId ?: userId,
+                quoteId = quote.id,
+                createdAt = System.currentTimeMillis()
+            )
+            
+            saveLead(lead)
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to create lead from quote", e)
             Result.failure(e)
         }
     }

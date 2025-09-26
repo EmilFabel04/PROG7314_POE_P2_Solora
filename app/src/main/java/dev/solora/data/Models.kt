@@ -13,6 +13,8 @@ data class Lead(
     val status: String = "new", // new, contacted, qualified, proposal, closed, lost
     val source: String = "manual", // manual, website, referral, marketing
     val notes: String = "",
+    val consultantId: String? = null, // Firebase Auth userId of the consultant who created this lead
+    val quoteId: Long? = null, // Optional - if this lead was created from a quote
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
 )
@@ -67,6 +69,7 @@ data class Quote(
     val systemKw: Double,
     val inverterKw: Double,
     val savingsRands: Double,
+    val consultantId: String? = null, // Firebase Auth userId of the consultant who created this quote
     val dateEpoch: Long = System.currentTimeMillis(),
     // Location and NASA API data
     val latitude: Double? = null,

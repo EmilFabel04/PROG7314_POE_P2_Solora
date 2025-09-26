@@ -170,7 +170,8 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
             panels = outputs.panels,
             systemKw = outputs.systemKw,
             inverterKw = outputs.inverterKw,
-            savingsRands = outputs.estimatedMonthlySavingsR
+            savingsRands = outputs.estimatedMonthlySavingsR,
+            consultantId = FirebaseAuth.getInstance().currentUser?.uid
         )
         
         // Save to local Room database and get the generated ID
@@ -386,6 +387,7 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
             systemKw = outputs.systemKw,
             inverterKw = outputs.inverterKw,
                     savingsRands = outputs.estimatedMonthlySavingsR,
+                    consultantId = FirebaseAuth.getInstance().currentUser?.uid,
                     // NASA API and location data (with fallbacks)
                     latitude = latitude,
                     longitude = longitude,
