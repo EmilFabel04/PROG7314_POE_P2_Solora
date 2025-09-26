@@ -231,15 +231,6 @@ class QuotesFragment : Fragment() {
                     address = address
                 )
                 
-                // Save the updated quote (this will trigger Firebase save)
-                quotesViewModel.saveQuoteFromOutputs(
-                    reference = reference,
-                    clientName = fullName,
-                    address = address,
-                    inputs = quotesViewModel.lastQuoteInputs.value ?: return@setOnClickListener,
-                    outputs = quotesViewModel.lastQuoteOutputs.value ?: return@setOnClickListener
-                )
-                
                 // Create a lead from this quote with client details
                 android.util.Log.d("QuotesFragment", "Creating lead from quote with client details")
                 leadsViewModel.createLeadFromQuote(

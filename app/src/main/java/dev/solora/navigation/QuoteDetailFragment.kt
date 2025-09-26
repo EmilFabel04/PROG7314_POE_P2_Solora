@@ -130,7 +130,13 @@ class QuoteDetailFragment : Fragment() {
             appendLine("Quantity                         ${quote.panels}")
             appendLine("Recommended Inverter             ${String.format("%.0f", quote.inverterKw)}kW")
             appendLine("Total System Size                ${String.format("%.2f", quote.systemKw)}kW")
-            appendLine("Percentage of monthly usage      ${String.format("%.0f", (quote.systemKw * quote.sunHours * 30) / (quote.monthlyUsageKwh ?: 1000) * 100)}%")
+            val monthlyGeneration = quote.systemKw * quote.sunHours * 30
+            val usagePercentage = if (quote.monthlyUsageKwh != null && quote.monthlyUsageKwh > 0) {
+                (monthlyGeneration / quote.monthlyUsageKwh) * 100
+            } else {
+                0.0
+            }
+            appendLine("Percentage of monthly usage      ${String.format("%.0f", usagePercentage)}%")
         }
         
         // Financial Analysis - Quotation breakdown like in Figma
