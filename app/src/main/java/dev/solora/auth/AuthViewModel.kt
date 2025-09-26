@@ -31,6 +31,18 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    fun loginWithGoogle(idToken: String) {
+        viewModelScope.launch {
+            _authState.value = AuthState.Loading
+            val result = repo.loginWithGoogle(idToken)
+            _authState.value = if (result.isSuccess) {
+                AuthState.Success("Google login successful")
+            } else {
+                AuthState.Error(result.exceptionOrNull()?.message ?: "Google login failed")
+            }
+        }
+    }
+
     fun register(name: String, surname: String, email: String, password: String) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
@@ -39,6 +51,18 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
                 AuthState.Success("Registration successful")
             } else {
                 AuthState.Error(result.exceptionOrNull()?.message ?: "Registration failed")
+            }
+        }
+    }
+
+    fun registerWithGoogle(idToken: String) {
+        viewModelScope.launch {
+            _authState.value = AuthState.Loading
+            val result = repo.registerWithGoogle(idToken)
+            _authState.value = if (result.isSuccess) {
+                AuthState.Success("Google sign-in successful")
+            } else {
+                AuthState.Error(result.exceptionOrNull()?.message ?: "Google sign-in failed")
             }
         }
     }

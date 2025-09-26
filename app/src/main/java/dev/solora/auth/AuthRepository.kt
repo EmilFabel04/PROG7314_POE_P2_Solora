@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import dev.solora.data.UserInfo
 import kotlinx.coroutines.flow.Flow
@@ -52,6 +53,26 @@ class AuthRepository(private val context: Context) {
         }
     }
 
+    suspend fun loginWithGoogle(idToken: String): Result<FirebaseUser> {
+        return try {
+            // Sign in with Google credential
+            val credential = GoogleAuthProvider.getCredential(idToken, null)
+            val authResult = firebaseAuth.signInWithCredential(credential).await()
+            val user = authResult.user ?: throw Exception("Google login failed")
+
+            // Only store info locally, do NOT write to Firestore
+            context.dataStore.edit { prefs ->
+                prefs[KEY_USER_ID] = user.uid
+                prefs[KEY_NAME] = user.displayName ?: ""
+                prefs[KEY_EMAIL] = user.email ?: ""
+            }
+
+            Result.success(user)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun register(name: String, surname: String, email: String, password: String): Result<FirebaseUser> {
         return try {
             val result = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
@@ -80,6 +101,39 @@ class AuthRepository(private val context: Context) {
                 prefs[KEY_EMAIL] = email
             }
             
+            Result.success(user)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun registerWithGoogle(idToken: String): Result<FirebaseUser> {
+        return try {
+            val credential = GoogleAuthProvider.getCredential(idToken, null)
+            val authResult = firebaseAuth.signInWithCredential(credential).await()
+            val user = authResult.user ?: throw Exception("Google sign-in failed")
+
+            val fullName = user.displayName ?: ""
+            val nameParts = fullName.trim().split(" ")
+            val firstName = nameParts.getOrNull(0) ?: ""
+            val lastName = if (nameParts.size > 1) nameParts.subList(1, nameParts.size).joinToString(" ") else ""
+
+            val userDoc = hashMapOf(
+                "name" to firstName,
+                "surname" to lastName,
+                "email" to (user.email ?: "")
+            )
+
+            firestore.collection("users").document(user.uid).set(userDoc).await()
+
+            // Store user info locally
+            context.dataStore.edit { prefs ->
+                prefs[KEY_USER_ID] = user.uid
+                prefs[KEY_NAME] = user.displayName ?: ""
+                prefs[KEY_SURNAME] = "" // no surname from Google
+                prefs[KEY_EMAIL] = user.email ?: ""
+            }
+
             Result.success(user)
         } catch (e: Exception) {
             Result.failure(e)

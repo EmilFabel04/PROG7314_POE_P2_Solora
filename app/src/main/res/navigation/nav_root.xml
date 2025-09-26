@@ -24,9 +24,6 @@
             android:name="dev.solora.navigation.OnboardingFragment"
             android:label="Onboarding">
             <action
-                android:id="@+id/action_onboarding_to_login"
-                app:destination="@id/loginFragment" />
-            <action
                 android:id="@+id/action_onboarding_to_register"
                 app:destination="@id/registerFragment" />
         </fragment>

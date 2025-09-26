@@ -8,8 +8,8 @@
         android:id="@+id/onboardingFragment"
         android:name="dev.solora.navigation.OnboardingFragment">
         <action
-            android:id="@+id/action_onboarding_to_login"
-            app:destination="@id/loginFragment" />
+            android:id="@+id/action_onboarding_to_register"
+            app:destination="@id/registerFragment" />
     </fragment>
 
     <fragment
@@ -30,9 +30,6 @@
         <action
             android:id="@+id/action_register_to_login"
             app:destination="@id/loginFragment" />
-        <action
-            android:id="@+id/action_register_to_home"
-            app:destination="@id/homeFragment" />
     </fragment>
 
     <fragment

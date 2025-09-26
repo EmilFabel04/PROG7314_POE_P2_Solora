@@ -33,14 +33,14 @@
         android:background="@drawable/solora_logo2"/>
 
     <LinearLayout
-        android:id="@+id/btn_login"
+        android:id="@+id/btn_get_started"
         android:layout_width="250dp"
         android:layout_height="50dp"
         android:orientation="horizontal"
         android:clickable="true"
         android:focusable="true"
         android:layout_gravity="center"
-        android:layout_marginTop="192dp"
+        android:layout_marginTop="210dp"
         android:background="@drawable/authentication_button_background_orange">
 
         <TextView

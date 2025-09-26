@@ -173,7 +173,7 @@
             android:layout_gravity="center"
             android:clickable="true"
             android:focusable="true"
-            android:layout_marginTop="35dp"
+            android:layout_marginTop="30dp"
             android:background="@drawable/authentication_button_background_orange"
             android:orientation="vertical">
 
@@ -192,7 +192,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="20dp"
             android:orientation="horizontal">
 
             <LinearLayout
@@ -222,7 +222,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="30dp"
             android:orientation="horizontal">
 
             <ImageButton
@@ -231,6 +231,7 @@
                 android:background="@drawable/twitter_icon" />
 
             <ImageButton
+                android:id="@+id/btn_google_register"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_marginLeft="30dp"
@@ -245,12 +246,16 @@
 
         <LinearLayout
             android:id="@+id/txt_btn_back_login"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"
+            android:padding="12dp"
+            android:focusableInTouchMode="true"
+            android:descendantFocusability="blocksDescendants"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:clickable="true"
-            android:focusable="true"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="30dp"
             android:orientation="horizontal">
 
             <TextView
@@ -264,7 +269,6 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
                 android:fontFamily="@font/poppins"
                 android:text="@string/login_text"
                 android:textColor="@color/solora_night_gray"

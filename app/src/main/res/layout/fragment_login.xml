@@ -176,6 +176,7 @@
                 android:background="@drawable/twitter_icon" />
 
             <ImageButton
+                android:id="@+id/btn_google_login"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_marginLeft="30dp"
