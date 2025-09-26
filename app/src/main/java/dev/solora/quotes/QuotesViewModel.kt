@@ -561,6 +561,51 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    // Public method to update an existing quote with client details
+    fun updateQuoteWithClientDetails(
+        quoteId: Long,
+        reference: String,
+        clientName: String,
+        address: String
+    ) {
+        viewModelScope.launch {
+            try {
+                // Get the existing quote
+                val existingQuote = dao.getQuoteById(quoteId)
+                if (existingQuote != null) {
+                    // Update with new client information
+                    val updatedQuote = existingQuote.copy(
+                        reference = reference,
+                        clientName = clientName,
+                        address = address
+                    )
+                    
+                    // Update in Room database
+                    dao.update(updatedQuote)
+                    _lastQuote.value = updatedQuote
+                    
+                    android.util.Log.d("QuotesViewModel", "Quote updated with client details: $clientName")
+                    
+                    // Also update in Firebase
+                    try {
+                        val result = firebaseRepository.saveQuote(updatedQuote)
+                        if (result.isSuccess) {
+                            android.util.Log.d("QuotesViewModel", "Updated quote saved to Firebase: ${result.getOrNull()}")
+                        } else {
+                            android.util.Log.e("QuotesViewModel", "Failed to update quote in Firebase: ${result.exceptionOrNull()?.message}")
+                        }
+                    } catch (e: Exception) {
+                        android.util.Log.e("QuotesViewModel", "Firebase update error: ${e.message}")
+                    }
+                } else {
+                    android.util.Log.e("QuotesViewModel", "Quote with ID $quoteId not found for update")
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("QuotesViewModel", "Error updating quote with client details: ${e.message}")
+            }
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
         nasa.close()

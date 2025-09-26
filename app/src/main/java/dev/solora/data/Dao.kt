@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -26,8 +27,14 @@ interface QuoteDao {
     @Query("SELECT * FROM quotes WHERE id = :id")
     fun observeQuote(id: Long): Flow<Quote?>
 
+    @Query("SELECT * FROM quotes WHERE id = :id LIMIT 1")
+    suspend fun getQuoteById(id: Long): Quote?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(quote: Quote): Long
+    
+    @Update
+    suspend fun update(quote: Quote)
 }
 
 

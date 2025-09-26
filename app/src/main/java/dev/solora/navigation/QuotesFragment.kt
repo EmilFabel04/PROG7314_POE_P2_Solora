@@ -224,8 +224,9 @@ class QuotesFragment : Fragment() {
                 val fullName = "$firstName $lastName"
                 val contactInfo = "$email | $contact"
                 
-                // Update the quote with client information
-                val updatedQuote = quote.copy(
+                // Update the quote in the database with real client information
+                quotesViewModel.updateQuoteWithClientDetails(
+                    quoteId = quote.id,
                     reference = reference,
                     clientName = fullName,
                     address = address
@@ -233,17 +234,24 @@ class QuotesFragment : Fragment() {
                 
                 // Create a lead from this quote with client details
                 android.util.Log.d("QuotesFragment", "Creating lead from quote with client details")
+                val updatedQuote = quote.copy(
+                    reference = reference,
+                    clientName = fullName,
+                    address = address
+                )
                 leadsViewModel.createLeadFromQuote(
                     quote = updatedQuote,
                     contactInfo = contactInfo,
-                    notes = "Lead created from quote ${reference} with full client details. Client expressed interest in ${String.format("%.2f", quote.systemKw)}kW solar system."
+                    notes = "Lead created from quote ${reference} with full client details. Client expressed interested in ${String.format("%.2f", quote.systemKw)}kW solar system."
                 )
                 
                 Toast.makeText(requireContext(), "Quote saved and lead created successfully!", Toast.LENGTH_LONG).show()
                 
-                // Navigate to the quote detail
-                val bundle = Bundle().apply { putLong("id", quote.id) }
-                findNavController().navigate(R.id.quoteDetailFragment, bundle)
+                // Navigate to the quote detail (small delay to ensure database update)
+                view.postDelayed({
+                    val bundle = Bundle().apply { putLong("id", quote.id) }
+                    findNavController().navigate(R.id.quoteDetailFragment, bundle)
+                }, 300)
                 
             } ?: run {
                 Toast.makeText(requireContext(), "Please calculate a quote first", Toast.LENGTH_SHORT).show()
