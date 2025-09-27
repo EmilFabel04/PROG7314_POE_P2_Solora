@@ -13,15 +13,11 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavOptions
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import dev.solora.R
-import dev.solora.auth.AuthState
 import dev.solora.auth.AuthViewModel
 
 class OnboardingFragment : Fragment() {
@@ -96,39 +92,13 @@ class LoginFragment : Fragment() {
             startActivityForResult(signInIntent, RC_SIGN_IN)
         }
 
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            authViewModel.authState.collect { state ->
-                when (state) {
-                    is AuthState.Success -> {
-                        // showing success message
-                        Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
-
-                        // navigating to the main section of the app
-                        findNavController().navigate(
-                            R.id.action_login_to_main,
-                            null,
-                            NavOptions.Builder().setPopUpTo(R.id.auth_graph, true).build()
-                        )
-
-                        // resetting the state so it doesn't trigger again accidentally
-                        authViewModel.clearAuthState()
-                    }
-
-                    is AuthState.Error -> {
-                        Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
-                        authViewModel.clearAuthState()
-                    }
-
-                    else -> Unit
-                }
-            }
-        }
+        observeAuthStateAndNavigate(authViewModel)
 
         view.findViewById<View>(R.id.btn_to_register).setOnClickListener {
             findNavController().navigate(R.id.action_login_to_register)
         }
 
-        view.findViewById<View>(R.id.btn_sign_up).setOnClickListener {
+        view.findViewById<View>(R.id.txt_btn_sign_up).setOnClickListener {
             findNavController().navigate(R.id.action_login_to_register)
         }
     }
@@ -211,35 +181,7 @@ class RegisterFragment : Fragment() {
             startActivityForResult(signInIntent, RC_SIGN_IN)
         }
 
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            authViewModel.authState.collect { state ->
-                when (state) {
-                    is AuthState.Success -> {
-                        // showing success message
-                        Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT)
-                            .show()
-
-                        // navigating to the main sections of the app
-                        findNavController().navigate(
-                            R.id.action_register_to_main,
-                            null,
-                            NavOptions.Builder().setPopUpTo(R.id.auth_graph, true).build()
-                        )
-
-                        // resetting the state so it doesn't trigger again accidentally
-                        authViewModel.clearAuthState()
-                    }
-
-                    is AuthState.Error -> {
-                        Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT)
-                            .show()
-                        authViewModel.clearAuthState()
-                    }
-
-                    else -> Unit
-                }
-            }
-        }
+        observeAuthStateAndNavigate(authViewModel)
 
         view.findViewById<View>(R.id.btn_back_login).setOnClickListener {
             findNavController().popBackStack()

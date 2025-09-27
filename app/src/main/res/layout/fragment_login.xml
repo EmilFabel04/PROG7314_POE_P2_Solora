@@ -167,7 +167,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="50dp"
+            android:layout_marginTop="40dp"
             android:orientation="horizontal">
 
             <ImageButton
@@ -190,13 +190,14 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/btn_sign_up"
+            android:id="@+id/txt_btn_sign_up"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:clickable="true"
             android:focusable="true"
             android:layout_gravity="center"
-            android:layout_marginTop="50dp"
+            android:padding="12dp"
+            android:layout_marginTop="40dp"
             android:orientation="horizontal">
 
             <TextView
@@ -212,7 +213,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dp"
                 android:fontFamily="@font/poppins"
-                android:text="@string/sign_up_text"
+                android:text="@string/create_an_account_text"
                 android:textColor="@color/solora_night_gray"
                 android:textSize="13sp" />
         </LinearLayout>
