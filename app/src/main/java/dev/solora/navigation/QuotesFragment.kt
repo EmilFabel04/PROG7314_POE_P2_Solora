@@ -248,10 +248,11 @@ class QuotesFragment : Fragment() {
                 Toast.makeText(requireContext(), "Quote saved and lead created successfully!", Toast.LENGTH_LONG).show()
                 
                 // Navigate to the quote detail (small delay to ensure database update)
-                view.postDelayed({
+                viewLifecycleOwner.lifecycleScope.launch {
+                    kotlinx.coroutines.delay(300)
                     val bundle = Bundle().apply { putLong("id", quote.id) }
                     findNavController().navigate(R.id.quoteDetailFragment, bundle)
-                }, 300)
+                }
                 
             } ?: run {
                 Toast.makeText(requireContext(), "Please calculate a quote first", Toast.LENGTH_SHORT).show()
