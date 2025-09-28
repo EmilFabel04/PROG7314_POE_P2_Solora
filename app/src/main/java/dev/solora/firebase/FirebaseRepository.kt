@@ -6,6 +6,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import dev.solora.data.Quote
 import dev.solora.data.Lead
+import dev.solora.data.UserProfile
+import dev.solora.data.UserStats
 import kotlinx.coroutines.tasks.await
 
 class FirebaseRepository {
@@ -42,6 +44,7 @@ class FirebaseRepository {
                 "systemKw" to quote.systemKw,
                 "inverterKw" to quote.inverterKw,
                 "savingsRands" to quote.savingsRands,
+                "consultantId" to (quote.consultantId ?: userId), // Ensure consultantId is set
                 "dateEpoch" to quote.dateEpoch,
                 
                 // Location and NASA API data
@@ -115,13 +118,17 @@ class FirebaseRepository {
                 "name" to lead.name,
                 "address" to lead.address,
                 "contact" to lead.contact,
-                "userId" to userId,
-                "status" to "new",
-                "createdAt" to System.currentTimeMillis(),
+                "status" to lead.status,
+                "source" to lead.source,
+                "notes" to lead.notes,
+                "consultantId" to (lead.consultantId ?: userId), // Use provided consultantId or current user
+                "quoteId" to lead.quoteId, // Can be null if not created from a quote
+                "userId" to userId, // Keep for backward compatibility
+                "createdAt" to lead.createdAt,
                 "updatedAt" to System.currentTimeMillis()
             )
             
-            val documentId = "${userId}_${lead.reference}_${System.currentTimeMillis()}"
+            val documentId = "${userId}_${lead.reference}_${lead.createdAt}"
             
             firestore.collection(LEADS_COLLECTION)
                 .document(documentId)
@@ -159,28 +166,27 @@ class FirebaseRepository {
     
     // ==================== USER PROFILE ====================
     
-    suspend fun saveUserProfile(
-        name: String,
-        email: String,
-        companyName: String? = null,
-        phone: String? = null
-    ): Result<Unit> {
+    suspend fun saveUserProfile(userProfile: UserProfile): Result<Unit> {
         return try {
             val userId = getCurrentUserId() ?: return Result.failure(Exception("User not authenticated"))
             
-            val userProfile = hashMapOf(
-                "name" to name,
-                "email" to email,
-                "companyName" to companyName,
-                "phone" to phone,
+            val profileData = hashMapOf(
                 "userId" to userId,
-                "createdAt" to System.currentTimeMillis(),
+                "name" to userProfile.name,
+                "email" to userProfile.email,
+                "companyName" to userProfile.companyName,
+                "phone" to userProfile.phone,
+                "jobTitle" to userProfile.jobTitle,
+                "address" to userProfile.address,
+                "profileImageUrl" to userProfile.profileImageUrl,
+                "preferences" to userProfile.preferences,
+                "createdAt" to userProfile.createdAt,
                 "updatedAt" to System.currentTimeMillis()
             )
             
             firestore.collection(USERS_COLLECTION)
                 .document(userId)
-                .set(userProfile)
+                .set(profileData)
                 .await()
             
             Log.d(TAG, "User profile saved successfully")
@@ -192,13 +198,71 @@ class FirebaseRepository {
         }
     }
     
-    // ==================== ANALYTICS & STATS ====================
-    
-    suspend fun getUserStats(): Result<Map<String, Any>> {
+    suspend fun getUserProfile(): Result<UserProfile?> {
         return try {
             val userId = getCurrentUserId() ?: return Result.failure(Exception("User not authenticated"))
             
-            // Get quote count
+            val document = firestore.collection(USERS_COLLECTION)
+                .document(userId)
+                .get()
+                .await()
+            
+            val data = document.data
+            if (data != null) {
+                val profile = UserProfile(
+                    userId = data["userId"] as? String ?: userId,
+                    name = data["name"] as? String ?: "",
+                    email = data["email"] as? String ?: "",
+                    companyName = data["companyName"] as? String,
+                    phone = data["phone"] as? String,
+                    jobTitle = data["jobTitle"] as? String,
+                    address = data["address"] as? String,
+                    profileImageUrl = data["profileImageUrl"] as? String,
+                    preferences = data["preferences"] as? Map<String, Any> ?: emptyMap(),
+                    createdAt = data["createdAt"] as? Long ?: System.currentTimeMillis(),
+                    updatedAt = data["updatedAt"] as? Long ?: System.currentTimeMillis()
+                )
+                Log.d(TAG, "User profile retrieved successfully")
+                Result.success(profile)
+            } else {
+                Log.d(TAG, "No user profile found")
+                Result.success(null)
+            }
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to get user profile from Firebase", e)
+            Result.failure(e)
+        }
+    }
+    
+    suspend fun updateUserProfile(updates: Map<String, Any>): Result<Unit> {
+        return try {
+            val userId = getCurrentUserId() ?: return Result.failure(Exception("User not authenticated"))
+            
+            val updateData = updates.toMutableMap()
+            updateData["updatedAt"] = System.currentTimeMillis()
+            
+            firestore.collection(USERS_COLLECTION)
+                .document(userId)
+                .update(updateData)
+                .await()
+            
+            Log.d(TAG, "User profile updated successfully")
+            Result.success(Unit)
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to update user profile in Firebase", e)
+            Result.failure(e)
+        }
+    }
+    
+    // ==================== ANALYTICS & STATS ====================
+    
+    suspend fun getUserStats(): Result<UserStats> {
+        return try {
+            val userId = getCurrentUserId() ?: return Result.failure(Exception("User not authenticated"))
+            
+            // Get quote count and data
             val quotesSnapshot = firestore.collection(QUOTES_COLLECTION)
                 .whereEqualTo("userId", userId)
                 .get()
@@ -224,20 +288,165 @@ class FirebaseRepository {
             
             val totalLeads = leadsSnapshot.size()
             
-            val stats = mapOf(
-                "totalQuotes" to totalQuotes,
-                "totalLeads" to totalLeads,
-                "totalSystemKw" to totalSystemKw,
-                "totalMonthlySavings" to totalSavings,
-                "totalAnnualSavings" to (totalSavings * 12),
-                "generatedAt" to System.currentTimeMillis()
+            // Calculate derived metrics
+            val averageSystemSize = if (totalQuotes > 0) totalSystemKw / totalQuotes else 0.0
+            val conversionRate = if (totalLeads > 0) (totalQuotes.toDouble() / totalLeads) * 100 else 0.0
+            
+            val stats = UserStats(
+                totalQuotes = totalQuotes,
+                totalLeads = totalLeads,
+                totalSystemKw = totalSystemKw,
+                totalMonthlySavings = totalSavings,
+                totalAnnualSavings = totalSavings * 12,
+                averageSystemSize = averageSystemSize,
+                conversionRate = conversionRate,
+                generatedAt = System.currentTimeMillis()
             )
             
-            Log.d(TAG, "User stats: $stats")
+            Log.d(TAG, "User stats calculated: quotes=$totalQuotes, leads=$totalLeads, conversion=$conversionRate%")
             Result.success(stats)
             
         } catch (e: Exception) {
             Log.e(TAG, "Failed to get user stats from Firebase", e)
+            Result.failure(e)
+        }
+    }
+    
+    // ==================== LEAD MANAGEMENT ====================
+    
+    suspend fun updateLeadStatus(leadId: String, status: String, notes: String = ""): Result<Unit> {
+        return try {
+            val userId = getCurrentUserId() ?: return Result.failure(Exception("User not authenticated"))
+            
+            val updates = mapOf(
+                "status" to status,
+                "notes" to notes,
+                "updatedAt" to System.currentTimeMillis()
+            )
+            
+            firestore.collection(LEADS_COLLECTION)
+                .document(leadId)
+                .update(updates)
+                .await()
+            
+            Log.d(TAG, "Lead status updated: $leadId -> $status")
+            Result.success(Unit)
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to update lead status", e)
+            Result.failure(e)
+        }
+    }
+    
+    suspend fun getLeadsByStatus(status: String): Result<List<Map<String, Any>>> {
+        return try {
+            val userId = getCurrentUserId() ?: return Result.failure(Exception("User not authenticated"))
+            
+            val snapshot = firestore.collection(LEADS_COLLECTION)
+                .whereEqualTo("userId", userId)
+                .whereEqualTo("status", status)
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .get()
+                .await()
+            
+            val leads = snapshot.documents.mapNotNull { it.data }
+            Log.d(TAG, "Retrieved ${leads.size} leads with status: $status")
+            Result.success(leads)
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to get leads by status from Firebase", e)
+            Result.failure(e)
+        }
+    }
+    
+    // ==================== RELATIONSHIP METHODS ====================
+    
+    // Get quotes by consultant ID
+    suspend fun getQuotesByConsultant(consultantId: String? = null): Result<List<Map<String, Any>>> {
+        return try {
+            val userId = consultantId ?: getCurrentUserId() ?: return Result.failure(Exception("User not authenticated"))
+            
+            val snapshot = firestore.collection(QUOTES_COLLECTION)
+                .whereEqualTo("consultantId", userId)
+                .orderBy("dateEpoch", Query.Direction.DESCENDING)
+                .get()
+                .await()
+            
+            val quotes = snapshot.documents.mapNotNull { it.data }
+            Log.d(TAG, "Retrieved ${quotes.size} quotes for consultant: $userId")
+            Result.success(quotes)
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to get quotes by consultant from Firebase", e)
+            Result.failure(e)
+        }
+    }
+    
+    // Get leads by consultant ID
+    suspend fun getLeadsByConsultant(consultantId: String? = null): Result<List<Map<String, Any>>> {
+        return try {
+            val userId = consultantId ?: getCurrentUserId() ?: return Result.failure(Exception("User not authenticated"))
+            
+            val snapshot = firestore.collection(LEADS_COLLECTION)
+                .whereEqualTo("consultantId", userId)
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .get()
+                .await()
+            
+            val leads = snapshot.documents.mapNotNull { it.data }
+            Log.d(TAG, "Retrieved ${leads.size} leads for consultant: $userId")
+            Result.success(leads)
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to get leads by consultant from Firebase", e)
+            Result.failure(e)
+        }
+    }
+    
+    // Get leads related to a specific quote
+    suspend fun getLeadsByQuote(quoteId: Long): Result<List<Map<String, Any>>> {
+        return try {
+            val snapshot = firestore.collection(LEADS_COLLECTION)
+                .whereEqualTo("quoteId", quoteId)
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .get()
+                .await()
+            
+            val leads = snapshot.documents.mapNotNull { it.data }
+            Log.d(TAG, "Retrieved ${leads.size} leads for quote: $quoteId")
+            Result.success(leads)
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to get leads by quote from Firebase", e)
+            Result.failure(e)
+        }
+    }
+    
+    // Create a lead from quote data (useful when converting a quote to a lead)
+    suspend fun createLeadFromQuote(quote: Quote, leadSource: String = "quote"): Result<String> {
+        return try {
+            val userId = getCurrentUserId() ?: return Result.failure(Exception("User not authenticated"))
+            
+            // Generate a lead reference
+            val leadReference = "L${System.currentTimeMillis()}"
+            
+            val lead = Lead(
+                reference = leadReference,
+                name = quote.clientName,
+                address = quote.address,
+                contact = "", // Will need to be filled in later
+                status = "qualified", // Leads from quotes are typically qualified
+                source = leadSource,
+                notes = "Lead created from quote ${quote.reference}. System: ${quote.systemKw}kW, Savings: R${quote.savingsRands}/month",
+                consultantId = quote.consultantId ?: userId,
+                quoteId = quote.id,
+                createdAt = System.currentTimeMillis()
+            )
+            
+            saveLead(lead)
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to create lead from quote", e)
             Result.failure(e)
         }
     }

@@ -170,7 +170,8 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
             panels = outputs.panels,
             systemKw = outputs.systemKw,
             inverterKw = outputs.inverterKw,
-            savingsRands = outputs.estimatedMonthlySavingsR
+            savingsRands = outputs.estimatedMonthlySavingsR,
+            consultantId = FirebaseAuth.getInstance().currentUser?.uid
         )
         
         // Save to local Room database and get the generated ID
@@ -386,6 +387,7 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
             systemKw = outputs.systemKw,
             inverterKw = outputs.inverterKw,
                     savingsRands = outputs.estimatedMonthlySavingsR,
+                    consultantId = FirebaseAuth.getInstance().currentUser?.uid,
                     // NASA API and location data (with fallbacks)
                     latitude = latitude,
                     longitude = longitude,
@@ -556,6 +558,51 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
             
             // Default to Cape Town if no match (good solar conditions)
             else -> Pair(-33.9249, 18.4241)
+        }
+    }
+
+    // Public method to update an existing quote with client details
+    fun updateQuoteWithClientDetails(
+        quoteId: Long,
+        reference: String,
+        clientName: String,
+        address: String
+    ) {
+        viewModelScope.launch {
+            try {
+                // Get the existing quote
+                val existingQuote = dao.getQuoteById(quoteId)
+                if (existingQuote != null) {
+                    // Update with new client information
+                    val updatedQuote = existingQuote.copy(
+                        reference = reference,
+                        clientName = clientName,
+                        address = address
+                    )
+                    
+                    // Update in Room database
+                    dao.update(updatedQuote)
+                    _lastQuote.value = updatedQuote
+                    
+                    android.util.Log.d("QuotesViewModel", "Quote updated with client details: $clientName")
+                    
+                    // Also update in Firebase
+                    try {
+                        val result = firebaseRepository.saveQuote(updatedQuote)
+                        if (result.isSuccess) {
+                            android.util.Log.d("QuotesViewModel", "Updated quote saved to Firebase: ${result.getOrNull()}")
+                        } else {
+                            android.util.Log.e("QuotesViewModel", "Failed to update quote in Firebase: ${result.exceptionOrNull()?.message}")
+                        }
+                    } catch (e: Exception) {
+                        android.util.Log.e("QuotesViewModel", "Firebase update error: ${e.message}")
+                    }
+                } else {
+                    android.util.Log.e("QuotesViewModel", "Quote with ID $quoteId not found for update")
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("QuotesViewModel", "Error updating quote with client details: ${e.message}")
+            }
         }
     }
 

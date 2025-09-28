@@ -24,6 +24,9 @@
             android:name="dev.solora.navigation.OnboardingFragment"
             android:label="Onboarding">
             <action
+                android:id="@+id/action_onboarding_to_login"
+                app:destination="@id/loginFragment" />
+            <action
                 android:id="@+id/action_onboarding_to_register"
                 app:destination="@id/registerFragment" />
         </fragment>
@@ -49,9 +52,6 @@
                 app:destination="@id/main_graph"
                 app:popUpTo="@id/auth_graph"
                 app:popUpToInclusive="true" />
-            <action
-                android:id="@+id/action_register_to_login"
-                app:destination="@id/loginFragment" />
         </fragment>
     </navigation>
 
@@ -108,4 +108,7 @@
                 app:argType="long" />
         </fragment>
     </navigation>
+
 </navigation>
+
+

@@ -30,3 +30,5 @@ class MainTabsFragment : Fragment() {
             .setupWithNavController(childNavController)
     }
 }
+
+
