@@ -3,18 +3,6 @@ package dev.solora.data
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-data class UserInfo(
-    val id: String,
-    val name: String,
-    val surname: String,
-    val email: String,
-    val phone: String? = null,
-    val occupation: String? = null,
-    val birthday: String? = null,
-    val gender: String? = null,
-    val race: String? = null
-)
-
 @Entity(tableName = "leads")
 data class Lead(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,

@@ -31,38 +31,14 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun loginWithGoogle(idToken: String) {
+    fun register(name: String, email: String, password: String) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
-            val result = repo.loginWithGoogle(idToken)
-            _authState.value = if (result.isSuccess) {
-                AuthState.Success("Google login successful")
-            } else {
-                AuthState.Error(result.exceptionOrNull()?.message ?: "Google login failed")
-            }
-        }
-    }
-
-    fun register(name: String, surname: String, email: String, password: String) {
-        viewModelScope.launch {
-            _authState.value = AuthState.Loading
-            val result = repo.register(name, surname, email, password)
+            val result = repo.register(name, email, password)
             _authState.value = if (result.isSuccess) {
                 AuthState.Success("Registration successful")
             } else {
                 AuthState.Error(result.exceptionOrNull()?.message ?: "Registration failed")
-            }
-        }
-    }
-
-    fun registerWithGoogle(idToken: String) {
-        viewModelScope.launch {
-            _authState.value = AuthState.Loading
-            val result = repo.registerWithGoogle(idToken)
-            _authState.value = if (result.isSuccess) {
-                AuthState.Success("Google sign-in successful")
-            } else {
-                AuthState.Error(result.exceptionOrNull()?.message ?: "Google sign-in failed")
             }
         }
     }
@@ -90,3 +66,5 @@ sealed class AuthState {
     data class Success(val message: String) : AuthState()
     data class Error(val message: String) : AuthState()
 }
+
+
