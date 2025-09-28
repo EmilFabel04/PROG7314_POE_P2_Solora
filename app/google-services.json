@@ -12,7 +12,20 @@
             "package_name": "dev.solora"
           }
         },
-        "oauth_client": [],
+        "oauth_client": [
+          {
+            "client_id": "570014568272-3hul7i6rpmsqp7dauf166ek5jdeu8lrr.apps.googleusercontent.com",
+            "client_type": 1,
+            "android_info": {
+              "package_name": "dev.solora",
+              "certificate_hash": "895c75c408027e0cf2407bad20b6df097fc6be3a"
+            }
+          },
+          {
+            "client_id": "570014568272-gd86hu4qi23o92k6ji98ii5g26t97ks2.apps.googleusercontent.com",
+            "client_type": 3
+          }
+        ],
         "api_key": [
           {
             "current_key": "AIzaSyCAfU_ngJElc7SNXMpH2r2yq5rUsPcxrZc"
@@ -20,10 +33,16 @@
         ],
         "services": {
           "appinvite_service": {
-            "other_platform_oauth_client": []
+            "other_platform_oauth_client": [
+              {
+                "client_id": "570014568272-gd86hu4qi23o92k6ji98ii5g26t97ks2.apps.googleusercontent.com",
+                "client_type": 3
+              }
+            ]
           }
         }
       }
     ],
     "configuration_version": "1"
   }
+  
