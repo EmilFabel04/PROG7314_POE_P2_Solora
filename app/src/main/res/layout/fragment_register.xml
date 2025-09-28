@@ -1,45 +1,227 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:padding="24dp"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/get_started_background">
 
-    <EditText
-        android:id="@+id/et_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Full name"/>
-
-    <EditText
-        android:id="@+id/et_email"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Email"
-        android:layout_marginTop="8dp"/>
-
-    <EditText
-        android:id="@+id/et_password"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Password"
-        android:inputType="textPassword"
-        android:layout_marginTop="8dp"/>
-
-    <Button
-        android:id="@+id/btn_register"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Create account"
-        android:layout_marginTop="16dp"/>
-
-    <Button
+    <ImageButton
         android:id="@+id/btn_back_login"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="60dp"
+        android:layout_marginLeft="30dp"
+        android:background="@drawable/arrow_back_icon_white"/>
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Back to login"
-        android:layout_marginTop="8dp"/>
+        android:layout_height="850dp"
+        android:layout_marginTop="100dp"
+        android:background="@drawable/authentication_form_background_orange"
+        android:orientation="vertical">
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="50dp"
+            android:fontFamily="@font/poppins_bold"
+            android:text="Create an account"
+            android:textColor="@color/solora_on_primary"
+            android:textSize="30sp" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="50dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/poppins"
+                android:text="Full Name"
+                android:textColor="@color/solora_on_primary"
+                android:textSize="16sp" />
+
+            <LinearLayout
+                android:layout_width="370dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/authentication_input_field_background_grey"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/et_full_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="20dp"
+                    android:background="@android:color/transparent"
+                    android:fontFamily="@font/poppins"
+                    android:hint="Enter your full name"
+                    android:inputType="textPersonName"
+                    android:textColor="@color/solora_night_gray"
+                    android:textColorHint="@color/solora_night_gray"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:fontFamily="@font/poppins"
+                android:text="Email"
+                android:textColor="@color/solora_on_primary"
+                android:textSize="16sp" />
+
+            <LinearLayout
+                android:layout_width="370dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/authentication_input_field_background_grey"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/et_email"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="20dp"
+                    android:background="@android:color/transparent"
+                    android:fontFamily="@font/poppins"
+                    android:hint="Enter your email"
+                    android:inputType="textEmailAddress"
+                    android:textColor="@color/solora_night_gray"
+                    android:textColorHint="@color/solora_night_gray"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:fontFamily="@font/poppins"
+                android:text="Password"
+                android:textColor="@color/solora_on_primary"
+                android:textSize="16sp" />
+
+            <LinearLayout
+                android:layout_width="370dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/authentication_input_field_background_grey"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/et_password"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_marginLeft="20dp"
+                    android:background="@android:color/transparent"
+                    android:fontFamily="@font/poppins"
+                    android:hint="Enter your password"
+                    android:inputType="textPassword"
+                    android:textColor="@color/solora_night_gray"
+                    android:textColorHint="@color/solora_night_gray"
+                    android:textSize="14sp" />
+
+                <ImageButton
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:layout_marginRight="20dp"
+                    android:background="@drawable/closed_eye_icon_orange" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:fontFamily="@font/poppins"
+                android:text="Confirm Password"
+                android:textColor="@color/solora_on_primary"
+                android:textSize="16sp" />
+
+            <LinearLayout
+                android:layout_width="370dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/authentication_input_field_background_grey"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/et_confirm_password"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_marginLeft="20dp"
+                    android:background="@android:color/transparent"
+                    android:fontFamily="@font/poppins"
+                    android:hint="Confirm your password"
+                    android:inputType="textPassword"
+                    android:textColor="@color/solora_night_gray"
+                    android:textColorHint="@color/solora_night_gray"
+                    android:textSize="14sp" />
+
+                <ImageButton
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:layout_marginRight="20dp"
+                    android:background="@drawable/closed_eye_icon_orange" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="370dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/authentication_button_background_orange"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_submit"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:fontFamily="@font/poppins_bold"
+                android:text="Create Account"
+                android:textColor="@color/solora_on_primary"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/btn_to_login"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_gravity="center"
+            android:padding="12dp"
+            android:layout_marginTop="30dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/poppins"
+                android:text="Already have an account?"
+                android:textColor="@color/solora_night_gray"
+                android:textSize="13sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:fontFamily="@font/poppins"
+                android:text="Login"
+                android:textColor="@color/solora_night_gray"
+                android:textSize="13sp" />
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>
-
-

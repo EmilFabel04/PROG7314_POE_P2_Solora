@@ -67,7 +67,8 @@ class LoginFragment : Fragment() {
         val emailInput = view.findViewById<android.widget.EditText>(R.id.et_email)
         val passwordInput = view.findViewById<android.widget.EditText>(R.id.et_password)
         val submitButton = view.findViewById<android.widget.Button>(R.id.btn_submit)
-        val googleSignInButton = view.findViewById<android.widget.Button>(R.id.btn_google_signin)
+        val googleSignInButton = view.findViewById<android.widget.ImageButton>(R.id.btn_google_signin)
+        val registerButton = view.findViewById<android.view.View>(R.id.btn_to_register)
         
         // Observe auth state
         authViewModel.authState.asLiveData().observe(viewLifecycleOwner) { state ->
@@ -146,10 +147,11 @@ class RegisterFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        val nameInput = view.findViewById<android.widget.EditText>(R.id.et_name)
+        val nameInput = view.findViewById<android.widget.EditText>(R.id.et_full_name)
         val emailInput = view.findViewById<android.widget.EditText>(R.id.et_email)
         val passwordInput = view.findViewById<android.widget.EditText>(R.id.et_password)
-        val registerButton = view.findViewById<android.widget.Button>(R.id.btn_register)
+        val confirmPasswordInput = view.findViewById<android.widget.EditText>(R.id.et_confirm_password)
+        val registerButton = view.findViewById<android.widget.Button>(R.id.btn_submit)
         
         // Observe auth state
         authViewModel.authState.asLiveData().observe(viewLifecycleOwner) { state ->
@@ -182,9 +184,15 @@ class RegisterFragment : Fragment() {
             val name = nameInput.text?.toString()?.trim() ?: ""
             val email = emailInput.text?.toString()?.trim() ?: ""
             val password = passwordInput.text?.toString() ?: ""
+            val confirmPassword = confirmPasswordInput.text?.toString() ?: ""
             
-            if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
+            if (name.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
                 android.widget.Toast.makeText(requireContext(), "Please fill in all fields", android.widget.Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            
+            if (password != confirmPassword) {
+                android.widget.Toast.makeText(requireContext(), "Passwords do not match", android.widget.Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             
@@ -197,6 +205,7 @@ class RegisterFragment : Fragment() {
         }
         
         view.findViewById<View>(R.id.btn_back_login).setOnClickListener { findNavController().popBackStack() }
+        view.findViewById<View>(R.id.btn_to_login).setOnClickListener { findNavController().popBackStack() }
     }
 }
 
