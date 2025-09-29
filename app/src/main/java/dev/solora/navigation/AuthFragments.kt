@@ -106,17 +106,18 @@ class LoginFragment : Fragment() {
             authViewModel.login(email, password)
         }
 
-        // Google login setup with fallback client ID
-        val webClientId = try {
-            getString(R.string.default_web_client_id)
-        } catch (e: Exception) {
-            Log.w("LoginFragment", "Web client ID not found, trying Android client ID")
-            getString(R.string.android_client_id)
-        }
+        // NUCLEAR OPTION: Completely hardcoded Google Sign-In setup
+        val webClientId = "570014568272-gd86hu4qi23o92k6ji98ii5g26t97ks2.apps.googleusercontent.com"
         
-        Log.d("LoginFragment", "=== GOOGLE SIGN-IN SETUP ===")
-        Log.d("LoginFragment", "Using Client ID: $webClientId")
+        Log.d("LoginFragment", "=== NUCLEAR GOOGLE SIGN-IN SETUP ===")
+        Log.d("LoginFragment", "Hardcoded Client ID: $webClientId")
         Log.d("LoginFragment", "Package: ${requireContext().packageName}")
+        Log.d("LoginFragment", "Expected package: dev.solora")
+        
+        // Check if google-services.json is being processed
+        val appInfo = requireContext().packageManager.getApplicationInfo(requireContext().packageName, 0)
+        Log.d("LoginFragment", "App target SDK: ${appInfo.targetSdkVersion}")
+        Log.d("LoginFragment", "Firebase initialized: ${com.google.firebase.FirebaseApp.getApps(requireContext()).isNotEmpty()}")
         
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(webClientId)
@@ -232,16 +233,18 @@ class RegisterFragment : Fragment() {
             authViewModel.register(name, surname, email, password)
         }
 
-        val webClientId = try {
-            getString(R.string.default_web_client_id)
-        } catch (e: Exception) {
-            Log.w("RegisterFragment", "Web client ID not found, trying Android client ID")
-            getString(R.string.android_client_id)
-        }
+        // NUCLEAR OPTION: Completely hardcoded Google Sign-In setup
+        val webClientId = "570014568272-gd86hu4qi23o92k6ji98ii5g26t97ks2.apps.googleusercontent.com"
         
-        Log.d("RegisterFragment", "=== GOOGLE SIGN-IN SETUP ===")
-        Log.d("RegisterFragment", "Using Client ID: $webClientId")
+        Log.d("RegisterFragment", "=== NUCLEAR GOOGLE SIGN-IN SETUP ===")
+        Log.d("RegisterFragment", "Hardcoded Client ID: $webClientId")
         Log.d("RegisterFragment", "Package: ${requireContext().packageName}")
+        Log.d("RegisterFragment", "Expected package: dev.solora")
+        
+        // Check if google-services.json is being processed
+        val appInfo = requireContext().packageManager.getApplicationInfo(requireContext().packageName, 0)
+        Log.d("RegisterFragment", "App target SDK: ${appInfo.targetSdkVersion}")
+        Log.d("RegisterFragment", "Firebase initialized: ${com.google.firebase.FirebaseApp.getApps(requireContext()).isNotEmpty()}")
         
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(webClientId)
