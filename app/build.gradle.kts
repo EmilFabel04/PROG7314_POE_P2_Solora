@@ -44,12 +44,17 @@ android {
 
 dependencies {
     // Firebase BOM and services
-    implementation(platform("com.google.firebase:firebase-bom:33.3.0"))
+    implementation(platform("com.google.firebase:firebase-bom:34.3.0"))
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-analytics-ktx")
-    
-    // SSO - Google Sign-In
+
+    // Google Identity via Credential Manager (modern Google Sign-In)
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+
+    // SSO - Google Sign-In (legacy API; safe to keep)
     implementation("com.google.android.gms:play-services-auth:20.7.0")
 	implementation("androidx.core:core-ktx:1.13.1")
     implementation("com.google.android.material:material:1.12.0")

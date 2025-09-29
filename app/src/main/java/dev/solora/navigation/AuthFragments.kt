@@ -13,10 +13,13 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialException
+import androidx.credentials.Credential
+import androidx.credentials.CustomCredential
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import androidx.activity.result.contract.ActivityResultContracts
@@ -54,27 +57,7 @@ class LoginFragment : Fragment() {
 
     private val authViewModel: AuthViewModel by viewModels()
     private lateinit var auth: FirebaseAuth
-    private lateinit var googleSignInClient: GoogleSignInClient
-
-    private val googleSignInLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        val data = result.data
-        val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-        try {
-            val account = task.getResult(com.google.android.gms.common.api.ApiException::class.java)!!
-            val idToken = account.idToken
-            if (idToken.isNullOrEmpty()) {
-                Log.e("LoginFragment", "Google ID token is null - check requestIdToken config")
-                Toast.makeText(requireContext(), "Google configuration error. Check web client ID.", Toast.LENGTH_LONG).show()
-                return@registerForActivityResult
-            }
-            authViewModel.authenticateWithGoogle(idToken, isRegistration = false)
-        } catch (e: com.google.android.gms.common.api.ApiException) {
-            Log.e("LoginFragment", "Google Sign-In failed: code=${e.statusCode}", e)
-            Toast.makeText(requireContext(), "Google Sign-In failed: ${e.statusCode}", Toast.LENGTH_LONG).show()
-        }
-    }
+    private lateinit var credentialManager: CredentialManager
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -107,7 +90,7 @@ class LoginFragment : Fragment() {
             authViewModel.login(email, password)
         }
 
-        // Configure Google Sign-In following Firebase documentation
+        // Configure Google Sign-In following Firebase documentation (Credential Manager)
         configureGoogleSignIn()
         
         // Navigation
@@ -123,17 +106,39 @@ class LoginFragment : Fragment() {
     }
 
     private fun configureGoogleSignIn() {
+        credentialManager = CredentialManager.create(requireContext())
         val webClientId = getString(R.string.default_web_client_id)
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(webClientId)
-            .requestEmail()
+        val googleIdOption = GetGoogleIdOption.Builder()
+            .setServerClientId(webClientId)
+            .setFilterByAuthorizedAccounts(true)
             .build()
 
-        googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
+        val request = GetCredentialRequest.Builder()
+            .addCredentialOption(googleIdOption)
+            .build()
 
         view?.findViewById<ImageButton>(R.id.btn_google_login)?.setOnClickListener {
-            val signInIntent = googleSignInClient.signInIntent
-            googleSignInLauncher.launch(signInIntent)
+            viewLifecycleOwner.lifecycle.addObserver(object : androidx.lifecycle.DefaultLifecycleObserver {})
+            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                try {
+                    val result = credentialManager.getCredential(requireContext(), request)
+                    handleCredential(result.credential)
+                } catch (e: GetCredentialException) {
+                    Log.e("LoginFragment", "Credential retrieval failed: ${e.message}")
+                    Toast.makeText(requireContext(), "Google Sign-In error: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
+
+    private fun handleCredential(credential: Credential) {
+        if (credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+            val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+            val idToken = googleIdTokenCredential.idToken
+            authViewModel.authenticateWithGoogle(idToken, isRegistration = false)
+        } else {
+            Log.w("LoginFragment", "Credential is not Google ID token")
+            Toast.makeText(requireContext(), "Not a Google ID credential", Toast.LENGTH_SHORT).show()
         }
     }
 }
@@ -142,27 +147,7 @@ class RegisterFragment : Fragment() {
 
     private val authViewModel: AuthViewModel by viewModels()
     private lateinit var auth: FirebaseAuth
-    private lateinit var googleSignInClient: GoogleSignInClient
-
-    private val googleSignInLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        val data = result.data
-        val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-        try {
-            val account = task.getResult(com.google.android.gms.common.api.ApiException::class.java)!!
-            val idToken = account.idToken
-            if (idToken.isNullOrEmpty()) {
-                Log.e("RegisterFragment", "Google ID token is null - check requestIdToken config")
-                Toast.makeText(requireContext(), "Google configuration error. Check web client ID.", Toast.LENGTH_LONG).show()
-                return@registerForActivityResult
-            }
-            authViewModel.authenticateWithGoogle(idToken, isRegistration = true)
-        } catch (e: com.google.android.gms.common.api.ApiException) {
-            Log.e("RegisterFragment", "Google Sign-In failed: code=${e.statusCode}", e)
-            Toast.makeText(requireContext(), "Google Sign-In failed: ${e.statusCode}", Toast.LENGTH_LONG).show()
-        }
-    }
+    private lateinit var credentialManager: CredentialManager
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -204,7 +189,7 @@ class RegisterFragment : Fragment() {
             authViewModel.register(name, surname, email, password)
         }
 
-        // Configure Google Sign-In following Firebase documentation
+        // Configure Google Sign-In following Firebase documentation (Credential Manager)
         configureGoogleSignIn()
 
         // Navigation
@@ -220,17 +205,27 @@ class RegisterFragment : Fragment() {
     }
 
     private fun configureGoogleSignIn() {
+        credentialManager = CredentialManager.create(requireContext())
         val webClientId = getString(R.string.default_web_client_id)
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(webClientId)
-            .requestEmail()
+        val googleIdOption = GetGoogleIdOption.Builder()
+            .setServerClientId(webClientId)
+            .setFilterByAuthorizedAccounts(true)
             .build()
 
-        googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
+        val request = GetCredentialRequest.Builder()
+            .addCredentialOption(googleIdOption)
+            .build()
 
         view?.findViewById<ImageButton>(R.id.btn_google_register)?.setOnClickListener {
-            val signInIntent = googleSignInClient.signInIntent
-            googleSignInLauncher.launch(signInIntent)
+            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                try {
+                    val result = credentialManager.getCredential(requireContext(), request)
+                    handleCredential(result.credential)
+                } catch (e: GetCredentialException) {
+                    Log.e("RegisterFragment", "Credential retrieval failed: ${e.message}")
+                    Toast.makeText(requireContext(), "Google Sign-In error: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
         }
     }
 }
