@@ -12,6 +12,7 @@ import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
@@ -226,6 +227,17 @@ class RegisterFragment : Fragment() {
                     Toast.makeText(requireContext(), "Google Sign-In error: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
+        }
+    }
+
+    private fun handleCredential(credential: Credential) {
+        if (credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+            val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+            val idToken = googleIdTokenCredential.idToken
+            authViewModel.authenticateWithGoogle(idToken, isRegistration = true)
+        } else {
+            Log.w("RegisterFragment", "Credential is not Google ID token")
+            Toast.makeText(requireContext(), "Not a Google ID credential", Toast.LENGTH_SHORT).show()
         }
     }
 }
