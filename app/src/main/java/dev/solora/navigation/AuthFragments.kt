@@ -15,8 +15,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+// Google Play Services imports
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInClient  
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import dev.solora.R
@@ -82,9 +83,14 @@ class LoginFragment : Fragment() {
         val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
         try {
             val account = task.getResult(ApiException::class.java)!!
+            Log.d("LoginFragment", "Google login successful, account: ${account.email}")
             authViewModel.loginWithGoogle(account.idToken!!)
         } catch (e: ApiException) {
-            Toast.makeText(requireContext(), "Google login failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            Log.e("LoginFragment", "Google login failed with code: ${e.statusCode}, message: ${e.message}")
+            Toast.makeText(requireContext(), "Google login failed: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+        } catch (e: Exception) {
+            Log.e("LoginFragment", "Unexpected Google login error: ${e.message}")
+            Toast.makeText(requireContext(), "Google login error: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -120,16 +126,26 @@ class LoginFragment : Fragment() {
         }
 
         // Google login setup
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id))
-            .requestEmail()
-            .build()
+        try {
+            val webClientId = getString(R.string.default_web_client_id)
+            Log.d("LoginFragment", "Using web client ID: $webClientId")
+            
+            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(webClientId)
+                .requestEmail()
+                .build()
 
-        googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
+            googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
+            Log.d("LoginFragment", "Google Sign-In client initialized successfully")
 
-        view.findViewById<ImageButton>(R.id.btn_google_login).setOnClickListener {
-            val signInIntent = googleSignInClient.signInIntent
-            googleSignInLauncher.launch(signInIntent)
+            view.findViewById<ImageButton>(R.id.btn_google_login).setOnClickListener {
+                Log.d("LoginFragment", "Google login button clicked")
+                val signInIntent = googleSignInClient.signInIntent
+                googleSignInLauncher.launch(signInIntent)
+            }
+        } catch (e: Exception) {
+            Log.e("LoginFragment", "Failed to initialize Google Sign-In: ${e.message}")
+            Toast.makeText(requireContext(), "Google Sign-In setup failed: ${e.message}", Toast.LENGTH_LONG).show()
         }
 
         observeAuthStateAndNavigate(authViewModel)
@@ -157,9 +173,14 @@ class RegisterFragment : Fragment() {
         val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
         try {
             val account = task.getResult(ApiException::class.java)!!
+            Log.d("RegisterFragment", "Google register successful, account: ${account.email}")
             authViewModel.registerWithGoogle(account.idToken!!)
         } catch (e: ApiException) {
-            Toast.makeText(requireContext(), "Google register failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            Log.e("RegisterFragment", "Google register failed with code: ${e.statusCode}, message: ${e.message}")
+            Toast.makeText(requireContext(), "Google register failed: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+        } catch (e: Exception) {
+            Log.e("RegisterFragment", "Unexpected Google register error: ${e.message}")
+            Toast.makeText(requireContext(), "Google register error: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -208,17 +229,27 @@ class RegisterFragment : Fragment() {
         }
 
         // Google Sign-In setup
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id))
-            .requestEmail()
-            .build()
+        try {
+            val webClientId = getString(R.string.default_web_client_id)
+            Log.d("RegisterFragment", "Using web client ID: $webClientId")
+            
+            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(webClientId)
+                .requestEmail()
+                .build()
 
-        googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
+            googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
+            Log.d("RegisterFragment", "Google Sign-In client initialized successfully")
 
-        val googleButton = view.findViewById<ImageButton>(R.id.btn_google_register)
-        googleButton.setOnClickListener {
-            val signInIntent = googleSignInClient.signInIntent
-            googleSignInLauncher.launch(signInIntent)
+            val googleButton = view.findViewById<ImageButton>(R.id.btn_google_register)
+            googleButton.setOnClickListener {
+                Log.d("RegisterFragment", "Google register button clicked")
+                val signInIntent = googleSignInClient.signInIntent
+                googleSignInLauncher.launch(signInIntent)
+            }
+        } catch (e: Exception) {
+            Log.e("RegisterFragment", "Failed to initialize Google Sign-In: ${e.message}")
+            Toast.makeText(requireContext(), "Google Sign-In setup failed: ${e.message}", Toast.LENGTH_LONG).show()
         }
 
         observeAuthStateAndNavigate(authViewModel)
