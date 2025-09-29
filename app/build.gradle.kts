@@ -18,6 +18,15 @@ android {
 		versionName = "1.0.0"
 	}
 
+	signingConfigs {
+		create("release") {
+			storeFile = file("keystore/solora-release-key.keystore")
+			storePassword = "solora123"
+			keyAlias = "solora"
+			keyPassword = "solora123"
+		}
+	}
+
 	buildTypes {
 		release {
 			isMinifyEnabled = false
@@ -25,6 +34,7 @@ android {
 				getDefaultProguardFile("proguard-android-optimize.txt"),
 				"proguard-rules.pro"
 			)
+			signingConfig = signingConfigs.getByName("release")
 		}
 	}
 
