@@ -111,7 +111,7 @@ class LoginFragment : Fragment() {
         val webClientId = getString(R.string.default_web_client_id)
         val googleIdOption = GetGoogleIdOption.Builder()
             .setServerClientId(webClientId)
-            .setFilterByAuthorizedAccounts(true)
+            .setFilterByAuthorizedAccounts(false)
             .build()
 
         val request = GetCredentialRequest.Builder()
@@ -210,7 +210,7 @@ class RegisterFragment : Fragment() {
         val webClientId = getString(R.string.default_web_client_id)
         val googleIdOption = GetGoogleIdOption.Builder()
             .setServerClientId(webClientId)
-            .setFilterByAuthorizedAccounts(true)
+            .setFilterByAuthorizedAccounts(false)
             .build()
 
         val request = GetCredentialRequest.Builder()
