@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -71,9 +72,20 @@ class OnboardingFragment : Fragment() {
 class LoginFragment : Fragment() {
 
     private val authViewModel: AuthViewModel by viewModels()
-
     private lateinit var googleSignInClient: GoogleSignInClient
-    private val RC_SIGN_IN = 1001
+    
+    // Modern Activity Result API for Google Sign-In
+    private val googleSignInLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(ApiException::class.java)!!
+            authViewModel.loginWithGoogle(account.idToken!!)
+        } catch (e: ApiException) {
+            Toast.makeText(requireContext(), "Google login failed: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -116,7 +128,7 @@ class LoginFragment : Fragment() {
 
         view.findViewById<ImageButton>(R.id.btn_google_login).setOnClickListener {
             val signInIntent = googleSignInClient.signInIntent
-            startActivityForResult(signInIntent, RC_SIGN_IN)
+            googleSignInLauncher.launch(signInIntent)
         }
 
         observeAuthStateAndNavigate(authViewModel)
@@ -130,26 +142,25 @@ class LoginFragment : Fragment() {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == RC_SIGN_IN) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-            try {
-                val account = task.getResult(ApiException::class.java)!!
-                authViewModel.loginWithGoogle(account.idToken!!)
-            } catch (e: ApiException) {
-                Toast.makeText(requireContext(), "Google login failed: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
 }
 
 class RegisterFragment : Fragment() {
 
     private val authViewModel: AuthViewModel by viewModels()
-
     private lateinit var googleSignInClient: GoogleSignInClient
-    private val RC_SIGN_IN = 1001
+    
+    // Modern Activity Result API for Google Sign-In
+    private val googleSignInLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(ApiException::class.java)!!
+            authViewModel.registerWithGoogle(account.idToken!!)
+        } catch (e: ApiException) {
+            Toast.makeText(requireContext(), "Google register failed: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -205,7 +216,7 @@ class RegisterFragment : Fragment() {
         val googleButton = view.findViewById<ImageButton>(R.id.btn_google_register)
         googleButton.setOnClickListener {
             val signInIntent = googleSignInClient.signInIntent
-            startActivityForResult(signInIntent, RC_SIGN_IN)
+            googleSignInLauncher.launch(signInIntent)
         }
 
         observeAuthStateAndNavigate(authViewModel)
@@ -220,16 +231,4 @@ class RegisterFragment : Fragment() {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == RC_SIGN_IN) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-            try {
-                val account = task.getResult(ApiException::class.java)!!
-                authViewModel.registerWithGoogle(account.idToken!!)
-            } catch (e: ApiException) {
-                Toast.makeText(requireContext(), "Google register failed: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
 }
