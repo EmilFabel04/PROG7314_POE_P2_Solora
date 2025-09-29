@@ -128,7 +128,7 @@ class LoginFragment : Fragment() {
         view.findViewById<ImageButton>(R.id.btn_google_login).setOnClickListener {
             Log.d("LoginFragment", "=== GOOGLE LOGIN BUTTON CLICKED ===")
             Log.d("LoginFragment", "Package name: ${requireContext().packageName}")
-            Log.d("LoginFragment", "Google Services available: ${GoogleSignIn.hasPermissions(GoogleSignIn.getLastSignedInAccount(requireContext()), gso)}")
+            Log.d("LoginFragment", "Last signed in account: ${GoogleSignIn.getLastSignedInAccount(requireContext())?.email}")
             
             try {
                 val signInIntent = googleSignInClient.signInIntent
@@ -254,7 +254,7 @@ class RegisterFragment : Fragment() {
         googleButton.setOnClickListener {
             Log.d("RegisterFragment", "=== GOOGLE REGISTER BUTTON CLICKED ===")
             Log.d("RegisterFragment", "Package name: ${requireContext().packageName}")
-            Log.d("RegisterFragment", "Google Services available: ${GoogleSignIn.hasPermissions(GoogleSignIn.getLastSignedInAccount(requireContext()), gso)}")
+            Log.d("RegisterFragment", "Last signed in account: ${GoogleSignIn.getLastSignedInAccount(requireContext())?.email}")
             
             try {
                 val signInIntent = googleSignInClient.signInIntent
