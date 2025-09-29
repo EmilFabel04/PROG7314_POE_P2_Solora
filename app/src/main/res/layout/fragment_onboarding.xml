@@ -2,30 +2,65 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:padding="24dp"
-    android:gravity="center"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/get_started_background">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Solora Mobile"
-        android:textStyle="bold"
-        android:textSize="24sp"
-        android:paddingBottom="24dp"/>
+        android:fontFamily="@font/poppins_bold"
+        android:text="Solar Sales Made
+                      Simple."
+        android:layout_marginTop="30dp"
+        android:textColor="@color/solora_on_primary"
+        android:textSize="40sp" />
 
-    <Button
-        android:id="@+id/btn_login"
-        android:layout_width="match_parent"
+    <TextView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Login"/>
+        android:fontFamily="@font/poppins_bold"
+        android:text="Closing more deals with confidence."
+        android:textColor="@color/solora_black"
+        android:textSize="13sp" />
 
-    <Button
-        android:id="@+id/btn_register"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Create account"
-        android:layout_marginTop="12dp"/>
+    <LinearLayout
+        android:layout_width="232dp"
+        android:layout_height="232dp"
+        android:orientation="horizontal"
+        android:layout_gravity="center"
+        android:layout_marginTop="80dp"
+        android:background="@drawable/solora_logo2"/>
+
+    <LinearLayout
+        android:id="@+id/btn_get_started"
+        android:layout_width="250dp"
+        android:layout_height="50dp"
+        android:orientation="horizontal"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_gravity="center"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/authentication_button_background_orange">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="55dp"
+            android:fontFamily="@font/poppins_medium"
+            android:text="Get Started"
+            android:textColor="@color/solora_on_primary"
+            android:textSize="20sp"/>
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:background="@drawable/arrow_forward_icon_white"
+            android:layout_gravity="center"
+            android:layout_marginLeft="10dp"/>
+    </LinearLayout>
 
 </LinearLayout>
 
