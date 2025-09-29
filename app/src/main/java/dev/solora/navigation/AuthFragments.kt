@@ -97,7 +97,32 @@ class LoginFragment : Fragment() {
             authViewModel.loginWithGoogle(idToken)
         } catch (e: ApiException) {
             Log.e("LoginFragment", "Google login failed with code: ${e.statusCode}, message: ${e.message}")
-            Toast.makeText(requireContext(), "Google login failed: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+            
+            when (e.statusCode) {
+                10 -> {
+                    Log.e("LoginFragment", "DEVELOPER_ERROR: Firebase Console configuration issue")
+                    Log.e("LoginFragment", "Current package: ${requireContext().packageName}")
+                    Log.e("LoginFragment", "Expected: dev.solora")
+                    Toast.makeText(requireContext(), 
+                        "Configuration Error: Check Firebase Console\n" +
+                        "1. Enable Google Sign-In\n" +
+                        "2. Add SHA-1 fingerprint\n" +
+                        "3. Download new google-services.json", 
+                        Toast.LENGTH_LONG).show()
+                }
+                7 -> {
+                    Log.e("LoginFragment", "NETWORK_ERROR: No internet connection")
+                    Toast.makeText(requireContext(), "Network error. Check internet connection.", Toast.LENGTH_LONG).show()
+                }
+                12501 -> {
+                    Log.w("LoginFragment", "Sign-in cancelled by user")
+                    // Don't show error for user cancellation
+                }
+                else -> {
+                    Log.e("LoginFragment", "Unknown Google Sign-In error: ${e.statusCode}")
+                    Toast.makeText(requireContext(), "Google login failed: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+                }
+            }
         } catch (e: Exception) {
             Log.e("LoginFragment", "Unexpected Google login error: ${e.message}")
             Toast.makeText(requireContext(), "Google login error: ${e.message}", Toast.LENGTH_LONG).show()
@@ -208,7 +233,32 @@ class RegisterFragment : Fragment() {
             authViewModel.registerWithGoogle(idToken)
         } catch (e: ApiException) {
             Log.e("RegisterFragment", "Google register failed with code: ${e.statusCode}, message: ${e.message}")
-            Toast.makeText(requireContext(), "Google register failed: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+            
+            when (e.statusCode) {
+                10 -> {
+                    Log.e("RegisterFragment", "DEVELOPER_ERROR: Firebase Console configuration issue")
+                    Log.e("RegisterFragment", "Current package: ${requireContext().packageName}")
+                    Log.e("RegisterFragment", "Expected: dev.solora")
+                    Toast.makeText(requireContext(), 
+                        "Configuration Error: Check Firebase Console\n" +
+                        "1. Enable Google Sign-In\n" +
+                        "2. Add SHA-1 fingerprint\n" +
+                        "3. Download new google-services.json", 
+                        Toast.LENGTH_LONG).show()
+                }
+                7 -> {
+                    Log.e("RegisterFragment", "NETWORK_ERROR: No internet connection")
+                    Toast.makeText(requireContext(), "Network error. Check internet connection.", Toast.LENGTH_LONG).show()
+                }
+                12501 -> {
+                    Log.w("RegisterFragment", "Sign-in cancelled by user")
+                    // Don't show error for user cancellation
+                }
+                else -> {
+                    Log.e("RegisterFragment", "Unknown Google Sign-In error: ${e.statusCode}")
+                    Toast.makeText(requireContext(), "Google register failed: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+                }
+            }
         } catch (e: Exception) {
             Log.e("RegisterFragment", "Unexpected Google register error: ${e.message}")
             Toast.makeText(requireContext(), "Google register error: ${e.message}", Toast.LENGTH_LONG).show()
