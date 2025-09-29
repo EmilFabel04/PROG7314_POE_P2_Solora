@@ -18,8 +18,43 @@ class OnboardingFragment : Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        view.findViewById<View>(R.id.btn_login).setOnClickListener { findNavController().navigate(R.id.action_onboarding_to_login) }
-        view.findViewById<View>(R.id.btn_register).setOnClickListener { findNavController().navigate(R.id.action_onboarding_to_register) }
+        
+        android.util.Log.d("OnboardingFragment", "=== ONBOARDING FRAGMENT VIEW CREATED ===")
+        
+        // Get Started button - navigate to registration for new users
+        val getStartedButton = view.findViewById<View>(R.id.btn_get_started)
+        android.util.Log.d("OnboardingFragment", "Get Started button found: ${getStartedButton != null}")
+        
+        if (getStartedButton != null) {
+            android.util.Log.d("OnboardingFragment", "Button visibility: ${getStartedButton.visibility}, enabled: ${getStartedButton.isEnabled}")
+            getStartedButton.setOnClickListener { 
+                android.util.Log.d("OnboardingFragment", "Get Started button clicked!")
+                findNavController().navigate(R.id.action_onboarding_to_register) 
+            }
+        } else {
+            android.util.Log.e("OnboardingFragment", "Get Started button NOT FOUND!")
+        }
+        
+        // Already have account link - navigate to login
+        val alreadyHaveAccountLink = view.findViewById<View>(R.id.tv_already_have_account)
+        android.util.Log.d("OnboardingFragment", "Already have account link found: ${alreadyHaveAccountLink != null}")
+        
+        alreadyHaveAccountLink?.setOnClickListener { 
+            android.util.Log.d("OnboardingFragment", "Already have account clicked!")
+            findNavController().navigate(R.id.action_onboarding_to_login) 
+        }
+        
+        // Hidden compatibility buttons (in case they're still referenced)
+        view.findViewById<View>(R.id.btn_login)?.setOnClickListener { 
+            android.util.Log.d("OnboardingFragment", "Hidden login button clicked!")
+            findNavController().navigate(R.id.action_onboarding_to_login) 
+        }
+        view.findViewById<View>(R.id.btn_register)?.setOnClickListener { 
+            android.util.Log.d("OnboardingFragment", "Hidden register button clicked!")
+            findNavController().navigate(R.id.action_onboarding_to_register) 
+        }
+        
+        android.util.Log.d("OnboardingFragment", "=== ONBOARDING SETUP COMPLETE ===")
     }
 }
 

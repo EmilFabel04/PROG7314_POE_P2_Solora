@@ -4,8 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -16,42 +14,38 @@ import dev.solora.R
 
 class StartFragment : Fragment() {
     private val authViewModel: AuthViewModel by viewModels()
-    private var isCheckingAuth = true
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_start, container, false)
+        // Show a simple loading view while checking auth state
+        return inflater.inflate(android.R.layout.activity_list_item, container, false).apply {
+            findViewById<android.widget.TextView>(android.R.id.text1)?.apply {
+                text = "Loading..."
+                gravity = android.view.Gravity.CENTER
+                textSize = 18f
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        // Initialize UI elements
-        val btnGetStarted = view.findViewById<Button>(R.id.btn_get_started)
-        val tvSkip = view.findViewById<TextView>(R.id.tv_skip)
-        
-        // Set up click listeners
-        btnGetStarted.setOnClickListener {
-            findNavController().navigate(R.id.action_start_to_auth)
-        }
-        
-        tvSkip.setOnClickListener {
-            findNavController().navigate(R.id.action_start_to_auth)
-        }
-        
-        // Check authentication status
+        // Add a small delay to prevent immediate navigation on slow devices
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            kotlinx.coroutines.delay(500) // Give UI time to render
+            
             authViewModel.isLoggedIn.collectLatest { loggedIn ->
-                if (isCheckingAuth) {
-                    // Only auto-redirect on initial check, not after user actions
-                    if (loggedIn) {
-                        findNavController().navigate(R.id.action_start_to_main)
-                    }
-                    // Show the welcome screen for new users
-                    isCheckingAuth = false
+                android.util.Log.d("StartFragment", "Auth state: loggedIn = $loggedIn")
+                
+                if (loggedIn) {
+                    android.util.Log.d("StartFragment", "User logged in, navigating to main")
+                    findNavController().navigate(R.id.action_start_to_main)
+                } else {
+                    android.util.Log.d("StartFragment", "User not logged in, navigating to auth flow")
+                    findNavController().navigate(R.id.action_start_to_auth)
                 }
             }
         }
