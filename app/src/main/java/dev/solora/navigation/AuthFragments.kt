@@ -83,14 +83,17 @@ class LoginFragment : Fragment() {
         val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
         try {
             val account = task.getResult(ApiException::class.java)!!
-            Log.d("LoginFragment", "Google login successful, account: ${account.email}")
+            Log.d("LoginFragment", "Google Sign-In successful")
+            Log.d("LoginFragment", "Account: ${account.email}")
+            Log.d("LoginFragment", "Display Name: ${account.displayName}")
+            Log.d("LoginFragment", "Photo URL: ${account.photoUrl}")
             
             val idToken = account.idToken
             if (idToken.isNullOrBlank()) {
-                throw Exception("ID token is null or empty. Make sure SHA-1 fingerprint is configured in Firebase Console.")
+                throw Exception("ID token is null or empty. Check SHA-1 fingerprint in Firebase Console.")
             }
             
-            Log.d("LoginFragment", "ID token received successfully")
+            Log.d("LoginFragment", "ID token received, proceeding with Firebase authentication")
             authViewModel.loginWithGoogle(idToken)
         } catch (e: ApiException) {
             Log.e("LoginFragment", "Google login failed with code: ${e.statusCode}, message: ${e.message}")
@@ -191,14 +194,17 @@ class RegisterFragment : Fragment() {
         val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
         try {
             val account = task.getResult(ApiException::class.java)!!
-            Log.d("RegisterFragment", "Google register successful, account: ${account.email}")
+            Log.d("RegisterFragment", "Google Sign-In successful")
+            Log.d("RegisterFragment", "Account: ${account.email}")
+            Log.d("RegisterFragment", "Display Name: ${account.displayName}")
+            Log.d("RegisterFragment", "Photo URL: ${account.photoUrl}")
             
             val idToken = account.idToken
             if (idToken.isNullOrBlank()) {
-                throw Exception("ID token is null or empty. Make sure SHA-1 fingerprint is configured in Firebase Console.")
+                throw Exception("ID token is null or empty. Check SHA-1 fingerprint in Firebase Console.")
             }
             
-            Log.d("RegisterFragment", "ID token received successfully")
+            Log.d("RegisterFragment", "ID token received, proceeding with Firebase authentication")
             authViewModel.registerWithGoogle(idToken)
         } catch (e: ApiException) {
             Log.e("RegisterFragment", "Google register failed with code: ${e.statusCode}, message: ${e.message}")

@@ -53,9 +53,10 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
             _authState.value = AuthState.Loading
             val result = repo.loginWithGoogle(idToken)
             _authState.value = if (result.isSuccess) {
-                AuthState.Success("Google login successful")
+                val user = result.getOrNull()
+                AuthState.Success("Welcome ${user?.displayName ?: user?.email ?: "back"}!")
             } else {
-                AuthState.Error(result.exceptionOrNull()?.message ?: "Google login failed")
+                AuthState.Error(result.exceptionOrNull()?.message ?: "Google authentication failed")
             }
         }
     }
@@ -65,9 +66,10 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
             _authState.value = AuthState.Loading
             val result = repo.registerWithGoogle(idToken)
             _authState.value = if (result.isSuccess) {
-                AuthState.Success("Google registration successful")
+                val user = result.getOrNull()
+                AuthState.Success("Welcome ${user?.displayName ?: user?.email ?: "to Solora"}!")
             } else {
-                AuthState.Error(result.exceptionOrNull()?.message ?: "Google registration failed")
+                AuthState.Error(result.exceptionOrNull()?.message ?: "Google authentication failed")
             }
         }
     }
