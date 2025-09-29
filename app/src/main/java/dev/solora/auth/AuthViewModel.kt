@@ -43,28 +43,48 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun loginWithGoogle(idToken: String) {
+    fun authenticateWithGoogle(idToken: String, isRegistration: Boolean = false) {
         viewModelScope.launch {
-            _authState.value = AuthState.Loading
-            val result = repo.loginWithGoogle(idToken)
-            _authState.value = if (result.isSuccess) {
-                AuthState.Success("Google login successful")
-            } else {
-                AuthState.Error(result.exceptionOrNull()?.message ?: "Google login failed")
+            try {
+                _authState.value = AuthState.Loading
+                
+                Log.d("AuthViewModel", "🚀 Starting Google authentication flow...")
+                Log.d("AuthViewModel", "📋 Is registration: $isRegistration")
+                
+                val result = repo.authenticateWithGoogle(idToken)
+                
+                if (result.isSuccess) {
+                    val user = result.getOrNull()!!
+                    val welcomeMessage = if (isRegistration) {
+                        "Welcome to Solora, ${user.displayName ?: user.email}! 🎉"
+                    } else {
+                        "Welcome back, ${user.displayName ?: user.email}! 👋"
+                    }
+                    
+                    Log.d("AuthViewModel", "✅ Google authentication completed successfully")
+                    _authState.value = AuthState.Success(welcomeMessage)
+                } else {
+                    val error = result.exceptionOrNull()
+                    Log.e("AuthViewModel", "❌ Google authentication failed: ${error?.message}")
+                    _authState.value = AuthState.Error(
+                        error?.message ?: "Google authentication failed. Please try again."
+                    )
+                }
+                
+            } catch (e: Exception) {
+                Log.e("AuthViewModel", "💥 Unexpected error in Google authentication: ${e.message}")
+                _authState.value = AuthState.Error("An unexpected error occurred. Please try again.")
             }
         }
     }
-
+    
+    // Convenience methods for backward compatibility
+    fun loginWithGoogle(idToken: String) {
+        authenticateWithGoogle(idToken, isRegistration = false)
+    }
+    
     fun registerWithGoogle(idToken: String) {
-        viewModelScope.launch {
-            _authState.value = AuthState.Loading
-            val result = repo.registerWithGoogle(idToken)
-            _authState.value = if (result.isSuccess) {
-                AuthState.Success("Google sign-in successful")
-            } else {
-                AuthState.Error(result.exceptionOrNull()?.message ?: "Google sign-in failed")
-            }
-        }
+        authenticateWithGoogle(idToken, isRegistration = true)
     }
 
     fun logout() {
