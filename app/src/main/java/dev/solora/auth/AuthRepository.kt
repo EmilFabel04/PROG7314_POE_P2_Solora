@@ -5,8 +5,10 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -98,9 +100,20 @@ class AuthRepository(private val context: Context) {
 
     suspend fun loginWithGoogle(idToken: String): Result<com.google.firebase.auth.FirebaseUser> {
         return try {
-            val credential = com.google.firebase.auth.GoogleAuthProvider.getCredential(idToken, null)
+            Log.d("AuthRepository", "Starting Google login with ID token")
+            
+            if (idToken.isBlank()) {
+                throw Exception("ID token is empty")
+            }
+            
+            val credential = GoogleAuthProvider.getCredential(idToken, null)
+            Log.d("AuthRepository", "Created Google credential successfully")
+            
             val result = firebaseAuth.signInWithCredential(credential).await()
-            val user = result.user ?: return Result.failure(Exception("User is null"))
+            Log.d("AuthRepository", "Firebase signInWithCredential completed")
+            
+            val user = result.user ?: return Result.failure(Exception("Firebase returned null user"))
+            Log.d("AuthRepository", "Google login successful for user: ${user.email}")
             
             // Store user info locally
             context.dataStore.edit { prefs ->
@@ -108,26 +121,45 @@ class AuthRepository(private val context: Context) {
                 prefs[KEY_EMAIL] = user.email ?: ""
                 prefs[KEY_NAME] = user.displayName ?: ""
             }
+            Log.d("AuthRepository", "User data stored locally")
             
             Result.success(user)
         } catch (e: Exception) {
+            Log.e("AuthRepository", "Google login failed: ${e.message}", e)
             Result.failure(e)
         }
     }
 
     suspend fun registerWithGoogle(idToken: String): Result<com.google.firebase.auth.FirebaseUser> {
         return try {
-            val credential = com.google.firebase.auth.GoogleAuthProvider.getCredential(idToken, null)
-            val result = firebaseAuth.signInWithCredential(credential).await()
-            val user = result.user ?: return Result.failure(Exception("User is null"))
+            Log.d("AuthRepository", "Starting Google registration with ID token")
             
-            // Store user info in Firestore
+            if (idToken.isBlank()) {
+                throw Exception("ID token is empty")
+            }
+            
+            val credential = GoogleAuthProvider.getCredential(idToken, null)
+            Log.d("AuthRepository", "Created Google credential for registration")
+            
+            val result = firebaseAuth.signInWithCredential(credential).await()
+            Log.d("AuthRepository", "Firebase signInWithCredential completed for registration")
+            
+            val user = result.user ?: return Result.failure(Exception("Firebase returned null user"))
+            Log.d("AuthRepository", "Google registration successful for user: ${user.email}")
+            
+            // Check if this is a new user
+            val isNewUser = result.additionalUserInfo?.isNewUser ?: false
+            Log.d("AuthRepository", "Is new user: $isNewUser")
+            
+            // Store user info in Firestore (always update/create)
             val userDoc = hashMapOf(
                 "name" to (user.displayName ?: ""),
                 "email" to (user.email ?: ""),
-                "createdAt" to com.google.firebase.Timestamp.now()
+                "createdAt" to com.google.firebase.Timestamp.now(),
+                "isNewUser" to isNewUser
             )
             firestore.collection("users").document(user.uid).set(userDoc).await()
+            Log.d("AuthRepository", "User document saved to Firestore")
             
             // Store user info locally
             context.dataStore.edit { prefs ->
@@ -135,9 +167,11 @@ class AuthRepository(private val context: Context) {
                 prefs[KEY_EMAIL] = user.email ?: ""
                 prefs[KEY_NAME] = user.displayName ?: ""
             }
+            Log.d("AuthRepository", "User data stored locally for registration")
             
             Result.success(user)
         } catch (e: Exception) {
+            Log.e("AuthRepository", "Google registration failed: ${e.message}", e)
             Result.failure(e)
         }
     }
