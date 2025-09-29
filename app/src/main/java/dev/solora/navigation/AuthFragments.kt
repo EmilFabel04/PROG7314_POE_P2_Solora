@@ -105,9 +105,18 @@ class LoginFragment : Fragment() {
 
     private fun setupGoogleSignIn(view: View) {
         try {
-            // Simple Google Sign-In configuration
+            // Get web client ID with fallback for new Firebase setup
+            val webClientId = try {
+                getString(R.string.default_web_client_id)
+            } catch (e: Exception) {
+                // Fallback to new client ID from updated google-services.json
+                "570014568272-akipotsp9timh1g4tescrdnh71tblmth.apps.googleusercontent.com"
+            }
+            
+            Log.d("LoginFragment", "Using web client ID: $webClientId")
+            
             val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestIdToken(webClientId)
                 .requestEmail()
                 .requestProfile()
                 .build()
@@ -213,9 +222,18 @@ class RegisterFragment : Fragment() {
 
     private fun setupGoogleSignIn(view: View) {
         try {
-            // Simple Google Sign-In configuration
+            // Get web client ID with fallback for new Firebase setup
+            val webClientId = try {
+                getString(R.string.default_web_client_id)
+            } catch (e: Exception) {
+                // Fallback to new client ID from updated google-services.json
+                "570014568272-akipotsp9timh1g4tescrdnh71tblmth.apps.googleusercontent.com"
+            }
+            
+            Log.d("RegisterFragment", "Using web client ID: $webClientId")
+            
             val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestIdToken(webClientId)
                 .requestEmail()
                 .requestProfile()
                 .build()
