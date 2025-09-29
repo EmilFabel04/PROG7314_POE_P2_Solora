@@ -1,6 +1,5 @@
 package dev.solora.navigation
 
-// Force Android Studio sync - Google SSO enabled
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
