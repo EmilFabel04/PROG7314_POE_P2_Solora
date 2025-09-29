@@ -96,6 +96,52 @@ class AuthRepository(private val context: Context) {
         }
     }
 
+    suspend fun loginWithGoogle(idToken: String): Result<com.google.firebase.auth.FirebaseUser> {
+        return try {
+            val credential = com.google.firebase.auth.GoogleAuthProvider.getCredential(idToken, null)
+            val result = firebaseAuth.signInWithCredential(credential).await()
+            val user = result.user ?: return Result.failure(Exception("User is null"))
+            
+            // Store user info locally
+            context.dataStore.edit { prefs ->
+                prefs[KEY_USER_ID] = user.uid
+                prefs[KEY_EMAIL] = user.email ?: ""
+                prefs[KEY_NAME] = user.displayName ?: ""
+            }
+            
+            Result.success(user)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun registerWithGoogle(idToken: String): Result<com.google.firebase.auth.FirebaseUser> {
+        return try {
+            val credential = com.google.firebase.auth.GoogleAuthProvider.getCredential(idToken, null)
+            val result = firebaseAuth.signInWithCredential(credential).await()
+            val user = result.user ?: return Result.failure(Exception("User is null"))
+            
+            // Store user info in Firestore
+            val userDoc = hashMapOf(
+                "name" to (user.displayName ?: ""),
+                "email" to (user.email ?: ""),
+                "createdAt" to com.google.firebase.Timestamp.now()
+            )
+            firestore.collection("users").document(user.uid).set(userDoc).await()
+            
+            // Store user info locally
+            context.dataStore.edit { prefs ->
+                prefs[KEY_USER_ID] = user.uid
+                prefs[KEY_EMAIL] = user.email ?: ""
+                prefs[KEY_NAME] = user.displayName ?: ""
+            }
+            
+            Result.success(user)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     fun getCurrentUserInfo(): Flow<UserInfo?> {
         return context.dataStore.data.catch { e -> 
             if (e is IOException) emit(emptyPreferences()) else throw e 
