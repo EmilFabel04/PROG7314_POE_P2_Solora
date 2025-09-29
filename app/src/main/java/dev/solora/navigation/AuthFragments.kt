@@ -106,20 +106,15 @@ class LoginFragment : Fragment() {
 
     private fun setupGoogleSignIn(view: View) {
         try {
-            Log.d("LoginFragment", "🔧 Setting up Google Sign-In for login...")
-            
-            // Use the confirmed working client ID
-            val webClientId = "570014568272-akipotsp9timh1g4tescrdnh71tblmth.apps.googleusercontent.com"
-            Log.d("LoginFragment", "🔑 Client ID: $webClientId")
+            Log.d("LoginFragment", "🔧 Setting up MINIMAL Google Sign-In for login...")
             Log.d("LoginFragment", "📱 Package: ${requireContext().packageName}")
             
-            // NUCLEAR SOLUTION: Remove requestIdToken to bypass DEVELOPER_ERROR
+            // ULTRA MINIMAL: No client ID, no ID token, just basic Google account access
             val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
-                .requestProfile()
                 .build()
                 
-            Log.d("LoginFragment", "⚡ Using simplified configuration (no ID token request)")
+            Log.d("LoginFragment", "🚀 ULTRA MINIMAL: Basic Google account access only")
             googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
             Log.d("LoginFragment", "✅ Google Sign-In client created successfully")
 
@@ -279,20 +274,15 @@ class RegisterFragment : Fragment() {
 
     private fun setupGoogleSignIn(view: View) {
         try {
-            Log.d("RegisterFragment", "🔧 Setting up Google Sign-In for registration...")
-            
-            // Use the confirmed working client ID
-            val webClientId = "570014568272-akipotsp9timh1g4tescrdnh71tblmth.apps.googleusercontent.com"
-            Log.d("RegisterFragment", "🔑 Client ID: $webClientId")
+            Log.d("RegisterFragment", "🔧 Setting up MINIMAL Google Sign-In for registration...")
             Log.d("RegisterFragment", "📱 Package: ${requireContext().packageName}")
             
-            // NUCLEAR SOLUTION: Remove requestIdToken to bypass DEVELOPER_ERROR
+            // ULTRA MINIMAL: No client ID, no ID token, just basic Google account access
             val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
-                .requestProfile()
                 .build()
                 
-            Log.d("RegisterFragment", "⚡ Using simplified configuration (no ID token request)")
+            Log.d("RegisterFragment", "🚀 ULTRA MINIMAL: Basic Google account access only")
             googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
             Log.d("RegisterFragment", "✅ Google Sign-In client created successfully")
 
