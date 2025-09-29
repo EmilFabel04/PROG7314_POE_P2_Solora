@@ -134,12 +134,23 @@ class LoginFragment : Fragment() {
 
         // Google login setup
         try {
-            val webClientId = getString(R.string.default_web_client_id)
+            // Try to get auto-generated client ID first, with fallback
+            val webClientId = try {
+                getString(R.string.default_web_client_id)
+            } catch (e: Exception) {
+                Log.w("LoginFragment", "Auto-generated client ID not found, using manual fallback")
+                // Fallback to manual web client ID if auto-generation failed
+                "570014568272-gd86hu4qi23o92k6ji98ii5g26t97ks2.apps.googleusercontent.com"
+            }
+            
             Log.d("LoginFragment", "Using web client ID: $webClientId")
+            Log.d("LoginFragment", "Package name: ${requireContext().packageName}")
+            Log.d("LoginFragment", "Application ID: ${requireContext().packageName}")
             
             val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(webClientId)
                 .requestEmail()
+                .requestProfile()
                 .build()
 
             googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
@@ -244,12 +255,23 @@ class RegisterFragment : Fragment() {
 
         // Google Sign-In setup
         try {
-            val webClientId = getString(R.string.default_web_client_id)
+            // Try to get auto-generated client ID first, with fallback
+            val webClientId = try {
+                getString(R.string.default_web_client_id)
+            } catch (e: Exception) {
+                Log.w("RegisterFragment", "Auto-generated client ID not found, using manual fallback")
+                // Fallback to manual web client ID if auto-generation failed
+                "570014568272-gd86hu4qi23o92k6ji98ii5g26t97ks2.apps.googleusercontent.com"
+            }
+            
             Log.d("RegisterFragment", "Using web client ID: $webClientId")
+            Log.d("RegisterFragment", "Package name: ${requireContext().packageName}")
+            Log.d("RegisterFragment", "Application ID: ${requireContext().packageName}")
             
             val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(webClientId)
                 .requestEmail()
+                .requestProfile()
                 .build()
 
             googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
