@@ -1,6 +1,5 @@
 package dev.solora.navigation
 
-// Force Android Studio sync - Google SSO enabled
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -11,13 +10,11 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-// Google Play Services imports
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInClient  
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import dev.solora.R
@@ -74,62 +71,9 @@ class OnboardingFragment : Fragment() {
 class LoginFragment : Fragment() {
 
     private val authViewModel: AuthViewModel by viewModels()
+
     private lateinit var googleSignInClient: GoogleSignInClient
-    
-    // Modern Activity Result API for Google Sign-In
-    private val googleSignInLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        try {
-            val account = task.getResult(ApiException::class.java)!!
-            Log.d("LoginFragment", "Google Sign-In successful")
-            Log.d("LoginFragment", "Account: ${account.email}")
-            Log.d("LoginFragment", "Display Name: ${account.displayName}")
-            Log.d("LoginFragment", "Photo URL: ${account.photoUrl}")
-            
-            val idToken = account.idToken
-            if (idToken.isNullOrBlank()) {
-                throw Exception("ID token is null or empty. Check SHA-1 fingerprint in Firebase Console.")
-            }
-            
-            Log.d("LoginFragment", "ID token received, proceeding with Firebase authentication")
-            authViewModel.loginWithGoogle(idToken)
-        } catch (e: ApiException) {
-            Log.e("LoginFragment", "Google login failed with code: ${e.statusCode}, message: ${e.message}")
-            
-            when (e.statusCode) {
-                10 -> {
-                    Log.e("LoginFragment", "DEVELOPER_ERROR: Firebase Console configuration issue")
-                    Log.e("LoginFragment", "Current package: ${requireContext().packageName}")
-                    Log.e("LoginFragment", "Expected: dev.solora")
-                    Log.e("LoginFragment", "SHA-1 fingerprint appears correct in Firebase Console")
-                    Log.e("LoginFragment", "Most likely cause: Google Sign-In provider not enabled in Authentication")
-                    Toast.makeText(requireContext(), 
-                        "Firebase Config Error!\n" +
-                        "Go to Firebase Console:\n" +
-                        "Authentication → Sign-in method → Google → Enable\n" +
-                        "Then download new google-services.json", 
-                        Toast.LENGTH_LONG).show()
-                }
-                7 -> {
-                    Log.e("LoginFragment", "NETWORK_ERROR: No internet connection")
-                    Toast.makeText(requireContext(), "Network error. Check internet connection.", Toast.LENGTH_LONG).show()
-                }
-                12501 -> {
-                    Log.w("LoginFragment", "Sign-in cancelled by user")
-                    // Don't show error for user cancellation
-                }
-                else -> {
-                    Log.e("LoginFragment", "Unknown Google Sign-In error: ${e.statusCode}")
-                    Toast.makeText(requireContext(), "Google login failed: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
-                }
-            }
-        } catch (e: Exception) {
-            Log.e("LoginFragment", "Unexpected Google login error: ${e.message}")
-            Toast.makeText(requireContext(), "Google login error: ${e.message}", Toast.LENGTH_LONG).show()
-        }
-    }
+    private val RC_SIGN_IN = 1001
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -163,46 +107,16 @@ class LoginFragment : Fragment() {
         }
 
         // Google login setup
-        try {
-            // Try to get auto-generated client ID first, with fallback
-            val webClientId = try {
-                getString(R.string.default_web_client_id)
-            } catch (e: Exception) {
-                Log.w("LoginFragment", "Auto-generated client ID not found, using manual fallback")
-                // Fallback to manual web client ID if auto-generation failed
-                "570014568272-gd86hu4qi23o92k6ji98ii5g26t97ks2.apps.googleusercontent.com"
-            }
-            
-            Log.d("LoginFragment", "Using web client ID: $webClientId")
-            Log.d("LoginFragment", "Package name: ${requireContext().packageName}")
-            Log.d("LoginFragment", "Application ID: ${requireContext().packageName}")
-            
-            // Additional debugging for DEVELOPER_ERROR
-            try {
-                val appInfo = requireContext().packageManager.getApplicationInfo(requireContext().packageName, 0)
-                Log.d("LoginFragment", "App info target SDK: ${appInfo.targetSdkVersion}")
-                Log.d("LoginFragment", "App signature: Available for verification")
-            } catch (e: Exception) {
-                Log.w("LoginFragment", "Could not get app info: ${e.message}")
-            }
-            
-            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(webClientId)
-                .requestEmail()
-                .requestProfile()
-                .build()
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
 
-            googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
-            Log.d("LoginFragment", "Google Sign-In client initialized successfully")
+        googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
 
-            view.findViewById<ImageButton>(R.id.btn_google_login).setOnClickListener {
-                Log.d("LoginFragment", "Google login button clicked")
-                val signInIntent = googleSignInClient.signInIntent
-                googleSignInLauncher.launch(signInIntent)
-            }
-        } catch (e: Exception) {
-            Log.e("LoginFragment", "Failed to initialize Google Sign-In: ${e.message}")
-            Toast.makeText(requireContext(), "Google Sign-In setup failed: ${e.message}", Toast.LENGTH_LONG).show()
+        view.findViewById<ImageButton>(R.id.btn_google_login).setOnClickListener {
+            val signInIntent = googleSignInClient.signInIntent
+            startActivityForResult(signInIntent, RC_SIGN_IN)
         }
 
         observeAuthStateAndNavigate(authViewModel)
@@ -216,67 +130,26 @@ class LoginFragment : Fragment() {
         }
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == RC_SIGN_IN) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+            try {
+                val account = task.getResult(ApiException::class.java)!!
+                authViewModel.loginWithGoogle(account.idToken!!)
+            } catch (e: ApiException) {
+                Toast.makeText(requireContext(), "Google login failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 }
 
 class RegisterFragment : Fragment() {
 
     private val authViewModel: AuthViewModel by viewModels()
+
     private lateinit var googleSignInClient: GoogleSignInClient
-    
-    // Modern Activity Result API for Google Sign-In
-    private val googleSignInLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        try {
-            val account = task.getResult(ApiException::class.java)!!
-            Log.d("RegisterFragment", "Google Sign-In successful")
-            Log.d("RegisterFragment", "Account: ${account.email}")
-            Log.d("RegisterFragment", "Display Name: ${account.displayName}")
-            Log.d("RegisterFragment", "Photo URL: ${account.photoUrl}")
-            
-            val idToken = account.idToken
-            if (idToken.isNullOrBlank()) {
-                throw Exception("ID token is null or empty. Check SHA-1 fingerprint in Firebase Console.")
-            }
-            
-            Log.d("RegisterFragment", "ID token received, proceeding with Firebase authentication")
-            authViewModel.registerWithGoogle(idToken)
-        } catch (e: ApiException) {
-            Log.e("RegisterFragment", "Google register failed with code: ${e.statusCode}, message: ${e.message}")
-            
-            when (e.statusCode) {
-                10 -> {
-                    Log.e("RegisterFragment", "DEVELOPER_ERROR: Firebase Console configuration issue")
-                    Log.e("RegisterFragment", "Current package: ${requireContext().packageName}")
-                    Log.e("RegisterFragment", "Expected: dev.solora")
-                    Log.e("RegisterFragment", "SHA-1 fingerprint appears correct in Firebase Console")
-                    Log.e("RegisterFragment", "Most likely cause: Google Sign-In provider not enabled in Authentication")
-                    Toast.makeText(requireContext(), 
-                        "Firebase Config Error!\n" +
-                        "Go to Firebase Console:\n" +
-                        "Authentication → Sign-in method → Google → Enable\n" +
-                        "Then download new google-services.json", 
-                        Toast.LENGTH_LONG).show()
-                }
-                7 -> {
-                    Log.e("RegisterFragment", "NETWORK_ERROR: No internet connection")
-                    Toast.makeText(requireContext(), "Network error. Check internet connection.", Toast.LENGTH_LONG).show()
-                }
-                12501 -> {
-                    Log.w("RegisterFragment", "Sign-in cancelled by user")
-                    // Don't show error for user cancellation
-                }
-                else -> {
-                    Log.e("RegisterFragment", "Unknown Google Sign-In error: ${e.statusCode}")
-                    Toast.makeText(requireContext(), "Google register failed: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
-                }
-            }
-        } catch (e: Exception) {
-            Log.e("RegisterFragment", "Unexpected Google register error: ${e.message}")
-            Toast.makeText(requireContext(), "Google register error: ${e.message}", Toast.LENGTH_LONG).show()
-        }
-    }
+    private val RC_SIGN_IN = 1001
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -322,48 +195,17 @@ class RegisterFragment : Fragment() {
             authViewModel.register(name, surname, email, password)
         }
 
-        // Google Sign-In setup
-        try {
-            // Try to get auto-generated client ID first, with fallback
-            val webClientId = try {
-                getString(R.string.default_web_client_id)
-            } catch (e: Exception) {
-                Log.w("RegisterFragment", "Auto-generated client ID not found, using manual fallback")
-                // Fallback to manual web client ID if auto-generation failed
-                "570014568272-gd86hu4qi23o92k6ji98ii5g26t97ks2.apps.googleusercontent.com"
-            }
-            
-            Log.d("RegisterFragment", "Using web client ID: $webClientId")
-            Log.d("RegisterFragment", "Package name: ${requireContext().packageName}")
-            Log.d("RegisterFragment", "Application ID: ${requireContext().packageName}")
-            
-            // Additional debugging for DEVELOPER_ERROR
-            try {
-                val appInfo = requireContext().packageManager.getApplicationInfo(requireContext().packageName, 0)
-                Log.d("RegisterFragment", "App info target SDK: ${appInfo.targetSdkVersion}")
-                Log.d("RegisterFragment", "App signature: Available for verification")
-            } catch (e: Exception) {
-                Log.w("RegisterFragment", "Could not get app info: ${e.message}")
-            }
-            
-            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(webClientId)
-                .requestEmail()
-                .requestProfile()
-                .build()
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
 
-            googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
-            Log.d("RegisterFragment", "Google Sign-In client initialized successfully")
+        googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
 
-            val googleButton = view.findViewById<ImageButton>(R.id.btn_google_register)
-            googleButton.setOnClickListener {
-                Log.d("RegisterFragment", "Google register button clicked")
-                val signInIntent = googleSignInClient.signInIntent
-                googleSignInLauncher.launch(signInIntent)
-            }
-        } catch (e: Exception) {
-            Log.e("RegisterFragment", "Failed to initialize Google Sign-In: ${e.message}")
-            Toast.makeText(requireContext(), "Google Sign-In setup failed: ${e.message}", Toast.LENGTH_LONG).show()
+        val googleButton = view.findViewById<ImageButton>(R.id.btn_google_register)
+        googleButton.setOnClickListener {
+            val signInIntent = googleSignInClient.signInIntent
+            startActivityForResult(signInIntent, RC_SIGN_IN)
         }
 
         observeAuthStateAndNavigate(authViewModel)
@@ -378,4 +220,16 @@ class RegisterFragment : Fragment() {
         }
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == RC_SIGN_IN) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+            try {
+                val account = task.getResult(ApiException::class.java)!!
+                authViewModel.registerWithGoogle(account.idToken!!)
+            } catch (e: ApiException) {
+                Toast.makeText(requireContext(), "Google register failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 }

@@ -31,10 +31,10 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun register(name: String, email: String, password: String) {
+    fun register(name: String, surname: String, email: String, password: String) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
-            val result = repo.register(name, email, password)
+            val result = repo.register(name, surname, email, password)
             _authState.value = if (result.isSuccess) {
                 AuthState.Success("Registration successful")
             } else {
@@ -43,20 +43,14 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun register(firstName: String, lastName: String, email: String, password: String) {
-        val fullName = "$firstName $lastName"
-        register(fullName, email, password)
-    }
-
     fun loginWithGoogle(idToken: String) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
             val result = repo.loginWithGoogle(idToken)
             _authState.value = if (result.isSuccess) {
-                val user = result.getOrNull()
-                AuthState.Success("Welcome ${user?.displayName ?: user?.email ?: "back"}!")
+                AuthState.Success("Google login successful")
             } else {
-                AuthState.Error(result.exceptionOrNull()?.message ?: "Google authentication failed")
+                AuthState.Error(result.exceptionOrNull()?.message ?: "Google login failed")
             }
         }
     }
@@ -66,10 +60,9 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
             _authState.value = AuthState.Loading
             val result = repo.registerWithGoogle(idToken)
             _authState.value = if (result.isSuccess) {
-                val user = result.getOrNull()
-                AuthState.Success("Welcome ${user?.displayName ?: user?.email ?: "to Solora"}!")
+                AuthState.Success("Google sign-in successful")
             } else {
-                AuthState.Error(result.exceptionOrNull()?.message ?: "Google authentication failed")
+                AuthState.Error(result.exceptionOrNull()?.message ?: "Google sign-in failed")
             }
         }
     }

@@ -5,12 +5,10 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -24,6 +22,7 @@ class AuthRepository(private val context: Context) {
     private val firestore = FirebaseFirestore.getInstance()
     private val KEY_USER_ID = stringPreferencesKey("user_id")
     private val KEY_NAME = stringPreferencesKey("name")
+    private val KEY_SURNAME = stringPreferencesKey("surname")
     private val KEY_EMAIL = stringPreferencesKey("email")
 
     val currentUser: FirebaseUser? get() = firebaseAuth.currentUser
@@ -53,20 +52,22 @@ class AuthRepository(private val context: Context) {
         }
     }
 
-    suspend fun register(name: String, email: String, password: String): Result<FirebaseUser> {
+    suspend fun register(name: String, surname: String, email: String, password: String): Result<FirebaseUser> {
         return try {
             val result = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
             val user = result.user ?: throw Exception("Registration failed: No user returned")
             
             // Update profile with display name
+            val fullName = "$name $surname"
             val profileUpdates = com.google.firebase.auth.UserProfileChangeRequest.Builder()
-                .setDisplayName(name)
+                .setDisplayName(fullName)
                 .build()
             user.updateProfile(profileUpdates).await()
             
             // Store user info in Firestore
             val userDoc = hashMapOf(
                 "name" to name,
+                "surname" to surname,
                 "email" to email,
                 "createdAt" to com.google.firebase.Timestamp.now()
             )
@@ -77,6 +78,7 @@ class AuthRepository(private val context: Context) {
                 prefs[KEY_USER_ID] = user.uid
                 prefs[KEY_EMAIL] = email
                 prefs[KEY_NAME] = name
+                prefs[KEY_SURNAME] = surname
             }
             
             Result.success(user)
@@ -99,65 +101,57 @@ class AuthRepository(private val context: Context) {
         }
     }
 
-    suspend fun loginWithGoogle(idToken: String): Result<com.google.firebase.auth.FirebaseUser> {
+    suspend fun loginWithGoogle(idToken: String): Result<FirebaseUser> {
         return try {
-            Log.d("AuthRepository", "Starting Google authentication with ID token")
-            
-            if (idToken.isBlank()) {
-                throw Exception("ID token is empty")
-            }
-            
+            // Sign in with Google credential
             val credential = GoogleAuthProvider.getCredential(idToken, null)
-            Log.d("AuthRepository", "Created Google credential successfully")
-            
-            val result = firebaseAuth.signInWithCredential(credential).await()
-            Log.d("AuthRepository", "Firebase signInWithCredential completed")
-            
-            val user = result.user ?: return Result.failure(Exception("Firebase returned null user"))
-            Log.d("AuthRepository", "Google authentication successful for user: ${user.email}")
-            
-            // Check if this is a new user (for logging purposes)
-            val isNewUser = result.additionalUserInfo?.isNewUser ?: false
-            Log.d("AuthRepository", "Is new user: $isNewUser")
-            
-            // Always ensure user document exists in Firestore users collection
-            val userDoc = hashMapOf(
-                "uid" to user.uid,
-                "name" to (user.displayName ?: ""),
-                "email" to (user.email ?: ""),
-                "photoUrl" to (user.photoUrl?.toString() ?: ""),
-                "provider" to "google",
-                "isNewUser" to isNewUser,
-                "lastSignIn" to com.google.firebase.Timestamp.now(),
-                "createdAt" to if (isNewUser) com.google.firebase.Timestamp.now() else null
-            )
-            
-            // Use merge: true to update existing or create new
-            firestore.collection("users").document(user.uid)
-                .set(userDoc, SetOptions.merge())
-                .await()
-            Log.d("AuthRepository", "User document saved to Firestore users collection")
-            
-            // Store user info locally
+            val authResult = firebaseAuth.signInWithCredential(credential).await()
+            val user = authResult.user ?: throw Exception("Google login failed")
+
+            // Only store info locally, do NOT write to Firestore
             context.dataStore.edit { prefs ->
                 prefs[KEY_USER_ID] = user.uid
-                prefs[KEY_EMAIL] = user.email ?: ""
                 prefs[KEY_NAME] = user.displayName ?: ""
+                prefs[KEY_EMAIL] = user.email ?: ""
             }
-            Log.d("AuthRepository", "User data stored locally")
-            
+
             Result.success(user)
         } catch (e: Exception) {
-            Log.e("AuthRepository", "Google authentication failed: ${e.message}", e)
             Result.failure(e)
         }
     }
 
-    suspend fun registerWithGoogle(idToken: String): Result<com.google.firebase.auth.FirebaseUser> {
-        // Google Sign-In handles both login and registration automatically
-        // Just delegate to loginWithGoogle since Firebase handles this seamlessly
-        Log.d("AuthRepository", "Google registerWithGoogle -> delegating to loginWithGoogle")
-        return loginWithGoogle(idToken)
+    suspend fun registerWithGoogle(idToken: String): Result<FirebaseUser> {
+        return try {
+            val credential = GoogleAuthProvider.getCredential(idToken, null)
+            val authResult = firebaseAuth.signInWithCredential(credential).await()
+            val user = authResult.user ?: throw Exception("Google sign-in failed")
+
+            val fullName = user.displayName ?: ""
+            val nameParts = fullName.trim().split(" ")
+            val firstName = nameParts.getOrNull(0) ?: ""
+            val lastName = if (nameParts.size > 1) nameParts.subList(1, nameParts.size).joinToString(" ") else ""
+
+            val userDoc = hashMapOf(
+                "name" to firstName,
+                "surname" to lastName,
+                "email" to (user.email ?: "")
+            )
+
+            firestore.collection("users").document(user.uid).set(userDoc).await()
+
+            // Store user info locally
+            context.dataStore.edit { prefs ->
+                prefs[KEY_USER_ID] = user.uid
+                prefs[KEY_NAME] = user.displayName ?: ""
+                prefs[KEY_SURNAME] = "" // no surname from Google
+                prefs[KEY_EMAIL] = user.email ?: ""
+            }
+
+            Result.success(user)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     fun getCurrentUserInfo(): Flow<UserInfo?> {
