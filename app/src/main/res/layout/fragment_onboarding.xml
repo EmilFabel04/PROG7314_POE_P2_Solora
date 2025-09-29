@@ -40,7 +40,10 @@
         android:clickable="true"
         android:focusable="true"
         android:layout_gravity="center"
-        android:layout_marginTop="210dp"
+        android:layout_marginTop="100dp"
+        android:layout_marginBottom="32dp"
+        android:visibility="visible"
+        android:elevation="4dp"
         android:background="@drawable/authentication_button_background_orange">
 
         <TextView

@@ -29,15 +29,42 @@ class OnboardingFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        view.findViewById<View>(R.id.btn_get_started).setOnClickListener {
+        android.util.Log.d("OnboardingFragment", "=== ZIMKITHA ONBOARDING FRAGMENT VIEW CREATED ===")
+        
+        // Find and configure the Get Started button
+        val getStartedButton = view.findViewById<View>(R.id.btn_get_started)
+        android.util.Log.d("OnboardingFragment", "Get Started button found: ${getStartedButton != null}")
+        
+        if (getStartedButton != null) {
+            android.util.Log.d("OnboardingFragment", "Button visibility: ${getStartedButton.visibility}, enabled: ${getStartedButton.isEnabled}")
+            android.util.Log.d("OnboardingFragment", "Button clickable: ${getStartedButton.isClickable}, focusable: ${getStartedButton.isFocusable}")
+            
+            // Ensure button is visible and clickable
+            getStartedButton.visibility = android.view.View.VISIBLE
+            getStartedButton.isClickable = true
+            getStartedButton.isFocusable = true
+            getStartedButton.isEnabled = true
+            
+            getStartedButton.setOnClickListener {
+                android.util.Log.d("OnboardingFragment", "Get Started button clicked! Navigating to register...")
 
-            // saving onboarding flag so that this screen is now shown again
-            val prefs = requireContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-            prefs.edit().putBoolean("onboarding_seen", true).apply()
+                // saving onboarding flag so that this screen is now shown again
+                val prefs = requireContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+                prefs.edit().putBoolean("onboarding_seen", true).apply()
 
-            // navigating to the register screen
-            findNavController().navigate(R.id.action_onboarding_to_register)
+                // navigating to the register screen
+                try {
+                    findNavController().navigate(R.id.action_onboarding_to_register)
+                    android.util.Log.d("OnboardingFragment", "Navigation to register successful!")
+                } catch (e: Exception) {
+                    android.util.Log.e("OnboardingFragment", "Navigation failed: ${e.message}")
+                }
+            }
+        } else {
+            android.util.Log.e("OnboardingFragment", "Get Started button NOT FOUND!")
         }
+        
+        android.util.Log.d("OnboardingFragment", "=== ONBOARDING SETUP COMPLETE ===")
     }
 }
 
