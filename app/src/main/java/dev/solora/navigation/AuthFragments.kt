@@ -19,6 +19,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import androidx.activity.result.contract.ActivityResultContracts
 import dev.solora.R
 import dev.solora.auth.AuthViewModel
 
@@ -54,7 +55,26 @@ class LoginFragment : Fragment() {
     private val authViewModel: AuthViewModel by viewModels()
     private lateinit var auth: FirebaseAuth
     private lateinit var googleSignInClient: GoogleSignInClient
-    private val RC_SIGN_IN = 1001
+
+    private val googleSignInLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val data = result.data
+        val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+        try {
+            val account = task.getResult(com.google.android.gms.common.api.ApiException::class.java)!!
+            val idToken = account.idToken
+            if (idToken.isNullOrEmpty()) {
+                Log.e("LoginFragment", "Google ID token is null - check requestIdToken config")
+                Toast.makeText(requireContext(), "Google configuration error. Check web client ID.", Toast.LENGTH_LONG).show()
+                return@registerForActivityResult
+            }
+            authViewModel.authenticateWithGoogle(idToken, isRegistration = false)
+        } catch (e: com.google.android.gms.common.api.ApiException) {
+            Log.e("LoginFragment", "Google Sign-In failed: code=${e.statusCode}", e)
+            Toast.makeText(requireContext(), "Google Sign-In failed: ${e.statusCode}", Toast.LENGTH_LONG).show()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -103,74 +123,18 @@ class LoginFragment : Fragment() {
     }
 
     private fun configureGoogleSignIn() {
-        // WORKING SOLUTION: Basic Google Sign-In without OAuth dependency
+        val webClientId = getString(R.string.default_web_client_id)
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(webClientId)
             .requestEmail()
             .build()
 
         googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
 
         view?.findViewById<ImageButton>(R.id.btn_google_login)?.setOnClickListener {
-            signInWithGoogleBasic()
+            val signInIntent = googleSignInClient.signInIntent
+            googleSignInLauncher.launch(signInIntent)
         }
-    }
-
-    private fun signInWithGoogleBasic() {
-        val signInIntent = googleSignInClient.signInIntent
-        startActivityForResult(signInIntent, RC_SIGN_IN)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == RC_SIGN_IN) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-            try {
-                // Google Sign In was successful - bypass Firebase Auth
-                val account = task.getResult(ApiException::class.java)!!
-                Log.d("LoginFragment", "Google Sign-In successful: ${account.email}")
-                
-                // Save user locally and navigate (bypass Firebase Auth issues)
-                saveGoogleUserLocally(account, isRegistration = false)
-                
-            } catch (e: ApiException) {
-                Log.w("LoginFragment", "Google sign in failed with code: ${e.statusCode}", e)
-                if (e.statusCode == 10) {
-                    Toast.makeText(requireContext(), "Google configuration issue. Using email/password login instead.", Toast.LENGTH_LONG).show()
-                } else {
-                    Toast.makeText(requireContext(), "Google sign in failed: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
-
-    private fun saveGoogleUserLocally(account: com.google.android.gms.auth.api.signin.GoogleSignInAccount, isRegistration: Boolean) {
-        val email = account.email ?: ""
-        val displayName = account.displayName ?: ""
-        
-        Log.d("LoginFragment", "Saving Google user locally: $email")
-        
-        // Store user info using existing auth system
-        val prefs = requireContext().getSharedPreferences("auth", Context.MODE_PRIVATE)
-        prefs.edit().apply {
-            putString("user_id", account.id ?: "google_user")
-            putString("name", displayName.split(" ").getOrNull(0) ?: "Google")
-            putString("surname", displayName.split(" ").drop(1).joinToString(" "))
-            putString("email", email)
-            putBoolean("is_logged_in", true)
-            apply()
-        }
-        
-        val message = if (isRegistration) {
-            "Welcome to Solora, $displayName! 🎉"
-        } else {
-            "Welcome back, $displayName! 👋"
-        }
-        
-        Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
-        
-        // Navigate to main app
-        findNavController().navigate(R.id.main_graph)
     }
 }
 
@@ -179,7 +143,26 @@ class RegisterFragment : Fragment() {
     private val authViewModel: AuthViewModel by viewModels()
     private lateinit var auth: FirebaseAuth
     private lateinit var googleSignInClient: GoogleSignInClient
-    private val RC_SIGN_IN = 1001
+
+    private val googleSignInLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val data = result.data
+        val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+        try {
+            val account = task.getResult(com.google.android.gms.common.api.ApiException::class.java)!!
+            val idToken = account.idToken
+            if (idToken.isNullOrEmpty()) {
+                Log.e("RegisterFragment", "Google ID token is null - check requestIdToken config")
+                Toast.makeText(requireContext(), "Google configuration error. Check web client ID.", Toast.LENGTH_LONG).show()
+                return@registerForActivityResult
+            }
+            authViewModel.authenticateWithGoogle(idToken, isRegistration = true)
+        } catch (e: com.google.android.gms.common.api.ApiException) {
+            Log.e("RegisterFragment", "Google Sign-In failed: code=${e.statusCode}", e)
+            Toast.makeText(requireContext(), "Google Sign-In failed: ${e.statusCode}", Toast.LENGTH_LONG).show()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -237,73 +220,17 @@ class RegisterFragment : Fragment() {
     }
 
     private fun configureGoogleSignIn() {
-        // WORKING SOLUTION: Basic Google Sign-In without OAuth dependency
+        val webClientId = getString(R.string.default_web_client_id)
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(webClientId)
             .requestEmail()
             .build()
 
         googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
 
         view?.findViewById<ImageButton>(R.id.btn_google_register)?.setOnClickListener {
-            signInWithGoogleBasic()
+            val signInIntent = googleSignInClient.signInIntent
+            googleSignInLauncher.launch(signInIntent)
         }
-    }
-
-    private fun signInWithGoogleBasic() {
-        val signInIntent = googleSignInClient.signInIntent
-        startActivityForResult(signInIntent, RC_SIGN_IN)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == RC_SIGN_IN) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-            try {
-                // Google Sign In was successful - bypass Firebase Auth
-                val account = task.getResult(ApiException::class.java)!!
-                Log.d("RegisterFragment", "Google Sign-In successful: ${account.email}")
-                
-                // Save user locally and navigate (bypass Firebase Auth issues)
-                saveGoogleUserLocally(account, isRegistration = true)
-                
-            } catch (e: ApiException) {
-                Log.w("RegisterFragment", "Google sign in failed with code: ${e.statusCode}", e)
-                if (e.statusCode == 10) {
-                    Toast.makeText(requireContext(), "Google configuration issue. Using email/password registration instead.", Toast.LENGTH_LONG).show()
-                } else {
-                    Toast.makeText(requireContext(), "Google sign in failed: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
-
-    private fun saveGoogleUserLocally(account: com.google.android.gms.auth.api.signin.GoogleSignInAccount, isRegistration: Boolean) {
-        val email = account.email ?: ""
-        val displayName = account.displayName ?: ""
-        
-        Log.d("RegisterFragment", "Saving Google user locally: $email")
-        
-        // Store user info using existing auth system
-        val prefs = requireContext().getSharedPreferences("auth", Context.MODE_PRIVATE)
-        prefs.edit().apply {
-            putString("user_id", account.id ?: "google_user")
-            putString("name", displayName.split(" ").getOrNull(0) ?: "Google")
-            putString("surname", displayName.split(" ").drop(1).joinToString(" "))
-            putString("email", email)
-            putBoolean("is_logged_in", true)
-            apply()
-        }
-        
-        val message = if (isRegistration) {
-            "Welcome to Solora, $displayName! 🎉"
-        } else {
-            "Welcome back, $displayName! 👋"
-        }
-        
-        Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
-        
-        // Navigate to main app
-        findNavController().navigate(R.id.main_graph)
     }
 }
