@@ -106,54 +106,68 @@ class AuthRepository(private val context: Context) {
 
     suspend fun loginWithGoogle(idToken: String): Result<FirebaseUser> {
         return try {
-            // Sign in with Google credential
+            Log.d("AuthRepository", "Starting Google authentication with Firebase...")
+            
             val credential = GoogleAuthProvider.getCredential(idToken, null)
             val authResult = firebaseAuth.signInWithCredential(credential).await()
-            val user = authResult.user ?: throw Exception("Google login failed")
+            val user = authResult.user ?: throw Exception("Google authentication failed")
 
-            // Only store info locally, do NOT write to Firestore
+            Log.d("AuthRepository", "Google authentication successful: ${user.email}")
+
+            // Store user info locally
             context.dataStore.edit { prefs ->
                 prefs[KEY_USER_ID] = user.uid
                 prefs[KEY_NAME] = user.displayName ?: ""
-                prefs[KEY_SURNAME] = "" // No surname from Google login
+                prefs[KEY_SURNAME] = "" // No surname from Google
                 prefs[KEY_EMAIL] = user.email ?: ""
             }
 
             Result.success(user)
         } catch (e: Exception) {
+            Log.e("AuthRepository", "Google authentication failed: ${e.message}")
             Result.failure(e)
         }
     }
 
     suspend fun registerWithGoogle(idToken: String): Result<FirebaseUser> {
         return try {
+            Log.d("AuthRepository", "Starting Google registration with Firebase...")
+            
             val credential = GoogleAuthProvider.getCredential(idToken, null)
             val authResult = firebaseAuth.signInWithCredential(credential).await()
-            val user = authResult.user ?: throw Exception("Google sign-in failed")
+            val user = authResult.user ?: throw Exception("Google registration failed")
 
+            Log.d("AuthRepository", "Google registration successful: ${user.email}")
+            
+            // Parse Google display name into first and last name
             val fullName = user.displayName ?: ""
             val nameParts = fullName.trim().split(" ")
             val firstName = nameParts.getOrNull(0) ?: ""
             val lastName = if (nameParts.size > 1) nameParts.subList(1, nameParts.size).joinToString(" ") else ""
 
+            // Save user to Firestore users collection
             val userDoc = hashMapOf(
                 "name" to firstName,
                 "surname" to lastName,
-                "email" to (user.email ?: "")
+                "email" to (user.email ?: ""),
+                "provider" to "google",
+                "createdAt" to com.google.firebase.Timestamp.now()
             )
 
             firestore.collection("users").document(user.uid).set(userDoc).await()
+            Log.d("AuthRepository", "User saved to Firestore users collection")
 
             // Store user info locally
             context.dataStore.edit { prefs ->
                 prefs[KEY_USER_ID] = user.uid
-                prefs[KEY_NAME] = user.displayName ?: ""
-                prefs[KEY_SURNAME] = "" // no surname from Google
+                prefs[KEY_NAME] = firstName
+                prefs[KEY_SURNAME] = lastName
                 prefs[KEY_EMAIL] = user.email ?: ""
             }
 
             Result.success(user)
         } catch (e: Exception) {
+            Log.e("AuthRepository", "Google registration failed: ${e.message}")
             Result.failure(e)
         }
     }
