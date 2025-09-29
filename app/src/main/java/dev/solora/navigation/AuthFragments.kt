@@ -49,10 +49,8 @@ class OnboardingFragment : Fragment() {
             }
         }
         
-        // Already have account link
-        view.findViewById<View>(R.id.tv_already_have_account)?.setOnClickListener {
-            findNavController().navigate(R.id.action_onboarding_to_login)
-        }
+        // Note: "Already have account" link not present in this layout
+        // Users can navigate back from register screen if needed
     }
 }
 
