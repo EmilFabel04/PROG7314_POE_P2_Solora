@@ -1,9 +1,22 @@
 <resources>
+    <!-- Primary Solora Colors -->
     <color name="solora_orange">#FF5D00</color>
     <color name="solora_orange_dark">#FC8224</color>
     <color name="solora_gray">#F7F7F7</color>
     <color name="solora_on_primary">#FFFFFF</color>
     <color name="solora_on_surface">#1E1E1E</color>
+    
+    <!-- Missing Authentication Colors -->
+    <color name="solora_light_grey">#F5F5F5</color>
+    <color name="solora_dark_grey">#666666</color>
+    <color name="solora_night_gray">#999999</color>
+    <color name="solora_black">#000000</color>
+    <color name="solora_bottom_nav_text_gray">#757575</color>
+    
+    <!-- Additional Solora Brand Colors -->
+    <color name="solora_white">#FFFFFF</color>
+    <color name="solora_surface">#FAFAFA</color>
+    <color name="solora_border">#E0E0E0</color>
 </resources>
 
 
