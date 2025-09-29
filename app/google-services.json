@@ -30,6 +30,14 @@
           }
         },
         {
+          "client_id": "570014568272-h73d6v7a8qen7l4djp87ue80ugf1pb3u.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "dev.solora",
+            "certificate_hash": "6d857952868f9df75cf6c4d0b848d062030d4fc1"
+          }
+        },
+        {
           "client_id": "570014568272-akipotsp9timh1g4tescrdnh71tblmth.apps.googleusercontent.com",
           "client_type": 3
         }
