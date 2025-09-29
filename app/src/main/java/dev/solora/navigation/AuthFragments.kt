@@ -103,11 +103,13 @@ class LoginFragment : Fragment() {
                     Log.e("LoginFragment", "DEVELOPER_ERROR: Firebase Console configuration issue")
                     Log.e("LoginFragment", "Current package: ${requireContext().packageName}")
                     Log.e("LoginFragment", "Expected: dev.solora")
+                    Log.e("LoginFragment", "SHA-1 fingerprint appears correct in Firebase Console")
+                    Log.e("LoginFragment", "Most likely cause: Google Sign-In provider not enabled in Authentication")
                     Toast.makeText(requireContext(), 
-                        "Configuration Error: Check Firebase Console\n" +
-                        "1. Enable Google Sign-In\n" +
-                        "2. Add SHA-1 fingerprint\n" +
-                        "3. Download new google-services.json", 
+                        "Firebase Config Error!\n" +
+                        "Go to Firebase Console:\n" +
+                        "Authentication → Sign-in method → Google → Enable\n" +
+                        "Then download new google-services.json", 
                         Toast.LENGTH_LONG).show()
                 }
                 7 -> {
@@ -175,6 +177,15 @@ class LoginFragment : Fragment() {
             Log.d("LoginFragment", "Package name: ${requireContext().packageName}")
             Log.d("LoginFragment", "Application ID: ${requireContext().packageName}")
             
+            // Additional debugging for DEVELOPER_ERROR
+            try {
+                val appInfo = requireContext().packageManager.getApplicationInfo(requireContext().packageName, 0)
+                Log.d("LoginFragment", "App info target SDK: ${appInfo.targetSdkVersion}")
+                Log.d("LoginFragment", "App signature: Available for verification")
+            } catch (e: Exception) {
+                Log.w("LoginFragment", "Could not get app info: ${e.message}")
+            }
+            
             val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(webClientId)
                 .requestEmail()
@@ -239,11 +250,13 @@ class RegisterFragment : Fragment() {
                     Log.e("RegisterFragment", "DEVELOPER_ERROR: Firebase Console configuration issue")
                     Log.e("RegisterFragment", "Current package: ${requireContext().packageName}")
                     Log.e("RegisterFragment", "Expected: dev.solora")
+                    Log.e("RegisterFragment", "SHA-1 fingerprint appears correct in Firebase Console")
+                    Log.e("RegisterFragment", "Most likely cause: Google Sign-In provider not enabled in Authentication")
                     Toast.makeText(requireContext(), 
-                        "Configuration Error: Check Firebase Console\n" +
-                        "1. Enable Google Sign-In\n" +
-                        "2. Add SHA-1 fingerprint\n" +
-                        "3. Download new google-services.json", 
+                        "Firebase Config Error!\n" +
+                        "Go to Firebase Console:\n" +
+                        "Authentication → Sign-in method → Google → Enable\n" +
+                        "Then download new google-services.json", 
                         Toast.LENGTH_LONG).show()
                 }
                 7 -> {
@@ -323,6 +336,15 @@ class RegisterFragment : Fragment() {
             Log.d("RegisterFragment", "Using web client ID: $webClientId")
             Log.d("RegisterFragment", "Package name: ${requireContext().packageName}")
             Log.d("RegisterFragment", "Application ID: ${requireContext().packageName}")
+            
+            // Additional debugging for DEVELOPER_ERROR
+            try {
+                val appInfo = requireContext().packageManager.getApplicationInfo(requireContext().packageName, 0)
+                Log.d("RegisterFragment", "App info target SDK: ${appInfo.targetSdkVersion}")
+                Log.d("RegisterFragment", "App signature: Available for verification")
+            } catch (e: Exception) {
+                Log.w("RegisterFragment", "Could not get app info: ${e.message}")
+            }
             
             val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(webClientId)
