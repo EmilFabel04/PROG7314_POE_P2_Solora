@@ -10,6 +10,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
+import dev.solora.data.UserInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -45,6 +46,7 @@ class AuthRepository(private val context: Context) {
                 prefs[KEY_USER_ID] = user.uid
                 prefs[KEY_EMAIL] = user.email ?: email
                 prefs[KEY_NAME] = user.displayName ?: email.substringBefore('@')
+                prefs[KEY_SURNAME] = "" // Initialize surname for consistency
             }
             
             Result.success(user)
@@ -113,6 +115,7 @@ class AuthRepository(private val context: Context) {
             context.dataStore.edit { prefs ->
                 prefs[KEY_USER_ID] = user.uid
                 prefs[KEY_NAME] = user.displayName ?: ""
+                prefs[KEY_SURNAME] = "" // No surname from Google login
                 prefs[KEY_EMAIL] = user.email ?: ""
             }
 
@@ -161,10 +164,11 @@ class AuthRepository(private val context: Context) {
         }.map { prefs ->
             val userId = prefs[KEY_USER_ID]
             val name = prefs[KEY_NAME]
+            val surname = prefs[KEY_SURNAME]
             val email = prefs[KEY_EMAIL]
             
-            if (!userId.isNullOrEmpty() && !name.isNullOrEmpty() && !email.isNullOrEmpty()) {
-                UserInfo(userId, name, email)
+            if (!userId.isNullOrEmpty() && !name.isNullOrEmpty() && !surname.isNullOrEmpty() && !email.isNullOrEmpty()) {
+                UserInfo(userId, name, surname, email)
             } else null
         }
     }
@@ -200,10 +204,5 @@ class AuthRepository(private val context: Context) {
     }
 }
 
-data class UserInfo(
-    val id: String,
-    val name: String,
-    val email: String
-)
 
 
