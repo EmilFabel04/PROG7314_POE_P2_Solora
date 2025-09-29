@@ -106,17 +106,38 @@ class LoginFragment : Fragment() {
             authViewModel.login(email, password)
         }
 
-        // Google login setup
+        // Google login setup with fallback client ID
+        val webClientId = try {
+            getString(R.string.default_web_client_id)
+        } catch (e: Exception) {
+            Log.w("LoginFragment", "Web client ID not found, trying Android client ID")
+            getString(R.string.android_client_id)
+        }
+        
+        Log.d("LoginFragment", "=== GOOGLE SIGN-IN SETUP ===")
+        Log.d("LoginFragment", "Using Client ID: $webClientId")
+        Log.d("LoginFragment", "Package: ${requireContext().packageName}")
+        
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestIdToken(webClientId)
             .requestEmail()
             .build()
 
         googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
 
         view.findViewById<ImageButton>(R.id.btn_google_login).setOnClickListener {
-            val signInIntent = googleSignInClient.signInIntent
-            startActivityForResult(signInIntent, RC_SIGN_IN)
+            Log.d("LoginFragment", "=== GOOGLE LOGIN BUTTON CLICKED ===")
+            Log.d("LoginFragment", "Package name: ${requireContext().packageName}")
+            Log.d("LoginFragment", "Google Services available: ${GoogleSignIn.hasPermissions(GoogleSignIn.getLastSignedInAccount(requireContext()), gso)}")
+            
+            try {
+                val signInIntent = googleSignInClient.signInIntent
+                Log.d("LoginFragment", "Sign-in intent created successfully")
+                startActivityForResult(signInIntent, RC_SIGN_IN)
+            } catch (e: Exception) {
+                Log.e("LoginFragment", "Failed to create sign-in intent: ${e.message}")
+                Toast.makeText(requireContext(), "Google Sign-In setup error: ${e.message}", Toast.LENGTH_LONG).show()
+            }
         }
 
         observeAuthStateAndNavigate(authViewModel)
@@ -132,13 +153,29 @@ class LoginFragment : Fragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        Log.d("LoginFragment", "=== onActivityResult called ===")
+        Log.d("LoginFragment", "requestCode: $requestCode, resultCode: $resultCode")
+        
         if (requestCode == RC_SIGN_IN) {
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
             try {
+                Log.d("LoginFragment", "Attempting to get Google account from intent...")
                 val account = task.getResult(ApiException::class.java)!!
-                authViewModel.loginWithGoogle(account.idToken!!)
+                Log.d("LoginFragment", "Google account retrieved successfully")
+                Log.d("LoginFragment", "Account email: ${account.email}")
+                Log.d("LoginFragment", "Account display name: ${account.displayName}")
+                Log.d("LoginFragment", "ID token available: ${account.idToken != null}")
+                
+                if (account.idToken != null) {
+                    Log.d("LoginFragment", "Calling authViewModel.loginWithGoogle...")
+                    authViewModel.loginWithGoogle(account.idToken!!)
+                } else {
+                    Log.e("LoginFragment", "ID token is null - this indicates SHA-1 or OAuth configuration issue")
+                    Toast.makeText(requireContext(), "Google authentication failed: ID token not available", Toast.LENGTH_LONG).show()
+                }
             } catch (e: ApiException) {
-                Toast.makeText(requireContext(), "Google login failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                Log.e("LoginFragment", "ApiException in onActivityResult: code=${e.statusCode}, message=${e.message}")
+                Toast.makeText(requireContext(), "Google login failed: Code ${e.statusCode} - ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -195,8 +232,19 @@ class RegisterFragment : Fragment() {
             authViewModel.register(name, surname, email, password)
         }
 
+        val webClientId = try {
+            getString(R.string.default_web_client_id)
+        } catch (e: Exception) {
+            Log.w("RegisterFragment", "Web client ID not found, trying Android client ID")
+            getString(R.string.android_client_id)
+        }
+        
+        Log.d("RegisterFragment", "=== GOOGLE SIGN-IN SETUP ===")
+        Log.d("RegisterFragment", "Using Client ID: $webClientId")
+        Log.d("RegisterFragment", "Package: ${requireContext().packageName}")
+        
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestIdToken(webClientId)
             .requestEmail()
             .build()
 
@@ -204,8 +252,18 @@ class RegisterFragment : Fragment() {
 
         val googleButton = view.findViewById<ImageButton>(R.id.btn_google_register)
         googleButton.setOnClickListener {
-            val signInIntent = googleSignInClient.signInIntent
-            startActivityForResult(signInIntent, RC_SIGN_IN)
+            Log.d("RegisterFragment", "=== GOOGLE REGISTER BUTTON CLICKED ===")
+            Log.d("RegisterFragment", "Package name: ${requireContext().packageName}")
+            Log.d("RegisterFragment", "Google Services available: ${GoogleSignIn.hasPermissions(GoogleSignIn.getLastSignedInAccount(requireContext()), gso)}")
+            
+            try {
+                val signInIntent = googleSignInClient.signInIntent
+                Log.d("RegisterFragment", "Sign-in intent created successfully")
+                startActivityForResult(signInIntent, RC_SIGN_IN)
+            } catch (e: Exception) {
+                Log.e("RegisterFragment", "Failed to create sign-in intent: ${e.message}")
+                Toast.makeText(requireContext(), "Google Sign-In setup error: ${e.message}", Toast.LENGTH_LONG).show()
+            }
         }
 
         observeAuthStateAndNavigate(authViewModel)
@@ -222,13 +280,29 @@ class RegisterFragment : Fragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        Log.d("RegisterFragment", "=== onActivityResult called ===")
+        Log.d("RegisterFragment", "requestCode: $requestCode, resultCode: $resultCode")
+        
         if (requestCode == RC_SIGN_IN) {
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
             try {
+                Log.d("RegisterFragment", "Attempting to get Google account from intent...")
                 val account = task.getResult(ApiException::class.java)!!
-                authViewModel.registerWithGoogle(account.idToken!!)
+                Log.d("RegisterFragment", "Google account retrieved successfully")
+                Log.d("RegisterFragment", "Account email: ${account.email}")
+                Log.d("RegisterFragment", "Account display name: ${account.displayName}")
+                Log.d("RegisterFragment", "ID token available: ${account.idToken != null}")
+                
+                if (account.idToken != null) {
+                    Log.d("RegisterFragment", "Calling authViewModel.registerWithGoogle...")
+                    authViewModel.registerWithGoogle(account.idToken!!)
+                } else {
+                    Log.e("RegisterFragment", "ID token is null - this indicates SHA-1 or OAuth configuration issue")
+                    Toast.makeText(requireContext(), "Google authentication failed: ID token not available", Toast.LENGTH_LONG).show()
+                }
             } catch (e: ApiException) {
-                Toast.makeText(requireContext(), "Google register failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                Log.e("RegisterFragment", "ApiException in onActivityResult: code=${e.statusCode}, message=${e.message}")
+                Toast.makeText(requireContext(), "Google register failed: Code ${e.statusCode} - ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
     }
