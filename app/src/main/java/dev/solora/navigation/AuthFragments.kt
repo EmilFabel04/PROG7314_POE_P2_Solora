@@ -14,11 +14,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-// Temporarily commented out Google imports for compilation
-// import com.google.android.gms.auth.api.signin.GoogleSignIn
-// import com.google.android.gms.auth.api.signin.GoogleSignInClient
-// import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-// import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import dev.solora.R
 import dev.solora.auth.AuthViewModel
 
@@ -73,11 +72,9 @@ class OnboardingFragment : Fragment() {
 class LoginFragment : Fragment() {
 
     private val authViewModel: AuthViewModel by viewModels()
-    // Temporarily commented out Google Sign-In for compilation
-    // private lateinit var googleSignInClient: GoogleSignInClient
+    private lateinit var googleSignInClient: GoogleSignInClient
     
-    // Modern Activity Result API for Google Sign-In - TEMPORARILY DISABLED
-    /*
+    // Modern Activity Result API for Google Sign-In
     private val googleSignInLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -89,7 +86,6 @@ class LoginFragment : Fragment() {
             Toast.makeText(requireContext(), "Google login failed: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
-    */
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -123,21 +119,16 @@ class LoginFragment : Fragment() {
         }
 
         // Google login setup
-        // TEMPORARILY DISABLED Google Sign-In setup for compilation
-        /*
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
             .build()
 
         googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
-        */
 
         view.findViewById<ImageButton>(R.id.btn_google_login).setOnClickListener {
-            // TEMPORARILY DISABLED - Google Sign-In
-            Toast.makeText(requireContext(), "Google Sign-In temporarily disabled", Toast.LENGTH_SHORT).show()
-            // val signInIntent = googleSignInClient.signInIntent
-            // googleSignInLauncher.launch(signInIntent)
+            val signInIntent = googleSignInClient.signInIntent
+            googleSignInLauncher.launch(signInIntent)
         }
 
         observeAuthStateAndNavigate(authViewModel)
@@ -156,11 +147,9 @@ class LoginFragment : Fragment() {
 class RegisterFragment : Fragment() {
 
     private val authViewModel: AuthViewModel by viewModels()
-    // Temporarily commented out Google Sign-In for compilation
-    // private lateinit var googleSignInClient: GoogleSignInClient
+    private lateinit var googleSignInClient: GoogleSignInClient
     
-    // Modern Activity Result API for Google Sign-In - TEMPORARILY DISABLED
-    /*
+    // Modern Activity Result API for Google Sign-In
     private val googleSignInLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -172,7 +161,6 @@ class RegisterFragment : Fragment() {
             Toast.makeText(requireContext(), "Google register failed: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
-    */
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -218,22 +206,18 @@ class RegisterFragment : Fragment() {
             authViewModel.register(name, surname, email, password)
         }
 
-        // TEMPORARILY DISABLED Google Sign-In setup for compilation
-        /*
+        // Google Sign-In setup
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
             .build()
 
         googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
-        */
 
         val googleButton = view.findViewById<ImageButton>(R.id.btn_google_register)
         googleButton.setOnClickListener {
-            // TEMPORARILY DISABLED - Google Sign-In
-            Toast.makeText(requireContext(), "Google Sign-In temporarily disabled", Toast.LENGTH_SHORT).show()
-            // val signInIntent = googleSignInClient.signInIntent
-            // googleSignInLauncher.launch(signInIntent)
+            val signInIntent = googleSignInClient.signInIntent
+            googleSignInLauncher.launch(signInIntent)
         }
 
         observeAuthStateAndNavigate(authViewModel)
