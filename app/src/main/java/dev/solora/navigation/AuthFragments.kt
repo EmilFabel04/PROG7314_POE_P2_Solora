@@ -21,8 +21,6 @@ import androidx.credentials.CustomCredential
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption
-import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import dev.solora.R
 import dev.solora.auth.AuthViewModel
 
@@ -119,7 +117,7 @@ class LoginFragment : Fragment() {
             .build()
 
         view?.findViewById<ImageButton>(R.id.btn_google_login)?.setOnClickListener {
-            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            lifecycleScope.launch {
                 try {
                     val result = credentialManager.getCredential(requireContext(), request)
                     handleCredential(result.credential)
@@ -218,7 +216,7 @@ class RegisterFragment : Fragment() {
             .build()
 
         view?.findViewById<ImageButton>(R.id.btn_google_register)?.setOnClickListener {
-            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            lifecycleScope.launch {
                 try {
                     val result = credentialManager.getCredential(requireContext(), request)
                     handleCredential(result.credential)
