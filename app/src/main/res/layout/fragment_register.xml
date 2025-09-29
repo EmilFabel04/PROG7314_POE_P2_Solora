@@ -16,8 +16,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
-        android:paddingBottom="32dp"
+        android:layout_marginTop="15dp"
+        android:paddingBottom="24dp"
         android:background="@drawable/authentication_form_background_orange"
         android:orientation="vertical">
 
@@ -25,7 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="50dp"
+            android:layout_marginTop="20dp"
             android:fontFamily="@font/poppins_bold"
             android:text="Create an account"
             android:textColor="@color/solora_on_primary"
@@ -35,7 +35,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="15dp"
             android:orientation="vertical">
 
             <TextView
@@ -174,7 +174,7 @@
             android:layout_gravity="center"
             android:clickable="true"
             android:focusable="true"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="15dp"
             android:background="@drawable/authentication_button_background_orange"
             android:orientation="vertical">
 
@@ -223,7 +223,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="15dp"
             android:orientation="horizontal">
 
             <ImageButton
@@ -253,7 +253,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="15dp"
             android:orientation="horizontal">
 
             <TextView

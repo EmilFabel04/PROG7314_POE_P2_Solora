@@ -12,7 +12,7 @@
         android:fontFamily="@font/poppins_bold"
         android:text="Solar Sales Made
                       Simple."
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="30dp"
         android:textColor="@color/solora_on_primary"
         android:textSize="40sp" />
 
@@ -29,7 +29,7 @@
         android:layout_height="232dp"
         android:orientation="horizontal"
         android:layout_gravity="center"
-        android:layout_marginTop="143dp"
+        android:layout_marginTop="80dp"
         android:background="@drawable/solora_logo2"/>
 
     <LinearLayout
@@ -40,7 +40,7 @@
         android:clickable="true"
         android:focusable="true"
         android:layout_gravity="center"
-        android:layout_marginTop="60dp"
+        android:layout_marginTop="30dp"
         android:layout_marginBottom="24dp"
         android:background="@drawable/authentication_button_background_orange">
 
