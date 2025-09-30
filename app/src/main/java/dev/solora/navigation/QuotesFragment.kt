@@ -342,7 +342,7 @@ class QuotesFragment : Fragment() {
                         Toast.makeText(requireContext(), "Calculation complete! Review and save your quote.", Toast.LENGTH_LONG).show()
                         
                         // Update the view tab with calculation results
-                        updateResultsTab(state.result)
+                        updateResultsTab(state.outputs)
                         
                         // Automatically switch to view tab to show results
                         switchToTab(1)
