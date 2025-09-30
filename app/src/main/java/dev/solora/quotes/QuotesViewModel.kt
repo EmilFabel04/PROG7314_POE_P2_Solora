@@ -16,12 +16,14 @@ import dev.solora.data.FirebaseRepository
 import dev.solora.quote.NasaPowerClient
 import dev.solora.quote.QuoteCalculator
 import dev.solora.quote.QuoteInputs
+import dev.solora.quote.GeocodingService
 import dev.solora.quote.QuoteOutputs
 
 class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     private val firebaseRepository = FirebaseRepository()
     private val nasa = NasaPowerClient()
     private val calculator = QuoteCalculator
+    private val geocodingService = GeocodingService(app)
 
     // Firebase quotes flow
     val quotes = flow {
@@ -58,33 +60,57 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
             _calculationState.value = CalculationState.Loading
             
             try {
+                var finalLatitude = latitude
+                var finalLongitude = longitude
+                var finalAddress = address
+                
+                // If coordinates not provided, try to geocode the address
+                if (finalLatitude == null || finalLongitude == null) {
+                    android.util.Log.d("QuotesViewModel", "Geocoding address: $address")
+                    val geocodeResult = geocodingService.getCoordinatesFromAddress(address)
+                    
+                    if (geocodeResult.success) {
+                        finalLatitude = geocodeResult.latitude
+                        finalLongitude = geocodeResult.longitude
+                        finalAddress = geocodeResult.address
+                        android.util.Log.d("QuotesViewModel", "Geocoding successful: $finalLatitude, $finalLongitude")
+                    } else {
+                        android.util.Log.w("QuotesViewModel", "Geocoding failed: ${geocodeResult.error}")
+                        // Continue with calculation without location data
+                    }
+                }
+                
                 val inputs = QuoteInputs(
                     monthlyUsageKwh = usageKwh,
                     monthlyBillRands = billRands,
                     tariffRPerKwh = tariff,
                     panelWatt = panelWatt,
                     sunHoursPerDay = sunHours,
-                    location = if (latitude != null && longitude != null) {
+                    location = if (finalLatitude != null && finalLongitude != null) {
                         dev.solora.quote.LocationInputs(
-                            latitude = latitude,
-                            longitude = longitude,
-                            address = address
+                            latitude = finalLatitude,
+                            longitude = finalLongitude,
+                            address = finalAddress
                         )
                     } else null
                 )
 
-                val result = calculator.calculateAdvanced(inputs)
+                android.util.Log.d("QuotesViewModel", "Starting calculation with NASA API integration")
+                val result = calculator.calculateAdvanced(inputs, nasa)
                 result.fold(
                     onSuccess = { outputs ->
+                        android.util.Log.d("QuotesViewModel", "Calculation successful: ${outputs.systemKw}kW system")
                         _lastCalculation.value = outputs
                         _calculationState.value = CalculationState.Success(outputs)
                     },
                     onFailure = { error ->
+                        android.util.Log.e("QuotesViewModel", "Calculation failed: ${error.message}")
                         _calculationState.value = CalculationState.Error(error.message ?: "Calculation failed")
                     }
                 )
                 
             } catch (e: Exception) {
+                android.util.Log.e("QuotesViewModel", "Exception during calculation: ${e.message}", e)
                 _calculationState.value = CalculationState.Error(e.message ?: "Calculation failed")
             }
         }
@@ -129,6 +155,55 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                 }
             } catch (e: Exception) {
                 // Handle error
+            }
+        }
+    }
+
+    // Save quote from calculation results
+    fun saveQuoteFromCalculation(
+        reference: String,
+        clientName: String,
+        address: String,
+        calculation: QuoteOutputs
+    ) {
+        viewModelScope.launch {
+            try {
+                val quote = FirebaseQuote(
+                    reference = reference,
+                    clientName = clientName,
+                    address = address,
+                    usageKwh = calculation.monthlyUsageKwh,
+                    billRands = calculation.monthlyBillRands,
+                    tariff = calculation.tariffRPerKwh,
+                    panelWatt = calculation.panelWatt,
+                    sunHours = calculation.sunHoursPerDay,
+                    systemKwp = calculation.systemKw,
+                    estimatedGeneration = calculation.estimatedMonthlyGeneration,
+                    paybackMonths = calculation.paybackMonths,
+                    savingsFirstYear = calculation.monthlySavingsRands * 12,
+                    dateEpoch = System.currentTimeMillis(),
+                    // Add NASA data if available
+                    latitude = calculation.detailedAnalysis?.locationData?.latitude,
+                    longitude = calculation.detailedAnalysis?.locationData?.longitude,
+                    averageAnnualIrradiance = calculation.detailedAnalysis?.locationData?.averageAnnualIrradiance,
+                    averageAnnualSunHours = calculation.detailedAnalysis?.locationData?.averageAnnualSunHours,
+                    optimalMonth = calculation.detailedAnalysis?.optimalMonth,
+                    optimalMonthIrradiance = calculation.detailedAnalysis?.optimalMonthIrradiance,
+                    temperature = calculation.detailedAnalysis?.averageTemperature,
+                    windSpeed = calculation.detailedAnalysis?.averageWindSpeed,
+                    humidity = calculation.detailedAnalysis?.averageHumidity
+                )
+
+                val result = firebaseRepository.saveQuote(quote)
+                if (result.isSuccess) {
+                    val savedQuote = quote.copy(id = result.getOrNull())
+                    _lastQuote.value = savedQuote
+                    android.util.Log.d("QuotesViewModel", "Quote saved successfully with ID: ${savedQuote.id}")
+                } else {
+                    android.util.Log.e("QuotesViewModel", "Failed to save quote: ${result.exceptionOrNull()?.message}")
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("QuotesViewModel", "Exception saving quote: ${e.message}", e)
             }
         }
     }

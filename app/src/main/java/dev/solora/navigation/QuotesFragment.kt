@@ -206,57 +206,61 @@ class QuotesFragment : Fragment() {
     
     private fun setupDashboardTab() {
         btnSaveFinalQuote.setOnClickListener {
-            val reference = etReference.text.toString().trim()
-            val firstName = etFirstName.text.toString().trim()
-            val lastName = etLastName.text.toString().trim()
-            val address = etClientAddress.text.toString().trim()
-            val email = etEmail.text.toString().trim()
-            val contact = etContact.text.toString().trim()
-            
-            // Basic validation
-            if (reference.isEmpty() || firstName.isEmpty() || lastName.isEmpty()) {
-                Toast.makeText(requireContext(), "Please fill in required client details", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            
-            // Save the complete quote with client information and create lead
-            quotesViewModel.lastQuote.value?.let { quote ->
-                val fullName = "$firstName $lastName"
-                val contactInfo = "$email | $contact"
-                
-                // Update the quote in the database with real client information
-                val updatedQuote = quote.copy(
-                    reference = reference,
-                    clientName = fullName,
-                    address = address
-                )
-                quotesViewModel.updateQuote(quote.id ?: "", updatedQuote)
-                
-                // Create a lead from this quote with client details
-                android.util.Log.d("QuotesFragment", "Creating lead from quote with client details")
-                leadsViewModel.createLeadFromQuote(
-                    quoteId = updatedQuote.id ?: "",
-                    clientName = updatedQuote.clientName,
-                    address = updatedQuote.address,
-                    contactInfo = contactInfo,
-                    notes = "Lead created from quote ${reference} with full client details. Client expressed interested in ${String.format("%.2f", updatedQuote.systemKwp)}kW solar system."
-                )
-                
-                Toast.makeText(requireContext(), "Quote saved and lead created successfully!", Toast.LENGTH_LONG).show()
-                
-                // Navigate to the quote detail (small delay to ensure database update)
-                viewLifecycleOwner.lifecycleScope.launch {
-                    kotlinx.coroutines.delay(300)
-                    val bundle = Bundle().apply { putString("id", quote.id) }
-                    findNavController().navigate(R.id.quoteDetailFragment, bundle)
-                }
-                
-            } ?: run {
-                Toast.makeText(requireContext(), "Please calculate a quote first", Toast.LENGTH_SHORT).show()
-            }
+            saveQuoteWithClientDetails()
         }
     }
     
+    private fun saveQuoteWithClientDetails() {
+        quotesViewModel.lastCalculation.value?.let { calculation ->
+            // Get client details from the form
+            val etReference = view?.findViewById<EditText>(R.id.et_reference)
+            val etClientName = view?.findViewById<EditText>(R.id.et_client_name)
+            val etAddress = view?.findViewById<EditText>(R.id.et_address)
+            val etContactInfo = view?.findViewById<EditText>(R.id.et_contact_info)
+            
+            val reference = etReference?.text?.toString()?.trim() ?: "QUOTE-${System.currentTimeMillis()}"
+            val clientName = etClientName?.text?.toString()?.trim() ?: "Unknown Client"
+            val address = etAddress?.text?.toString()?.trim() ?: "Unknown Address"
+            val contactInfo = etContactInfo?.text?.toString()?.trim() ?: ""
+            
+            if (clientName.isEmpty() || address.isEmpty()) {
+                Toast.makeText(requireContext(), "Please enter client name and address", Toast.LENGTH_SHORT).show()
+                return
+            }
+            
+            // Save the quote with all details
+            quotesViewModel.saveQuoteFromCalculation(reference, clientName, address, calculation)
+            
+            // Wait for quote to be saved, then create lead
+            viewLifecycleOwner.lifecycleScope.launch {
+                // Wait a bit for the quote to be saved
+                kotlinx.coroutines.delay(500)
+                
+                val savedQuote = quotesViewModel.lastQuote.value
+                if (savedQuote != null && savedQuote.id != null) {
+                    // Create a lead from this quote
+                    leadsViewModel.createLeadFromQuote(
+                        quoteId = savedQuote.id!!,
+                        clientName = clientName,
+                        address = address,
+                        contactInfo = contactInfo,
+                        notes = "Lead created from quote $reference. System: ${String.format("%.2f", calculation.systemKw)}kW, Monthly savings: R${String.format("%.2f", calculation.monthlySavingsRands)}"
+                    )
+                    
+                    Toast.makeText(requireContext(), "Quote saved and lead created successfully!", Toast.LENGTH_LONG).show()
+                    
+                    // Navigate to the quote detail
+                    val bundle = Bundle().apply { putString("id", savedQuote.id) }
+                    findNavController().navigate(R.id.quoteDetailFragment, bundle)
+                } else {
+                    Toast.makeText(requireContext(), "Quote saved but lead creation failed", Toast.LENGTH_SHORT).show()
+                }
+            }
+        } ?: run {
+            Toast.makeText(requireContext(), "No calculation to save", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun observeViewModel() {
         // Observe calculation state
         viewLifecycleOwner.lifecycleScope.launch {
@@ -273,7 +277,7 @@ class QuotesFragment : Fragment() {
                     is CalculationState.Success -> {
                         btnCalculate.isEnabled = true
                         btnCalculate.text = "calculate"
-                        Toast.makeText(requireContext(), "Calculation complete!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Calculation complete! Review and save your quote.", Toast.LENGTH_LONG).show()
                         
                         // Automatically switch to view tab to show results
                         switchToTab(1)
