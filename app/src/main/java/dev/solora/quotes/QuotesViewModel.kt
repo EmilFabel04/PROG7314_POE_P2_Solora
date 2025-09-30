@@ -26,7 +26,7 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     private val nasa = NasaPowerClient()
     private val calculator = QuoteCalculator
     private val geocodingService = GeocodingService(app)
-    private val settingsRepository = SettingsRepository(app)
+    private val settingsRepository = SettingsRepository()
 
     // Firebase quotes flow
     val quotes = flow {
