@@ -215,14 +215,20 @@ class QuotesFragment : Fragment() {
         quotesViewModel.lastCalculation.value?.let { calculation ->
             // Get client details from the form
             val etReference = view?.findViewById<EditText>(R.id.et_reference)
-            val etClientName = view?.findViewById<EditText>(R.id.et_client_name)
-            val etAddress = view?.findViewById<EditText>(R.id.et_address)
-            val etContactInfo = view?.findViewById<EditText>(R.id.et_contact_info)
+            val etFirstName = view?.findViewById<EditText>(R.id.et_first_name)
+            val etLastName = view?.findViewById<EditText>(R.id.et_last_name)
+            val etClientAddress = view?.findViewById<EditText>(R.id.et_client_address)
+            val etEmail = view?.findViewById<EditText>(R.id.et_email)
+            val etContact = view?.findViewById<EditText>(R.id.et_contact)
             
             val reference = etReference?.text?.toString()?.trim() ?: "QUOTE-${System.currentTimeMillis()}"
-            val clientName = etClientName?.text?.toString()?.trim() ?: "Unknown Client"
-            val address = etAddress?.text?.toString()?.trim() ?: "Unknown Address"
-            val contactInfo = etContactInfo?.text?.toString()?.trim() ?: ""
+            val firstName = etFirstName?.text?.toString()?.trim() ?: ""
+            val lastName = etLastName?.text?.toString()?.trim() ?: ""
+            val clientName = if (firstName.isNotEmpty() && lastName.isNotEmpty()) "$firstName $lastName" else "Unknown Client"
+            val address = etClientAddress?.text?.toString()?.trim() ?: "Unknown Address"
+            val email = etEmail?.text?.toString()?.trim() ?: ""
+            val contact = etContact?.text?.toString()?.trim() ?: ""
+            val contactInfo = if (email.isNotEmpty() && contact.isNotEmpty()) "$email | $contact" else email.ifEmpty { contact }
             
             if (clientName.isEmpty() || address.isEmpty()) {
                 Toast.makeText(requireContext(), "Please enter client name and address", Toast.LENGTH_SHORT).show()

@@ -3,6 +3,7 @@ package dev.solora.quote
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
+import dev.solora.quote.NasaPowerClient.LocationData
 
 data class QuoteInputs(
     val monthlyUsageKwh: Double?,
