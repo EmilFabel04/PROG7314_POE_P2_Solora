@@ -19,7 +19,7 @@ import dev.solora.quote.QuoteOutputs
 class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     private val firebaseRepository = FirebaseRepository()
     private val nasa = NasaPowerClient()
-    private val calculator = QuoteCalculator()
+    private val calculator = QuoteCalculator
 
     // Firebase quotes flow
     val quotes = firebaseRepository.getQuotes().stateIn(
@@ -55,16 +55,18 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
             
             try {
                 val inputs = QuoteInputs(
-                    reference = reference,
-                    clientName = clientName,
-                    address = address,
-                    usageKwh = usageKwh,
-                    billRands = billRands,
-                    tariff = tariff,
+                    monthlyUsageKwh = usageKwh,
+                    monthlyBillRands = billRands,
+                    tariffRPerKwh = tariff,
                     panelWatt = panelWatt,
-                    sunHours = sunHours,
-                    latitude = latitude,
-                    longitude = longitude
+                    sunHoursPerDay = sunHours,
+                    location = if (latitude != null && longitude != null) {
+                        dev.solora.quote.LocationInputs(
+                            latitude = latitude,
+                            longitude = longitude,
+                            address = address
+                        )
+                    } else null
                 )
 
                 val outputs = calculator.calculateQuote(inputs)

@@ -12,14 +12,14 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dev.solora.R
-import dev.solora.quotes.QuotesViewModel
+import dev.solora.quotes.FirebaseQuotesViewModel
 import dev.solora.leads.LeadsViewModel
-import dev.solora.data.Quote
+import dev.solora.data.FirebaseFirebaseQuote
 import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment() {
     
-    private val quotesViewModel: QuotesViewModel by viewModels()
+    private val quotesViewModel: FirebaseQuotesViewModel by viewModels()
     private val leadsViewModel: LeadsViewModel by viewModels()
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -31,42 +31,42 @@ class HomeFragment : Fragment() {
         
         // Get references to UI elements
         val tvSavings = view.findViewById<TextView>(R.id.tv_savings)
-        val tvQuotes = view.findViewById<TextView>(R.id.tv_quotes)
+        val tvFirebaseQuotes = view.findViewById<TextView>(R.id.tv_quotes)
         val tvLeads = view.findViewById<TextView>(R.id.tv_leads)
-        val rvRecentQuotes = view.findViewById<RecyclerView>(R.id.rv_recent_quotes)
-        val cardEmptyQuotes = view.findViewById<View>(R.id.card_empty_quotes)
+        val rvRecentFirebaseQuotes = view.findViewById<RecyclerView>(R.id.rv_recent_quotes)
+        val cardEmptyFirebaseQuotes = view.findViewById<View>(R.id.card_empty_quotes)
         
         // Set up RecyclerView
-        val quotesAdapter = RecentQuotesAdapter { quote ->
+        val quotesAdapter = RecentFirebaseQuotesAdapter { quote ->
             // Navigate to quote detail when clicked
             val bundle = Bundle().apply { putLong("id", quote.id) }
             findNavController().navigate(R.id.quoteDetailFragment, bundle)
         }
         
-        rvRecentQuotes.layoutManager = LinearLayoutManager(requireContext())
-        rvRecentQuotes.adapter = quotesAdapter
+        rvRecentFirebaseQuotes.layoutManager = LinearLayoutManager(requireContext())
+        rvRecentFirebaseQuotes.adapter = quotesAdapter
         
         // Observe quotes data
         viewLifecycleOwner.lifecycleScope.launch {
             quotesViewModel.quotes.collect { quotes ->
                 // Update quote count
-                tvQuotes.text = "Quotes ${quotes.size}"
+                tvFirebaseQuotes.text = "FirebaseQuotes ${quotes.size}"
                 
                 // Calculate total monthly savings
-                val totalSavings = quotes.sumOf { it.savingsRands }
+                val totalSavings = quotes.sumOf { it.savingsFirstYear }
                 tvSavings.text = "R ${String.format("%.0f", totalSavings)}"
                 
                 // Update recent quotes (show max 3)
-                val recentQuotes = quotes.take(3)
-                quotesAdapter.submitList(recentQuotes)
+                val recentFirebaseQuotes = quotes.take(3)
+                quotesAdapter.submitList(recentFirebaseQuotes)
                 
                 // Show/hide empty state
                 if (quotes.isEmpty()) {
-                    rvRecentQuotes.visibility = View.GONE
-                    cardEmptyQuotes.visibility = View.VISIBLE
+                    rvRecentFirebaseQuotes.visibility = View.GONE
+                    cardEmptyFirebaseQuotes.visibility = View.VISIBLE
                 } else {
-                    rvRecentQuotes.visibility = View.VISIBLE
-                    cardEmptyQuotes.visibility = View.GONE
+                    rvRecentFirebaseQuotes.visibility = View.VISIBLE
+                    cardEmptyFirebaseQuotes.visibility = View.GONE
                 }
             }
         }
@@ -92,8 +92,8 @@ class HomeFragment : Fragment() {
         }
         
         // Quick action cards - make the entire cards clickable
-        val calculateQuoteCard = view.findViewById<View>(R.id.card_calculate_quote)
-        calculateQuoteCard?.setOnClickListener {
+        val calculateFirebaseQuoteCard = view.findViewById<View>(R.id.card_calculate_quote)
+        calculateFirebaseQuoteCard?.setOnClickListener {
             findNavController().navigate(R.id.quotesFragment)
         }
         
@@ -129,42 +129,42 @@ class HomeFragment : Fragment() {
 }
 
 // Simple adapter for recent quotes
-class RecentQuotesAdapter(
-    private val onQuoteClick: (Quote) -> Unit
-) : RecyclerView.Adapter<RecentQuotesAdapter.QuoteViewHolder>() {
+class RecentFirebaseQuotesAdapter(
+    private val onFirebaseQuoteClick: (FirebaseQuote) -> Unit
+) : RecyclerView.Adapter<RecentFirebaseQuotesAdapter.FirebaseQuoteViewHolder>() {
     
-    private var quotes: List<Quote> = emptyList()
+    private var quotes: List<FirebaseQuote> = emptyList()
     
-    fun submitList(newQuotes: List<Quote>) {
-        quotes = newQuotes
+    fun submitList(newFirebaseQuotes: List<FirebaseQuote>) {
+        quotes = newFirebaseQuotes
         notifyDataSetChanged()
     }
     
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): QuoteViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FirebaseQuoteViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_recent_quote, parent, false)
-        return QuoteViewHolder(view)
+        return FirebaseQuoteViewHolder(view)
     }
     
-    override fun onBindViewHolder(holder: QuoteViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: FirebaseQuoteViewHolder, position: Int) {
         holder.bind(quotes[position])
     }
     
     override fun getItemCount(): Int = quotes.size
     
-    inner class QuoteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class FirebaseQuoteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvReference = itemView.findViewById<TextView>(R.id.tv_quote_reference)
         private val tvClient = itemView.findViewById<TextView>(R.id.tv_quote_client)
         private val tvSystem = itemView.findViewById<TextView>(R.id.tv_quote_system)
         private val tvSavings = itemView.findViewById<TextView>(R.id.tv_quote_savings)
         
-        fun bind(quote: Quote) {
+        fun bind(quote: FirebaseQuote) {
             tvReference.text = quote.reference
             tvClient.text = quote.clientName
-            tvSystem.text = "${String.format("%.1f", quote.systemKw)} kW"
-            tvSavings.text = "R${String.format("%.0f", quote.savingsRands)}/month"
+            tvSystem.text = "${String.format("%.1f", quote.systemKwp)} kW"
+            tvSavings.text = "R${String.format("%.0f", quote.savingsFirstYear)}/month"
             
-            itemView.setOnClickListener { onQuoteClick(quote) }
+            itemView.setOnClickListener { onFirebaseQuoteClick(quote) }
         }
     }
 }

@@ -182,7 +182,7 @@ class QuotesFragment : Fragment() {
                 val panelWatt = if (panelText.isNotEmpty()) panelText.toInt() else 420
                 
                 // Use temporary values for reference and client name during calculation
-                quotesViewModel.calculateAndSaveUsingAddress(
+                quotesViewModel.calculateAdvanced(
                     reference = "TEMP-${System.currentTimeMillis()}",
                     clientName = "Temporary Client",
                     address = address,
@@ -225,24 +225,21 @@ class QuotesFragment : Fragment() {
                 val contactInfo = "$email | $contact"
                 
                 // Update the quote in the database with real client information
-                quotesViewModel.updateQuoteWithClientDetails(
-                    quoteId = quote.id,
-                    reference = reference,
-                    clientName = fullName,
-                    address = address
-                )
-                
-                // Create a lead from this quote with client details
-                android.util.Log.d("QuotesFragment", "Creating lead from quote with client details")
                 val updatedQuote = quote.copy(
                     reference = reference,
                     clientName = fullName,
                     address = address
                 )
+                quotesViewModel.updateQuote(quote.id ?: "", updatedQuote)
+                
+                // Create a lead from this quote with client details
+                android.util.Log.d("QuotesFragment", "Creating lead from quote with client details")
                 leadsViewModel.createLeadFromQuote(
-                    quote = updatedQuote,
+                    quoteId = updatedQuote.id ?: "",
+                    clientName = updatedQuote.clientName,
+                    address = updatedQuote.address,
                     contactInfo = contactInfo,
-                    notes = "Lead created from quote ${reference} with full client details. Client expressed interested in ${String.format("%.2f", quote.systemKw)}kW solar system."
+                    notes = "Lead created from quote ${reference} with full client details. Client expressed interested in ${String.format("%.2f", updatedQuote.systemKwpp)}kW solar system."
                 )
                 
                 Toast.makeText(requireContext(), "Quote saved and lead created successfully!", Toast.LENGTH_LONG).show()
@@ -250,7 +247,7 @@ class QuotesFragment : Fragment() {
                 // Navigate to the quote detail (small delay to ensure database update)
                 viewLifecycleOwner.lifecycleScope.launch {
                     kotlinx.coroutines.delay(300)
-                    val bundle = Bundle().apply { putLong("id", quote.id) }
+                    val bundle = Bundle().apply { putString("id", quote.id) }
                     findNavController().navigate(R.id.quoteDetailFragment, bundle)
                 }
                 
@@ -295,17 +292,17 @@ class QuotesFragment : Fragment() {
             quotesViewModel.lastQuote.collect { quote ->
                 if (quote != null) {
                     // Update view tab with results
-                    tvPanels.text = quote.panels.toString()
-                    tvSystemSize.text = "${String.format("%.1f", quote.systemKw)} kW"
-                    tvInverterSize.text = "${String.format("%.1f", quote.inverterKw)} kW"
-                    tvSavings.text = "R ${String.format("%.2f", quote.savingsRands)}"
+                    tvPanels.text = (quote.systemKwp * 1000 / quote.panelWatt).toInt().toString()
+                    tvSystemSize.text = "${String.format("%.1f", quote.systemKwp)} kW"
+                    tvInverterSize.text = "${String.format("%.1f", quote.systemKwp * 0.8)} kW"
+                    tvSavings.text = "R ${String.format("%.2f", quote.savingsFirstYear)}"
                     
                     // Update dashboard tab summary
                     tvQuoteSummary.text = buildString {
-                        appendLine("Number of Panels: ${quote.panels}")
-                        appendLine("Total System Size: ${String.format("%.1f", quote.systemKw)} kW")
-                        appendLine("Recommended Inverter: ${String.format("%.1f", quote.inverterKw)} kW")
-                        appendLine("Estimated Monthly Savings: R ${String.format("%.2f", quote.savingsRands)}")
+                        appendLine("Number of Panels: ${(quote.systemKwp * 1000 / quote.panelWatt).toInt()}")
+                        appendLine("Total System Size: ${String.format("%.1f", quote.systemKwp)} kW")
+                        appendLine("Recommended Inverter: ${String.format("%.1f", quote.systemKwp * 0.8)} kW")
+                        appendLine("Estimated Monthly Savings: R ${String.format("%.2f", quote.savingsFirstYear)}")
                     }
                     
                     // Pre-fill client address from calculation

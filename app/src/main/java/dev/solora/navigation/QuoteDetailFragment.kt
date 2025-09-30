@@ -34,7 +34,7 @@ class QuoteDetailFragment : Fragment() {
     private lateinit var btnExportPdf: Button
     private lateinit var btnShare: Button
     
-    private var currentQuote: dev.solora.data.Quote? = null
+    private var currentQuote: dev.solora.data.FirebaseQuote? = null
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_quote_detail, container, false)
@@ -46,7 +46,7 @@ class QuoteDetailFragment : Fragment() {
         initializeViews(view)
         setupClickListeners()
         
-        val quoteId = requireArguments().getLong("id", 0L)
+        val quoteId = requireArguments().getString("id") ?: ""
         android.util.Log.d("QuoteDetailFragment", "Looking for quote with ID: $quoteId")
         
         observeQuote(quoteId)
@@ -79,9 +79,10 @@ class QuoteDetailFragment : Fragment() {
         }
     }
     
-    private fun observeQuote(quoteId: Long) {
+    private fun observeQuote(quoteId: String) {
         viewLifecycleOwner.lifecycleScope.launch {
-            quotesViewModel.quoteById(quoteId).collect { quote ->
+            quotesViewModel.getQuoteById(quoteId)
+            quotesViewModel.lastQuote.collect { quote ->
                 android.util.Log.d("QuoteDetailFragment", "Received quote: ${quote?.id} - ${quote?.reference}")
                 currentQuote = quote
                 
@@ -94,7 +95,7 @@ class QuoteDetailFragment : Fragment() {
         }
     }
     
-    private fun populateQuoteDetails(quote: dev.solora.data.Quote) {
+    private fun populateQuoteDetails(quote: dev.solora.data.FirebaseQuote) {
         // Header
         tvReference.text = quote.reference
         tvDate.text = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(quote.dateEpoch))
@@ -113,10 +114,10 @@ class QuoteDetailFragment : Fragment() {
         tvEnergyDetails.text = buildString {
             appendLine("CURRENT ENERGY INFORMATION")
             appendLine()
-            quote.monthlyUsageKwh?.let { 
+            quote.usageKwh?.let { 
                 appendLine("Monthly Usage                    ${String.format("%.0f", it)} kWh") 
             }
-            quote.monthlyBillRands?.let { 
+            quote.billRands?.let { 
                 appendLine("Average Bill                     R ${String.format("%.2f", it)}") 
             }
             appendLine("Tariff Rate                      R ${String.format("%.2f", quote.tariff)}/kWh")
@@ -127,12 +128,12 @@ class QuoteDetailFragment : Fragment() {
             appendLine("RECOMMENDED SYSTEM")
             appendLine()
             appendLine("Panel                            ${quote.panelWatt}W")
-            appendLine("Quantity                         ${quote.panels}")
-            appendLine("Recommended Inverter             ${String.format("%.0f", quote.inverterKw)}kW")
-            appendLine("Total System Size                ${String.format("%.2f", quote.systemKw)}kW")
-            val monthlyGeneration = quote.systemKw * quote.sunHours * 30
-            val usagePercentage = if (quote.monthlyUsageKwh != null && quote.monthlyUsageKwh > 0) {
-                (monthlyGeneration / quote.monthlyUsageKwh) * 100
+            appendLine("Quantity                         ${(quote.systemKwp * 1000 / quote.panelWatt).toInt()}")
+            appendLine("Recommended Inverter             ${String.format("%.0f", quote.systemKwp * 0.8)}kW")
+            appendLine("Total System Size                ${String.format("%.2f", quote.systemKwp)}kW")
+            val monthlyGeneration = quote.systemKwp * quote.sunHours * 30
+            val usagePercentage = if (quote.usageKwh != null && quote.usageKwh > 0) {
+                (monthlyGeneration / quote.usageKwh) * 100
             } else {
                 0.0
             }
@@ -144,7 +145,7 @@ class QuoteDetailFragment : Fragment() {
             appendLine("QUOTATION")
             appendLine()
             
-            val systemCost = quote.systemCostRands ?: (quote.systemKw * 15000)
+            val systemCost = quote.systemKwp * 15000
             val vatAmount = systemCost * 0.15
             val totalCost = systemCost + vatAmount
             
@@ -157,9 +158,9 @@ class QuoteDetailFragment : Fragment() {
             appendLine("Total Due                        R ${String.format("%.2f", totalCost)}")
             appendLine()
             appendLine("ESTIMATED MONTHLY SAVINGS")
-            appendLine("R ${String.format("%.2f", quote.savingsRands)}")
+            appendLine("R ${String.format("%.2f", quote.savingsFirstYear)}")
             appendLine()
-            quote.paybackYears?.let { 
+            quote.paybackMonths?.let { 
                 appendLine("PAYBACK PERIOD")
                 appendLine("${String.format("%.1f", it)} years")
             }
@@ -187,9 +188,11 @@ class QuoteDetailFragment : Fragment() {
             
             // Create lead from quote using LeadsViewModel
             leadsViewModel.createLeadFromQuote(
-                quote = quote,
+                quoteId = quote.id ?: "",
+                clientName = quote.clientName,
+                address = quote.address,
                 contactInfo = "", // Will be filled in later by the consultant
-                notes = "Lead converted from quote ${quote.reference}. System: ${String.format("%.2f", quote.systemKw)}kW, Monthly savings: R${String.format("%.2f", quote.savingsRands)}"
+                notes = "Lead converted from quote ${quote.reference}. System: ${String.format("%.2f", quote.systemKwp)}kW, Monthly savings: R${String.format("%.2f", quote.savingsFirstYear)}"
             )
             
             Toast.makeText(
@@ -212,7 +215,7 @@ class QuoteDetailFragment : Fragment() {
     
     private fun shareQuote() {
         currentQuote?.let { quote ->
-            val systemCost = quote.systemCostRands ?: (quote.systemKw * 15000)
+            val systemCost = quote.systemKwp * 15000
             val vatAmount = systemCost * 0.15
             val totalCost = systemCost + vatAmount
             
@@ -225,9 +228,9 @@ class QuoteDetailFragment : Fragment() {
                 appendLine()
                 appendLine("RECOMMENDED SYSTEM:")
                 appendLine("Panel Rating: ${quote.panelWatt}W")
-                appendLine("Quantity: ${quote.panels}")
-                appendLine("System Size: ${String.format("%.2f", quote.systemKw)} kW")
-                appendLine("Inverter: ${String.format("%.2f", quote.inverterKw)} kW")
+                appendLine("Quantity: ${(quote.systemKwp * 1000 / quote.panelWatt).toInt()}")
+                appendLine("System Size: ${String.format("%.2f", quote.systemKwp)} kW")
+                appendLine("Inverter: ${String.format("%.2f", quote.systemKwp * 0.8)} kW")
                 appendLine()
                 appendLine("QUOTATION:")
                 appendLine("Solar System: R ${String.format("%.2f", systemCost)}")
@@ -236,8 +239,8 @@ class QuoteDetailFragment : Fragment() {
                 appendLine("Total Due: R ${String.format("%.2f", totalCost)}")
                 appendLine()
                 appendLine("ESTIMATED MONTHLY SAVINGS:")
-                appendLine("R ${String.format("%.2f", quote.savingsRands)}")
-                quote.paybackYears?.let { 
+                appendLine("R ${String.format("%.2f", quote.savingsFirstYear)}")
+                quote.paybackMonths?.let { 
                     appendLine("PAYBACK PERIOD: ${String.format("%.1f", it)} years")
                 }
                 appendLine()

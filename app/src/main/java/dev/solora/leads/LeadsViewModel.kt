@@ -16,7 +16,7 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
     val leads = firebaseRepository.getLeads().stateIn(
         viewModelScope, 
         SharingStarted.WhileSubscribed(5000), 
-        emptyList()
+        emptyList<FirebaseLead>()
     )
 
     fun addLead(name: String, email: String, phone: String, notes: String = "") {
