@@ -21,7 +21,9 @@ class SettingsRepository {
             val currentUser = auth.currentUser
             if (currentUser == null) {
                 android.util.Log.w("SettingsRepository", "No authenticated user, using default settings")
-                trySend(AppSettings())
+                if (!isClosedForSend) {
+                    trySend(AppSettings())
+                }
                 return@callbackFlow
             }
             
@@ -32,57 +34,69 @@ class SettingsRepository {
             
             // Set up real-time listener
             val listener = settingsDoc.addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    android.util.Log.e("SettingsRepository", "Firebase settings error", error)
-                    trySend(AppSettings()) // Send default settings on error
-                    return@addSnapshotListener
-                }
-                
-                if (snapshot != null && snapshot.exists()) {
-                    try {
-                        val data = snapshot.data
-                        val appSettings = AppSettings(
-                            calculationSettings = CalculationSettings(
-                                defaultTariff = (data?.get("defaultTariff") as? Double) ?: 2.50,
-                                defaultPanelWatt = (data?.get("defaultPanelWatt") as? Long)?.toInt() ?: 420,
-                                panelCostPerWatt = (data?.get("panelCostPerWatt") as? Double) ?: 15.0,
-                                inverterCostPerWatt = (data?.get("inverterCostPerWatt") as? Double) ?: 12.0,
-                                installationCostPerKw = (data?.get("installationCostPerKw") as? Double) ?: 15000.0,
-                                panelEfficiency = (data?.get("panelEfficiency") as? Double) ?: 0.20,
-                                performanceRatio = (data?.get("performanceRatio") as? Double) ?: 0.80,
-                                inverterSizingRatio = (data?.get("inverterSizingRatio") as? Double) ?: 0.80,
-                                defaultSunHours = (data?.get("defaultSunHours") as? Double) ?: 5.0,
-                                systemLifetime = (data?.get("systemLifetime") as? Long)?.toInt() ?: 25,
-                                panelDegradationRate = (data?.get("panelDegradationRate") as? Double) ?: 0.005,
-                                co2PerKwh = (data?.get("co2PerKwh") as? Double) ?: 0.5
-                            ),
-                            companySettings = CompanySettings(
-                                companyName = (data?.get("companyName") as? String) ?: "",
-                                companyAddress = (data?.get("companyAddress") as? String) ?: "",
-                                companyPhone = (data?.get("companyPhone") as? String) ?: "",
-                                companyEmail = (data?.get("companyEmail") as? String) ?: "",
-                                companyWebsite = (data?.get("companyWebsite") as? String) ?: "",
-                                consultantName = (data?.get("consultantName") as? String) ?: "",
-                                consultantPhone = (data?.get("consultantPhone") as? String) ?: "",
-                                consultantEmail = (data?.get("consultantEmail") as? String) ?: "",
-                                consultantLicense = (data?.get("consultantLicense") as? String) ?: "",
-                                companyLogo = (data?.get("companyLogo") as? String) ?: "",
-                                quoteFooter = (data?.get("quoteFooter") as? String) ?: "",
-                                termsAndConditions = (data?.get("termsAndConditions") as? String) ?: ""
-                            ),
-                            currency = (data?.get("currency") as? String) ?: "ZAR",
-                            language = (data?.get("language") as? String) ?: "en",
-                            theme = (data?.get("theme") as? String) ?: "light"
-                        )
-                        android.util.Log.d("SettingsRepository", "Settings loaded from Firebase: $appSettings")
-                        trySend(appSettings)
-                    } catch (e: Exception) {
-                        android.util.Log.e("SettingsRepository", "Error parsing settings data", e)
-                        trySend(AppSettings())
+                try {
+                    if (error != null) {
+                        android.util.Log.e("SettingsRepository", "Firebase settings error", error)
+                        if (!isClosedForSend) {
+                            trySend(AppSettings()) // Send default settings on error
+                        }
+                        return@addSnapshotListener
                     }
-                } else {
-                    android.util.Log.d("SettingsRepository", "No settings found, using defaults")
-                    trySend(AppSettings())
+                    
+                    if (snapshot != null && snapshot.exists()) {
+                        try {
+                            val data = snapshot.data
+                            val appSettings = AppSettings(
+                                calculationSettings = CalculationSettings(
+                                    defaultTariff = (data?.get("defaultTariff") as? Double) ?: 2.50,
+                                    defaultPanelWatt = (data?.get("defaultPanelWatt") as? Long)?.toInt() ?: 420,
+                                    panelCostPerWatt = (data?.get("panelCostPerWatt") as? Double) ?: 15.0,
+                                    inverterCostPerWatt = (data?.get("inverterCostPerWatt") as? Double) ?: 12.0,
+                                    installationCostPerKw = (data?.get("installationCostPerKw") as? Double) ?: 15000.0,
+                                    panelEfficiency = (data?.get("panelEfficiency") as? Double) ?: 0.20,
+                                    performanceRatio = (data?.get("performanceRatio") as? Double) ?: 0.80,
+                                    inverterSizingRatio = (data?.get("inverterSizingRatio") as? Double) ?: 0.80,
+                                    defaultSunHours = (data?.get("defaultSunHours") as? Double) ?: 5.0,
+                                    systemLifetime = (data?.get("systemLifetime") as? Long)?.toInt() ?: 25,
+                                    panelDegradationRate = (data?.get("panelDegradationRate") as? Double) ?: 0.005,
+                                    co2PerKwh = (data?.get("co2PerKwh") as? Double) ?: 0.5
+                                ),
+                                companySettings = CompanySettings(
+                                    companyName = (data?.get("companyName") as? String) ?: "",
+                                    companyAddress = (data?.get("companyAddress") as? String) ?: "",
+                                    companyPhone = (data?.get("companyPhone") as? String) ?: "",
+                                    companyEmail = (data?.get("companyEmail") as? String) ?: "",
+                                    companyWebsite = (data?.get("companyWebsite") as? String) ?: "",
+                                    consultantName = (data?.get("consultantName") as? String) ?: "",
+                                    consultantPhone = (data?.get("consultantPhone") as? String) ?: "",
+                                    consultantEmail = (data?.get("consultantEmail") as? String) ?: "",
+                                    consultantLicense = (data?.get("consultantLicense") as? String) ?: "",
+                                    companyLogo = (data?.get("companyLogo") as? String) ?: "",
+                                    quoteFooter = (data?.get("quoteFooter") as? String) ?: "",
+                                    termsAndConditions = (data?.get("termsAndConditions") as? String) ?: ""
+                                ),
+                                currency = (data?.get("currency") as? String) ?: "ZAR",
+                                language = (data?.get("language") as? String) ?: "en",
+                                theme = (data?.get("theme") as? String) ?: "light"
+                            )
+                            android.util.Log.d("SettingsRepository", "Settings loaded from Firebase: $appSettings")
+                            if (!isClosedForSend) {
+                                trySend(appSettings)
+                            }
+                        } catch (e: Exception) {
+                            android.util.Log.e("SettingsRepository", "Error parsing settings data", e)
+                            if (!isClosedForSend) {
+                                trySend(AppSettings())
+                            }
+                        }
+                    } else {
+                        android.util.Log.d("SettingsRepository", "No settings found, using defaults")
+                        if (!isClosedForSend) {
+                            trySend(AppSettings())
+                        }
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("SettingsRepository", "Error in snapshot listener", e)
                 }
             }
             
@@ -90,7 +104,9 @@ class SettingsRepository {
             
         } catch (e: Exception) {
             android.util.Log.e("SettingsRepository", "Error creating settings flow", e)
-            trySend(AppSettings())
+            if (!isClosedForSend) {
+                trySend(AppSettings())
+            }
         }
     }
     
@@ -121,7 +137,7 @@ class SettingsRepository {
                 "lastUpdated" to System.currentTimeMillis()
             )
             
-            firestore.collection("user_settings").document(userId).update(settingsData).await()
+            firestore.collection("user_settings").document(userId).set(settingsData, com.google.firebase.firestore.SetOptions.merge()).await()
             android.util.Log.d("SettingsRepository", "Calculation settings saved successfully")
             
         } catch (e: Exception) {
@@ -157,7 +173,7 @@ class SettingsRepository {
                 "lastUpdated" to System.currentTimeMillis()
             )
             
-            firestore.collection("user_settings").document(userId).update(settingsData).await()
+            firestore.collection("user_settings").document(userId).set(settingsData, com.google.firebase.firestore.SetOptions.merge()).await()
             android.util.Log.d("SettingsRepository", "Company settings saved successfully")
             
         } catch (e: Exception) {
@@ -184,7 +200,7 @@ class SettingsRepository {
                 "lastUpdated" to System.currentTimeMillis()
             )
             
-            firestore.collection("user_settings").document(userId).update(settingsData).await()
+            firestore.collection("user_settings").document(userId).set(settingsData, com.google.firebase.firestore.SetOptions.merge()).await()
             android.util.Log.d("SettingsRepository", "App settings saved successfully")
             
         } catch (e: Exception) {
