@@ -129,6 +129,9 @@ object QuoteCalculator {
         val inverterKw = (systemKw * 0.8).coerceAtLeast(1.0)
         val savings = usageKwh * inputs.tariffRPerKwh * 0.8
         
+        android.util.Log.d("QuoteCalculator", "Basic calculation: usageKwh=$usageKwh, averageDailyKwh=$averageDailyKwh, sunHours=${inputs.sunHoursPerDay}")
+        android.util.Log.d("QuoteCalculator", "System calculation: systemKw=$systemKw, panels=$panels, inverterKw=$inverterKw, savings=$savings")
+        
         // Calculate additional metrics
         val estimatedMonthlyGeneration = systemKw * inputs.sunHoursPerDay * 30
         val installationCost = systemKw * 15000 // R15,000 per kW

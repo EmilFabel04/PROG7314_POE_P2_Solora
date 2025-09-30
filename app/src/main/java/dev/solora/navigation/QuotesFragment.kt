@@ -211,6 +211,61 @@ class QuotesFragment : Fragment() {
         }
     }
     
+    private fun updateResultsTab(calculation: dev.solora.quote.QuoteOutputs) {
+        // Update the view tab with calculation results
+        tvPanels.text = calculation.panels.toString()
+        tvSystemSize.text = "${String.format("%.1f", calculation.systemKw)} kW"
+        tvInverterSize.text = "${String.format("%.1f", calculation.inverterKw)} kW"
+        tvSavings.text = "R ${String.format("%.2f", calculation.monthlySavingsRands)}"
+        
+        // Update dashboard tab summary
+        tvQuoteSummary.text = buildString {
+            appendLine("Number of Panels: ${calculation.panels}")
+            appendLine("Total System Size: ${String.format("%.1f", calculation.systemKw)} kW")
+            appendLine("Recommended Inverter: ${String.format("%.1f", calculation.inverterKw)} kW")
+            appendLine("Estimated Monthly Savings: R ${String.format("%.2f", calculation.monthlySavingsRands)}")
+            appendLine("Estimated Monthly Generation: ${String.format("%.0f", calculation.estimatedMonthlyGeneration)} kWh")
+            appendLine("Payback Period: ${calculation.paybackMonths} months")
+            
+            // Add NASA data if available
+            calculation.detailedAnalysis?.let { analysis ->
+                appendLine("")
+                appendLine("NASA Solar Data:")
+                analysis.locationData?.let { location ->
+                    appendLine("Location: ${String.format("%.4f", location.latitude)}, ${String.format("%.4f", location.longitude)}")
+                    appendLine("Average Annual Irradiance: ${String.format("%.1f", location.averageAnnualIrradiance)} kWh/m²/day")
+                    appendLine("Average Annual Sun Hours: ${String.format("%.1f", location.averageAnnualSunHours)} hours/day")
+                }
+                analysis.optimalMonth?.let { month ->
+                    appendLine("Optimal Solar Month: ${getMonthName(month)}")
+                }
+                analysis.averageTemperature?.let { temp ->
+                    appendLine("Average Temperature: ${String.format("%.1f", temp)}°C")
+                }
+            }
+        }
+        
+        android.util.Log.d("QuotesFragment", "Results updated: ${calculation.systemKw}kW system, R${calculation.monthlySavingsRands} savings")
+    }
+    
+    private fun getMonthName(month: Int): String {
+        return when (month) {
+            1 -> "January"
+            2 -> "February"
+            3 -> "March"
+            4 -> "April"
+            5 -> "May"
+            6 -> "June"
+            7 -> "July"
+            8 -> "August"
+            9 -> "September"
+            10 -> "October"
+            11 -> "November"
+            12 -> "December"
+            else -> "Unknown"
+        }
+    }
+
     private fun saveQuoteWithClientDetails() {
         quotesViewModel.lastCalculation.value?.let { calculation ->
             // Get client details from the form
@@ -285,6 +340,9 @@ class QuotesFragment : Fragment() {
                         btnCalculate.isEnabled = true
                         btnCalculate.text = "calculate"
                         Toast.makeText(requireContext(), "Calculation complete! Review and save your quote.", Toast.LENGTH_LONG).show()
+                        
+                        // Update the view tab with calculation results
+                        updateResultsTab(state.result)
                         
                         // Automatically switch to view tab to show results
                         switchToTab(1)

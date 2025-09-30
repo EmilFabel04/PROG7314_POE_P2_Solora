@@ -63,6 +63,7 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                 var finalLatitude = latitude
                 var finalLongitude = longitude
                 var finalAddress = address
+                var finalSunHours = sunHours
                 
                 // If coordinates not provided, try to geocode the address
                 if (finalLatitude == null || finalLongitude == null) {
@@ -80,12 +81,30 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                     }
                 }
                 
+                // If we have coordinates, try to get NASA sun hours data
+                if (finalLatitude != null && finalLongitude != null) {
+                    try {
+                        val nasaDataResult = nasa.getSolarData(finalLatitude, finalLongitude)
+                        if (nasaDataResult.isSuccess) {
+                            val nasaData = nasaDataResult.getOrNull()
+                            if (nasaData != null) {
+                                finalSunHours = nasaData.averageAnnualSunHours
+                                android.util.Log.d("QuotesViewModel", "NASA sun hours: $finalSunHours")
+                            }
+                        } else {
+                            android.util.Log.w("QuotesViewModel", "NASA API failed: ${nasaDataResult.exceptionOrNull()?.message}")
+                        }
+                    } catch (e: Exception) {
+                        android.util.Log.w("QuotesViewModel", "NASA API error: ${e.message}")
+                    }
+                }
+                
                 val inputs = QuoteInputs(
                     monthlyUsageKwh = usageKwh,
                     monthlyBillRands = billRands,
                     tariffRPerKwh = tariff,
                     panelWatt = panelWatt,
-                    sunHoursPerDay = sunHours,
+                    sunHoursPerDay = finalSunHours,
                     location = if (finalLatitude != null && finalLongitude != null) {
                         dev.solora.quote.LocationInputs(
                             latitude = finalLatitude,
@@ -96,10 +115,11 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                 )
 
                 android.util.Log.d("QuotesViewModel", "Starting calculation with NASA API integration")
+                android.util.Log.d("QuotesViewModel", "Input values: usageKwh=$usageKwh, billRands=$billRands, tariff=$tariff, panelWatt=$panelWatt, sunHours=$finalSunHours")
                 val result = calculator.calculateAdvanced(inputs, nasa)
                 result.fold(
                     onSuccess = { outputs ->
-                        android.util.Log.d("QuotesViewModel", "Calculation successful: ${outputs.systemKw}kW system")
+                        android.util.Log.d("QuotesViewModel", "Calculation successful: ${outputs.systemKw}kW system, ${outputs.panels} panels, R${outputs.monthlySavingsRands} savings")
                         _lastCalculation.value = outputs
                         _calculationState.value = CalculationState.Success(outputs)
                     },
