@@ -19,6 +19,7 @@ import dev.solora.quote.QuoteInputs
 import dev.solora.quote.GeocodingService
 import dev.solora.quote.QuoteOutputs
 import dev.solora.settings.SettingsRepository
+import com.google.firebase.auth.FirebaseAuth
 
 class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     private val firebaseRepository = FirebaseRepository()
