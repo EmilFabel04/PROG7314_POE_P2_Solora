@@ -296,7 +296,7 @@ class QuotesFragment : Fragment() {
             // Wait for quote to be saved, then create lead
             viewLifecycleOwner.lifecycleScope.launch {
                 // Wait a bit for the quote to be saved
-                kotlinx.coroutines.delay(500)
+                kotlinx.coroutines.delay(1000)
                 
                 val savedQuote = quotesViewModel.lastQuote.value
                 if (savedQuote != null && savedQuote.id != null) {
