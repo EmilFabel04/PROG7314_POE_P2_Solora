@@ -18,12 +18,14 @@ import dev.solora.quote.QuoteCalculator
 import dev.solora.quote.QuoteInputs
 import dev.solora.quote.GeocodingService
 import dev.solora.quote.QuoteOutputs
+import dev.solora.settings.SettingsRepository
 
 class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     private val firebaseRepository = FirebaseRepository()
     private val nasa = NasaPowerClient()
     private val calculator = QuoteCalculator
     private val geocodingService = GeocodingService(app)
+    private val settingsRepository = SettingsRepository(app)
 
     // Firebase quotes flow
     val quotes = flow {
@@ -116,7 +118,15 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
 
                 android.util.Log.d("QuotesViewModel", "Starting calculation with NASA API integration")
                 android.util.Log.d("QuotesViewModel", "Input values: usageKwh=$usageKwh, billRands=$billRands, tariff=$tariff, panelWatt=$panelWatt, sunHours=$finalSunHours")
-                val result = calculator.calculateAdvanced(inputs, nasa)
+                
+                // Get current settings
+                val settings = settingsRepository.settings.stateIn(
+                    viewModelScope,
+                    SharingStarted.WhileSubscribed(5000),
+                    dev.solora.settings.AppSettings()
+                ).value.calculationSettings
+                
+                val result = calculator.calculateAdvanced(inputs, nasa, settings)
                 result.fold(
                     onSuccess = { outputs ->
                         android.util.Log.d("QuotesViewModel", "Calculation successful: ${outputs.systemKw}kW system, ${outputs.panels} panels, R${outputs.monthlySavingsRands} savings")
@@ -188,6 +198,13 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     ) {
         viewModelScope.launch {
             try {
+                // Get company settings
+                val companySettings = settingsRepository.settings.stateIn(
+                    viewModelScope,
+                    SharingStarted.WhileSubscribed(5000),
+                    dev.solora.settings.AppSettings()
+                ).value.companySettings
+                
                 val quote = FirebaseQuote(
                     reference = reference,
                     clientName = clientName,
@@ -202,6 +219,7 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                     paybackMonths = calculation.paybackMonths,
                     savingsFirstYear = calculation.monthlySavingsRands * 12,
                     dateEpoch = System.currentTimeMillis(),
+                    userId = FirebaseAuth.getInstance().currentUser?.uid ?: "",
                     // Add NASA data if available
                     latitude = calculation.detailedAnalysis?.locationData?.latitude,
                     longitude = calculation.detailedAnalysis?.locationData?.longitude,
@@ -211,7 +229,17 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                     optimalMonthIrradiance = calculation.detailedAnalysis?.optimalMonthIrradiance,
                     temperature = calculation.detailedAnalysis?.averageTemperature,
                     windSpeed = calculation.detailedAnalysis?.averageWindSpeed,
-                    humidity = calculation.detailedAnalysis?.averageHumidity
+                    humidity = calculation.detailedAnalysis?.averageHumidity,
+                    // Add company information
+                    companyName = companySettings.companyName,
+                    companyAddress = companySettings.companyAddress,
+                    companyPhone = companySettings.companyPhone,
+                    companyEmail = companySettings.companyEmail,
+                    companyWebsite = companySettings.companyWebsite,
+                    consultantName = companySettings.consultantName,
+                    consultantPhone = companySettings.consultantPhone,
+                    consultantEmail = companySettings.consultantEmail,
+                    consultantLicense = companySettings.consultantLicense
                 )
 
                 val result = firebaseRepository.saveQuote(quote)

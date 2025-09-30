@@ -67,6 +67,7 @@ dependencies {
         implementation("androidx.navigation:navigation-ui-ktx:2.8.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
     implementation("androidx.datastore:datastore-preferences:1.1.1")
+    implementation("androidx.datastore:datastore-preferences-core:1.1.1")
 
 	// Room database removed for Part 2 - using Firebase Firestore only
 

@@ -99,15 +99,16 @@ object QuoteCalculator {
     
     suspend fun calculateAdvanced(
         inputs: QuoteInputs,
-        nasaClient: NasaPowerClient? = null
+        nasaClient: NasaPowerClient? = null,
+        settings: dev.solora.settings.CalculationSettings? = null
     ): Result<QuoteOutputs> {
         return try {
             // Basic calculation
-            val basicOutputs = calculateBasic(inputs)
+            val basicOutputs = calculateBasic(inputs, settings)
             
             // Enhanced calculation with NASA data if location provided
             val detailedAnalysis = if (inputs.location != null && nasaClient != null) {
-                calculateDetailedAnalysis(inputs, basicOutputs, nasaClient)
+                calculateDetailedAnalysis(inputs, basicOutputs, nasaClient, settings)
             } else null
             
             Result.success(basicOutputs.copy(detailedAnalysis = detailedAnalysis))
@@ -116,7 +117,7 @@ object QuoteCalculator {
         }
     }
     
-    fun calculateBasic(inputs: QuoteInputs): QuoteOutputs {
+    fun calculateBasic(inputs: QuoteInputs, settings: dev.solora.settings.CalculationSettings? = null): QuoteOutputs {
         val usageKwh = inputs.monthlyUsageKwh ?: run {
             val bill = inputs.monthlyBillRands ?: 0.0
             if (bill <= 0) 0.0 else bill / inputs.tariffRPerKwh
@@ -126,15 +127,18 @@ object QuoteCalculator {
         val systemKw = if (inputs.sunHoursPerDay <= 0) 0.0 else averageDailyKwh / inputs.sunHoursPerDay
         val panelKw = inputs.panelWatt / 1000.0
         val panels = if (panelKw <= 0) 0 else ceil(systemKw / panelKw).toInt()
-        val inverterKw = (systemKw * 0.8).coerceAtLeast(1.0)
-        val savings = usageKwh * inputs.tariffRPerKwh * 0.8
+        val inverterRatio = settings?.inverterSizingRatio ?: 0.8
+        val inverterKw = (systemKw * inverterRatio).coerceAtLeast(1.0)
+        val performanceRatio = settings?.performanceRatio ?: 0.8
+        val savings = usageKwh * inputs.tariffRPerKwh * performanceRatio
         
         android.util.Log.d("QuoteCalculator", "Basic calculation: usageKwh=$usageKwh, averageDailyKwh=$averageDailyKwh, sunHours=${inputs.sunHoursPerDay}")
         android.util.Log.d("QuoteCalculator", "System calculation: systemKw=$systemKw, panels=$panels, inverterKw=$inverterKw, savings=$savings")
         
         // Calculate additional metrics
         val estimatedMonthlyGeneration = systemKw * inputs.sunHoursPerDay * 30
-        val installationCost = systemKw * 15000 // R15,000 per kW
+        val installationCostPerKw = settings?.installationCostPerKw ?: 15000.0
+        val installationCost = systemKw * installationCostPerKw
         val paybackMonths = if (savings > 0) (installationCost / savings).toInt() else 0
         
         return QuoteOutputs(
@@ -157,7 +161,8 @@ object QuoteCalculator {
     private suspend fun calculateDetailedAnalysis(
         inputs: QuoteInputs,
         basicOutputs: QuoteOutputs,
-        nasaClient: NasaPowerClient
+        nasaClient: NasaPowerClient,
+        settings: dev.solora.settings.CalculationSettings? = null
     ): DetailedAnalysis? {
         val location = inputs.location ?: return null
         

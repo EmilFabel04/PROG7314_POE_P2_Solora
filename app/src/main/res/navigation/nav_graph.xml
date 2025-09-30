@@ -34,7 +34,11 @@
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="dev.solora.navigation.HomeFragment" />
+        android:name="dev.solora.navigation.HomeFragment">
+        <action
+            android:id="@+id/action_to_settings"
+            app:destination="@id/settingsFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/quotesFragment"

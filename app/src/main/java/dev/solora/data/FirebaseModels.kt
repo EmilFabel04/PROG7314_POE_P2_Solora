@@ -32,6 +32,16 @@ data class FirebaseQuote(
     val temperature: Double? = null,
     val windSpeed: Double? = null,
     val humidity: Double? = null,
+    // Company information
+    val companyName: String = "",
+    val companyAddress: String = "",
+    val companyPhone: String = "",
+    val companyEmail: String = "",
+    val companyWebsite: String = "",
+    val consultantName: String = "",
+    val consultantPhone: String = "",
+    val consultantEmail: String = "",
+    val consultantLicense: String = "",
     @ServerTimestamp
     val createdAt: Timestamp? = null,
     @ServerTimestamp
