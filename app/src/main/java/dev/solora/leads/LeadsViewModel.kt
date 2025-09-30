@@ -3,69 +3,63 @@ package dev.solora.leads
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import dev.solora.SoloraApp
-import dev.solora.data.Lead
-import dev.solora.firebase.FirebaseRepository
-import com.google.firebase.auth.FirebaseAuth
+import dev.solora.data.FirebaseLead
+import dev.solora.data.FirebaseRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class LeadsViewModel(app: Application) : AndroidViewModel(app) {
-    private val db = (app as SoloraApp).database
-    private val dao = db.leadDao()
     private val firebaseRepository = FirebaseRepository()
 
-    val leads = dao.observeLeads().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    // Firebase leads flow
+    val leads = firebaseRepository.getLeads().stateIn(
+        viewModelScope, 
+        SharingStarted.WhileSubscribed(5000), 
+        emptyList()
+    )
 
-    fun addLead(reference: String, name: String, address: String, contact: String, source: String = "manual") {
+    fun addLead(name: String, email: String, phone: String, notes: String = "") {
         viewModelScope.launch { 
-            val lead = Lead(
-                reference = reference, 
-                name = name, 
-                address = address, 
-                contact = contact,
+            val lead = FirebaseLead(
+                name = name,
+                email = email,
+                phone = phone,
                 status = "new",
-                source = source,
-                notes = "",
-                consultantId = FirebaseAuth.getInstance().currentUser?.uid,
-                quoteId = null, // This is a manual lead, not from a quote
-                createdAt = System.currentTimeMillis(),
-                updatedAt = System.currentTimeMillis()
+                notes = notes
             )
             
-            // Save to local Room database and get the generated ID
-            val insertedId = dao.insert(lead)
-            val savedLead = lead.copy(id = insertedId)
-            
-            android.util.Log.d("LeadsViewModel", "Lead saved locally with ID: $insertedId")
-            
-            // Also save to Firebase Firestore (using the saved lead with correct ID)
-            try {
-                val result = firebaseRepository.saveLead(savedLead)
-                if (result.isSuccess) {
-                    android.util.Log.d("LeadsViewModel", "Lead saved to Firebase: ${result.getOrNull()}")
-                } else {
-                    android.util.Log.e("LeadsViewModel", "Failed to save lead to Firebase: ${result.exceptionOrNull()?.message}")
-                }
-            } catch (e: Exception) {
-                android.util.Log.e("LeadsViewModel", "Firebase save error: ${e.message}")
+            val result = firebaseRepository.saveLead(lead)
+            if (result.isSuccess) {
+                android.util.Log.d("LeadsViewModel", "Lead saved to Firebase: ${result.getOrNull()}")
+            } else {
+                android.util.Log.e("LeadsViewModel", "Failed to save lead to Firebase: ${result.exceptionOrNull()?.message}")
             }
         }
     }
     
-    fun updateLeadStatus(leadId: Long, status: String, notes: String = "") {
+    fun updateLeadStatus(leadId: String, status: String, notes: String = "") {
         viewModelScope.launch {
             try {
-                // Update in local database
-                // Note: You would need to add an update method to LeadDao
-                
-                // Update in Firebase
-                val result = firebaseRepository.updateLeadStatus(leadId.toString(), status, notes)
+                // Get current lead
+                val result = firebaseRepository.getLeadById(leadId)
                 if (result.isSuccess) {
-                    android.util.Log.d("LeadsViewModel", "Lead status updated in Firebase")
+                    val currentLead = result.getOrNull()
+                    if (currentLead != null) {
+                        val updatedLead = currentLead.copy(
+                            status = status,
+                            notes = notes.ifEmpty { currentLead.notes }
+                        )
+                        
+                        val updateResult = firebaseRepository.updateLead(leadId, updatedLead)
+                        if (updateResult.isSuccess) {
+                            android.util.Log.d("LeadsViewModel", "Lead status updated in Firebase")
+                        } else {
+                            android.util.Log.e("LeadsViewModel", "Failed to update lead status in Firebase: ${updateResult.exceptionOrNull()?.message}")
+                        }
+                    }
                 } else {
-                    android.util.Log.e("LeadsViewModel", "Failed to update lead status in Firebase: ${result.exceptionOrNull()?.message}")
+                    android.util.Log.e("LeadsViewModel", "Failed to get lead: ${result.exceptionOrNull()?.message}")
                 }
             } catch (e: Exception) {
                 android.util.Log.e("LeadsViewModel", "Error updating lead status: ${e.message}")
@@ -73,59 +67,45 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
     
-    fun syncLeadsFromFirebase() {
+    fun deleteLead(leadId: String) {
         viewModelScope.launch {
             try {
-                val result = firebaseRepository.getLeads()
+                val result = firebaseRepository.deleteLead(leadId)
                 if (result.isSuccess) {
-                    val firebaseLeads = result.getOrNull() ?: emptyList()
-                    android.util.Log.d("LeadsViewModel", "Retrieved ${firebaseLeads.size} leads from Firebase")
-                    // TODO: Sync with local database if needed
+                    android.util.Log.d("LeadsViewModel", "Lead deleted from Firebase")
                 } else {
-                    android.util.Log.e("LeadsViewModel", "Failed to sync leads from Firebase: ${result.exceptionOrNull()?.message}")
+                    android.util.Log.e("LeadsViewModel", "Failed to delete lead from Firebase: ${result.exceptionOrNull()?.message}")
                 }
             } catch (e: Exception) {
-                android.util.Log.e("LeadsViewModel", "Error syncing leads: ${e.message}")
+                android.util.Log.e("LeadsViewModel", "Error deleting lead: ${e.message}")
             }
         }
     }
     
     // Create a lead from a quote
-    fun createLeadFromQuote(quote: dev.solora.data.Quote, contactInfo: String = "", notes: String = "") {
+    fun createLeadFromQuote(
+        quoteId: String,
+        clientName: String,
+        address: String,
+        contactInfo: String = "",
+        notes: String = ""
+    ) {
         viewModelScope.launch {
             try {
-                val leadReference = "L${System.currentTimeMillis()}"
-                
-                val lead = Lead(
-                    reference = leadReference,
-                    name = quote.clientName,
-                    address = quote.address,
-                    contact = contactInfo,
+                val lead = FirebaseLead(
+                    name = clientName,
+                    email = contactInfo,
+                    phone = contactInfo,
                     status = "qualified", // Leads from quotes are typically qualified
-                    source = "quote",
-                    notes = notes.ifEmpty { "Lead created from quote ${quote.reference}. System: ${quote.systemKw}kW, Savings: R${quote.savingsRands}/month" },
-                    consultantId = quote.consultantId ?: FirebaseAuth.getInstance().currentUser?.uid,
-                    quoteId = quote.id,
-                    createdAt = System.currentTimeMillis(),
-                    updatedAt = System.currentTimeMillis()
+                    notes = notes.ifEmpty { "Lead created from quote. Address: $address" },
+                    quoteId = quoteId
                 )
                 
-                // Save to local Room database and get the generated ID
-                val insertedId = dao.insert(lead)
-                val savedLead = lead.copy(id = insertedId)
-                
-                android.util.Log.d("LeadsViewModel", "Lead created from quote with ID: $insertedId")
-                
-                // Also save to Firebase Firestore
-                try {
-                    val result = firebaseRepository.saveLead(savedLead)
-                    if (result.isSuccess) {
-                        android.util.Log.d("LeadsViewModel", "Lead from quote saved to Firebase: ${result.getOrNull()}")
-                    } else {
-                        android.util.Log.e("LeadsViewModel", "Failed to save lead from quote to Firebase: ${result.exceptionOrNull()?.message}")
-                    }
-                } catch (e: Exception) {
-                    android.util.Log.e("LeadsViewModel", "Firebase save error for lead from quote: ${e.message}")
+                val result = firebaseRepository.saveLead(lead)
+                if (result.isSuccess) {
+                    android.util.Log.d("LeadsViewModel", "Lead from quote saved to Firebase: ${result.getOrNull()}")
+                } else {
+                    android.util.Log.e("LeadsViewModel", "Failed to save lead from quote to Firebase: ${result.exceptionOrNull()?.message}")
                 }
             } catch (e: Exception) {
                 android.util.Log.e("LeadsViewModel", "Error creating lead from quote: ${e.message}")
@@ -133,5 +113,3 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 }
-
-

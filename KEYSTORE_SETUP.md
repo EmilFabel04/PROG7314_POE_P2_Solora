@@ -9,8 +9,8 @@
 ### 2. Keystore Details
 - **File**: `app/keystore/solora-release-key.keystore`
 - **Alias**: `solora`
-- **Password**: `solora123`
-- **Key Password**: `solora123`
+- **Password**: `SoloraPOE2025`
+- **Key Password**: `SoloraPOE2025`
 
 ### 3. Build Release APK
 ```bash

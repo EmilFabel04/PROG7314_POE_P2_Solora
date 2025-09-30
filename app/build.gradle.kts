@@ -1,7 +1,7 @@
 plugins {
 	id("com.android.application")
 	id("org.jetbrains.kotlin.android")
-    kotlin("kapt")
+    // kotlin("kapt") // Removed - no longer needed without Room
     id("org.jetbrains.kotlin.plugin.serialization")
     id("com.google.gms.google-services")
 }
@@ -68,10 +68,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
     implementation("androidx.datastore:datastore-preferences:1.1.1")
 
-	// Room
-	implementation("androidx.room:room-runtime:2.6.1")
-	kapt("androidx.room:room-compiler:2.6.1")
-	implementation("androidx.room:room-ktx:2.6.1")
+	// Room database removed for Part 2 - using Firebase Firestore only
 
 	// WorkManager for sync
 	implementation("androidx.work:work-runtime-ktx:2.9.1")
