@@ -282,9 +282,15 @@ class SettingsFragment : Fragment() {
             
             android.util.Log.d("SettingsFragment", "Settings data prepared, saving...")
             
-            // Save settings
-            settingsViewModel.updateCalculationSettings(calculationSettings)
-            settingsViewModel.updateCompanySettings(companySettings)
+            // Save settings to Firebase
+            try {
+                settingsViewModel.updateCalculationSettings(calculationSettings)
+                settingsViewModel.updateCompanySettings(companySettings)
+                android.util.Log.d("SettingsFragment", "Settings saved to Firebase successfully")
+            } catch (e: Exception) {
+                android.util.Log.e("SettingsFragment", "Error saving to Firebase", e)
+                throw e // Re-throw to be caught by outer try-catch
+            }
             
             // Reset button state after a short delay
             btnSaveSettings.postDelayed({
@@ -311,8 +317,14 @@ class SettingsFragment : Fragment() {
             btnResetSettings.isEnabled = false
             btnResetSettings.text = "Resetting..."
             
-            // Reset settings
-            settingsViewModel.resetToDefaults()
+            // Reset settings in Firebase
+            try {
+                settingsViewModel.resetToDefaults()
+                android.util.Log.d("SettingsFragment", "Settings reset in Firebase successfully")
+            } catch (e: Exception) {
+                android.util.Log.e("SettingsFragment", "Error resetting settings in Firebase", e)
+                throw e // Re-throw to be caught by outer try-catch
+            }
             
             // Reset button state after a short delay
             btnResetSettings.postDelayed({

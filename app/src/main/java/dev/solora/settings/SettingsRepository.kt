@@ -1,117 +1,216 @@
 package dev.solora.settings
 
-import android.content.Context
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.emptyPreferences
-import androidx.datastore.preferences.preferencesDataStore
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOf
-import java.io.IOException
 
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
-
-class SettingsRepository(private val context: Context) {
+class SettingsRepository {
     
-    val settings: Flow<AppSettings> = try {
-        android.util.Log.d("SettingsRepository", "Initializing DataStore")
-        context.dataStore.data
-            .catch { exception ->
-                android.util.Log.e("SettingsRepository", "DataStore error", exception)
-                if (exception is IOException) {
-                    emit(emptyPreferences())
+    private val firestore = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
+    
+    val settings: Flow<AppSettings> = callbackFlow {
+        try {
+            android.util.Log.d("SettingsRepository", "Initializing Firebase settings")
+            
+            val currentUser = auth.currentUser
+            if (currentUser == null) {
+                android.util.Log.w("SettingsRepository", "No authenticated user, using default settings")
+                trySend(AppSettings())
+                return@callbackFlow
+            }
+            
+            val userId = currentUser.uid
+            android.util.Log.d("SettingsRepository", "Loading settings for user: $userId")
+            
+            val settingsDoc = firestore.collection("user_settings").document(userId)
+            
+            // Set up real-time listener
+            val listener = settingsDoc.addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    android.util.Log.e("SettingsRepository", "Firebase settings error", error)
+                    trySend(AppSettings()) // Send default settings on error
+                    return@addSnapshotListener
+                }
+                
+                if (snapshot != null && snapshot.exists()) {
+                    try {
+                        val data = snapshot.data
+                        val appSettings = AppSettings(
+                            calculationSettings = CalculationSettings(
+                                defaultTariff = (data?.get("defaultTariff") as? Double) ?: 2.50,
+                                defaultPanelWatt = (data?.get("defaultPanelWatt") as? Long)?.toInt() ?: 420,
+                                panelCostPerWatt = (data?.get("panelCostPerWatt") as? Double) ?: 15.0,
+                                inverterCostPerWatt = (data?.get("inverterCostPerWatt") as? Double) ?: 12.0,
+                                installationCostPerKw = (data?.get("installationCostPerKw") as? Double) ?: 15000.0,
+                                panelEfficiency = (data?.get("panelEfficiency") as? Double) ?: 0.20,
+                                performanceRatio = (data?.get("performanceRatio") as? Double) ?: 0.80,
+                                inverterSizingRatio = (data?.get("inverterSizingRatio") as? Double) ?: 0.80,
+                                defaultSunHours = (data?.get("defaultSunHours") as? Double) ?: 5.0,
+                                systemLifetime = (data?.get("systemLifetime") as? Long)?.toInt() ?: 25,
+                                panelDegradationRate = (data?.get("panelDegradationRate") as? Double) ?: 0.005,
+                                co2PerKwh = (data?.get("co2PerKwh") as? Double) ?: 0.5
+                            ),
+                            companySettings = CompanySettings(
+                                companyName = (data?.get("companyName") as? String) ?: "",
+                                companyAddress = (data?.get("companyAddress") as? String) ?: "",
+                                companyPhone = (data?.get("companyPhone") as? String) ?: "",
+                                companyEmail = (data?.get("companyEmail") as? String) ?: "",
+                                companyWebsite = (data?.get("companyWebsite") as? String) ?: "",
+                                consultantName = (data?.get("consultantName") as? String) ?: "",
+                                consultantPhone = (data?.get("consultantPhone") as? String) ?: "",
+                                consultantEmail = (data?.get("consultantEmail") as? String) ?: "",
+                                consultantLicense = (data?.get("consultantLicense") as? String) ?: "",
+                                companyLogo = (data?.get("companyLogo") as? String) ?: "",
+                                quoteFooter = (data?.get("quoteFooter") as? String) ?: "",
+                                termsAndConditions = (data?.get("termsAndConditions") as? String) ?: ""
+                            ),
+                            currency = (data?.get("currency") as? String) ?: "ZAR",
+                            language = (data?.get("language") as? String) ?: "en",
+                            theme = (data?.get("theme") as? String) ?: "light"
+                        )
+                        android.util.Log.d("SettingsRepository", "Settings loaded from Firebase: $appSettings")
+                        trySend(appSettings)
+                    } catch (e: Exception) {
+                        android.util.Log.e("SettingsRepository", "Error parsing settings data", e)
+                        trySend(AppSettings())
+                    }
                 } else {
-                    emit(emptyPreferences())
+                    android.util.Log.d("SettingsRepository", "No settings found, using defaults")
+                    trySend(AppSettings())
                 }
             }
-            .map { preferences ->
-            AppSettings(
-                calculationSettings = CalculationSettings(
-                    defaultTariff = preferences[SettingsKeys.DEFAULT_TARIFF] ?: 2.50,
-                    defaultPanelWatt = preferences[SettingsKeys.DEFAULT_PANEL_WATT] ?: 420,
-                    panelCostPerWatt = preferences[SettingsKeys.PANEL_COST_PER_WATT] ?: 15.0,
-                    inverterCostPerWatt = preferences[SettingsKeys.INVERTER_COST_PER_WATT] ?: 12.0,
-                    installationCostPerKw = preferences[SettingsKeys.INSTALLATION_COST_PER_KW] ?: 15000.0,
-                    panelEfficiency = preferences[SettingsKeys.PANEL_EFFICIENCY] ?: 0.20,
-                    performanceRatio = preferences[SettingsKeys.PERFORMANCE_RATIO] ?: 0.80,
-                    inverterSizingRatio = preferences[SettingsKeys.INVERTER_SIZING_RATIO] ?: 0.80,
-                    defaultSunHours = preferences[SettingsKeys.DEFAULT_SUN_HOURS] ?: 5.0,
-                    systemLifetime = preferences[SettingsKeys.SYSTEM_LIFETIME] ?: 25,
-                    panelDegradationRate = preferences[SettingsKeys.PANEL_DEGRADATION_RATE] ?: 0.005,
-                    co2PerKwh = preferences[SettingsKeys.CO2_PER_KWH] ?: 0.5
-                ),
-                companySettings = CompanySettings(
-                    companyName = preferences[SettingsKeys.COMPANY_NAME] ?: "",
-                    companyAddress = preferences[SettingsKeys.COMPANY_ADDRESS] ?: "",
-                    companyPhone = preferences[SettingsKeys.COMPANY_PHONE] ?: "",
-                    companyEmail = preferences[SettingsKeys.COMPANY_EMAIL] ?: "",
-                    companyWebsite = preferences[SettingsKeys.COMPANY_WEBSITE] ?: "",
-                    consultantName = preferences[SettingsKeys.CONSULTANT_NAME] ?: "",
-                    consultantPhone = preferences[SettingsKeys.CONSULTANT_PHONE] ?: "",
-                    consultantEmail = preferences[SettingsKeys.CONSULTANT_EMAIL] ?: "",
-                    consultantLicense = preferences[SettingsKeys.CONSULTANT_LICENSE] ?: "",
-                    companyLogo = preferences[SettingsKeys.COMPANY_LOGO] ?: "",
-                    quoteFooter = preferences[SettingsKeys.QUOTE_FOOTER] ?: "",
-                    termsAndConditions = preferences[SettingsKeys.TERMS_AND_CONDITIONS] ?: ""
-                ),
-                currency = preferences[SettingsKeys.CURRENCY] ?: "ZAR",
-                language = preferences[SettingsKeys.LANGUAGE] ?: "en",
-                theme = preferences[SettingsKeys.THEME] ?: "light"
-            )
+            
+            awaitClose { listener.remove() }
+            
+        } catch (e: Exception) {
+            android.util.Log.e("SettingsRepository", "Error creating settings flow", e)
+            trySend(AppSettings())
         }
-    } catch (e: Exception) {
-        android.util.Log.e("SettingsRepository", "Error creating settings flow", e)
-        kotlinx.coroutines.flow.flowOf(AppSettings())
     }
     
     suspend fun updateCalculationSettings(settings: CalculationSettings) {
-        context.dataStore.edit { preferences ->
-            preferences[SettingsKeys.DEFAULT_TARIFF] = settings.defaultTariff
-            preferences[SettingsKeys.DEFAULT_PANEL_WATT] = settings.defaultPanelWatt
-            preferences[SettingsKeys.PANEL_COST_PER_WATT] = settings.panelCostPerWatt
-            preferences[SettingsKeys.INVERTER_COST_PER_WATT] = settings.inverterCostPerWatt
-            preferences[SettingsKeys.INSTALLATION_COST_PER_KW] = settings.installationCostPerKw
-            preferences[SettingsKeys.PANEL_EFFICIENCY] = settings.panelEfficiency
-            preferences[SettingsKeys.PERFORMANCE_RATIO] = settings.performanceRatio
-            preferences[SettingsKeys.INVERTER_SIZING_RATIO] = settings.inverterSizingRatio
-            preferences[SettingsKeys.DEFAULT_SUN_HOURS] = settings.defaultSunHours
-            preferences[SettingsKeys.SYSTEM_LIFETIME] = settings.systemLifetime
-            preferences[SettingsKeys.PANEL_DEGRADATION_RATE] = settings.panelDegradationRate
-            preferences[SettingsKeys.CO2_PER_KWH] = settings.co2PerKwh
+        try {
+            val currentUser = auth.currentUser
+            if (currentUser == null) {
+                android.util.Log.e("SettingsRepository", "No authenticated user for saving calculation settings")
+                return
+            }
+            
+            val userId = currentUser.uid
+            android.util.Log.d("SettingsRepository", "Saving calculation settings for user: $userId")
+            
+            val settingsData = mapOf(
+                "defaultTariff" to settings.defaultTariff,
+                "defaultPanelWatt" to settings.defaultPanelWatt,
+                "panelCostPerWatt" to settings.panelCostPerWatt,
+                "inverterCostPerWatt" to settings.inverterCostPerWatt,
+                "installationCostPerKw" to settings.installationCostPerKw,
+                "panelEfficiency" to settings.panelEfficiency,
+                "performanceRatio" to settings.performanceRatio,
+                "inverterSizingRatio" to settings.inverterSizingRatio,
+                "defaultSunHours" to settings.defaultSunHours,
+                "systemLifetime" to settings.systemLifetime,
+                "panelDegradationRate" to settings.panelDegradationRate,
+                "co2PerKwh" to settings.co2PerKwh,
+                "lastUpdated" to System.currentTimeMillis()
+            )
+            
+            firestore.collection("user_settings").document(userId).update(settingsData).await()
+            android.util.Log.d("SettingsRepository", "Calculation settings saved successfully")
+            
+        } catch (e: Exception) {
+            android.util.Log.e("SettingsRepository", "Error saving calculation settings", e)
+            throw e
         }
     }
     
     suspend fun updateCompanySettings(settings: CompanySettings) {
-        context.dataStore.edit { preferences ->
-            preferences[SettingsKeys.COMPANY_NAME] = settings.companyName
-            preferences[SettingsKeys.COMPANY_ADDRESS] = settings.companyAddress
-            preferences[SettingsKeys.COMPANY_PHONE] = settings.companyPhone
-            preferences[SettingsKeys.COMPANY_EMAIL] = settings.companyEmail
-            preferences[SettingsKeys.COMPANY_WEBSITE] = settings.companyWebsite
-            preferences[SettingsKeys.CONSULTANT_NAME] = settings.consultantName
-            preferences[SettingsKeys.CONSULTANT_PHONE] = settings.consultantPhone
-            preferences[SettingsKeys.CONSULTANT_EMAIL] = settings.consultantEmail
-            preferences[SettingsKeys.CONSULTANT_LICENSE] = settings.consultantLicense
-            preferences[SettingsKeys.COMPANY_LOGO] = settings.companyLogo
-            preferences[SettingsKeys.QUOTE_FOOTER] = settings.quoteFooter
-            preferences[SettingsKeys.TERMS_AND_CONDITIONS] = settings.termsAndConditions
+        try {
+            val currentUser = auth.currentUser
+            if (currentUser == null) {
+                android.util.Log.e("SettingsRepository", "No authenticated user for saving company settings")
+                return
+            }
+            
+            val userId = currentUser.uid
+            android.util.Log.d("SettingsRepository", "Saving company settings for user: $userId")
+            
+            val settingsData = mapOf(
+                "companyName" to settings.companyName,
+                "companyAddress" to settings.companyAddress,
+                "companyPhone" to settings.companyPhone,
+                "companyEmail" to settings.companyEmail,
+                "companyWebsite" to settings.companyWebsite,
+                "consultantName" to settings.consultantName,
+                "consultantPhone" to settings.consultantPhone,
+                "consultantEmail" to settings.consultantEmail,
+                "consultantLicense" to settings.consultantLicense,
+                "companyLogo" to settings.companyLogo,
+                "quoteFooter" to settings.quoteFooter,
+                "termsAndConditions" to settings.termsAndConditions,
+                "lastUpdated" to System.currentTimeMillis()
+            )
+            
+            firestore.collection("user_settings").document(userId).update(settingsData).await()
+            android.util.Log.d("SettingsRepository", "Company settings saved successfully")
+            
+        } catch (e: Exception) {
+            android.util.Log.e("SettingsRepository", "Error saving company settings", e)
+            throw e
         }
     }
     
     suspend fun updateAppSettings(settings: AppSettings) {
-        context.dataStore.edit { preferences ->
-            preferences[SettingsKeys.CURRENCY] = settings.currency
-            preferences[SettingsKeys.LANGUAGE] = settings.language
-            preferences[SettingsKeys.THEME] = settings.theme
+        try {
+            val currentUser = auth.currentUser
+            if (currentUser == null) {
+                android.util.Log.e("SettingsRepository", "No authenticated user for saving app settings")
+                return
+            }
+            
+            val userId = currentUser.uid
+            android.util.Log.d("SettingsRepository", "Saving app settings for user: $userId")
+            
+            val settingsData = mapOf(
+                "currency" to settings.currency,
+                "language" to settings.language,
+                "theme" to settings.theme,
+                "lastUpdated" to System.currentTimeMillis()
+            )
+            
+            firestore.collection("user_settings").document(userId).update(settingsData).await()
+            android.util.Log.d("SettingsRepository", "App settings saved successfully")
+            
+        } catch (e: Exception) {
+            android.util.Log.e("SettingsRepository", "Error saving app settings", e)
+            throw e
         }
     }
     
     suspend fun resetToDefaults() {
-        context.dataStore.edit { preferences ->
-            preferences.clear()
+        try {
+            val currentUser = auth.currentUser
+            if (currentUser == null) {
+                android.util.Log.e("SettingsRepository", "No authenticated user for resetting settings")
+                return
+            }
+            
+            val userId = currentUser.uid
+            android.util.Log.d("SettingsRepository", "Resetting settings to defaults for user: $userId")
+            
+            // Delete the user's settings document to reset to defaults
+            firestore.collection("user_settings").document(userId).delete().await()
+            android.util.Log.d("SettingsRepository", "Settings reset to defaults successfully")
+            
+        } catch (e: Exception) {
+            android.util.Log.e("SettingsRepository", "Error resetting settings", e)
+            throw e
         }
     }
 }

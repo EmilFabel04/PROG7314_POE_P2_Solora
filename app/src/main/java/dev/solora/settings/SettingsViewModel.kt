@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(app: Application) : AndroidViewModel(app) {
-    private val repository = SettingsRepository(app.applicationContext)
+    private val repository = SettingsRepository()
     
     val settings by lazy {
         try {
