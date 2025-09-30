@@ -7,7 +7,11 @@
     <fragment
         android:id="@+id/homeFragment"
         android:name="dev.solora.navigation.HomeFragment"
-        android:label="Home" />
+        android:label="Home">
+        <action
+            android:id="@+id/action_to_settings"
+            app:destination="@id/settingsFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/quotesFragment"
@@ -26,7 +30,11 @@
     <fragment
         android:id="@+id/profileFragment"
         android:name="dev.solora.navigation.ProfileFragment"
-        android:label="Profile" />
+        android:label="Profile">
+        <action
+            android:id="@+id/action_to_settings"
+            app:destination="@id/settingsFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/quoteDetailFragment"
@@ -37,6 +45,11 @@
             app:argType="long"
             android:defaultValue="0L" />
     </fragment>
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="dev.solora.navigation.SettingsFragment"
+        android:label="Settings" />
 
 </navigation>
 
