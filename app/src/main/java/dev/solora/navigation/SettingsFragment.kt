@@ -174,6 +174,9 @@ class SettingsFragment : Fragment() {
         btnResetSettings.setOnClickListener {
             resetToDefaults()
         }
+        
+        // Set initial button states
+        updateSaveButtonState()
     }
     
     private fun observeSettings() {
@@ -232,6 +235,19 @@ class SettingsFragment : Fragment() {
     
     private fun saveSettings() {
         try {
+            android.util.Log.d("SettingsFragment", "Starting to save settings")
+            
+            // Validate inputs first
+            val validationResult = validateInputs()
+            if (!validationResult.isValid) {
+                Toast.makeText(requireContext(), validationResult.errorMessage, Toast.LENGTH_LONG).show()
+                return
+            }
+            
+            // Show loading state
+            btnSaveSettings.isEnabled = false
+            btnSaveSettings.text = "Saving..."
+            
             // Get calculation settings
             val calculationSettings = CalculationSettings(
                 defaultTariff = etDefaultTariff.text.toString().toDoubleOrNull() ?: 2.50,
@@ -264,22 +280,130 @@ class SettingsFragment : Fragment() {
                 termsAndConditions = "" // Keep empty for now
             )
             
+            android.util.Log.d("SettingsFragment", "Settings data prepared, saving...")
+            
             // Save settings
             settingsViewModel.updateCalculationSettings(calculationSettings)
             settingsViewModel.updateCompanySettings(companySettings)
             
-            Toast.makeText(requireContext(), "Settings saved successfully!", Toast.LENGTH_SHORT).show()
-            android.util.Log.d("SettingsFragment", "Settings saved successfully")
+            // Reset button state after a short delay
+            btnSaveSettings.postDelayed({
+                btnSaveSettings.isEnabled = true
+                btnSaveSettings.text = "Save Settings"
+                Toast.makeText(requireContext(), "Settings saved successfully!", Toast.LENGTH_SHORT).show()
+                android.util.Log.d("SettingsFragment", "Settings saved successfully")
+            }, 1000)
             
         } catch (e: Exception) {
+            // Reset button state on error
+            btnSaveSettings.isEnabled = true
+            btnSaveSettings.text = "Save Settings"
             Toast.makeText(requireContext(), "Error saving settings: ${e.message}", Toast.LENGTH_LONG).show()
             android.util.Log.e("SettingsFragment", "Error saving settings", e)
         }
     }
     
     private fun resetToDefaults() {
-        settingsViewModel.resetToDefaults()
-        Toast.makeText(requireContext(), "Settings reset to defaults", Toast.LENGTH_SHORT).show()
-        android.util.Log.d("SettingsFragment", "Settings reset to defaults")
+        try {
+            android.util.Log.d("SettingsFragment", "Resetting settings to defaults")
+            
+            // Show loading state
+            btnResetSettings.isEnabled = false
+            btnResetSettings.text = "Resetting..."
+            
+            // Reset settings
+            settingsViewModel.resetToDefaults()
+            
+            // Reset button state after a short delay
+            btnResetSettings.postDelayed({
+                btnResetSettings.isEnabled = true
+                btnResetSettings.text = "Reset to Defaults"
+                Toast.makeText(requireContext(), "Settings reset to defaults", Toast.LENGTH_SHORT).show()
+                android.util.Log.d("SettingsFragment", "Settings reset to defaults")
+            }, 1000)
+            
+        } catch (e: Exception) {
+            // Reset button state on error
+            btnResetSettings.isEnabled = true
+            btnResetSettings.text = "Reset to Defaults"
+            Toast.makeText(requireContext(), "Error resetting settings: ${e.message}", Toast.LENGTH_LONG).show()
+            android.util.Log.e("SettingsFragment", "Error resetting settings", e)
+        }
     }
+    
+    private fun validateInputs(): ValidationResult {
+        try {
+            // Validate calculation settings
+            val tariff = etDefaultTariff.text.toString().toDoubleOrNull()
+            if (tariff == null || tariff <= 0) {
+                return ValidationResult(false, "Please enter a valid tariff (must be greater than 0)")
+            }
+            
+            val panelWatt = etDefaultPanelWatt.text.toString().toIntOrNull()
+            if (panelWatt == null || panelWatt <= 0) {
+                return ValidationResult(false, "Please enter a valid panel wattage (must be greater than 0)")
+            }
+            
+            val sunHours = etDefaultSunHours.text.toString().toDoubleOrNull()
+            if (sunHours == null || sunHours <= 0 || sunHours > 24) {
+                return ValidationResult(false, "Please enter valid sun hours (must be between 0 and 24)")
+            }
+            
+            val panelCost = etPanelCostPerWatt.text.toString().toDoubleOrNull()
+            if (panelCost == null || panelCost <= 0) {
+                return ValidationResult(false, "Please enter a valid panel cost (must be greater than 0)")
+            }
+            
+            val inverterCost = etInverterCostPerWatt.text.toString().toDoubleOrNull()
+            if (inverterCost == null || inverterCost <= 0) {
+                return ValidationResult(false, "Please enter a valid inverter cost (must be greater than 0)")
+            }
+            
+            val installationCost = etInstallationCostPerKw.text.toString().toDoubleOrNull()
+            if (installationCost == null || installationCost <= 0) {
+                return ValidationResult(false, "Please enter a valid installation cost (must be greater than 0)")
+            }
+            
+            val efficiency = etPanelEfficiency.text.toString().toDoubleOrNull()
+            if (efficiency == null || efficiency <= 0 || efficiency > 100) {
+                return ValidationResult(false, "Please enter a valid panel efficiency (must be between 0 and 100%)")
+            }
+            
+            val performanceRatio = etPerformanceRatio.text.toString().toDoubleOrNull()
+            if (performanceRatio == null || performanceRatio <= 0 || performanceRatio > 100) {
+                return ValidationResult(false, "Please enter a valid performance ratio (must be between 0 and 100%)")
+            }
+            
+            val inverterRatio = etInverterSizingRatio.text.toString().toDoubleOrNull()
+            if (inverterRatio == null || inverterRatio <= 0 || inverterRatio > 100) {
+                return ValidationResult(false, "Please enter a valid inverter sizing ratio (must be between 0 and 100%)")
+            }
+            
+            val lifetime = etSystemLifetime.text.toString().toIntOrNull()
+            if (lifetime == null || lifetime <= 0) {
+                return ValidationResult(false, "Please enter a valid system lifetime (must be greater than 0)")
+            }
+            
+            return ValidationResult(true, "")
+            
+        } catch (e: Exception) {
+            android.util.Log.e("SettingsFragment", "Validation error", e)
+            return ValidationResult(false, "Validation error: ${e.message}")
+        }
+    }
+    
+    private fun updateSaveButtonState() {
+        try {
+            // Enable save button by default
+            btnSaveSettings.isEnabled = true
+            btnSaveSettings.text = "Save Settings"
+        } catch (e: Exception) {
+            android.util.Log.e("SettingsFragment", "Error updating save button state", e)
+        }
+    }
+    
+    private data class ValidationResult(
+        val isValid: Boolean,
+        val errorMessage: String
+    )
 }
