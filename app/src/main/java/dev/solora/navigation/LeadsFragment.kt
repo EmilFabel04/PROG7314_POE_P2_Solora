@@ -225,7 +225,7 @@ class LeadsFragment : Fragment() {
         
         // Add lead
         android.util.Log.d("LeadsFragment", "Adding lead: $fullName, $address, $contactInfo, $source")
-        leadsViewModel.addLead(fullName, contactInfo, contactInfo, notes)
+        leadsViewModel.addLead(fullName, contactInfo, contactInfo, "")
         
         // Clear form and hide modal
         clearForm()

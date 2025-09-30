@@ -7,13 +7,17 @@ import dev.solora.data.FirebaseLead
 import dev.solora.data.FirebaseRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.launch
 
 class LeadsViewModel(app: Application) : AndroidViewModel(app) {
     private val firebaseRepository = FirebaseRepository()
 
     // Firebase leads flow
-    val leads = firebaseRepository.getLeads().stateIn(
+    val leads = flow {
+        emitAll(firebaseRepository.getLeads())
+    }.stateIn(
         viewModelScope, 
         SharingStarted.WhileSubscribed(5000), 
         emptyList<FirebaseLead>()

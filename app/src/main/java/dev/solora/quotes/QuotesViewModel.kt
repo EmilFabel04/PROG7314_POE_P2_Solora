@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.launch
 import dev.solora.data.FirebaseQuote
 import dev.solora.data.FirebaseRepository
@@ -22,7 +24,9 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     private val calculator = QuoteCalculator
 
     // Firebase quotes flow
-    val quotes = firebaseRepository.getQuotes().stateIn(
+    val quotes = flow {
+        emitAll(firebaseRepository.getQuotes())
+    }.stateIn(
         viewModelScope, 
         SharingStarted.WhileSubscribed(5000), 
         emptyList<FirebaseQuote>()
@@ -69,9 +73,16 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                     } else null
                 )
 
-                val outputs = calculator.calculateAdvanced(inputs)
-                _lastCalculation.value = outputs
-                _calculationState.value = CalculationState.Success(outputs)
+                val result = calculator.calculateAdvanced(inputs)
+                result.fold(
+                    onSuccess = { outputs ->
+                        _lastCalculation.value = outputs
+                        _calculationState.value = CalculationState.Success(outputs)
+                    },
+                    onFailure = { error ->
+                        _calculationState.value = CalculationState.Error(error.message ?: "Calculation failed")
+                    }
+                )
                 
             } catch (e: Exception) {
                 _calculationState.value = CalculationState.Error(e.message ?: "Calculation failed")
