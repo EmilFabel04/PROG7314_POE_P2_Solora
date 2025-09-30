@@ -25,7 +25,7 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     val quotes = firebaseRepository.getQuotes().stateIn(
         viewModelScope, 
         SharingStarted.WhileSubscribed(5000), 
-        emptyList()
+        emptyList<FirebaseQuote>()
     )
 
     private val _lastQuote = MutableStateFlow<FirebaseQuote?>(null)
@@ -69,7 +69,7 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                     } else null
                 )
 
-                val outputs = calculator.calculateQuote(inputs)
+                val outputs = calculator.calculateAdvanced(inputs)
                 _lastCalculation.value = outputs
                 _calculationState.value = CalculationState.Success(outputs)
                 

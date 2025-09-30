@@ -17,23 +17,23 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dev.solora.R
-import dev.solora.leads.FirebaseLeadsViewModel
-import dev.solora.data.FirebaseFirebaseLead
+import dev.solora.leads.LeadsViewModel
+import dev.solora.data.FirebaseLead
 import kotlinx.coroutines.launch
 
-class FirebaseLeadsFragment : Fragment() {
+class LeadsFragment : Fragment() {
     
-    private val leadsViewModel: FirebaseLeadsViewModel by viewModels()
-    private lateinit var leadsAdapter: FirebaseLeadsAdapter
+    private val leadsViewModel: LeadsViewModel by viewModels()
+    private lateinit var leadsAdapter: LeadsAdapter
     
     // UI Elements
-    private lateinit var rvFirebaseLeads: RecyclerView
-    private lateinit var layoutEmptyFirebaseLeads: View
-    private lateinit var fabAddFirebaseLead: FloatingActionButton
-    private lateinit var btnAddFirebaseLeadFallback: Button
-    private lateinit var btnAddFirebaseLeadHeader: Button
-    private lateinit var btnAddFirebaseLeadEmpty: Button
-    private lateinit var overlayAddFirebaseLead: View
+    private lateinit var rvLeads: RecyclerView
+    private lateinit var layoutEmptyLeads: View
+    private lateinit var fabAddLead: FloatingActionButton
+    private lateinit var btnAddLeadFallback: Button
+    private lateinit var btnAddLeadHeader: Button
+    private lateinit var btnAddLeadEmpty: Button
+    private lateinit var overlayAddLead: View
     
     // Form elements
     private lateinit var etFirstName: EditText
@@ -46,49 +46,49 @@ class FirebaseLeadsFragment : Fragment() {
     private lateinit var btnCancel: Button
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        android.util.Log.d("FirebaseLeadsFragment", "===== UPDATED LEADS FRAGMENT ONCREATEVIEW CALLED =====")
-        android.util.Log.d("FirebaseLeadsFragment", "Inflating layout: R.layout.fragment_leads")
+        android.util.Log.d("LeadsFragment", "===== UPDATED LEADS FRAGMENT ONCREATEVIEW CALLED =====")
+        android.util.Log.d("LeadsFragment", "Inflating layout: R.layout.fragment_leads")
         val view = inflater.inflate(R.layout.fragment_leads, container, false)
-        android.util.Log.d("FirebaseLeadsFragment", "Layout inflated successfully. View type: ${view.javaClass.simpleName}")
+        android.util.Log.d("LeadsFragment", "Layout inflated successfully. View type: ${view.javaClass.simpleName}")
         return view
     }
     
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        android.util.Log.d("FirebaseLeadsFragment", "===== UPDATED LEADS FRAGMENT ONVIEWCREATED CALLED =====")
-        android.util.Log.d("FirebaseLeadsFragment", "View tree: ${view.javaClass.simpleName}")
+        android.util.Log.d("LeadsFragment", "===== UPDATED LEADS FRAGMENT ONVIEWCREATED CALLED =====")
+        android.util.Log.d("LeadsFragment", "View tree: ${view.javaClass.simpleName}")
         
         initializeViews(view)
         setupRecyclerView()
         setupClickListeners()
-        observeFirebaseLeads()
+        observeLeads()
         
-        android.util.Log.d("FirebaseLeadsFragment", "===== LEADS FRAGMENT SETUP COMPLETED =====")
+        android.util.Log.d("LeadsFragment", "===== LEADS FRAGMENT SETUP COMPLETED =====")
     }
     
     private fun initializeViews(view: View) {
-        rvFirebaseLeads = view.findViewById(R.id.rv_leads)
-        layoutEmptyFirebaseLeads = view.findViewById(R.id.layout_empty_leads)
-        fabAddFirebaseLead = view.findViewById(R.id.fab_add_lead)
-        btnAddFirebaseLeadFallback = view.findViewById(R.id.btn_add_lead_fallback)
-        btnAddFirebaseLeadHeader = view.findViewById(R.id.btn_add_lead_header)
-        btnAddFirebaseLeadEmpty = view.findViewById(R.id.btn_add_lead_empty)
-        overlayAddFirebaseLead = view.findViewById(R.id.overlay_add_lead)
+        rvLeads = view.findViewById(R.id.rv_leads)
+        layoutEmptyLeads = view.findViewById(R.id.layout_empty_leads)
+        fabAddLead = view.findViewById(R.id.fab_add_lead)
+        btnAddLeadFallback = view.findViewById(R.id.btn_add_lead_fallback)
+        btnAddLeadHeader = view.findViewById(R.id.btn_add_lead_header)
+        btnAddLeadEmpty = view.findViewById(R.id.btn_add_lead_empty)
+        overlayAddLead = view.findViewById(R.id.overlay_add_lead)
         
-        android.util.Log.d("FirebaseLeadsFragment", "Views initialized. FAB found: ${fabAddFirebaseLead != null}")
-        if (fabAddFirebaseLead != null) {
-            android.util.Log.d("FirebaseLeadsFragment", "FAB visibility: ${fabAddFirebaseLead.visibility}, alpha: ${fabAddFirebaseLead.alpha}")
+        android.util.Log.d("LeadsFragment", "Views initialized. FAB found: ${fabAddLead != null}")
+        if (fabAddLead != null) {
+            android.util.Log.d("LeadsFragment", "FAB visibility: ${fabAddLead.visibility}, alpha: ${fabAddLead.alpha}")
             // Explicitly ensure FAB is visible
-            fabAddFirebaseLead.visibility = View.VISIBLE
-            fabAddFirebaseLead.alpha = 1.0f
-            fabAddFirebaseLead.isClickable = true
-            fabAddFirebaseLead.isFocusable = true
-            android.util.Log.d("FirebaseLeadsFragment", "FAB visibility set to VISIBLE")
+            fabAddLead.visibility = View.VISIBLE
+            fabAddLead.alpha = 1.0f
+            fabAddLead.isClickable = true
+            fabAddLead.isFocusable = true
+            android.util.Log.d("LeadsFragment", "FAB visibility set to VISIBLE")
         } else {
-            android.util.Log.e("FirebaseLeadsFragment", "FAB not found in layout!")
+            android.util.Log.e("LeadsFragment", "FAB not found in layout!")
             // Show fallback button if FAB doesn't work
-            btnAddFirebaseLeadFallback.visibility = View.VISIBLE
+            btnAddLeadFallback.visibility = View.VISIBLE
         }
         
         // Form elements
@@ -108,43 +108,43 @@ class FirebaseLeadsFragment : Fragment() {
     }
     
     private fun setupRecyclerView() {
-        leadsAdapter = FirebaseLeadsAdapter { lead ->
+        leadsAdapter = LeadsAdapter { lead ->
             // Handle lead click - could navigate to lead detail
             Toast.makeText(requireContext(), "FirebaseLead: ${lead.name}", Toast.LENGTH_SHORT).show()
         }
         
-        rvFirebaseLeads.layoutManager = LinearLayoutManager(requireContext())
-        rvFirebaseLeads.adapter = leadsAdapter
+        rvLeads.layoutManager = LinearLayoutManager(requireContext())
+        rvLeads.adapter = leadsAdapter
     }
     
     private fun setupClickListeners() {
-        android.util.Log.d("FirebaseLeadsFragment", "Setting up click listeners. FAB found: ${::fabAddFirebaseLead.isInitialized}")
+        android.util.Log.d("LeadsFragment", "Setting up click listeners. FAB found: ${::fabAddLead.isInitialized}")
         
-        fabAddFirebaseLead.setOnClickListener {
-            android.util.Log.d("FirebaseLeadsFragment", "FAB clicked - showing add lead modal")
-            showAddFirebaseLeadModal()
+        fabAddLead.setOnClickListener {
+            android.util.Log.d("LeadsFragment", "FAB clicked - showing add lead modal")
+            showAddLeadModal()
         }
 
         // Also setup fallback button click listener
-        btnAddFirebaseLeadFallback.setOnClickListener {
-            android.util.Log.d("FirebaseLeadsFragment", "Fallback button clicked - showing add lead modal")
-            showAddFirebaseLeadModal()
+        btnAddLeadFallback.setOnClickListener {
+            android.util.Log.d("LeadsFragment", "Fallback button clicked - showing add lead modal")
+            showAddLeadModal()
         }
 
         // Setup header button click listener
-        btnAddFirebaseLeadHeader.setOnClickListener {
-            android.util.Log.d("FirebaseLeadsFragment", "Header button clicked - showing add lead modal")
-            showAddFirebaseLeadModal()
+        btnAddLeadHeader.setOnClickListener {
+            android.util.Log.d("LeadsFragment", "Header button clicked - showing add lead modal")
+            showAddLeadModal()
         }
 
         // Setup empty state button click listener
-        btnAddFirebaseLeadEmpty.setOnClickListener {
-            android.util.Log.d("FirebaseLeadsFragment", "Empty state button clicked - showing add lead modal")
-            showAddFirebaseLeadModal()
+        btnAddLeadEmpty.setOnClickListener {
+            android.util.Log.d("LeadsFragment", "Empty state button clicked - showing add lead modal")
+            showAddLeadModal()
         }
         
         btnCancel.setOnClickListener {
-            hideAddFirebaseLeadModal()
+            hideAddLeadModal()
         }
         
         btnAdd.setOnClickListener {
@@ -152,35 +152,35 @@ class FirebaseLeadsFragment : Fragment() {
         }
         
         // Close modal when clicking outside
-        overlayAddFirebaseLead.setOnClickListener {
-            hideAddFirebaseLeadModal()
+        overlayAddLead.setOnClickListener {
+            hideAddLeadModal()
         }
     }
     
-    private fun observeFirebaseLeads() {
+    private fun observeLeads() {
         viewLifecycleOwner.lifecycleScope.launch {
             leadsViewModel.leads.collect { leads ->
                 leadsAdapter.submitList(leads)
                 
                 // Show/hide empty state
                 if (leads.isEmpty()) {
-                    rvFirebaseLeads.visibility = View.GONE
-                    layoutEmptyFirebaseLeads.visibility = View.VISIBLE
+                    rvLeads.visibility = View.GONE
+                    layoutEmptyLeads.visibility = View.VISIBLE
                 } else {
-                    rvFirebaseLeads.visibility = View.VISIBLE
-                    layoutEmptyFirebaseLeads.visibility = View.GONE
+                    rvLeads.visibility = View.VISIBLE
+                    layoutEmptyLeads.visibility = View.GONE
                 }
             }
         }
     }
     
-    private fun showAddFirebaseLeadModal() {
-        overlayAddFirebaseLead.visibility = View.VISIBLE
+    private fun showAddLeadModal() {
+        overlayAddLead.visibility = View.VISIBLE
         clearForm()
     }
     
-    private fun hideAddFirebaseLeadModal() {
-        overlayAddFirebaseLead.visibility = View.GONE
+    private fun hideAddLeadModal() {
+        overlayAddLead.visibility = View.GONE
     }
     
     private fun clearForm() {
@@ -224,13 +224,13 @@ class FirebaseLeadsFragment : Fragment() {
         val contactInfo = if (email.isNotEmpty()) "$email | $contact" else contact
         
         // Add lead
-        android.util.Log.d("FirebaseLeadsFragment", "Adding lead: $fullName, $address, $contactInfo, $source")
+        android.util.Log.d("LeadsFragment", "Adding lead: $fullName, $address, $contactInfo, $source")
         leadsViewModel.addLead(fullName, contactInfo, contactInfo, notes)
         
         // Clear form and hide modal
         clearForm()
-        hideAddFirebaseLeadModal()
-        Toast.makeText(requireContext(), "FirebaseLead added successfully!", Toast.LENGTH_SHORT).show()
+        hideAddLeadModal()
+        Toast.makeText(requireContext(), "Lead added successfully!", Toast.LENGTH_SHORT).show()
     }
     
     private fun generateFirebaseLeadReference(): String {
@@ -240,30 +240,30 @@ class FirebaseLeadsFragment : Fragment() {
 }
 
 // RecyclerView Adapter
-class FirebaseLeadsAdapter(
-    private val onFirebaseLeadClick: (FirebaseLead) -> Unit
-) : RecyclerView.Adapter<FirebaseLeadsAdapter.FirebaseLeadViewHolder>() {
+class LeadsAdapter(
+    private val onLeadClick: (FirebaseLead) -> Unit
+) : RecyclerView.Adapter<LeadsAdapter.LeadViewHolder>() {
     
     private var leads: List<FirebaseLead> = emptyList()
     
-    fun submitList(newFirebaseLeads: List<FirebaseLead>) {
-        leads = newFirebaseLeads
+    fun submitList(newLeads: List<FirebaseLead>) {
+        leads = newLeads
         notifyDataSetChanged()
     }
     
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FirebaseLeadViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LeadViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_lead, parent, false)
-        return FirebaseLeadViewHolder(view)
+        return LeadViewHolder(view)
     }
     
-    override fun onBindViewHolder(holder: FirebaseLeadViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: LeadViewHolder, position: Int) {
         holder.bind(leads[position])
     }
     
     override fun getItemCount(): Int = leads.size
     
-    inner class FirebaseLeadViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class LeadViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvReference = itemView.findViewById<android.widget.TextView>(R.id.tv_reference)
         private val tvName = itemView.findViewById<android.widget.TextView>(R.id.tv_name)
         private val tvAddress = itemView.findViewById<android.widget.TextView>(R.id.tv_address)
@@ -274,7 +274,7 @@ class FirebaseLeadsAdapter(
             tvName.text = lead.name
             tvAddress.text = lead.email
             
-            clickableArea.setOnClickListener { onFirebaseLeadClick(lead) }
+            clickableArea.setOnClickListener { onLeadClick(lead) }
         }
     }
 }

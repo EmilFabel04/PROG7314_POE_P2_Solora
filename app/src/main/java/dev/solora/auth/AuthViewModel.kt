@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import dev.solora.data.FirebaseUser as UserInfo
 
 class AuthViewModel(app: Application) : AndroidViewModel(app) {
     private val repo = AuthRepository(app.applicationContext)

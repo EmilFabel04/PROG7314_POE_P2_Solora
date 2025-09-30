@@ -239,7 +239,7 @@ class QuotesFragment : Fragment() {
                     clientName = updatedQuote.clientName,
                     address = updatedQuote.address,
                     contactInfo = contactInfo,
-                    notes = "Lead created from quote ${reference} with full client details. Client expressed interested in ${String.format("%.2f", updatedQuote.systemKwpp)}kW solar system."
+                    notes = "Lead created from quote ${reference} with full client details. Client expressed interested in ${String.format("%.2f", updatedQuote.systemKwp)}kW solar system."
                 )
                 
                 Toast.makeText(requireContext(), "Quote saved and lead created successfully!", Toast.LENGTH_LONG).show()
