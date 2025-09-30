@@ -22,6 +22,16 @@ data class FirebaseQuote(
     val savingsFirstYear: Double = 0.0,
     val dateEpoch: Long = 0L,
     val userId: String = "", // Link to Firebase Auth user
+    // NASA API data
+    val latitude: Double? = null,
+    val longitude: Double? = null,
+    val averageAnnualIrradiance: Double? = null,
+    val averageAnnualSunHours: Double? = null,
+    val optimalMonth: Int? = null,
+    val optimalMonthIrradiance: Double? = null,
+    val temperature: Double? = null,
+    val windSpeed: Double? = null,
+    val humidity: Double? = null,
     @ServerTimestamp
     val createdAt: Timestamp? = null,
     @ServerTimestamp

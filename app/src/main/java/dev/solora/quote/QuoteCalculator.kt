@@ -35,7 +35,16 @@ data class QuoteOutputs(
     val systemKw: Double,
     val inverterKw: Double,
     val estimatedMonthlySavingsR: Double,
-    val detailedAnalysis: DetailedAnalysis? = null
+    val detailedAnalysis: DetailedAnalysis? = null,
+    // Additional properties for Firebase storage
+    val monthlyUsageKwh: Double? = null,
+    val monthlyBillRands: Double? = null,
+    val tariffRPerKwh: Double = 0.0,
+    val panelWatt: Int = 0,
+    val sunHoursPerDay: Double = 0.0,
+    val estimatedMonthlyGeneration: Double = 0.0,
+    val paybackMonths: Int = 0,
+    val monthlySavingsRands: Double = 0.0
 )
 
 data class DetailedAnalysis(
@@ -43,7 +52,14 @@ data class DetailedAnalysis(
     val seasonalPerformance: Map<String, Double>, // percentage of annual generation
     val financialProjection: FinancialProjection,
     val environmentalImpact: EnvironmentalImpact,
-    val systemOptimization: SystemOptimization
+    val systemOptimization: SystemOptimization,
+    // NASA API data
+    val locationData: LocationData? = null,
+    val optimalMonth: Int? = null,
+    val optimalMonthIrradiance: Double? = null,
+    val averageTemperature: Double? = null,
+    val averageWindSpeed: Double? = null,
+    val averageHumidity: Double? = null
 )
 
 data class FinancialProjection(
@@ -112,11 +128,25 @@ object QuoteCalculator {
         val inverterKw = (systemKw * 0.8).coerceAtLeast(1.0)
         val savings = usageKwh * inputs.tariffRPerKwh * 0.8
         
+        // Calculate additional metrics
+        val estimatedMonthlyGeneration = systemKw * inputs.sunHoursPerDay * 30
+        val installationCost = systemKw * 15000 // R15,000 per kW
+        val paybackMonths = if (savings > 0) (installationCost / savings).toInt() else 0
+        
         return QuoteOutputs(
             panels = panels, 
             systemKw = round2(systemKw), 
             inverterKw = round2(inverterKw), 
-            estimatedMonthlySavingsR = round2(savings)
+            estimatedMonthlySavingsR = round2(savings),
+            // Additional properties for Firebase storage
+            monthlyUsageKwh = inputs.monthlyUsageKwh,
+            monthlyBillRands = inputs.monthlyBillRands,
+            tariffRPerKwh = inputs.tariffRPerKwh,
+            panelWatt = inputs.panelWatt,
+            sunHoursPerDay = inputs.sunHoursPerDay,
+            estimatedMonthlyGeneration = round2(estimatedMonthlyGeneration),
+            paybackMonths = paybackMonths,
+            monthlySavingsRands = round2(savings)
         )
     }
     
@@ -202,12 +232,29 @@ object QuoteCalculator {
             recommendations = recommendations
         )
         
+        // Calculate NASA data averages
+        val averageTemperature = nasaData.monthlyData.values.mapNotNull { it.temperature }.average().let { if (it.isNaN()) null else it }
+        val averageWindSpeed = nasaData.monthlyData.values.mapNotNull { it.windSpeed }.average().let { if (it.isNaN()) null else it }
+        val averageHumidity = nasaData.monthlyData.values.mapNotNull { it.humidity }.average().let { if (it.isNaN()) null else it }
+        
+        // Find optimal month
+        val optimalMonthEntry = nasaData.monthlyData.maxByOrNull { it.value.solarIrradiance }
+        val optimalMonth = optimalMonthEntry?.key
+        val optimalMonthIrradiance = optimalMonthEntry?.value?.solarIrradiance
+        
         return DetailedAnalysis(
             monthlyGeneration = monthlyGeneration,
             seasonalPerformance = seasonalPerformance,
             financialProjection = financialProjection,
             environmentalImpact = environmentalImpact,
-            systemOptimization = systemOptimization
+            systemOptimization = systemOptimization,
+            // NASA API data
+            locationData = nasaData,
+            optimalMonth = optimalMonth,
+            optimalMonthIrradiance = optimalMonthIrradiance,
+            averageTemperature = averageTemperature,
+            averageWindSpeed = averageWindSpeed,
+            averageHumidity = averageHumidity
         )
     }
     
