@@ -287,18 +287,19 @@ class SettingsFragment : Fragment() {
                 settingsViewModel.updateCalculationSettings(calculationSettings)
                 settingsViewModel.updateCompanySettings(companySettings)
                 android.util.Log.d("SettingsFragment", "Settings saved to Firebase successfully")
-            } catch (e: Exception) {
-                android.util.Log.e("SettingsFragment", "Error saving to Firebase", e)
-                throw e // Re-throw to be caught by outer try-catch
-            }
-            
-            // Reset button state after a short delay
-            btnSaveSettings.postDelayed({
+                
+                // Reset button state after successful save
                 btnSaveSettings.isEnabled = true
                 btnSaveSettings.text = "Save Settings"
                 Toast.makeText(requireContext(), "Settings saved successfully!", Toast.LENGTH_SHORT).show()
                 android.util.Log.d("SettingsFragment", "Settings saved successfully")
-            }, 1000)
+            } catch (e: Exception) {
+                android.util.Log.e("SettingsFragment", "Error saving to Firebase", e)
+                // Reset button state on error
+                btnSaveSettings.isEnabled = true
+                btnSaveSettings.text = "Save Settings"
+                Toast.makeText(requireContext(), "Error saving settings: ${e.message}", Toast.LENGTH_LONG).show()
+            }
             
         } catch (e: Exception) {
             // Reset button state on error
@@ -321,18 +322,19 @@ class SettingsFragment : Fragment() {
             try {
                 settingsViewModel.resetToDefaults()
                 android.util.Log.d("SettingsFragment", "Settings reset in Firebase successfully")
-            } catch (e: Exception) {
-                android.util.Log.e("SettingsFragment", "Error resetting settings in Firebase", e)
-                throw e // Re-throw to be caught by outer try-catch
-            }
-            
-            // Reset button state after a short delay
-            btnResetSettings.postDelayed({
+                
+                // Reset button state after successful reset
                 btnResetSettings.isEnabled = true
                 btnResetSettings.text = "Reset to Defaults"
                 Toast.makeText(requireContext(), "Settings reset to defaults", Toast.LENGTH_SHORT).show()
                 android.util.Log.d("SettingsFragment", "Settings reset to defaults")
-            }, 1000)
+            } catch (e: Exception) {
+                android.util.Log.e("SettingsFragment", "Error resetting settings in Firebase", e)
+                // Reset button state on error
+                btnResetSettings.isEnabled = true
+                btnResetSettings.text = "Reset to Defaults"
+                Toast.makeText(requireContext(), "Error resetting settings: ${e.message}", Toast.LENGTH_LONG).show()
+            }
             
         } catch (e: Exception) {
             // Reset button state on error
