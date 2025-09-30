@@ -5,16 +5,29 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(app: Application) : AndroidViewModel(app) {
     private val repository = SettingsRepository(app.applicationContext)
     
-    val settings = repository.settings.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000),
-        AppSettings()
-    )
+    val settings by lazy {
+        try {
+            android.util.Log.d("SettingsViewModel", "Initializing settings flow")
+            repository.settings.stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(5000),
+                AppSettings()
+            )
+        } catch (e: Exception) {
+            android.util.Log.e("SettingsViewModel", "Error initializing settings", e)
+            kotlinx.coroutines.flow.flowOf(AppSettings()).stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(5000),
+                AppSettings()
+            )
+        }
+    }
     
     fun updateCalculationSettings(settings: CalculationSettings) {
         viewModelScope.launch {

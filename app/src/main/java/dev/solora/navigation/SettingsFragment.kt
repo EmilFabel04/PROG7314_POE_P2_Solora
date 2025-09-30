@@ -67,12 +67,22 @@ class SettingsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        initializeViews(view)
-        setupTabs()
-        setupButtons()
-        observeSettings()
-        
-        android.util.Log.d("SettingsFragment", "Settings fragment initialized")
+        try {
+            android.util.Log.d("SettingsFragment", "Starting SettingsFragment initialization")
+            initializeViews(view)
+            android.util.Log.d("SettingsFragment", "Views initialized successfully")
+            setupTabs()
+            android.util.Log.d("SettingsFragment", "Tabs setup successfully")
+            setupButtons()
+            android.util.Log.d("SettingsFragment", "Buttons setup successfully")
+            observeSettings()
+            android.util.Log.d("SettingsFragment", "Settings observer setup successfully")
+            
+            android.util.Log.d("SettingsFragment", "Settings fragment initialized successfully")
+        } catch (e: Exception) {
+            android.util.Log.e("SettingsFragment", "Error initializing SettingsFragment", e)
+            Toast.makeText(requireContext(), "Error initializing settings: ${e.message}", Toast.LENGTH_LONG).show()
+        }
     }
     
     private fun initializeViews(view: View) {
@@ -167,36 +177,57 @@ class SettingsFragment : Fragment() {
     }
     
     private fun observeSettings() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            settingsViewModel.settings.collect { settings ->
-                populateForms(settings)
+        try {
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    android.util.Log.d("SettingsFragment", "Starting to observe settings")
+                    settingsViewModel.settings.collect { settings ->
+                        android.util.Log.d("SettingsFragment", "Settings received: $settings")
+                        populateForms(settings)
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("SettingsFragment", "Error observing settings", e)
+                    Toast.makeText(requireContext(), "Error loading settings: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
             }
+        } catch (e: Exception) {
+            android.util.Log.e("SettingsFragment", "Error setting up settings observer", e)
+            Toast.makeText(requireContext(), "Error setting up settings: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
     
     private fun populateForms(settings: dev.solora.settings.AppSettings) {
-        // Calculation settings
-        etDefaultTariff.setText(settings.calculationSettings.defaultTariff.toString())
-        etDefaultPanelWatt.setText(settings.calculationSettings.defaultPanelWatt.toString())
-        etDefaultSunHours.setText(settings.calculationSettings.defaultSunHours.toString())
-        etPanelCostPerWatt.setText(settings.calculationSettings.panelCostPerWatt.toString())
-        etInverterCostPerWatt.setText(settings.calculationSettings.inverterCostPerWatt.toString())
-        etInstallationCostPerKw.setText(settings.calculationSettings.installationCostPerKw.toString())
-        etPanelEfficiency.setText((settings.calculationSettings.panelEfficiency * 100).toString())
-        etPerformanceRatio.setText((settings.calculationSettings.performanceRatio * 100).toString())
-        etInverterSizingRatio.setText((settings.calculationSettings.inverterSizingRatio * 100).toString())
-        etSystemLifetime.setText(settings.calculationSettings.systemLifetime.toString())
-        
-        // Company settings
-        etCompanyName.setText(settings.companySettings.companyName)
-        etCompanyAddress.setText(settings.companySettings.companyAddress)
-        etCompanyPhone.setText(settings.companySettings.companyPhone)
-        etCompanyEmail.setText(settings.companySettings.companyEmail)
-        etCompanyWebsite.setText(settings.companySettings.companyWebsite)
-        etConsultantName.setText(settings.companySettings.consultantName)
-        etConsultantPhone.setText(settings.companySettings.consultantPhone)
-        etConsultantEmail.setText(settings.companySettings.consultantEmail)
-        etConsultantLicense.setText(settings.companySettings.consultantLicense)
+        try {
+            android.util.Log.d("SettingsFragment", "Populating forms with settings")
+            
+            // Calculation settings
+            etDefaultTariff.setText(settings.calculationSettings.defaultTariff.toString())
+            etDefaultPanelWatt.setText(settings.calculationSettings.defaultPanelWatt.toString())
+            etDefaultSunHours.setText(settings.calculationSettings.defaultSunHours.toString())
+            etPanelCostPerWatt.setText(settings.calculationSettings.panelCostPerWatt.toString())
+            etInverterCostPerWatt.setText(settings.calculationSettings.inverterCostPerWatt.toString())
+            etInstallationCostPerKw.setText(settings.calculationSettings.installationCostPerKw.toString())
+            etPanelEfficiency.setText((settings.calculationSettings.panelEfficiency * 100).toString())
+            etPerformanceRatio.setText((settings.calculationSettings.performanceRatio * 100).toString())
+            etInverterSizingRatio.setText((settings.calculationSettings.inverterSizingRatio * 100).toString())
+            etSystemLifetime.setText(settings.calculationSettings.systemLifetime.toString())
+            
+            // Company settings
+            etCompanyName.setText(settings.companySettings.companyName)
+            etCompanyAddress.setText(settings.companySettings.companyAddress)
+            etCompanyPhone.setText(settings.companySettings.companyPhone)
+            etCompanyEmail.setText(settings.companySettings.companyEmail)
+            etCompanyWebsite.setText(settings.companySettings.companyWebsite)
+            etConsultantName.setText(settings.companySettings.consultantName)
+            etConsultantPhone.setText(settings.companySettings.consultantPhone)
+            etConsultantEmail.setText(settings.companySettings.consultantEmail)
+            etConsultantLicense.setText(settings.companySettings.consultantLicense)
+            
+            android.util.Log.d("SettingsFragment", "Forms populated successfully")
+        } catch (e: Exception) {
+            android.util.Log.e("SettingsFragment", "Error populating forms", e)
+            Toast.makeText(requireContext(), "Error loading form data: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
     }
     
     private fun saveSettings() {

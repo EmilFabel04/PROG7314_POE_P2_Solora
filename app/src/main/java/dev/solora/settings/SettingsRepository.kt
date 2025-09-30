@@ -9,21 +9,25 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flowOf
 import java.io.IOException
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
 class SettingsRepository(private val context: Context) {
     
-    val settings: Flow<AppSettings> = context.dataStore.data
-        .catch { exception ->
-            if (exception is IOException) {
-                emit(emptyPreferences())
-            } else {
-                throw exception
+    val settings: Flow<AppSettings> = try {
+        android.util.Log.d("SettingsRepository", "Initializing DataStore")
+        context.dataStore.data
+            .catch { exception ->
+                android.util.Log.e("SettingsRepository", "DataStore error", exception)
+                if (exception is IOException) {
+                    emit(emptyPreferences())
+                } else {
+                    emit(emptyPreferences())
+                }
             }
-        }
-        .map { preferences ->
+            .map { preferences ->
             AppSettings(
                 calculationSettings = CalculationSettings(
                     defaultTariff = preferences[SettingsKeys.DEFAULT_TARIFF] ?: 2.50,
@@ -58,6 +62,10 @@ class SettingsRepository(private val context: Context) {
                 theme = preferences[SettingsKeys.THEME] ?: "light"
             )
         }
+    } catch (e: Exception) {
+        android.util.Log.e("SettingsRepository", "Error creating settings flow", e)
+        kotlinx.coroutines.flow.flowOf(AppSettings())
+    }
     
     suspend fun updateCalculationSettings(settings: CalculationSettings) {
         context.dataStore.edit { preferences ->
