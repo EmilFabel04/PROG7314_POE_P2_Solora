@@ -111,6 +111,39 @@ class FirebaseFunctionsApi {
     }
     
     /**
+     * Get quote by ID via Cloud Function
+     */
+    suspend fun getQuoteById(quoteId: String): Result<Map<String, Any>?> {
+        return try {
+            android.util.Log.d("FirebaseFunctionsApi", "Calling getQuoteById function")
+            
+            val data = hashMapOf<String, Any>(
+                "quoteId" to quoteId
+            )
+            
+            val result = functions
+                .getHttpsCallable("getQuoteById")
+                .call(data)
+                .await()
+            
+            @Suppress("UNCHECKED_CAST")
+            val response = result.data as Map<String, Any>
+            val quote = response["quote"] as? Map<String, Any>
+            
+            if (quote != null) {
+                android.util.Log.d("FirebaseFunctionsApi", "Quote retrieved via API: $quoteId")
+                Result.success(quote)
+            } else {
+                android.util.Log.d("FirebaseFunctionsApi", "No quote found via API: $quoteId")
+                Result.success(null)
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseFunctionsApi", "Get quote by ID error: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+    
+    /**
      * Save lead via Cloud Function
      */
     suspend fun saveLead(leadData: Map<String, Any?>): Result<String> {

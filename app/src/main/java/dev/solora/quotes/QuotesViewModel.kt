@@ -262,9 +262,9 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                 android.util.Log.d("QuotesViewModel", "locationData is null: ${nasaData == null}")
                 
                 val quote = FirebaseQuote(
-                    reference = reference,
-                    clientName = clientName,
-                    address = address,
+            reference = reference,
+            clientName = clientName,
+            address = address,
                     // Input data
                     usageKwh = calculation.monthlyUsageKwh,
                     billRands = calculation.monthlyBillRands,
