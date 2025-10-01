@@ -206,6 +206,14 @@ class QuotesFragment : Fragment() {
         // Setup RecyclerView
         quotesAdapter = QuotesListAdapter { quote ->
             // Navigate to quote detail page
+            android.util.Log.d("QuotesFragment", "Quote clicked: ID=${quote.id}, Reference=${quote.reference}")
+            
+            if (quote.id.isNullOrBlank()) {
+                android.util.Log.e("QuotesFragment", "ERROR: Quote ID is null or blank!")
+                Toast.makeText(requireContext(), "Error: Quote ID is missing", Toast.LENGTH_SHORT).show()
+                return@QuotesListAdapter
+            }
+            
             val bundle = Bundle().apply { putString("id", quote.id) }
             findNavController().navigate(R.id.quoteDetailFragment, bundle)
         }

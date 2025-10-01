@@ -96,6 +96,15 @@ class QuoteDetailFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 android.util.Log.d("QuoteDetailFragment", "Calling getQuoteById for: $quoteId")
+                
+                // Check if quoteId is valid
+                if (quoteId.isBlank()) {
+                    android.util.Log.e("QuoteDetailFragment", "Quote ID is blank!")
+                    Toast.makeText(requireContext(), "Invalid quote ID", Toast.LENGTH_LONG).show()
+                    findNavController().navigateUp()
+                    return@launch
+                }
+                
                 quotesViewModel.getQuoteById(quoteId)
                 
                 quotesViewModel.lastQuote.collect { quote ->
@@ -103,6 +112,7 @@ class QuoteDetailFragment : Fragment() {
                     currentQuote = quote
                     
                     if (quote != null) {
+                        android.util.Log.d("QuoteDetailFragment", "Quote found, populating details")
                         populateQuoteDetails(quote)
                     } else {
                         android.util.Log.w("QuoteDetailFragment", "Quote is null, showing not found")
@@ -118,11 +128,12 @@ class QuoteDetailFragment : Fragment() {
     }
     
     private fun populateQuoteDetails(quote: dev.solora.data.FirebaseQuote) {
-        // Header
-        tvReference.text = quote.reference
-        tvDate.text = quote.createdAt?.toDate()?.let {
-            SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(it)
-        } ?: "Unknown date"
+        try {
+            // Header
+            tvReference.text = quote.reference ?: "Unknown Reference"
+            tvDate.text = quote.createdAt?.toDate()?.let {
+                SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(it)
+            } ?: "Unknown date"
         
         // Client Information
         tvClientInfo.text = buildString {
@@ -192,6 +203,11 @@ class QuoteDetailFragment : Fragment() {
         
         // Hide environmental impact to match clean design
         view?.findViewById<View>(R.id.card_environmental)?.visibility = View.GONE
+        
+        } catch (e: Exception) {
+            android.util.Log.e("QuoteDetailFragment", "Error populating quote details: ${e.message}", e)
+            Toast.makeText(requireContext(), "Error displaying quote details", Toast.LENGTH_SHORT).show()
+        }
     }
     
     private fun showQuoteNotFound() {
@@ -207,29 +223,40 @@ class QuoteDetailFragment : Fragment() {
     }
     
     private fun convertToLead() {
-        currentQuote?.let { quote ->
-            android.util.Log.d("QuoteDetailFragment", "Converting quote ${quote.reference} to lead")
-            
-            // Create lead from quote using LeadsViewModel
-            leadsViewModel.createLeadFromQuote(
-                quoteId = quote.id ?: "",
-                clientName = quote.clientName,
-                address = quote.address,
-                contactInfo = "", // Will be filled in later by the consultant
-                notes = "Lead converted from quote ${quote.reference}. System: ${String.format("%.2f", quote.systemKwp)}kW, Monthly savings: R${String.format("%.2f", quote.monthlySavings)}"
-            )
-            
-            Toast.makeText(
-                requireContext(), 
-                "Quote successfully converted to lead! Check the Leads tab.", 
-                Toast.LENGTH_LONG
-            ).show()
-            
-            // Navigate to leads tab
-            findNavController().navigate(R.id.leadsFragment)
-            
-        } ?: run {
-            Toast.makeText(requireContext(), "No quote available to convert", Toast.LENGTH_SHORT).show()
+        try {
+            currentQuote?.let { quote ->
+                android.util.Log.d("QuoteDetailFragment", "Converting quote ${quote.reference} to lead")
+                
+                // Validate quote ID
+                if (quote.id.isNullOrBlank()) {
+                    Toast.makeText(requireContext(), "Cannot convert quote: Invalid quote ID", Toast.LENGTH_SHORT).show()
+                    return
+                }
+                
+                // Create lead from quote using LeadsViewModel
+                leadsViewModel.createLeadFromQuote(
+                    quoteId = quote.id,
+                    clientName = quote.clientName ?: "Unknown Client",
+                    address = quote.address ?: "Unknown Address",
+                    contactInfo = "", // Will be filled in later by the consultant
+                    notes = "Lead converted from quote ${quote.reference ?: "Unknown"}. System: ${String.format("%.2f", quote.systemKwp)}kW, Monthly savings: R${String.format("%.2f", quote.monthlySavings)}"
+                )
+                
+                Toast.makeText(
+                    requireContext(), 
+                    "Quote successfully converted to lead! Check the Leads tab.", 
+                    Toast.LENGTH_LONG
+                ).show()
+                
+                // Navigate to leads tab
+                findNavController().navigate(R.id.leadsFragment)
+                
+            } ?: run {
+                Toast.makeText(requireContext(), "No quote available to convert", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("QuoteDetailFragment", "Error converting quote to lead: ${e.message}", e)
+            Toast.makeText(requireContext(), "Error converting quote to lead: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
     
