@@ -3,6 +3,7 @@ package dev.solora.data
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.Timestamp
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -354,7 +355,7 @@ class FirebaseRepository {
             val result = apiService.getLeads(search, status, limit)
             if (result.isSuccess) {
                 val leadsData = result.getOrNull() ?: emptyList()
-                val leads = leadsData.mapNotNull { data ->
+                val leads = leadsData.mapNotNull { data: Map<String, Any> ->
                     try {
                         FirebaseLead(
                             id = data["id"] as? String,
@@ -366,8 +367,8 @@ class FirebaseRepository {
                             notes = data["notes"] as? String,
                             quoteId = data["quoteId"] as? String,
                             userId = data["userId"] as? String ?: "",
-                            createdAt = data["createdAt"] as? com.google.firebase.firestore.Timestamp,
-                            updatedAt = data["updatedAt"] as? com.google.firebase.firestore.Timestamp
+                            createdAt = data["createdAt"] as? Timestamp,
+                            updatedAt = data["updatedAt"] as? Timestamp
                         )
                     } catch (e: Exception) {
                         android.util.Log.w("FirebaseRepository", "Failed to parse lead: ${e.message}")
@@ -396,7 +397,7 @@ class FirebaseRepository {
             val result = apiService.getQuotes(search, limit)
             if (result.isSuccess) {
                 val quotesData = result.getOrNull() ?: emptyList()
-                val quotes = quotesData.mapNotNull { data ->
+                val quotes = quotesData.mapNotNull { data: Map<String, Any> ->
                     try {
                         FirebaseQuote(
                             id = data["id"] as? String,
@@ -422,8 +423,8 @@ class FirebaseRepository {
                             consultantPhone = data["consultantPhone"] as? String ?: "",
                             consultantEmail = data["consultantEmail"] as? String ?: "",
                             userId = data["userId"] as? String ?: "",
-                            createdAt = data["createdAt"] as? com.google.firebase.firestore.Timestamp,
-                            updatedAt = data["updatedAt"] as? com.google.firebase.firestore.Timestamp
+                            createdAt = data["createdAt"] as? Timestamp,
+                            updatedAt = data["updatedAt"] as? Timestamp
                         )
                     } catch (e: Exception) {
                         android.util.Log.w("FirebaseRepository", "Failed to parse quote: ${e.message}")

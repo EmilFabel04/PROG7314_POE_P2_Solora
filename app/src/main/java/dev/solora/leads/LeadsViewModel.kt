@@ -8,6 +8,7 @@ import dev.solora.data.FirebaseRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.launch
 import com.google.firebase.auth.FirebaseAuth
