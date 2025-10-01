@@ -42,8 +42,8 @@
         android:label="Quote Details">
         <argument
             android:name="id"
-            app:argType="long"
-            android:defaultValue="0L" />
+            app:argType="string"
+            android:defaultValue="" />
     </fragment>
 
     <fragment

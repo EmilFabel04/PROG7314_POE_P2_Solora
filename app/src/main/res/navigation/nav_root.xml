@@ -105,7 +105,7 @@
             android:label="Quote Detail">
             <argument
                 android:name="id"
-                app:argType="long" />
+                app:argType="string" />
         </fragment>
     </navigation>
 

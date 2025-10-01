@@ -73,7 +73,7 @@
         android:name="dev.solora.navigation.QuoteDetailFragment">
         <argument
             android:name="id"
-            app:argType="long"
-            android:defaultValue="0" />
+            app:argType="string"
+            android:defaultValue="" />
     </fragment>
 </navigation>
