@@ -51,6 +51,7 @@ class SettingsFragment : Fragment() {
     private lateinit var etConsultantLicense: TextInputEditText
     
     // Action buttons
+    private lateinit var btnBack: android.widget.ImageButton
     private lateinit var btnSaveSettings: Button
     private lateinit var btnResetSettings: Button
     
@@ -116,6 +117,7 @@ class SettingsFragment : Fragment() {
         etConsultantLicense = view.findViewById(R.id.et_consultant_license)
         
         // Action buttons
+        btnBack = view.findViewById(R.id.btn_back)
         btnSaveSettings = view.findViewById(R.id.btn_save_settings)
         btnResetSettings = view.findViewById(R.id.btn_reset_settings)
     }
@@ -167,6 +169,11 @@ class SettingsFragment : Fragment() {
     }
     
     private fun setupButtons() {
+        btnBack.setOnClickListener {
+            // Navigate back to home
+            requireActivity().onBackPressed()
+        }
+        
         btnSaveSettings.setOnClickListener {
             saveSettings()
         }
