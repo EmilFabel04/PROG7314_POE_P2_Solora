@@ -110,7 +110,7 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                 // If we have coordinates, try to get NASA sun hours data
                 if (finalLatitude != null && finalLongitude != null) {
                     try {
-                        val nasaDataResult = nasa.getSolarData(finalLatitude, finalLongitude)
+                        val nasaDataResult = nasa.getSolarDataWithFallback(finalLatitude, finalLongitude)
                         if (nasaDataResult.isSuccess) {
                             val nasaData = nasaDataResult.getOrNull()
                             if (nasaData != null) {
