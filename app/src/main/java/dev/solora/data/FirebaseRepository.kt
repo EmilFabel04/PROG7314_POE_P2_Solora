@@ -51,6 +51,14 @@ class FirebaseRepository {
                 .addSnapshotListener { snapshot, error ->
                     if (error != null) {
                         android.util.Log.e("FirebaseRepository", "Error listening to quotes: ${error.message}", error)
+                        
+                        // Check for index requirement error
+                        if (error.message?.contains("index", ignoreCase = true) == true) {
+                            android.util.Log.e("FirebaseRepository", "⚠️ FIREBASE INDEX REQUIRED!")
+                            android.util.Log.e("FirebaseRepository", "Create index at: https://console.firebase.google.com/project/solora-e00a4/firestore/indexes")
+                            android.util.Log.e("FirebaseRepository", "Index needed: quotes collection with userId (Ascending) + createdAt (Descending)")
+                        }
+                        
                         if (!isClosedForSend) {
                             trySend(emptyList())
                         }
@@ -167,6 +175,14 @@ class FirebaseRepository {
                 .addSnapshotListener { snapshot, error ->
                     if (error != null) {
                         android.util.Log.e("FirebaseRepository", "Error listening to leads: ${error.message}", error)
+                        
+                        // Check for index requirement error
+                        if (error.message?.contains("index", ignoreCase = true) == true) {
+                            android.util.Log.e("FirebaseRepository", "⚠️ FIREBASE INDEX REQUIRED!")
+                            android.util.Log.e("FirebaseRepository", "Create index at: https://console.firebase.google.com/project/solora-e00a4/firestore/indexes")
+                            android.util.Log.e("FirebaseRepository", "Index needed: leads collection with userId (Ascending) + createdAt (Descending)")
+                        }
+                        
                         if (!isClosedForSend) {
                             trySend(emptyList())
                         }
