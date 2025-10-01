@@ -494,4 +494,190 @@ class FirebaseRepository {
             Result.failure(e)
         }
     }
+    
+    /**
+     * Calculate quote via API with NASA integration
+     */
+    suspend fun calculateQuoteViaApi(
+        address: String,
+        usageKwh: Double?,
+        billRands: Double?,
+        tariff: Double,
+        panelWatt: Int,
+        latitude: Double?,
+        longitude: Double?
+    ): Result<dev.solora.quote.QuoteOutputs> {
+        return try {
+            val result = apiService.calculateQuote(address, usageKwh, billRands, tariff, panelWatt, latitude, longitude)
+            if (result.isSuccess) {
+                val calculationData = result.getOrNull()
+                if (calculationData != null) {
+                    // Convert API response to QuoteOutputs
+                    val quoteOutputs = dev.solora.quote.QuoteOutputs(
+                        panels = calculationData.panels,
+                        systemKw = calculationData.systemKw,
+                        monthlyUsageKwh = usageKwh ?: 0.0,
+                        monthlyBillRands = billRands ?: 0.0,
+                        tariffRPerKwh = tariff,
+                        panelWatt = panelWatt,
+                        estimatedMonthlyGeneration = calculationData.estimatedMonthlyGeneration,
+                        monthlySavingsRands = calculationData.monthlySavingsRands,
+                        paybackMonths = calculationData.paybackMonths,
+                        detailedAnalysis = null // API doesn't return detailed analysis
+                    )
+                    android.util.Log.d("FirebaseRepository", "Quote calculated via API: ${quoteOutputs.systemKw}kW system")
+                    Result.success(quoteOutputs)
+                } else {
+                    Result.failure(Exception("No calculation data returned from API"))
+                }
+            } else {
+                Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Calculate quote via API error: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Save quote via API
+     */
+    suspend fun saveQuoteViaApi(quote: FirebaseQuote): Result<String> {
+        return try {
+            val quoteData = mapOf(
+                "reference" to quote.reference,
+                "clientName" to quote.clientName,
+                "address" to quote.address,
+                "usageKwh" to quote.usageKwh,
+                "billRands" to quote.billRands,
+                "tariff" to quote.tariff,
+                "panelWatt" to quote.panelWatt,
+                "latitude" to quote.latitude,
+                "longitude" to quote.longitude,
+                "averageAnnualIrradiance" to quote.averageAnnualIrradiance,
+                "averageAnnualSunHours" to quote.averageAnnualSunHours,
+                "systemKwp" to quote.systemKwp,
+                "estimatedGeneration" to quote.estimatedGeneration,
+                "monthlySavings" to quote.monthlySavings,
+                "paybackMonths" to quote.paybackMonths,
+                "companyName" to quote.companyName,
+                "companyPhone" to quote.companyPhone,
+                "companyEmail" to quote.companyEmail,
+                "consultantName" to quote.consultantName,
+                "consultantPhone" to quote.consultantPhone,
+                "consultantEmail" to quote.consultantEmail,
+                "userId" to quote.userId
+            )
+            
+            val result = apiService.saveQuote(quoteData)
+            if (result.isSuccess) {
+                val quoteId = result.getOrNull()
+                android.util.Log.d("FirebaseRepository", "Quote saved via API: $quoteId")
+                Result.success(quoteId ?: "")
+            } else {
+                Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Save quote via API error: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Get quote by ID via API
+     */
+    suspend fun getQuoteByIdViaApi(quoteId: String): Result<FirebaseQuote?> {
+        return try {
+            val result = apiService.getQuoteById(quoteId)
+            if (result.isSuccess) {
+                val quoteData = result.getOrNull()
+                if (quoteData != null) {
+                    val quote = FirebaseQuote(
+                        id = quoteData["id"] as? String,
+                        reference = quoteData["reference"] as? String ?: "",
+                        clientName = quoteData["clientName"] as? String ?: "",
+                        address = quoteData["address"] as? String ?: "",
+                        usageKwh = (quoteData["usageKwh"] as? Number)?.toDouble(),
+                        billRands = (quoteData["billRands"] as? Number)?.toDouble(),
+                        tariff = (quoteData["tariff"] as? Number)?.toDouble() ?: 0.0,
+                        panelWatt = (quoteData["panelWatt"] as? Number)?.toInt() ?: 0,
+                        latitude = (quoteData["latitude"] as? Number)?.toDouble(),
+                        longitude = (quoteData["longitude"] as? Number)?.toDouble(),
+                        averageAnnualIrradiance = (quoteData["averageAnnualIrradiance"] as? Number)?.toDouble(),
+                        averageAnnualSunHours = (quoteData["averageAnnualSunHours"] as? Number)?.toDouble(),
+                        systemKwp = (quoteData["systemKwp"] as? Number)?.toDouble() ?: 0.0,
+                        estimatedGeneration = (quoteData["estimatedGeneration"] as? Number)?.toDouble() ?: 0.0,
+                        monthlySavings = (quoteData["monthlySavings"] as? Number)?.toDouble() ?: 0.0,
+                        paybackMonths = (quoteData["paybackMonths"] as? Number)?.toInt() ?: 0,
+                        companyName = quoteData["companyName"] as? String ?: "",
+                        companyPhone = quoteData["companyPhone"] as? String ?: "",
+                        companyEmail = quoteData["companyEmail"] as? String ?: "",
+                        consultantName = quoteData["consultantName"] as? String ?: "",
+                        consultantPhone = quoteData["consultantPhone"] as? String ?: "",
+                        consultantEmail = quoteData["consultantEmail"] as? String ?: "",
+                        userId = quoteData["userId"] as? String ?: "",
+                        createdAt = quoteData["createdAt"] as? Timestamp,
+                        updatedAt = quoteData["updatedAt"] as? Timestamp
+                    )
+                    android.util.Log.d("FirebaseRepository", "Quote retrieved via API: ${quote.reference}")
+                    Result.success(quote)
+                } else {
+                    Result.success(null)
+                }
+            } else {
+                Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Get quote by ID via API error: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Save lead via API
+     */
+    suspend fun saveLeadViaApi(lead: FirebaseLead): Result<String> {
+        return try {
+            val leadData = mapOf(
+                "name" to lead.name,
+                "email" to lead.email,
+                "phone" to lead.phone,
+                "status" to lead.status,
+                "notes" to lead.notes,
+                "quoteId" to lead.quoteId,
+                "userId" to lead.userId
+            )
+            
+            val result = apiService.saveLead(leadData)
+            if (result.isSuccess) {
+                val leadId = result.getOrNull()
+                android.util.Log.d("FirebaseRepository", "Lead saved via API: $leadId")
+                Result.success(leadId ?: "")
+            } else {
+                Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Save lead via API error: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Get settings via API
+     */
+    suspend fun getSettingsViaApi(): Result<Map<String, Any>?> {
+        return try {
+            val result = apiService.getSettings()
+            if (result.isSuccess) {
+                val settings = result.getOrNull()
+                android.util.Log.d("FirebaseRepository", "Settings retrieved via API")
+                Result.success(settings)
+            } else {
+                Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Get settings via API error: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
 }

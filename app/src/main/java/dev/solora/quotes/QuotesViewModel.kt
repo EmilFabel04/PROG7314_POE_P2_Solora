@@ -150,7 +150,24 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                     dev.solora.settings.AppSettings()
                 ).value.calculationSettings
                 
-                val result = calculator.calculateAdvanced(inputs, nasa, settings)
+                // Try API calculation first, fallback to local calculation
+                val apiResult = firebaseRepository.calculateQuoteViaApi(
+                    address = finalAddress,
+                    usageKwh = usageKwh,
+                    billRands = billRands,
+                    tariff = tariff,
+                    panelWatt = panelWatt,
+                    latitude = finalLatitude,
+                    longitude = finalLongitude
+                )
+                
+                val result = if (apiResult.isSuccess) {
+                    android.util.Log.d("QuotesViewModel", "Using API calculation result")
+                    apiResult
+                } else {
+                    android.util.Log.w("QuotesViewModel", "API calculation failed, using local calculation: ${apiResult.exceptionOrNull()?.message}")
+                    calculator.calculateAdvanced(inputs, nasa, settings)
+                }
                 result.fold(
                     onSuccess = { outputs ->
                         android.util.Log.d("QuotesViewModel", "Calculation successful: ${outputs.systemKw}kW system, ${outputs.panels} panels, R${outputs.monthlySavingsRands} savings")
