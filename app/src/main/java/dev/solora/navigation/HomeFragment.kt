@@ -53,7 +53,7 @@ class HomeFragment : Fragment() {
                 tvQuotes.text = "Quotes ${quotes.size}"
                 
                 // Calculate total monthly savings
-                val totalSavings = quotes.sumOf { it.savingsFirstYear }
+                val totalSavings = quotes.sumOf { it.monthlySavings }
                 tvSavings.text = "R ${String.format("%.0f", totalSavings)}"
                 
                 // Update recent quotes (show max 3)
@@ -162,7 +162,7 @@ class RecentQuotesAdapter(
             tvReference.text = quote.reference
             tvClient.text = quote.clientName
             tvSystem.text = "${String.format("%.1f", quote.systemKwp)} kW"
-            tvSavings.text = "R${String.format("%.0f", quote.savingsFirstYear)}/month"
+            tvSavings.text = "R${String.format("%.0f", quote.monthlySavings)}/month"
             
             itemView.setOnClickListener { onQuoteClick(quote) }
         }

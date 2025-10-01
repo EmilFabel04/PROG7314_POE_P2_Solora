@@ -98,7 +98,9 @@ class QuoteDetailFragment : Fragment() {
     private fun populateQuoteDetails(quote: dev.solora.data.FirebaseQuote) {
         // Header
         tvReference.text = quote.reference
-        tvDate.text = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(quote.dateEpoch))
+        tvDate.text = quote.createdAt?.toDate()?.let {
+            SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(it)
+        } ?: "Unknown date"
         
         // Client Information
         tvClientInfo.text = buildString {
@@ -131,7 +133,7 @@ class QuoteDetailFragment : Fragment() {
             appendLine("Quantity                         ${(quote.systemKwp * 1000 / quote.panelWatt).toInt()}")
             appendLine("Recommended Inverter             ${String.format("%.0f", quote.systemKwp * 0.8)}kW")
             appendLine("Total System Size                ${String.format("%.2f", quote.systemKwp)}kW")
-            val monthlyGeneration = quote.systemKwp * quote.sunHours * 30
+            val monthlyGeneration = quote.estimatedGeneration
             val usagePercentage = if (quote.usageKwh != null && quote.usageKwh > 0) {
                 (monthlyGeneration / quote.usageKwh) * 100
             } else {
@@ -158,7 +160,7 @@ class QuoteDetailFragment : Fragment() {
             appendLine("Total Due                        R ${String.format("%.2f", totalCost)}")
             appendLine()
             appendLine("ESTIMATED MONTHLY SAVINGS")
-            appendLine("R ${String.format("%.2f", quote.savingsFirstYear)}")
+            appendLine("R ${String.format("%.2f", quote.monthlySavings)}")
             appendLine()
             quote.paybackMonths?.let { 
                 appendLine("PAYBACK PERIOD")
@@ -192,7 +194,7 @@ class QuoteDetailFragment : Fragment() {
                 clientName = quote.clientName,
                 address = quote.address,
                 contactInfo = "", // Will be filled in later by the consultant
-                notes = "Lead converted from quote ${quote.reference}. System: ${String.format("%.2f", quote.systemKwp)}kW, Monthly savings: R${String.format("%.2f", quote.savingsFirstYear)}"
+                notes = "Lead converted from quote ${quote.reference}. System: ${String.format("%.2f", quote.systemKwp)}kW, Monthly savings: R${String.format("%.2f", quote.monthlySavings)}"
             )
             
             Toast.makeText(
@@ -239,7 +241,7 @@ class QuoteDetailFragment : Fragment() {
                 appendLine("Total Due: R ${String.format("%.2f", totalCost)}")
                 appendLine()
                 appendLine("ESTIMATED MONTHLY SAVINGS:")
-                appendLine("R ${String.format("%.2f", quote.savingsFirstYear)}")
+                appendLine("R ${String.format("%.2f", quote.monthlySavings)}")
                 quote.paybackMonths?.let { 
                     appendLine("PAYBACK PERIOD: ${String.format("%.1f", it)} years")
                 }
