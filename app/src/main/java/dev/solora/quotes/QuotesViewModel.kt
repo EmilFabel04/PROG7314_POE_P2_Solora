@@ -28,8 +28,17 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     private val geocodingService = GeocodingService(app)
     private val settingsRepository = SettingsRepository()
 
-    // Firebase quotes flow
+    init {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        android.util.Log.d("QuotesViewModel", "QuotesViewModel initialized for user: ${currentUser?.uid ?: "NOT LOGGED IN"}")
+        if (currentUser == null) {
+            android.util.Log.e("QuotesViewModel", "WARNING: No user logged in! Quotes will be empty.")
+        }
+    }
+
+    // Firebase quotes flow - filtered by logged-in user's ID
     val quotes = flow {
+        android.util.Log.d("QuotesViewModel", "Starting quotes flow for user: ${FirebaseAuth.getInstance().currentUser?.uid}")
         emitAll(firebaseRepository.getQuotes())
     }.stateIn(
         viewModelScope, 

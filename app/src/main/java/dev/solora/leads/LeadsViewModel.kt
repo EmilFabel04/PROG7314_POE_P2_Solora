@@ -10,12 +10,22 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.launch
+import com.google.firebase.auth.FirebaseAuth
 
 class LeadsViewModel(app: Application) : AndroidViewModel(app) {
     private val firebaseRepository = FirebaseRepository()
 
-    // Firebase leads flow
+    init {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        android.util.Log.d("LeadsViewModel", "LeadsViewModel initialized for user: ${currentUser?.uid ?: "NOT LOGGED IN"}")
+        if (currentUser == null) {
+            android.util.Log.e("LeadsViewModel", "WARNING: No user logged in! Leads will be empty.")
+        }
+    }
+
+    // Firebase leads flow - filtered by logged-in user's ID
     val leads = flow {
+        android.util.Log.d("LeadsViewModel", "Starting leads flow for user: ${FirebaseAuth.getInstance().currentUser?.uid}")
         emitAll(firebaseRepository.getLeads())
     }.stateIn(
         viewModelScope, 
