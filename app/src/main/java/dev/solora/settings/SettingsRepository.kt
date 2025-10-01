@@ -15,18 +15,16 @@ class SettingsRepository {
     private val auth = FirebaseAuth.getInstance()
     
     val settings: Flow<AppSettings> = callbackFlow {
-        try {
-            android.util.Log.d("SettingsRepository", "Initializing Firebase settings")
-            
-            val currentUser = auth.currentUser
-            if (currentUser == null) {
-                android.util.Log.w("SettingsRepository", "No authenticated user, using default settings")
-                if (!isClosedForSend) {
-                    trySend(AppSettings())
-                }
-                return@callbackFlow
+        android.util.Log.d("SettingsRepository", "Initializing Firebase settings")
+        
+        val currentUser = auth.currentUser
+        if (currentUser == null) {
+            android.util.Log.w("SettingsRepository", "No authenticated user, using default settings")
+            if (!isClosedForSend) {
+                trySend(AppSettings())
             }
-            
+            awaitClose { } // Empty awaitClose for no-user case
+        } else {
             val userId = currentUser.uid
             android.util.Log.d("SettingsRepository", "Loading settings for user: $userId")
             
@@ -100,12 +98,9 @@ class SettingsRepository {
                 }
             }
             
-            awaitClose { listener.remove() }
-            
-        } catch (e: Exception) {
-            android.util.Log.e("SettingsRepository", "Error creating settings flow", e)
-            if (!isClosedForSend) {
-                trySend(AppSettings())
+            awaitClose { 
+                android.util.Log.d("SettingsRepository", "Removing Firebase listener")
+                listener.remove() 
             }
         }
     }
