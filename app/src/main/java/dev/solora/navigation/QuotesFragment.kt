@@ -229,12 +229,6 @@ class QuotesFragment : Fragment() {
     }
     
     private fun updateResultsTab(calculation: dev.solora.quote.QuoteOutputs) {
-        // Update the view tab with calculation results
-        tvPanels.text = calculation.panels.toString()
-        tvSystemSize.text = "${String.format("%.1f", calculation.systemKw)} kW"
-        tvInverterSize.text = "${String.format("%.1f", calculation.inverterKw)} kW"
-        tvSavings.text = "R ${String.format("%.2f", calculation.monthlySavingsRands)}"
-        
         // Update dashboard tab summary
         tvQuoteSummary.text = buildString {
             appendLine("Number of Panels: ${calculation.panels}")
@@ -377,12 +371,6 @@ class QuotesFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             quotesViewModel.lastQuote.collect { quote ->
                 if (quote != null) {
-                    // Update view tab with results
-                    tvPanels.text = (quote.systemKwp * 1000 / quote.panelWatt).toInt().toString()
-                    tvSystemSize.text = "${String.format("%.1f", quote.systemKwp)} kW"
-                    tvInverterSize.text = "${String.format("%.1f", quote.systemKwp * 0.8)} kW"
-                    tvSavings.text = "R ${String.format("%.2f", quote.savingsFirstYear)}"
-                    
                     // Update dashboard tab summary
                     tvQuoteSummary.text = buildString {
                         appendLine("Number of Panels: ${(quote.systemKwp * 1000 / quote.panelWatt).toInt()}")
