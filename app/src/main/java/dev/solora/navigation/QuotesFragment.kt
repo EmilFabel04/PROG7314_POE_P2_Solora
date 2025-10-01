@@ -395,20 +395,29 @@ class QuotesFragment : Fragment() {
     
     private fun observeSettings() {
         viewLifecycleOwner.lifecycleScope.launch {
-            settingsViewModel.settings.collect { settings ->
-                // Update hints to show current settings defaults
-                etTariff.hint = "Default: ${settings.calculationSettings.defaultTariff} R/kWh"
-                etPanel.hint = "Default: ${settings.calculationSettings.defaultPanelWatt}W"
-                
-                // If fields are empty, pre-fill with settings
-                if (etTariff.text.toString().isEmpty()) {
-                    etTariff.setText(settings.calculationSettings.defaultTariff.toString())
+            try {
+                settingsViewModel.settings.collect { settings ->
+                    // Update hints to show current settings defaults
+                    etTariff.hint = "Default: ${settings.calculationSettings.defaultTariff} R/kWh"
+                    etPanel.hint = "Default: ${settings.calculationSettings.defaultPanelWatt}W"
+                    
+                    // If fields are empty, pre-fill with settings
+                    if (etTariff.text.toString().isEmpty()) {
+                        etTariff.setText(settings.calculationSettings.defaultTariff.toString())
+                    }
+                    if (etPanel.text.toString().isEmpty()) {
+                        etPanel.setText(settings.calculationSettings.defaultPanelWatt.toString())
+                    }
+                    
+                    android.util.Log.d("QuotesFragment", "Settings updated: Tariff=${settings.calculationSettings.defaultTariff}, Panel=${settings.calculationSettings.defaultPanelWatt}W")
                 }
-                if (etPanel.text.toString().isEmpty()) {
-                    etPanel.setText(settings.calculationSettings.defaultPanelWatt.toString())
-                }
-                
-                android.util.Log.d("QuotesFragment", "Settings updated: Tariff=${settings.calculationSettings.defaultTariff}, Panel=${settings.calculationSettings.defaultPanelWatt}W")
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                // Expected when fragment is destroyed, don't show error
+                android.util.Log.d("QuotesFragment", "Settings observation cancelled (fragment lifecycle ended)")
+            } catch (e: Exception) {
+                // Only show error for unexpected exceptions
+                android.util.Log.e("QuotesFragment", "Error observing settings", e)
+                Toast.makeText(requireContext(), "Error loading settings: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }

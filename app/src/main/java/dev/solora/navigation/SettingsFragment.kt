@@ -201,6 +201,9 @@ class SettingsFragment : Fragment() {
                         android.util.Log.d("SettingsFragment", "Settings received: $settings")
                         populateForms(settings)
                     }
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    // Expected when fragment is destroyed, don't show error
+                    android.util.Log.d("SettingsFragment", "Settings observation cancelled (fragment lifecycle ended)")
                 } catch (e: Exception) {
                     android.util.Log.e("SettingsFragment", "Error observing settings", e)
                     Toast.makeText(requireContext(), "Error loading settings: ${e.message}", Toast.LENGTH_SHORT).show()
