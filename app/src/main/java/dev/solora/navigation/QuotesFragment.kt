@@ -439,10 +439,7 @@ class QuotesFragment : Fragment() {
             java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale.getDefault()).format(it)
         } ?: "Unknown date"
         
-        // Get current settings for company info
-        val currentSettings = settingsViewModel.settings.value
-        
-        // Build detailed message with company info from settings
+        // Build detailed message with company info from quote
         val details = buildString {
             appendLine("═══════════════════════════")
             appendLine("QUOTE DETAILS")
@@ -483,33 +480,27 @@ class QuotesFragment : Fragment() {
                 }
                 appendLine()
             }
-            if (currentSettings.companySettings.companyName.isNotEmpty()) {
+            if (quote.companyName.isNotEmpty()) {
                 appendLine("COMPANY INFORMATION")
                 appendLine("───────────────────────────")
-                appendLine("Company: ${currentSettings.companySettings.companyName}")
-                if (currentSettings.companySettings.companyAddress.isNotEmpty()) {
-                    appendLine("Address: ${currentSettings.companySettings.companyAddress}")
+                appendLine("Company: ${quote.companyName}")
+                if (quote.companyPhone.isNotEmpty()) {
+                    appendLine("Phone: ${quote.companyPhone}")
                 }
-                if (currentSettings.companySettings.companyPhone.isNotEmpty()) {
-                    appendLine("Phone: ${currentSettings.companySettings.companyPhone}")
-                }
-                if (currentSettings.companySettings.companyEmail.isNotEmpty()) {
-                    appendLine("Email: ${currentSettings.companySettings.companyEmail}")
+                if (quote.companyEmail.isNotEmpty()) {
+                    appendLine("Email: ${quote.companyEmail}")
                 }
                 appendLine()
                 appendLine("CONSULTANT DETAILS")
                 appendLine("───────────────────────────")
-                if (currentSettings.companySettings.consultantName.isNotEmpty()) {
-                    appendLine("Name: ${currentSettings.companySettings.consultantName}")
+                if (quote.consultantName.isNotEmpty()) {
+                    appendLine("Name: ${quote.consultantName}")
                 }
-                if (currentSettings.companySettings.consultantPhone.isNotEmpty()) {
-                    appendLine("Phone: ${currentSettings.companySettings.consultantPhone}")
+                if (quote.consultantPhone.isNotEmpty()) {
+                    appendLine("Phone: ${quote.consultantPhone}")
                 }
-                if (currentSettings.companySettings.consultantEmail.isNotEmpty()) {
-                    appendLine("Email: ${currentSettings.companySettings.consultantEmail}")
-                }
-                if (currentSettings.companySettings.consultantLicense.isNotEmpty()) {
-                    appendLine("License: ${currentSettings.companySettings.consultantLicense}")
+                if (quote.consultantEmail.isNotEmpty()) {
+                    appendLine("Email: ${quote.consultantEmail}")
                 }
             }
             appendLine()

@@ -27,6 +27,13 @@ data class FirebaseQuote(
     val estimatedGeneration: Double = 0.0,
     val monthlySavings: Double = 0.0,
     val paybackMonths: Int = 0,
+    // Company information (snapshot at time of quote creation)
+    val companyName: String = "",
+    val companyPhone: String = "",
+    val companyEmail: String = "",
+    val consultantName: String = "",
+    val consultantPhone: String = "",
+    val consultantEmail: String = "",
     // Metadata
     val userId: String = "", // Link to consultant
     @ServerTimestamp

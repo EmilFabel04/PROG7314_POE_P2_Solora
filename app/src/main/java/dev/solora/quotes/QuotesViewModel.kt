@@ -199,6 +199,13 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     ) {
         viewModelScope.launch {
             try {
+                // Get company settings snapshot
+                val companySettings = settingsRepository.settings.stateIn(
+                    viewModelScope,
+                    SharingStarted.WhileSubscribed(5000),
+                    dev.solora.settings.AppSettings()
+                ).value.companySettings
+                
                 android.util.Log.d("QuotesViewModel", "Saving quote with panelWatt=${calculation.panelWatt}W (from calculation)")
                 
                 val quote = FirebaseQuote(
@@ -221,6 +228,13 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                     estimatedGeneration = calculation.estimatedMonthlyGeneration,
                     monthlySavings = calculation.monthlySavingsRands,
                     paybackMonths = calculation.paybackMonths,
+                    // Company information (snapshot at time of quote)
+                    companyName = companySettings.companyName,
+                    companyPhone = companySettings.companyPhone,
+                    companyEmail = companySettings.companyEmail,
+                    consultantName = companySettings.consultantName,
+                    consultantPhone = companySettings.consultantPhone,
+                    consultantEmail = companySettings.consultantEmail,
                     // Metadata
                     userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
                 )
