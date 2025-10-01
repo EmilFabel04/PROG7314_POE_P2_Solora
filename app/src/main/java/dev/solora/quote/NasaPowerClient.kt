@@ -98,8 +98,15 @@ class NasaPowerClient {
 
             val response: PowerResponse = client.get(url).body()
             
+            // Debug: Log the full response structure
+            android.util.Log.d("NasaPowerClient", "NASA API Response received")
+            android.util.Log.d("NasaPowerClient", "Response messages: ${response.messages}")
+            android.util.Log.d("NasaPowerClient", "Response parameters: ${response.parameters}")
+            android.util.Log.d("NasaPowerClient", "Response properties: ${response.properties}")
+            
             // Check for API messages/errors
             response.messages?.forEach { message ->
+                android.util.Log.d("NasaPowerClient", "NASA API Message: $message")
                 if (message.contains("error", ignoreCase = true)) {
                     return Result.failure(Exception("NASA API Error: $message"))
                 }
@@ -107,6 +114,10 @@ class NasaPowerClient {
 
             val parameter = response.properties?.parameter
                 ?: return Result.failure(Exception("No parameter data in response"))
+            
+            android.util.Log.d("NasaPowerClient", "Parameter data: $parameter")
+            android.util.Log.d("NasaPowerClient", "Solar irradiance data: ${parameter.solarIrradiance}")
+            android.util.Log.d("NasaPowerClient", "Temperature data: ${parameter.temperature}")
 
             val monthlyData = mutableMapOf<Int, SolarData>()
             var totalIrradiance = 0.0
@@ -115,9 +126,16 @@ class NasaPowerClient {
             // Process data for each month
             for (month in 1..12) {
                 val monthKey = month.toString().padStart(2, '0')
+                android.util.Log.d("NasaPowerClient", "Processing month $month (key: $monthKey)")
                 
                 val irradiance = parameter.solarIrradiance?.get(monthKey)
-                    ?: return Result.failure(Exception("Missing solar irradiance data for month $month"))
+                android.util.Log.d("NasaPowerClient", "Month $month irradiance: $irradiance")
+                
+                if (irradiance == null) {
+                    android.util.Log.e("NasaPowerClient", "Missing solar irradiance data for month $month (key: $monthKey)")
+                    android.util.Log.e("NasaPowerClient", "Available solar irradiance keys: ${parameter.solarIrradiance?.keys}")
+                    return Result.failure(Exception("Missing solar irradiance data for month $month"))
+                }
                 
                 val temperature = parameter.temperature?.get(monthKey)
                 val windSpeed = parameter.windSpeed?.get(monthKey)
