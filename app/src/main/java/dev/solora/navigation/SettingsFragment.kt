@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.textfield.TextInputEditText
 import dev.solora.R
 import dev.solora.settings.SettingsViewModel
@@ -170,8 +171,13 @@ class SettingsFragment : Fragment() {
     
     private fun setupButtons() {
         btnBack.setOnClickListener {
-            // Navigate back to home
-            requireActivity().onBackPressed()
+            // Navigate back to home page using Navigation Component
+            try {
+                findNavController().navigateUp()
+            } catch (e: Exception) {
+                android.util.Log.e("SettingsFragment", "Error navigating back", e)
+                Toast.makeText(requireContext(), "Error navigating back", Toast.LENGTH_SHORT).show()
+            }
         }
         
         btnSaveSettings.setOnClickListener {
