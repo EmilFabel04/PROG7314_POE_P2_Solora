@@ -470,9 +470,15 @@ class QuotesFragment : Fragment() {
             try {
                 Toast.makeText(requireContext(), "Testing NASA API...", Toast.LENGTH_SHORT).show()
                 
-                // Test with Cape Town coordinates
+                // Test with Oslo, Norway coordinates
                 val nasaClient = dev.solora.quote.NasaPowerClient()
-                val result = nasaClient.getSolarDataWithFallback(-33.9249, 18.4241) // Cape Town
+                val result = nasaClient.getSolarDataWithFallback(59.9139, 10.7522) // Oslo, Norway
+                
+                // Also test address-to-coordinates conversion
+                val geocodingService = dev.solora.quote.GeocodingService(requireContext())
+                val geocodingResult = geocodingService.getCoordinatesFromAddress("Storgata, Oslo, Norway 0155")
+                
+                android.util.Log.d("QuotesFragment", "Geocoding result for Storgata Oslo: $geocodingResult")
                 
                 if (result.isSuccess) {
                     val data = result.getOrNull()
