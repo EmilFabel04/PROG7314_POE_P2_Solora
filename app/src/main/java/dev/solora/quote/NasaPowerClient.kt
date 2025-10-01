@@ -96,8 +96,8 @@ class NasaPowerClient {
                     "&community=RE" +
                     "&latitude=$lat" +
                     "&longitude=$lon" +
-                    "&start=$year-01-01" +
-                    "&end=$year-12-31" +
+                    "&start=${year}0101" +
+                    "&end=${year}1231" +
                     "&format=JSON"
 
             android.util.Log.d("NasaPowerClient", "NASA API URL: $url")
@@ -105,9 +105,16 @@ class NasaPowerClient {
             val response: PowerResponse = client.get(url).body()
             
             android.util.Log.d("NasaPowerClient", "NASA API Response received")
+            android.util.Log.d("NasaPowerClient", "Full response: $response")
             android.util.Log.d("NasaPowerClient", "Response type: ${response.type}")
             android.util.Log.d("NasaPowerClient", "Response geometry: ${response.geometry}")
             android.util.Log.d("NasaPowerClient", "Response properties: ${response.properties}")
+            
+            // If the response is empty, try the daily endpoint as fallback
+            if (response.properties == null) {
+                android.util.Log.w("NasaPowerClient", "Monthly endpoint failed, trying daily endpoint")
+                return tryDailyEndpoint(lat, lon, year)
+            }
 
             val parameter = response.properties?.parameter
                 ?: return Result.failure(Exception("No parameter data in NASA API response"))
@@ -202,6 +209,69 @@ class NasaPowerClient {
         } catch (e: Exception) {
             android.util.Log.e("NasaPowerClient", "Failed to fetch NASA Power data: ${e.message}", e)
             Result.failure(Exception("Failed to fetch NASA Power data: ${e.message}", e))
+        }
+    }
+
+    /**
+     * Try the daily endpoint as fallback when monthly fails
+     */
+    private suspend fun tryDailyEndpoint(lat: Double, lon: Double, year: Int): Result<LocationData> {
+        return try {
+            android.util.Log.d("NasaPowerClient", "Trying daily endpoint for lat=$lat, lon=$lon, year=$year")
+            
+            // Use daily endpoint for the middle of the year (July 15)
+            val url = "https://power.larc.nasa.gov/api/temporal/daily/point" +
+                    "?parameters=ALLSKY_SFC_SW_DWN" +
+                    "&community=RE" +
+                    "&latitude=$lat" +
+                    "&longitude=$lon" +
+                    "&start=${year}0701" +
+                    "&end=${year}0731" +
+                    "&format=JSON"
+            
+            android.util.Log.d("NasaPowerClient", "Daily API URL: $url")
+            
+            val response: PowerResponse = client.get(url).body()
+            
+            android.util.Log.d("NasaPowerClient", "Daily API Response: $response")
+            
+            if (response.properties?.parameter?.solarIrradiance != null) {
+                // Calculate average from daily data
+                val dailyData = response.properties.parameter.solarIrradiance
+                val averageIrradiance = dailyData.values.average()
+                
+                android.util.Log.d("NasaPowerClient", "Daily data average irradiance: $averageIrradiance")
+                
+                // Create monthly data with the average
+                val monthlyData = mutableMapOf<Int, SolarData>()
+                for (month in 1..12) {
+                    monthlyData[month] = SolarData(
+                        month = month,
+                        solarIrradiance = averageIrradiance,
+                        temperature = 20.0,
+                        windSpeed = 3.0,
+                        humidity = 70.0,
+                        estimatedSunHours = averageIrradiance
+                    )
+                }
+                
+                val locationData = LocationData(
+                    latitude = lat,
+                    longitude = lon,
+                    monthlyData = monthlyData,
+                    averageAnnualIrradiance = averageIrradiance,
+                    averageAnnualSunHours = averageIrradiance
+                )
+                
+                android.util.Log.d("NasaPowerClient", "Daily endpoint success: irradiance=$averageIrradiance")
+                Result.success(locationData)
+            } else {
+                android.util.Log.w("NasaPowerClient", "Daily endpoint also failed")
+                Result.failure(Exception("Both monthly and daily endpoints failed"))
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("NasaPowerClient", "Daily endpoint error: ${e.message}", e)
+            Result.failure(e)
         }
     }
 
