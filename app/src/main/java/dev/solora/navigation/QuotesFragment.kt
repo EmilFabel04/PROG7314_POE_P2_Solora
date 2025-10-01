@@ -157,6 +157,12 @@ class QuotesFragment : Fragment() {
     }
     
     private fun setupCalculateTab() {
+        // Add NASA API test on long press
+        btnCalculate.setOnLongClickListener {
+            testNasaApi()
+            true
+        }
+        
         btnCalculate.setOnClickListener {
             val address = etAddress.text.toString().trim()
             val usageText = etUsage.text.toString().trim()
@@ -512,6 +518,35 @@ class QuotesListAdapter(
         
         override fun areContentsTheSame(oldItem: dev.solora.data.FirebaseQuote, newItem: dev.solora.data.FirebaseQuote): Boolean {
             return oldItem == newItem
+        }
+    }
+    
+    // Temporary NASA API test method
+    private fun testNasaApi() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                Toast.makeText(requireContext(), "Testing NASA API...", Toast.LENGTH_SHORT).show()
+                
+                // Test with Cape Town coordinates
+                val nasaClient = dev.solora.quote.NasaPowerClient()
+                val result = nasaClient.getSolarData(-33.9249, 18.4241) // Cape Town
+                
+                if (result.isSuccess) {
+                    val data = result.getOrNull()
+                    val message = "NASA API Success!\nIrradiance: ${String.format("%.2f", data?.averageAnnualIrradiance ?: 0.0)}\nSun Hours: ${String.format("%.2f", data?.averageAnnualSunHours ?: 0.0)}"
+                    Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
+                    android.util.Log.d("QuotesFragment", "NASA API Test Success: $message")
+                } else {
+                    val error = result.exceptionOrNull()?.message ?: "Unknown error"
+                    Toast.makeText(requireContext(), "NASA API Failed: $error", Toast.LENGTH_LONG).show()
+                    android.util.Log.e("QuotesFragment", "NASA API Test Failed: $error")
+                }
+                
+                nasaClient.close()
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "NASA API Error: ${e.message}", Toast.LENGTH_LONG).show()
+                android.util.Log.e("QuotesFragment", "NASA API Test Exception: ${e.message}", e)
+            }
         }
     }
 }
