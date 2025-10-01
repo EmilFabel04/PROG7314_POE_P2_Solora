@@ -1,3 +1,9 @@
+# Firebase / Google SSO sensitive files
+/app/google-services.json
+
+# Release keystore
+/keystore/release-keystore.jks
+
 # Android/IntelliJ
 *.iml
 .gradle/

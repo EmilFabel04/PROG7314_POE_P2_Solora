@@ -18,13 +18,29 @@ android {
 		versionName = "1.0.0"
 	}
 
-	buildTypes {
-		release {
-			isMinifyEnabled = false
-			proguardFiles(
-				getDefaultProguardFile("proguard-android-optimize.txt"),
-				"proguard-rules.pro"
-			)
+	android {
+
+		signingConfigs {
+			create("release") {
+				storeFile = file("keystore/release-keystore.jks")
+				storePassword = "RELEASE_STORE_PASSWORD"
+				keyAlias = "my-release-key"
+				keyPassword = "RELEASE_KEY_PASSWORD"
+			}
+		}
+
+		buildTypes {
+			getByName("debug") {
+				signingConfig = signingConfigs.getByName("release")
+			}
+			getByName("release") {
+				isMinifyEnabled = false
+				signingConfig = signingConfigs.getByName("release")
+				proguardFiles(
+					getDefaultProguardFile("proguard-android-optimize.txt"),
+					"proguard-rules.pro"
+				)
+			}
 		}
 	}
 
