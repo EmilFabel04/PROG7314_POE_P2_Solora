@@ -147,7 +147,7 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    // Save quote to Firebase
+    // Save quote to Firebase (simplified version - prefer saveQuoteFromCalculation)
     fun saveQuote(
         reference: String,
         clientName: String,
@@ -156,11 +156,10 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
         billRands: Double?,
         tariff: Double,
         panelWatt: Int,
-        sunHours: Double,
         systemKwp: Double,
         estimatedGeneration: Double,
         paybackMonths: Int,
-        savingsFirstYear: Double
+        monthlySavings: Double
     ) {
         viewModelScope.launch {
             try {
@@ -172,12 +171,11 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                     billRands = billRands,
                     tariff = tariff,
                     panelWatt = panelWatt,
-                    sunHours = sunHours,
                     systemKwp = systemKwp,
                     estimatedGeneration = estimatedGeneration,
                     paybackMonths = paybackMonths,
-                    savingsFirstYear = savingsFirstYear,
-                    dateEpoch = System.currentTimeMillis()
+                    monthlySavings = monthlySavings,
+                    userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
                 )
 
                 val result = firebaseRepository.saveQuote(quote)
@@ -185,7 +183,7 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                     _lastQuote.value = quote.copy(id = result.getOrNull())
                 }
             } catch (e: Exception) {
-                // Handle error
+                android.util.Log.e("QuotesViewModel", "Error saving quote: ${e.message}", e)
             }
         }
     }
