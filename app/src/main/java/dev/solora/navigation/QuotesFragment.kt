@@ -17,11 +17,13 @@ import dev.solora.R
 import dev.solora.quotes.QuotesViewModel
 import dev.solora.quotes.CalculationState
 import dev.solora.leads.LeadsViewModel
+import dev.solora.settings.SettingsViewModel
 import kotlinx.coroutines.launch
 
 class QuotesFragment : Fragment() {
     private val quotesViewModel: QuotesViewModel by viewModels()
     private val leadsViewModel: LeadsViewModel by viewModels()
+    private val settingsViewModel: SettingsViewModel by viewModels()
     private var isFirebaseTest = false
     private var currentTab = 0 // 0: calculate, 1: view, 2: dashboard
     
@@ -41,12 +43,10 @@ class QuotesFragment : Fragment() {
     private lateinit var etPanel: TextInputEditText
     private lateinit var btnCalculate: Button
     
-    // View tab elements
-    private lateinit var tvPanels: TextView
-    private lateinit var tvSystemSize: TextView
-    private lateinit var tvInverterSize: TextView
-    private lateinit var tvSavings: TextView
-    private lateinit var btnSaveQuote: Button
+    // View tab elements (quotes list)
+    private lateinit var rvQuotesList: androidx.recyclerview.widget.RecyclerView
+    private lateinit var layoutEmptyQuotes: View
+    private lateinit var quotesAdapter: QuotesListAdapter
     
     // Dashboard tab elements
     private lateinit var etReference: TextInputEditText
@@ -71,6 +71,7 @@ class QuotesFragment : Fragment() {
         setupViewTab()
         setupDashboardTab()
         observeViewModel()
+        observeSettings()
     }
     
     private fun initializeViews(view: View) {
@@ -92,12 +93,9 @@ class QuotesFragment : Fragment() {
         etPanel = view.findViewById(R.id.et_panel)
         btnCalculate = view.findViewById(R.id.btn_calculate)
         
-        // View tab elements
-        tvPanels = view.findViewById(R.id.tv_panels)
-        tvSystemSize = view.findViewById(R.id.tv_system_size)
-        tvInverterSize = view.findViewById(R.id.tv_inverter_size)
-        tvSavings = view.findViewById(R.id.tv_savings)
-        btnSaveQuote = view.findViewById(R.id.btn_save_quote)
+        // View tab elements (quotes list)
+        rvQuotesList = view.findViewById(R.id.rv_quotes_list)
+        layoutEmptyQuotes = view.findViewById(R.id.layout_empty_quotes)
         
         // Dashboard tab elements
         etReference = view.findViewById(R.id.et_reference)
@@ -177,10 +175,13 @@ class QuotesFragment : Fragment() {
             }
             
             try {
+                // Get current settings for defaults
+                val currentSettings = settingsViewModel.settings.value
+                
                 val usage = if (usageText.isNotEmpty()) usageText.toDouble() else null
                 val bill = if (billText.isNotEmpty()) billText.toDouble() else null
-                val tariff = if (tariffText.isNotEmpty()) tariffText.toDouble() else 2.50
-                val panelWatt = if (panelText.isNotEmpty()) panelText.toInt() else 420
+                val tariff = if (tariffText.isNotEmpty()) tariffText.toDouble() else currentSettings.calculationSettings.defaultTariff
+                val panelWatt = if (panelText.isNotEmpty()) panelText.toInt() else currentSettings.calculationSettings.defaultPanelWatt
                 
                 // Use temporary values for reference and client name during calculation
                 quotesViewModel.calculateAdvanced(
@@ -199,9 +200,25 @@ class QuotesFragment : Fragment() {
     }
     
     private fun setupViewTab() {
-        btnSaveQuote.setOnClickListener {
-            // Move to dashboard tab for final quote information
-            switchToTab(2)
+        // Setup RecyclerView
+        quotesAdapter = QuotesListAdapter { quote ->
+            showQuoteDetails(quote)
+        }
+        rvQuotesList.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
+        rvQuotesList.adapter = quotesAdapter
+        
+        // Observe quotes from ViewModel
+        viewLifecycleOwner.lifecycleScope.launch {
+            quotesViewModel.quotes.collect { quotes ->
+                if (quotes.isEmpty()) {
+                    layoutEmptyQuotes.visibility = View.VISIBLE
+                    rvQuotesList.visibility = View.GONE
+                } else {
+                    layoutEmptyQuotes.visibility = View.GONE
+                    rvQuotesList.visibility = View.VISIBLE
+                    quotesAdapter.submitList(quotes)
+                }
+            }
         }
     }
     
@@ -382,6 +399,160 @@ class QuotesFragment : Fragment() {
                     tvQuoteSummary.text = "Complete calculation first to see quote details"
                 }
             }
+        }
+    }
+    
+    private fun observeSettings() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            settingsViewModel.settings.collect { settings ->
+                // Pre-fill default values from settings
+                if (etTariff.text.toString().isEmpty()) {
+                    etTariff.setText(settings.calculationSettings.defaultTariff.toString())
+                }
+                if (etPanel.text.toString().isEmpty()) {
+                    etPanel.setText(settings.calculationSettings.defaultPanelWatt.toString())
+                }
+            }
+        }
+    }
+    
+    private fun showQuoteDetails(quote: dev.solora.data.FirebaseQuote) {
+        // Calculate panels and inverter from saved quote data
+        val panels = (quote.systemKwp * 1000 / quote.panelWatt).toInt()
+        val inverter = quote.systemKwp * 0.8
+        val monthlySavings = quote.savingsFirstYear / 12
+        
+        // Format date
+        val dateText = quote.createdAt?.toDate()?.let {
+            java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale.getDefault()).format(it)
+        } ?: "Unknown date"
+        
+        // Build detailed message with company info
+        val details = buildString {
+            appendLine("═══════════════════════════")
+            appendLine("QUOTE DETAILS")
+            appendLine("═══════════════════════════")
+            appendLine()
+            appendLine("Reference: ${quote.reference}")
+            appendLine("Date: $dateText")
+            appendLine()
+            appendLine("CLIENT INFORMATION")
+            appendLine("───────────────────────────")
+            appendLine("Name: ${quote.clientName}")
+            appendLine("Address: ${quote.address}")
+            appendLine()
+            appendLine("SYSTEM SPECIFICATIONS")
+            appendLine("───────────────────────────")
+            appendLine("System Size: ${String.format("%.2f", quote.systemKwp)} kW")
+            appendLine("Number of Panels: $panels")
+            appendLine("Panel Wattage: ${quote.panelWatt}W")
+            appendLine("Inverter Size: ${String.format("%.2f", inverter)} kW")
+            appendLine()
+            appendLine("FINANCIAL DETAILS")
+            appendLine("───────────────────────────")
+            appendLine("Monthly Savings: R ${String.format("%.2f", monthlySavings)}")
+            appendLine("Annual Savings: R ${String.format("%.2f", quote.savingsFirstYear)}")
+            appendLine("Payback Period: ${quote.paybackMonths} months")
+            appendLine()
+            if (quote.companyName.isNotEmpty()) {
+                appendLine("COMPANY INFORMATION")
+                appendLine("───────────────────────────")
+                appendLine("Company: ${quote.companyName}")
+                if (quote.companyAddress.isNotEmpty()) {
+                    appendLine("Address: ${quote.companyAddress}")
+                }
+                if (quote.companyPhone.isNotEmpty()) {
+                    appendLine("Phone: ${quote.companyPhone}")
+                }
+                if (quote.companyEmail.isNotEmpty()) {
+                    appendLine("Email: ${quote.companyEmail}")
+                }
+                appendLine()
+                appendLine("CONSULTANT DETAILS")
+                appendLine("───────────────────────────")
+                if (quote.consultantName.isNotEmpty()) {
+                    appendLine("Name: ${quote.consultantName}")
+                }
+                if (quote.consultantPhone.isNotEmpty()) {
+                    appendLine("Phone: ${quote.consultantPhone}")
+                }
+                if (quote.consultantEmail.isNotEmpty()) {
+                    appendLine("Email: ${quote.consultantEmail}")
+                }
+                if (quote.consultantLicense.isNotEmpty()) {
+                    appendLine("License: ${quote.consultantLicense}")
+                }
+            }
+            appendLine()
+            appendLine("═══════════════════════════")
+        }
+        
+        // Show in a dialog instead of toast for better readability
+        android.app.AlertDialog.Builder(requireContext())
+            .setTitle("Quote: ${quote.reference}")
+            .setMessage(details)
+            .setPositiveButton("Close", null)
+            .setNeutralButton("View Full Details") { _, _ ->
+                // Navigate to quote detail fragment
+                val bundle = Bundle().apply { putString("id", quote.id) }
+                findNavController().navigate(R.id.quoteDetailFragment, bundle)
+            }
+            .show()
+    }
+}
+
+// QuotesListAdapter for RecyclerView
+class QuotesListAdapter(
+    private val onQuoteClick: (dev.solora.data.FirebaseQuote) -> Unit
+) : androidx.recyclerview.widget.ListAdapter<dev.solora.data.FirebaseQuote, QuotesListAdapter.QuoteViewHolder>(QuoteDiffCallback()) {
+    
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): QuoteViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_quote, parent, false)
+        return QuoteViewHolder(view, onQuoteClick)
+    }
+    
+    override fun onBindViewHolder(holder: QuoteViewHolder, position: Int) {
+        holder.bind(getItem(position))
+    }
+    
+    class QuoteViewHolder(
+        itemView: View,
+        private val onQuoteClick: (dev.solora.data.FirebaseQuote) -> Unit
+    ) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
+        
+        private val tvReference: TextView = itemView.findViewById(R.id.tv_quote_reference)
+        private val tvDate: TextView = itemView.findViewById(R.id.tv_quote_date)
+        private val tvClientName: TextView = itemView.findViewById(R.id.tv_client_name)
+        private val tvClientAddress: TextView = itemView.findViewById(R.id.tv_client_address)
+        private val tvSystemSize: TextView = itemView.findViewById(R.id.tv_system_size)
+        private val tvSavings: TextView = itemView.findViewById(R.id.tv_savings)
+        
+        fun bind(quote: dev.solora.data.FirebaseQuote) {
+            tvReference.text = quote.reference
+            tvClientName.text = quote.clientName
+            tvClientAddress.text = quote.address
+            tvSystemSize.text = "${String.format("%.1f", quote.systemKwp)} kW"
+            tvSavings.text = "R ${String.format("%.0f", quote.savingsFirstYear / 12)}"
+            
+            // Format date
+            val dateText = quote.createdAt?.toDate()?.let {
+                java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale.getDefault()).format(it)
+            } ?: "Unknown"
+            tvDate.text = dateText
+            
+            itemView.setOnClickListener {
+                onQuoteClick(quote)
+            }
+        }
+    }
+    
+    class QuoteDiffCallback : androidx.recyclerview.widget.DiffUtil.ItemCallback<dev.solora.data.FirebaseQuote>() {
+        override fun areItemsTheSame(oldItem: dev.solora.data.FirebaseQuote, newItem: dev.solora.data.FirebaseQuote): Boolean {
+            return oldItem.id == newItem.id
+        }
+        
+        override fun areContentsTheSame(oldItem: dev.solora.data.FirebaseQuote, newItem: dev.solora.data.FirebaseQuote): Boolean {
+            return oldItem == newItem
         }
     }
 }

@@ -208,144 +208,49 @@
             </LinearLayout>
         </ScrollView>
         
-        <!-- View Quote Tab Content -->
-        <ScrollView
+        <!-- View Quotes Tab Content (List of All Quotes) -->
+        <LinearLayout
             android:id="@+id/content_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:paddingTop="16dp"
-            android:clipToPadding="false"
+            android:orientation="vertical"
             android:visibility="gone">
             
+            <!-- Empty state -->
             <LinearLayout
+                android:id="@+id/layout_empty_quotes"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:orientation="vertical"
-                android:paddingBottom="32dp">
+                android:gravity="center"
+                android:padding="32dp"
+                android:visibility="gone">
                 
-                <!-- Calculation Results Card -->
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="match_parent"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="2dp"
-                    app:cardUseCompatPadding="true"
-                    android:layout_marginBottom="16dp">
+                    android:text="No quotes yet"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp" />
                     
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="20dp">
-                        
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Calculation Results"
-                            android:textStyle="bold"
-                            android:textSize="18sp"
-                            android:layout_marginBottom="16dp" />
-                        
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:layout_marginBottom="12dp">
-                            
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Number of Panels"
-                                android:textColor="#666666" />
-                                
-                            <TextView
-                                android:id="@+id/tv_panels"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="16"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-                        
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:layout_marginBottom="12dp">
-                            
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Total System Size"
-                                android:textColor="#666666" />
-                                
-                            <TextView
-                                android:id="@+id/tv_system_size"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="4.8 kW"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-                        
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:layout_marginBottom="12dp">
-                            
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Recommended Inverter Size"
-                                android:textColor="#666666" />
-                                
-                            <TextView
-                                android:id="@+id/tv_inverter_size"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="5 kW"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-                        
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:layout_marginBottom="16dp">
-                            
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Estimated Monthly Savings"
-                                android:textColor="#666666" />
-                                
-                            <TextView
-                                android:id="@+id/tv_savings"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="R 800.00"
-                                android:textStyle="bold"
-                                android:textColor="@color/solora_orange" />
-                        </LinearLayout>
-                        
-                        <Button
-                            android:id="@+id/btn_save_quote"
-                            android:layout_width="match_parent"
-                            android:layout_height="56dp"
-                            android:text="save quote"
-                            android:backgroundTint="@color/solora_orange"
-                            android:textColor="@android:color/white"
-                            android:textAllCaps="false"
-                            android:textSize="16sp" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Create your first quote in the Calculate tab"
+                    android:textSize="14sp"
+                    android:textColor="#666666"
+                    android:gravity="center" />
             </LinearLayout>
-        </ScrollView>
+            
+            <!-- Quotes list -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_quotes_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="16dp"
+                android:clipToPadding="false" />
+        </LinearLayout>
         
         <!-- Dashboard Tab Content -->
         <ScrollView
