@@ -108,8 +108,14 @@ object QuoteCalculator {
             
             // Enhanced calculation with NASA data if location provided
             val detailedAnalysis = if (inputs.location != null && nasaClient != null) {
-                calculateDetailedAnalysis(inputs, basicOutputs, nasaClient, settings)
-            } else null
+                android.util.Log.d("QuoteCalculator", "Calling calculateDetailedAnalysis for location: ${inputs.location.latitude}, ${inputs.location.longitude}")
+                val result = calculateDetailedAnalysis(inputs, basicOutputs, nasaClient, settings)
+                android.util.Log.d("QuoteCalculator", "calculateDetailedAnalysis result: ${result != null}")
+                result
+            } else {
+                android.util.Log.w("QuoteCalculator", "Skipping calculateDetailedAnalysis: location=${inputs.location != null}, nasaClient=${nasaClient != null}")
+                null
+            }
             
             Result.success(basicOutputs.copy(detailedAnalysis = detailedAnalysis))
         } catch (e: Exception) {
