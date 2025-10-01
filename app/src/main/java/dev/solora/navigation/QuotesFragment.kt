@@ -318,27 +318,36 @@ class QuotesFragment : Fragment() {
             
             // Wait for quote to be saved, then create lead
             viewLifecycleOwner.lifecycleScope.launch {
-                // Wait a bit for the quote to be saved
-                kotlinx.coroutines.delay(1000)
-                
-                val savedQuote = quotesViewModel.lastQuote.value
-                if (savedQuote != null && savedQuote.id != null) {
-                    // Create a lead from this quote
-                    leadsViewModel.createLeadFromQuote(
-                        quoteId = savedQuote.id!!,
-                        clientName = clientName,
-                        address = address,
-                        contactInfo = contactInfo,
-                        notes = "Lead created from quote $reference. System: ${String.format("%.2f", calculation.systemKw)}kW, Monthly savings: R${String.format("%.2f", calculation.monthlySavingsRands)}"
-                    )
+                try {
+                    // Wait a bit for the quote to be saved
+                    kotlinx.coroutines.delay(1000)
                     
-                    Toast.makeText(requireContext(), "Quote saved and lead created successfully!", Toast.LENGTH_LONG).show()
-                    
-                    // Navigate to the quote detail
-                    val bundle = Bundle().apply { putString("id", savedQuote.id) }
-                    findNavController().navigate(R.id.quoteDetailFragment, bundle)
-                } else {
-                    Toast.makeText(requireContext(), "Quote saved but lead creation failed", Toast.LENGTH_SHORT).show()
+                    val savedQuote = quotesViewModel.lastQuote.value
+                    if (savedQuote != null && savedQuote.id != null) {
+                        android.util.Log.d("QuotesFragment", "Creating lead for quote ID: ${savedQuote.id}")
+                        
+                        // Create a lead from this quote
+                        leadsViewModel.createLeadFromQuote(
+                            quoteId = savedQuote.id!!,
+                            clientName = clientName,
+                            address = address,
+                            contactInfo = contactInfo,
+                            notes = "Lead created from quote $reference. System: ${String.format("%.2f", calculation.systemKw)}kW, Monthly savings: R${String.format("%.2f", calculation.monthlySavingsRands)}"
+                        )
+                        
+                        android.util.Log.d("QuotesFragment", "Lead created, showing success message")
+                        Toast.makeText(requireContext(), "Quote saved and lead created successfully!", Toast.LENGTH_LONG).show()
+                        
+                        // Switch to view tab to show the saved quote in the list
+                        android.util.Log.d("QuotesFragment", "Switching to view tab")
+                        switchToTab(1)
+                    } else {
+                        android.util.Log.e("QuotesFragment", "savedQuote is null or has no ID")
+                        Toast.makeText(requireContext(), "Quote saved but lead creation failed", Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("QuotesFragment", "Error during quote save/lead creation", e)
+                    Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
         } ?: run {
