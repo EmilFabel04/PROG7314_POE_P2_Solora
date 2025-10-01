@@ -1,17 +1,16 @@
 package dev.solora.api
 
 import com.google.firebase.functions.FirebaseFunctions
-import com.google.firebase.functions.ktx.functions
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.functions.FirebaseFunctions.getInstance
+import com.google.firebase.FirebaseApp
 import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.flow.flowOf
 
 /**
  * Firebase Cloud Functions API Client
  * Provides RESTful API access to server-side business logic
  */
 class FirebaseFunctionsApi {
-    private val functions: FirebaseFunctions = Firebase.functions
+    private val functions: FirebaseFunctions = FirebaseFunctions.getInstance()
     
     /**
      * Calculate quote via Cloud Function with NASA API integration
