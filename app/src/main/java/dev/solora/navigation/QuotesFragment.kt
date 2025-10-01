@@ -177,11 +177,14 @@ class QuotesFragment : Fragment() {
             try {
                 // Get current settings for defaults
                 val currentSettings = settingsViewModel.settings.value
+                android.util.Log.d("QuotesFragment", "Calculate clicked - Using settings: Tariff=${currentSettings.calculationSettings.defaultTariff}, Panel=${currentSettings.calculationSettings.defaultPanelWatt}W")
                 
                 val usage = if (usageText.isNotEmpty()) usageText.toDouble() else null
                 val bill = if (billText.isNotEmpty()) billText.toDouble() else null
                 val tariff = if (tariffText.isNotEmpty()) tariffText.toDouble() else currentSettings.calculationSettings.defaultTariff
                 val panelWatt = if (panelText.isNotEmpty()) panelText.toInt() else currentSettings.calculationSettings.defaultPanelWatt
+                
+                android.util.Log.d("QuotesFragment", "Final calculation values: Tariff=$tariff, PanelWatt=$panelWatt")
                 
                 // Use temporary values for reference and client name during calculation
                 quotesViewModel.calculateAdvanced(
@@ -393,13 +396,19 @@ class QuotesFragment : Fragment() {
     private fun observeSettings() {
         viewLifecycleOwner.lifecycleScope.launch {
             settingsViewModel.settings.collect { settings ->
-                // Pre-fill default values from settings
+                // Update hints to show current settings defaults
+                etTariff.hint = "Default: ${settings.calculationSettings.defaultTariff} R/kWh"
+                etPanel.hint = "Default: ${settings.calculationSettings.defaultPanelWatt}W"
+                
+                // If fields are empty, pre-fill with settings
                 if (etTariff.text.toString().isEmpty()) {
                     etTariff.setText(settings.calculationSettings.defaultTariff.toString())
                 }
                 if (etPanel.text.toString().isEmpty()) {
                     etPanel.setText(settings.calculationSettings.defaultPanelWatt.toString())
                 }
+                
+                android.util.Log.d("QuotesFragment", "Settings updated: Tariff=${settings.calculationSettings.defaultTariff}, Panel=${settings.calculationSettings.defaultPanelWatt}W")
             }
         }
     }
