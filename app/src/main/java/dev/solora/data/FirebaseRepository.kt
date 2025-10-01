@@ -3,7 +3,7 @@ package dev.solora.data
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.Timestamp
+import com.google.firebase.Timestamp
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -362,7 +362,6 @@ class FirebaseRepository {
                             name = data["name"] as? String ?: "",
                             email = data["email"] as? String ?: "",
                             phone = data["phone"] as? String ?: "",
-                            address = data["address"] as? String ?: "",
                             status = data["status"] as? String ?: "NEW",
                             notes = data["notes"] as? String,
                             quoteId = data["quoteId"] as? String,

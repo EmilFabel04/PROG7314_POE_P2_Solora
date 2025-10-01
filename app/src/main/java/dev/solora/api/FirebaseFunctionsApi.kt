@@ -206,7 +206,7 @@ data class NasaDataResponse(
                 "limit" to limit
             )
             
-            val result = functions
+            val result = this.functions
                 .getHttpsCallable("getLeads")
                 .call(data)
                 .await()
@@ -238,7 +238,7 @@ data class NasaDataResponse(
                 "limit" to limit
             )
             
-            val result = functions
+            val result = this.functions
                 .getHttpsCallable("getQuotes")
                 .call(data)
                 .await()
@@ -266,7 +266,7 @@ data class NasaDataResponse(
                 "settings" to settings
             )
             
-            val result = functions
+            val result = this.functions
                 .getHttpsCallable("updateSettings")
                 .call(data)
                 .await()
@@ -293,7 +293,7 @@ data class NasaDataResponse(
                 "offlineData" to offlineData
             )
             
-            val result = functions
+            val result = this.functions
                 .getHttpsCallable("syncData")
                 .call(data)
                 .await()
@@ -317,7 +317,7 @@ data class NasaDataResponse(
         return try {
             android.util.Log.d("FirebaseFunctionsApi", "Calling healthCheck function")
             
-            val result = functions
+            val result = this.functions
                 .getHttpsCallable("healthCheck")
                 .call()
                 .await()
