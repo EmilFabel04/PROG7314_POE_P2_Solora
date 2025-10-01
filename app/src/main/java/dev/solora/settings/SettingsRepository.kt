@@ -13,6 +13,7 @@ class SettingsRepository {
     
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
+    private val apiService = dev.solora.api.FirebaseFunctionsApi()
     
     val settings: Flow<AppSettings> = callbackFlow {
         android.util.Log.d("SettingsRepository", "Initializing Firebase settings")
@@ -223,5 +224,136 @@ class SettingsRepository {
             android.util.Log.e("SettingsRepository", "Error resetting settings", e)
             throw e
         }
+    }
+    
+    // ============================================
+    // API-BASED METHODS (Using REST API endpoints)
+    // ============================================
+    
+    /**
+     * Update settings via API
+     */
+    suspend fun updateSettingsViaApi(settings: AppSettings): Result<String> {
+        return try {
+            android.util.Log.d("SettingsRepository", "Updating settings via API")
+            
+            val settingsMap = mapOf(
+                "calculationSettings" to mapOf(
+                    "defaultTariff" to settings.calculationSettings.defaultTariff,
+                    "defaultPanelWatt" to settings.calculationSettings.defaultPanelWatt,
+                    "panelCostPerWatt" to settings.calculationSettings.panelCostPerWatt,
+                    "inverterCostPerWatt" to settings.calculationSettings.inverterCostPerWatt,
+                    "installationCostPerKw" to settings.calculationSettings.installationCostPerKw,
+                    "panelEfficiency" to settings.calculationSettings.panelEfficiency,
+                    "performanceRatio" to settings.calculationSettings.performanceRatio,
+                    "inverterSizingRatio" to settings.calculationSettings.inverterSizingRatio,
+                    "defaultSunHours" to settings.calculationSettings.defaultSunHours,
+                    "systemLifetime" to settings.calculationSettings.systemLifetime,
+                    "panelDegradationRate" to settings.calculationSettings.panelDegradationRate,
+                    "co2PerKwh" to settings.calculationSettings.co2PerKwh
+                ),
+                "companySettings" to mapOf(
+                    "companyName" to settings.companySettings.companyName,
+                    "companyAddress" to settings.companySettings.companyAddress,
+                    "companyPhone" to settings.companySettings.companyPhone,
+                    "companyEmail" to settings.companySettings.companyEmail,
+                    "companyWebsite" to settings.companySettings.companyWebsite,
+                    "consultantName" to settings.companySettings.consultantName,
+                    "consultantPhone" to settings.companySettings.consultantPhone,
+                    "consultantEmail" to settings.companySettings.consultantEmail,
+                    "consultantLicense" to settings.companySettings.consultantLicense,
+                    "companyLogo" to settings.companySettings.companyLogo,
+                    "quoteFooter" to settings.companySettings.quoteFooter,
+                    "termsAndConditions" to settings.companySettings.termsAndConditions
+                ),
+                "currency" to settings.currency,
+                "language" to settings.language,
+                "theme" to settings.theme
+            )
+            
+            val result = apiService.updateSettings(settingsMap)
+            if (result.isSuccess) {
+                android.util.Log.d("SettingsRepository", "Settings updated via API: ${result.getOrNull()}")
+                Result.success(result.getOrNull() ?: "Settings updated")
+            } else {
+                Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("SettingsRepository", "Update settings via API error: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Get settings via API
+     */
+    suspend fun getSettingsViaApi(): Result<AppSettings?> {
+        return try {
+            android.util.Log.d("SettingsRepository", "Getting settings via API")
+            
+            val result = apiService.getSettings()
+            if (result.isSuccess) {
+                val settingsData = result.getOrNull()
+                if (settingsData != null) {
+                    val appSettings = parseSettingsFromMap(settingsData)
+                    android.util.Log.d("SettingsRepository", "Settings retrieved via API")
+                    Result.success(appSettings)
+                } else {
+                    android.util.Log.d("SettingsRepository", "No settings found via API")
+                    Result.success(null)
+                }
+            } else {
+                Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("SettingsRepository", "Get settings via API error: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Parse settings from API response map
+     */
+    private fun parseSettingsFromMap(data: Map<String, Any>): AppSettings {
+        val calculationData = data["calculationSettings"] as? Map<String, Any> ?: emptyMap()
+        val companyData = data["companySettings"] as? Map<String, Any> ?: emptyMap()
+        
+        val calculationSettings = CalculationSettings(
+            defaultTariff = (calculationData["defaultTariff"] as? Number)?.toDouble() ?: 2.5,
+            defaultPanelWatt = (calculationData["defaultPanelWatt"] as? Number)?.toInt() ?: 420,
+            panelCostPerWatt = (calculationData["panelCostPerWatt"] as? Number)?.toDouble() ?: 15.0,
+            inverterCostPerWatt = (calculationData["inverterCostPerWatt"] as? Number)?.toDouble() ?: 12.0,
+            installationCostPerKw = (calculationData["installationCostPerKw"] as? Number)?.toDouble() ?: 15000.0,
+            panelEfficiency = (calculationData["panelEfficiency"] as? Number)?.toDouble() ?: 0.2,
+            performanceRatio = (calculationData["performanceRatio"] as? Number)?.toDouble() ?: 0.8,
+            inverterSizingRatio = (calculationData["inverterSizingRatio"] as? Number)?.toDouble() ?: 0.8,
+            defaultSunHours = (calculationData["defaultSunHours"] as? Number)?.toDouble() ?: 5.0,
+            systemLifetime = (calculationData["systemLifetime"] as? Number)?.toInt() ?: 25,
+            panelDegradationRate = (calculationData["panelDegradationRate"] as? Number)?.toDouble() ?: 0.005,
+            co2PerKwh = (calculationData["co2PerKwh"] as? Number)?.toDouble() ?: 0.5
+        )
+        
+        val companySettings = CompanySettings(
+            companyName = companyData["companyName"] as? String ?: "",
+            companyAddress = companyData["companyAddress"] as? String ?: "",
+            companyPhone = companyData["companyPhone"] as? String ?: "",
+            companyEmail = companyData["companyEmail"] as? String ?: "",
+            companyWebsite = companyData["companyWebsite"] as? String ?: "",
+            consultantName = companyData["consultantName"] as? String ?: "",
+            consultantPhone = companyData["consultantPhone"] as? String ?: "",
+            consultantEmail = companyData["consultantEmail"] as? String ?: "",
+            consultantLicense = companyData["consultantLicense"] as? String ?: "",
+            companyLogo = companyData["companyLogo"] as? String ?: "",
+            quoteFooter = companyData["quoteFooter"] as? String ?: "",
+            termsAndConditions = companyData["termsAndConditions"] as? String ?: ""
+        )
+        
+        return AppSettings(
+            calculationSettings = calculationSettings,
+            companySettings = companySettings,
+            currency = data["currency"] as? String ?: "ZAR",
+            language = data["language"] as? String ?: "en",
+            theme = data["theme"] as? String ?: "light"
+        )
     }
 }

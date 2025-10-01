@@ -50,6 +50,13 @@ class QuoteDetailFragment : Fragment() {
         val quoteId = requireArguments().getString("id") ?: ""
         android.util.Log.d("QuoteDetailFragment", "Looking for quote with ID: $quoteId")
         
+        if (quoteId.isEmpty()) {
+            android.util.Log.e("QuoteDetailFragment", "ERROR: Quote ID is empty!")
+            Toast.makeText(requireContext(), "Error: Quote ID not found", Toast.LENGTH_LONG).show()
+            findNavController().navigateUp()
+            return
+        }
+        
         observeQuote(quoteId)
     }
     
@@ -87,16 +94,25 @@ class QuoteDetailFragment : Fragment() {
     
     private fun observeQuote(quoteId: String) {
         viewLifecycleOwner.lifecycleScope.launch {
-            quotesViewModel.getQuoteById(quoteId)
-            quotesViewModel.lastQuote.collect { quote ->
-                android.util.Log.d("QuoteDetailFragment", "Received quote: ${quote?.id} - ${quote?.reference}")
-                currentQuote = quote
+            try {
+                android.util.Log.d("QuoteDetailFragment", "Calling getQuoteById for: $quoteId")
+                quotesViewModel.getQuoteById(quoteId)
                 
-                if (quote != null) {
-                    populateQuoteDetails(quote)
-                } else {
-                    showQuoteNotFound()
+                quotesViewModel.lastQuote.collect { quote ->
+                    android.util.Log.d("QuoteDetailFragment", "Received quote: ${quote?.id} - ${quote?.reference}")
+                    currentQuote = quote
+                    
+                    if (quote != null) {
+                        populateQuoteDetails(quote)
+                    } else {
+                        android.util.Log.w("QuoteDetailFragment", "Quote is null, showing not found")
+                        showQuoteNotFound()
+                    }
                 }
+            } catch (e: Exception) {
+                android.util.Log.e("QuoteDetailFragment", "Error observing quote: ${e.message}", e)
+                Toast.makeText(requireContext(), "Error loading quote: ${e.message}", Toast.LENGTH_LONG).show()
+                findNavController().navigateUp()
             }
         }
     }

@@ -12,6 +12,7 @@ import kotlinx.coroutines.tasks.await
 class FirebaseRepository {
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
+    private val apiService = dev.solora.api.FirebaseFunctionsApi()
     
     private fun getCurrentUserId(): String? = auth.currentUser?.uid
 
@@ -333,6 +334,163 @@ class FirebaseRepository {
             
             Result.success(Unit)
         } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    // ============================================
+    // API-BASED METHODS (Using REST API endpoints)
+    // ============================================
+    
+    /**
+     * Get leads via API with search and filter support
+     */
+    suspend fun getLeadsViaApi(
+        search: String? = null,
+        status: String? = null,
+        limit: Int = 50
+    ): Result<List<FirebaseLead>> {
+        return try {
+            val result = apiService.getLeads(search, status, limit)
+            if (result.isSuccess) {
+                val leadsData = result.getOrNull() ?: emptyList()
+                val leads = leadsData.mapNotNull { data ->
+                    try {
+                        FirebaseLead(
+                            id = data["id"] as? String,
+                            name = data["name"] as? String ?: "",
+                            email = data["email"] as? String ?: "",
+                            phone = data["phone"] as? String ?: "",
+                            address = data["address"] as? String ?: "",
+                            status = data["status"] as? String ?: "NEW",
+                            notes = data["notes"] as? String,
+                            quoteId = data["quoteId"] as? String,
+                            userId = data["userId"] as? String ?: "",
+                            createdAt = data["createdAt"] as? com.google.firebase.firestore.Timestamp,
+                            updatedAt = data["updatedAt"] as? com.google.firebase.firestore.Timestamp
+                        )
+                    } catch (e: Exception) {
+                        android.util.Log.w("FirebaseRepository", "Failed to parse lead: ${e.message}")
+                        null
+                    }
+                }
+                android.util.Log.d("FirebaseRepository", "Retrieved ${leads.size} leads via API")
+                Result.success(leads)
+            } else {
+                Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Get leads via API error: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Get quotes via API with search support
+     */
+    suspend fun getQuotesViaApi(
+        search: String? = null,
+        limit: Int = 50
+    ): Result<List<FirebaseQuote>> {
+        return try {
+            val result = apiService.getQuotes(search, limit)
+            if (result.isSuccess) {
+                val quotesData = result.getOrNull() ?: emptyList()
+                val quotes = quotesData.mapNotNull { data ->
+                    try {
+                        FirebaseQuote(
+                            id = data["id"] as? String,
+                            reference = data["reference"] as? String ?: "",
+                            clientName = data["clientName"] as? String ?: "",
+                            address = data["address"] as? String ?: "",
+                            usageKwh = (data["usageKwh"] as? Number)?.toDouble(),
+                            billRands = (data["billRands"] as? Number)?.toDouble(),
+                            tariff = (data["tariff"] as? Number)?.toDouble() ?: 0.0,
+                            panelWatt = (data["panelWatt"] as? Number)?.toInt() ?: 0,
+                            latitude = (data["latitude"] as? Number)?.toDouble(),
+                            longitude = (data["longitude"] as? Number)?.toDouble(),
+                            averageAnnualIrradiance = (data["averageAnnualIrradiance"] as? Number)?.toDouble(),
+                            averageAnnualSunHours = (data["averageAnnualSunHours"] as? Number)?.toDouble(),
+                            systemKwp = (data["systemKwp"] as? Number)?.toDouble() ?: 0.0,
+                            estimatedGeneration = (data["estimatedGeneration"] as? Number)?.toDouble() ?: 0.0,
+                            monthlySavings = (data["monthlySavings"] as? Number)?.toDouble() ?: 0.0,
+                            paybackMonths = (data["paybackMonths"] as? Number)?.toInt() ?: 0,
+                            companyName = data["companyName"] as? String ?: "",
+                            companyPhone = data["companyPhone"] as? String ?: "",
+                            companyEmail = data["companyEmail"] as? String ?: "",
+                            consultantName = data["consultantName"] as? String ?: "",
+                            consultantPhone = data["consultantPhone"] as? String ?: "",
+                            consultantEmail = data["consultantEmail"] as? String ?: "",
+                            userId = data["userId"] as? String ?: "",
+                            createdAt = data["createdAt"] as? com.google.firebase.firestore.Timestamp,
+                            updatedAt = data["updatedAt"] as? com.google.firebase.firestore.Timestamp
+                        )
+                    } catch (e: Exception) {
+                        android.util.Log.w("FirebaseRepository", "Failed to parse quote: ${e.message}")
+                        null
+                    }
+                }
+                android.util.Log.d("FirebaseRepository", "Retrieved ${quotes.size} quotes via API")
+                Result.success(quotes)
+            } else {
+                Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Get quotes via API error: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Update settings via API
+     */
+    suspend fun updateSettingsViaApi(settings: Map<String, Any>): Result<String> {
+        return try {
+            val result = apiService.updateSettings(settings)
+            if (result.isSuccess) {
+                android.util.Log.d("FirebaseRepository", "Settings updated via API: ${result.getOrNull()}")
+                Result.success(result.getOrNull() ?: "Settings updated")
+            } else {
+                Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Update settings via API error: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Sync data via API
+     */
+    suspend fun syncDataViaApi(offlineData: Map<String, Any>): Result<Map<String, Any>> {
+        return try {
+            val result = apiService.syncData(offlineData)
+            if (result.isSuccess) {
+                android.util.Log.d("FirebaseRepository", "Data synced via API: ${result.getOrNull()}")
+                Result.success(result.getOrNull() ?: emptyMap())
+            } else {
+                Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Sync data via API error: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Health check via API
+     */
+    suspend fun healthCheckViaApi(): Result<Map<String, Any>> {
+        return try {
+            val result = apiService.healthCheck()
+            if (result.isSuccess) {
+                android.util.Log.d("FirebaseRepository", "Health check via API: ${result.getOrNull()}")
+                Result.success(result.getOrNull() ?: emptyMap())
+            } else {
+                Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Health check via API error: ${e.message}", e)
             Result.failure(e)
         }
     }

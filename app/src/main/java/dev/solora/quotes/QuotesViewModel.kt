@@ -39,7 +39,20 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     // Firebase quotes flow - filtered by logged-in user's ID
     val quotes = flow {
         android.util.Log.d("QuotesViewModel", "Starting quotes flow for user: ${FirebaseAuth.getInstance().currentUser?.uid}")
-        emitAll(firebaseRepository.getQuotes())
+        // Try API first, fallback to direct Firestore
+        try {
+            val apiResult = firebaseRepository.getQuotesViaApi()
+            if (apiResult.isSuccess) {
+                android.util.Log.d("QuotesViewModel", "Using API for quotes")
+                emitAll(flowOf(apiResult.getOrNull() ?: emptyList()))
+            } else {
+                android.util.Log.w("QuotesViewModel", "API failed, using direct Firestore: ${apiResult.exceptionOrNull()?.message}")
+                emitAll(firebaseRepository.getQuotes())
+            }
+        } catch (e: Exception) {
+            android.util.Log.w("QuotesViewModel", "API error, using direct Firestore: ${e.message}")
+            emitAll(firebaseRepository.getQuotes())
+        }
     }.stateIn(
         viewModelScope, 
         SharingStarted.WhileSubscribed(5000), 

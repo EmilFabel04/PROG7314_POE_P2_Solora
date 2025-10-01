@@ -26,7 +26,20 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
     // Firebase leads flow - filtered by logged-in user's ID
     val leads = flow {
         android.util.Log.d("LeadsViewModel", "Starting leads flow for user: ${FirebaseAuth.getInstance().currentUser?.uid}")
-        emitAll(firebaseRepository.getLeads())
+        // Try API first, fallback to direct Firestore
+        try {
+            val apiResult = firebaseRepository.getLeadsViaApi()
+            if (apiResult.isSuccess) {
+                android.util.Log.d("LeadsViewModel", "Using API for leads")
+                emitAll(flowOf(apiResult.getOrNull() ?: emptyList()))
+            } else {
+                android.util.Log.w("LeadsViewModel", "API failed, using direct Firestore: ${apiResult.exceptionOrNull()?.message}")
+                emitAll(firebaseRepository.getLeads())
+            }
+        } catch (e: Exception) {
+            android.util.Log.w("LeadsViewModel", "API error, using direct Firestore: ${e.message}")
+            emitAll(firebaseRepository.getLeads())
+        }
     }.stateIn(
         viewModelScope, 
         SharingStarted.WhileSubscribed(5000), 

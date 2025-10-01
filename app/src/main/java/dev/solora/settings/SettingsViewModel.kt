@@ -45,8 +45,21 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
     
     fun updateAppSettings(settings: AppSettings) {
         viewModelScope.launch {
-            repository.updateAppSettings(settings)
-            android.util.Log.d("SettingsViewModel", "App settings updated")
+            // Try API first, fallback to direct Firestore
+            try {
+                val apiResult = repository.updateSettingsViaApi(settings)
+                if (apiResult.isSuccess) {
+                    android.util.Log.d("SettingsViewModel", "App settings updated via API: ${apiResult.getOrNull()}")
+                } else {
+                    android.util.Log.w("SettingsViewModel", "API failed, using direct Firestore: ${apiResult.exceptionOrNull()?.message}")
+                    repository.updateAppSettings(settings)
+                    android.util.Log.d("SettingsViewModel", "App settings updated via Firestore")
+                }
+            } catch (e: Exception) {
+                android.util.Log.w("SettingsViewModel", "API error, using direct Firestore: ${e.message}")
+                repository.updateAppSettings(settings)
+                android.util.Log.d("SettingsViewModel", "App settings updated via Firestore")
+            }
         }
     }
     

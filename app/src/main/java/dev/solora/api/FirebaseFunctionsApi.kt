@@ -188,3 +188,146 @@ data class NasaDataResponse(
     val longitude: Double?
 )
 
+    /**
+     * GET /leads - Retrieve saved leads with search/filter support
+     */
+    suspend fun getLeads(
+        search: String? = null,
+        status: String? = null,
+        limit: Int = 50
+    ): Result<List<Map<String, Any>>> {
+        return try {
+            android.util.Log.d("FirebaseFunctionsApi", "Calling getLeads function")
+            
+            val data = hashMapOf<String, Any?>(
+                "search" to search,
+                "status" to status,
+                "limit" to limit
+            )
+            
+            val result = functions
+                .getHttpsCallable("getLeads")
+                .call(data)
+                .await()
+            
+            @Suppress("UNCHECKED_CAST")
+            val response = result.data as Map<String, Any>
+            @Suppress("UNCHECKED_CAST")
+            val leads = response["leads"] as List<Map<String, Any>>
+            android.util.Log.d("FirebaseFunctionsApi", "Retrieved ${leads.size} leads via API")
+            Result.success(leads)
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseFunctionsApi", "Get leads error: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * GET /quotes - Retrieve previous quotes with search support
+     */
+    suspend fun getQuotes(
+        search: String? = null,
+        limit: Int = 50
+    ): Result<List<Map<String, Any>>> {
+        return try {
+            android.util.Log.d("FirebaseFunctionsApi", "Calling getQuotes function")
+            
+            val data = hashMapOf<String, Any?>(
+                "search" to search,
+                "limit" to limit
+            )
+            
+            val result = functions
+                .getHttpsCallable("getQuotes")
+                .call(data)
+                .await()
+            
+            @Suppress("UNCHECKED_CAST")
+            val response = result.data as Map<String, Any>
+            @Suppress("UNCHECKED_CAST")
+            val quotes = response["quotes"] as List<Map<String, Any>>
+            android.util.Log.d("FirebaseFunctionsApi", "Retrieved ${quotes.size} quotes via API")
+            Result.success(quotes)
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseFunctionsApi", "Get quotes error: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * PUT /settings - Update application defaults
+     */
+    suspend fun updateSettings(settings: Map<String, Any>): Result<String> {
+        return try {
+            android.util.Log.d("FirebaseFunctionsApi", "Calling updateSettings function")
+            
+            val data = hashMapOf<String, Any>(
+                "settings" to settings
+            )
+            
+            val result = functions
+                .getHttpsCallable("updateSettings")
+                .call(data)
+                .await()
+            
+            @Suppress("UNCHECKED_CAST")
+            val response = result.data as Map<String, Any>
+            val message = response["message"] as String
+            android.util.Log.d("FirebaseFunctionsApi", "Settings updated via API: $message")
+            Result.success(message)
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseFunctionsApi", "Update settings error: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * POST /sync - Synchronize offline records with cloud
+     */
+    suspend fun syncData(offlineData: Map<String, Any>): Result<Map<String, Any>> {
+        return try {
+            android.util.Log.d("FirebaseFunctionsApi", "Calling syncData function")
+            
+            val data = hashMapOf<String, Any>(
+                "offlineData" to offlineData
+            )
+            
+            val result = functions
+                .getHttpsCallable("syncData")
+                .call(data)
+                .await()
+            
+            @Suppress("UNCHECKED_CAST")
+            val response = result.data as Map<String, Any>
+            @Suppress("UNCHECKED_CAST")
+            val results = response["results"] as Map<String, Any>
+            android.util.Log.d("FirebaseFunctionsApi", "Data synced via API: $results")
+            Result.success(results)
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseFunctionsApi", "Sync data error: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Health check endpoint
+     */
+    suspend fun healthCheck(): Result<Map<String, Any>> {
+        return try {
+            android.util.Log.d("FirebaseFunctionsApi", "Calling healthCheck function")
+            
+            val result = functions
+                .getHttpsCallable("healthCheck")
+                .call()
+                .await()
+            
+            @Suppress("UNCHECKED_CAST")
+            val response = result.data as Map<String, Any>
+            android.util.Log.d("FirebaseFunctionsApi", "Health check via API: $response")
+            Result.success(response)
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseFunctionsApi", "Health check error: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+
