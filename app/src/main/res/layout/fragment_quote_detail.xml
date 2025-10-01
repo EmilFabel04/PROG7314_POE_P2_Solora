@@ -369,17 +369,6 @@
             android:orientation="vertical"
             android:layout_marginTop="8dp">
 
-            <Button
-                android:id="@+id/btn_export_pdf"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:text="Export to PDF"
-                android:backgroundTint="@color/solora_orange"
-                android:textColor="@android:color/white"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:layout_marginBottom="12dp"
-                app:cornerRadius="12dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
