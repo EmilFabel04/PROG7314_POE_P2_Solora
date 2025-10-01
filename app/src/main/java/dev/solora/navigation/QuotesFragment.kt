@@ -470,15 +470,29 @@ class QuotesFragment : Fragment() {
             try {
                 Toast.makeText(requireContext(), "Testing NASA API...", Toast.LENGTH_SHORT).show()
                 
-                // Test with Oslo, Norway coordinates
-                val nasaClient = dev.solora.quote.NasaPowerClient()
-                val result = nasaClient.getSolarDataWithFallback(59.9139, 10.7522) // Oslo, Norway
+                // Get the address from the form
+                val address = etAddress.text.toString().trim()
+                if (address.isEmpty()) {
+                    Toast.makeText(requireContext(), "Please enter an address first", Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
                 
-                // Also test address-to-coordinates conversion
+                android.util.Log.d("QuotesFragment", "Testing NASA API for address: $address")
+                
+                // Convert address to coordinates
                 val geocodingService = dev.solora.quote.GeocodingService(requireContext())
-                val geocodingResult = geocodingService.getCoordinatesFromAddress("Storgata, Oslo, Norway 0155")
+                val locationResult = geocodingService.getCoordinatesFromAddress(address)
                 
-                android.util.Log.d("QuotesFragment", "Geocoding result for Storgata Oslo: $geocodingResult")
+                if (!locationResult.success) {
+                    Toast.makeText(requireContext(), "Address not found: ${locationResult.error}", Toast.LENGTH_LONG).show()
+                    return@launch
+                }
+                
+                android.util.Log.d("QuotesFragment", "Address converted to: lat=${locationResult.latitude}, lon=${locationResult.longitude}")
+                
+                // Test NASA API with actual coordinates
+                val nasaClient = dev.solora.quote.NasaPowerClient()
+                val result = nasaClient.getSolarDataWithFallback(locationResult.latitude, locationResult.longitude)
                 
                 if (result.isSuccess) {
                     val data = result.getOrNull()
