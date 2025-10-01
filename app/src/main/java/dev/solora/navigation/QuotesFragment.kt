@@ -281,28 +281,37 @@ class QuotesFragment : Fragment() {
     }
 
     private fun saveQuoteWithClientDetails() {
+        android.util.Log.d("QuotesFragment", "saveQuoteWithClientDetails called")
+        
         quotesViewModel.lastCalculation.value?.let { calculation ->
-            // Get client details from the form
-            val etReference = view?.findViewById<EditText>(R.id.et_reference)
-            val etFirstName = view?.findViewById<EditText>(R.id.et_first_name)
-            val etLastName = view?.findViewById<EditText>(R.id.et_last_name)
-            val etClientAddress = view?.findViewById<EditText>(R.id.et_client_address)
-            val etEmail = view?.findViewById<EditText>(R.id.et_email)
-            val etContact = view?.findViewById<EditText>(R.id.et_contact)
+            android.util.Log.d("QuotesFragment", "Found calculation to save: ${calculation.systemKw}kW system")
             
-            val reference = etReference?.text?.toString()?.trim() ?: "QUOTE-${System.currentTimeMillis()}"
-            val firstName = etFirstName?.text?.toString()?.trim() ?: ""
-            val lastName = etLastName?.text?.toString()?.trim() ?: ""
-            val clientName = if (firstName.isNotEmpty() && lastName.isNotEmpty()) "$firstName $lastName" else "Unknown Client"
-            val address = etClientAddress?.text?.toString()?.trim() ?: "Unknown Address"
-            val email = etEmail?.text?.toString()?.trim() ?: ""
-            val contact = etContact?.text?.toString()?.trim() ?: ""
+            // Get client details from the form
+            val reference = etReference.text.toString().trim().ifEmpty { "QUOTE-${System.currentTimeMillis()}" }
+            val firstName = etFirstName.text.toString().trim()
+            val lastName = etLastName.text.toString().trim()
+            val clientName = if (firstName.isNotEmpty() && lastName.isNotEmpty()) {
+                "$firstName $lastName"
+            } else if (firstName.isNotEmpty()) {
+                firstName
+            } else if (lastName.isNotEmpty()) {
+                lastName
+            } else {
+                "Unknown Client"
+            }
+            val address = etClientAddress.text.toString().trim().ifEmpty { "Unknown Address" }
+            val email = etEmail.text.toString().trim()
+            val contact = etContact.text.toString().trim()
             val contactInfo = if (email.isNotEmpty() && contact.isNotEmpty()) "$email | $contact" else email.ifEmpty { contact }
             
-            if (clientName.isEmpty() || address.isEmpty()) {
-                Toast.makeText(requireContext(), "Please enter client name and address", Toast.LENGTH_SHORT).show()
+            android.util.Log.d("QuotesFragment", "Quote details - Ref: $reference, Client: $clientName, Address: $address")
+            
+            if (clientName == "Unknown Client") {
+                Toast.makeText(requireContext(), "Please enter client name", Toast.LENGTH_SHORT).show()
                 return
             }
+            
+            android.util.Log.d("QuotesFragment", "Calling saveQuoteFromCalculation...")
             
             // Save the quote with all details
             quotesViewModel.saveQuoteFromCalculation(reference, clientName, address, calculation)
@@ -353,13 +362,13 @@ class QuotesFragment : Fragment() {
                     is CalculationState.Success -> {
                         btnCalculate.isEnabled = true
                         btnCalculate.text = "calculate"
-                        Toast.makeText(requireContext(), "Calculation complete! Review and save your quote.", Toast.LENGTH_LONG).show()
+                        Toast.makeText(requireContext(), "Calculation complete! Enter client details to save.", Toast.LENGTH_LONG).show()
                         
-                        // Update the view tab with calculation results
+                        // Update the dashboard tab with calculation results
                         updateResultsTab(state.outputs)
                         
-                        // Automatically switch to view tab to show results
-                        switchToTab(1)
+                        // Automatically switch to dashboard tab to show results and save
+                        switchToTab(2)
                     }
                     is CalculationState.Error -> {
                         btnCalculate.isEnabled = true

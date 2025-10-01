@@ -17,11 +17,17 @@ class FirebaseRepository {
     suspend fun saveQuote(quote: FirebaseQuote): Result<String> {
         return try {
             val userId = getCurrentUserId() ?: throw Exception("User not authenticated")
+            android.util.Log.d("FirebaseRepository", "Saving quote for user: $userId")
+            android.util.Log.d("FirebaseRepository", "Quote data: ref=${quote.reference}, client=${quote.clientName}, panelWatt=${quote.panelWatt}")
+            
             val quoteWithUser = quote.copy(userId = userId)
             
             val docRef = firestore.collection("quotes").add(quoteWithUser).await()
+            android.util.Log.d("FirebaseRepository", "Quote saved successfully with ID: ${docRef.id}")
+            
             Result.success(docRef.id)
         } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Failed to save quote: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -29,6 +35,7 @@ class FirebaseRepository {
     suspend fun getQuotes(): Flow<List<FirebaseQuote>> = flow {
         try {
             val userId = getCurrentUserId() ?: throw Exception("User not authenticated")
+            android.util.Log.d("FirebaseRepository", "Fetching quotes for user: $userId")
             
             val snapshot = firestore.collection("quotes")
                 .whereEqualTo("userId", userId)
@@ -40,8 +47,11 @@ class FirebaseRepository {
                 doc.toObject(FirebaseQuote::class.java)?.copy(id = doc.id)
             }
             
+            android.util.Log.d("FirebaseRepository", "Retrieved ${quotes.size} quotes for user")
+            
             emit(quotes)
         } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Error fetching quotes: ${e.message}", e)
             emit(emptyList())
         }
     }
