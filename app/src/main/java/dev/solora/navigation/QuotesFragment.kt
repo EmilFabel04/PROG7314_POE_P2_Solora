@@ -397,19 +397,17 @@ class QuotesFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 settingsViewModel.settings.collect { settings ->
-                    // Update hints to show current settings defaults
-                    etTariff.hint = "Default: ${settings.calculationSettings.defaultTariff} R/kWh"
-                    etPanel.hint = "Default: ${settings.calculationSettings.defaultPanelWatt}W"
+                    android.util.Log.d("QuotesFragment", "Settings received: Tariff=${settings.calculationSettings.defaultTariff}, Panel=${settings.calculationSettings.defaultPanelWatt}W")
                     
-                    // If fields are empty, pre-fill with settings
-                    if (etTariff.text.toString().isEmpty()) {
-                        etTariff.setText(settings.calculationSettings.defaultTariff.toString())
-                    }
-                    if (etPanel.text.toString().isEmpty()) {
-                        etPanel.setText(settings.calculationSettings.defaultPanelWatt.toString())
-                    }
+                    // ALWAYS update fields with latest settings values
+                    etTariff.setText(settings.calculationSettings.defaultTariff.toString())
+                    etPanel.setText(settings.calculationSettings.defaultPanelWatt.toString())
                     
-                    android.util.Log.d("QuotesFragment", "Settings updated: Tariff=${settings.calculationSettings.defaultTariff}, Panel=${settings.calculationSettings.defaultPanelWatt}W")
+                    // Update hints as well
+                    etTariff.hint = "Tariff (R/kWh)"
+                    etPanel.hint = "Panel Wattage"
+                    
+                    android.util.Log.d("QuotesFragment", "Form fields updated with settings values")
                 }
             } catch (e: kotlinx.coroutines.CancellationException) {
                 // Expected when fragment is destroyed, don't show error
