@@ -23,6 +23,7 @@ class QuoteDetailFragment : Fragment() {
     private val quotesViewModel: QuotesViewModel by viewModels()
     private val leadsViewModel: LeadsViewModel by viewModels()
     
+    private lateinit var btnBackDetail: android.widget.ImageButton
     private lateinit var tvReference: TextView
     private lateinit var tvDate: TextView
     private lateinit var tvClientInfo: TextView
@@ -53,6 +54,7 @@ class QuoteDetailFragment : Fragment() {
     }
     
     private fun initializeViews(view: View) {
+        btnBackDetail = view.findViewById(R.id.btn_back_detail)
         tvReference = view.findViewById(R.id.tv_reference)
         tvDate = view.findViewById(R.id.tv_date)
         tvClientInfo = view.findViewById(R.id.tv_client_info)
@@ -66,6 +68,10 @@ class QuoteDetailFragment : Fragment() {
     }
     
     private fun setupClickListeners() {
+        btnBackDetail.setOnClickListener {
+            findNavController().navigateUp()
+        }
+        
         btnConvertToLead.setOnClickListener {
             convertToLead()
         }

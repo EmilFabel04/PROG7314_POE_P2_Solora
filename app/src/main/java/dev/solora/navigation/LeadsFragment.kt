@@ -109,12 +109,68 @@ class LeadsFragment : Fragment() {
     
     private fun setupRecyclerView() {
         leadsAdapter = LeadsAdapter { lead ->
-            // Handle lead click - could navigate to lead detail
-            Toast.makeText(requireContext(), "FirebaseLead: ${lead.name}", Toast.LENGTH_SHORT).show()
+            // Show lead details in professional dialog
+            showLeadDetails(lead)
         }
         
         rvLeads.layoutManager = LinearLayoutManager(requireContext())
         rvLeads.adapter = leadsAdapter
+    }
+    
+    private fun showLeadDetails(lead: FirebaseLead) {
+        // Format date
+        val dateText = lead.createdAt?.toDate()?.let {
+            java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale.getDefault()).format(it)
+        } ?: "Unknown date"
+        
+        // Build detailed message
+        val details = buildString {
+            appendLine("═══════════════════════════")
+            appendLine("LEAD DETAILS")
+            appendLine("═══════════════════════════")
+            appendLine()
+            appendLine("ID: ${lead.id ?: "N/A"}")
+            appendLine("Date: $dateText")
+            appendLine()
+            appendLine("CONTACT INFORMATION")
+            appendLine("───────────────────────────")
+            appendLine("Name: ${lead.name}")
+            if (lead.email.isNotEmpty()) {
+                appendLine("Email: ${lead.email}")
+            }
+            if (lead.phone.isNotEmpty()) {
+                appendLine("Phone: ${lead.phone}")
+            }
+            appendLine()
+            appendLine("STATUS")
+            appendLine("───────────────────────────")
+            appendLine(lead.status.uppercase())
+            appendLine()
+            if (!lead.notes.isNullOrEmpty()) {
+                appendLine("NOTES")
+                appendLine("───────────────────────────")
+                appendLine(lead.notes)
+                appendLine()
+            }
+            if (lead.quoteId != null) {
+                appendLine("LINKED QUOTE")
+                appendLine("───────────────────────────")
+                appendLine("Quote ID: ${lead.quoteId}")
+                appendLine()
+            }
+            appendLine("═══════════════════════════")
+        }
+        
+        // Show in dialog
+        android.app.AlertDialog.Builder(requireContext())
+            .setTitle("Lead: ${lead.name}")
+            .setMessage(details)
+            .setPositiveButton("Close", null)
+            .setNeutralButton("Update Status") { _, _ ->
+                // TODO: Show status update dialog
+                Toast.makeText(requireContext(), "Status update coming soon", Toast.LENGTH_SHORT).show()
+            }
+            .show()
     }
     
     private fun setupClickListeners() {

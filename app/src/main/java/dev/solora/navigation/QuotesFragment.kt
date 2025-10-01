@@ -205,7 +205,9 @@ class QuotesFragment : Fragment() {
     private fun setupViewTab() {
         // Setup RecyclerView
         quotesAdapter = QuotesListAdapter { quote ->
-            showQuoteDetails(quote)
+            // Navigate to quote detail page
+            val bundle = Bundle().apply { putString("id", quote.id) }
+            findNavController().navigate(R.id.quoteDetailFragment, bundle)
         }
         rvQuotesList.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
         rvQuotesList.adapter = quotesAdapter
@@ -448,96 +450,6 @@ class QuotesFragment : Fragment() {
         }
     }
     
-    private fun showQuoteDetails(quote: dev.solora.data.FirebaseQuote) {
-        // Calculate panels and inverter from saved quote data
-        val panels = (quote.systemKwp * 1000 / quote.panelWatt).toInt()
-        val inverter = quote.systemKwp * 0.8
-        
-        // Format date
-        val dateText = quote.createdAt?.toDate()?.let {
-            java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale.getDefault()).format(it)
-        } ?: "Unknown date"
-        
-        // Build detailed message with company info from quote
-        val details = buildString {
-            appendLine("═══════════════════════════")
-            appendLine("QUOTE DETAILS")
-            appendLine("═══════════════════════════")
-            appendLine()
-            appendLine("Reference: ${quote.reference}")
-            appendLine("Date: $dateText")
-            appendLine()
-            appendLine("CLIENT INFORMATION")
-            appendLine("───────────────────────────")
-            appendLine("Name: ${quote.clientName}")
-            appendLine("Address: ${quote.address}")
-            appendLine()
-            appendLine("SYSTEM SPECIFICATIONS")
-            appendLine("───────────────────────────")
-            appendLine("System Size: ${String.format("%.2f", quote.systemKwp)} kW")
-            appendLine("Number of Panels: $panels")
-            appendLine("Panel Wattage: ${quote.panelWatt}W")
-            appendLine("Inverter Size: ${String.format("%.2f", inverter)} kW")
-            appendLine()
-            appendLine("FINANCIAL DETAILS")
-            appendLine("───────────────────────────")
-            appendLine("Monthly Savings: R ${String.format("%.2f", quote.monthlySavings)}")
-            appendLine("Annual Savings: R ${String.format("%.2f", quote.monthlySavings * 12)}")
-            appendLine("Payback Period: ${quote.paybackMonths} months")
-            appendLine()
-            quote.averageAnnualIrradiance?.let { irradiance ->
-                appendLine("NASA SOLAR DATA")
-                appendLine("───────────────────────────")
-                appendLine("Solar Irradiance: ${String.format("%.2f", irradiance)} kWh/m²/day")
-                quote.averageAnnualSunHours?.let { sunHours ->
-                    appendLine("Average Sun Hours: ${String.format("%.2f", sunHours)} hours/day")
-                }
-                quote.latitude?.let { lat ->
-                    quote.longitude?.let { lon ->
-                        appendLine("Location: ${String.format("%.4f", lat)}, ${String.format("%.4f", lon)}")
-                    }
-                }
-                appendLine()
-            }
-            if (quote.companyName.isNotEmpty()) {
-                appendLine("COMPANY INFORMATION")
-                appendLine("───────────────────────────")
-                appendLine("Company: ${quote.companyName}")
-                if (quote.companyPhone.isNotEmpty()) {
-                    appendLine("Phone: ${quote.companyPhone}")
-                }
-                if (quote.companyEmail.isNotEmpty()) {
-                    appendLine("Email: ${quote.companyEmail}")
-                }
-                appendLine()
-                appendLine("CONSULTANT DETAILS")
-                appendLine("───────────────────────────")
-                if (quote.consultantName.isNotEmpty()) {
-                    appendLine("Name: ${quote.consultantName}")
-                }
-                if (quote.consultantPhone.isNotEmpty()) {
-                    appendLine("Phone: ${quote.consultantPhone}")
-                }
-                if (quote.consultantEmail.isNotEmpty()) {
-                    appendLine("Email: ${quote.consultantEmail}")
-                }
-            }
-            appendLine()
-            appendLine("═══════════════════════════")
-        }
-        
-        // Show in a dialog instead of toast for better readability
-        android.app.AlertDialog.Builder(requireContext())
-            .setTitle("Quote: ${quote.reference}")
-            .setMessage(details)
-            .setPositiveButton("Close", null)
-            .setNeutralButton("View Full Details") { _, _ ->
-                // Navigate to quote detail fragment
-                val bundle = Bundle().apply { putString("id", quote.id) }
-                findNavController().navigate(R.id.quoteDetailFragment, bundle)
-            }
-            .show()
-    }
 }
 
 // QuotesListAdapter for RecyclerView
