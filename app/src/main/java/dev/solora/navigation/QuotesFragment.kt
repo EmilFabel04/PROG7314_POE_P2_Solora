@@ -212,15 +212,25 @@ class QuotesFragment : Fragment() {
         
         // Observe quotes from ViewModel
         viewLifecycleOwner.lifecycleScope.launch {
-            quotesViewModel.quotes.collect { quotes ->
-                if (quotes.isEmpty()) {
-                    layoutEmptyQuotes.visibility = View.VISIBLE
-                    rvQuotesList.visibility = View.GONE
-                } else {
-                    layoutEmptyQuotes.visibility = View.GONE
-                    rvQuotesList.visibility = View.VISIBLE
-                    quotesAdapter.submitList(quotes)
+            try {
+                quotesViewModel.quotes.collect { quotes ->
+                    android.util.Log.d("QuotesFragment", "Quotes updated: ${quotes.size} quotes")
+                    
+                    if (quotes.isEmpty()) {
+                        layoutEmptyQuotes.visibility = View.VISIBLE
+                        rvQuotesList.visibility = View.GONE
+                        android.util.Log.d("QuotesFragment", "Showing empty state")
+                    } else {
+                        layoutEmptyQuotes.visibility = View.GONE
+                        rvQuotesList.visibility = View.VISIBLE
+                        quotesAdapter.submitList(quotes)
+                        android.util.Log.d("QuotesFragment", "Displaying ${quotes.size} quotes in RecyclerView")
+                    }
                 }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                android.util.Log.d("QuotesFragment", "Quotes observation cancelled")
+            } catch (e: Exception) {
+                android.util.Log.e("QuotesFragment", "Error observing quotes", e)
             }
         }
     }

@@ -159,17 +159,28 @@ class LeadsFragment : Fragment() {
     
     private fun observeLeads() {
         viewLifecycleOwner.lifecycleScope.launch {
-            leadsViewModel.leads.collect { leads ->
-                leadsAdapter.submitList(leads)
-                
-                // Show/hide empty state
-                if (leads.isEmpty()) {
-                    rvLeads.visibility = View.GONE
-                    layoutEmptyLeads.visibility = View.VISIBLE
-                } else {
-                    rvLeads.visibility = View.VISIBLE
-                    layoutEmptyLeads.visibility = View.GONE
+            try {
+                android.util.Log.d("LeadsFragment", "Starting to observe leads")
+                leadsViewModel.leads.collect { leads ->
+                    android.util.Log.d("LeadsFragment", "Leads updated: ${leads.size} leads received")
+                    leadsAdapter.submitList(leads)
+                    
+                    // Show/hide empty state
+                    if (leads.isEmpty()) {
+                        rvLeads.visibility = View.GONE
+                        layoutEmptyLeads.visibility = View.VISIBLE
+                        android.util.Log.d("LeadsFragment", "Showing empty state (no leads)")
+                    } else {
+                        rvLeads.visibility = View.VISIBLE
+                        layoutEmptyLeads.visibility = View.GONE
+                        android.util.Log.d("LeadsFragment", "Displaying ${leads.size} leads in RecyclerView")
+                    }
                 }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                android.util.Log.d("LeadsFragment", "Leads observation cancelled")
+            } catch (e: Exception) {
+                android.util.Log.e("LeadsFragment", "Error observing leads", e)
+                Toast.makeText(requireContext(), "Error loading leads: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
