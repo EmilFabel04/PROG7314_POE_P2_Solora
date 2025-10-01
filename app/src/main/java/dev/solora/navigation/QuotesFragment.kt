@@ -511,16 +511,6 @@ class QuotesListAdapter(
         }
     }
     
-    class QuoteDiffCallback : androidx.recyclerview.widget.DiffUtil.ItemCallback<dev.solora.data.FirebaseQuote>() {
-        override fun areItemsTheSame(oldItem: dev.solora.data.FirebaseQuote, newItem: dev.solora.data.FirebaseQuote): Boolean {
-            return oldItem.id == newItem.id
-        }
-        
-        override fun areContentsTheSame(oldItem: dev.solora.data.FirebaseQuote, newItem: dev.solora.data.FirebaseQuote): Boolean {
-            return oldItem == newItem
-        }
-    }
-    
     // Temporary NASA API test method
     private fun testNasaApi() {
         viewLifecycleOwner.lifecycleScope.launch {
@@ -547,6 +537,16 @@ class QuotesListAdapter(
                 Toast.makeText(requireContext(), "NASA API Error: ${e.message}", Toast.LENGTH_LONG).show()
                 android.util.Log.e("QuotesFragment", "NASA API Test Exception: ${e.message}", e)
             }
+        }
+    }
+    
+    class QuoteDiffCallback : androidx.recyclerview.widget.DiffUtil.ItemCallback<dev.solora.data.FirebaseQuote>() {
+        override fun areItemsTheSame(oldItem: dev.solora.data.FirebaseQuote, newItem: dev.solora.data.FirebaseQuote): Boolean {
+            return oldItem.id == newItem.id
+        }
+        
+        override fun areContentsTheSame(oldItem: dev.solora.data.FirebaseQuote, newItem: dev.solora.data.FirebaseQuote): Boolean {
+            return oldItem == newItem
         }
     }
 }
