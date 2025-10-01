@@ -206,6 +206,8 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                     dev.solora.settings.AppSettings()
                 ).value.companySettings
                 
+                android.util.Log.d("QuotesViewModel", "Saving quote with panelWatt=${calculation.panelWatt}W (from calculation)")
+                
                 val quote = FirebaseQuote(
                     reference = reference,
                     clientName = clientName,
