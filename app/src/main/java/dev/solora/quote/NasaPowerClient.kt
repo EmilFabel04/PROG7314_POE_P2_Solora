@@ -148,6 +148,7 @@ class NasaPowerClient {
                 averageAnnualSunHours = totalSunHours / 12
             )
 
+            android.util.Log.d("NasaPowerClient", "NASA data calculated: irradiance=${locationData.averageAnnualIrradiance}, sunHours=${locationData.averageAnnualSunHours}")
             Result.success(locationData)
             
         } catch (e: Exception) {
