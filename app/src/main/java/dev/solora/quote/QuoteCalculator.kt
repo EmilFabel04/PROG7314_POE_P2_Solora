@@ -166,11 +166,17 @@ object QuoteCalculator {
     ): DetailedAnalysis? {
         val location = inputs.location ?: return null
         
+        android.util.Log.d("QuoteCalculator", "Getting NASA data for lat=${location.latitude}, lon=${location.longitude}")
+        
         // Get NASA solar data
         val nasaDataResult = nasaClient.getSolarData(location.latitude, location.longitude)
-        if (nasaDataResult.isFailure) return null
+        if (nasaDataResult.isFailure) {
+            android.util.Log.e("QuoteCalculator", "NASA API failed in calculateDetailedAnalysis: ${nasaDataResult.exceptionOrNull()?.message}")
+            return null
+        }
         
         val nasaData = nasaDataResult.getOrNull() ?: return null
+        android.util.Log.d("QuoteCalculator", "NASA data retrieved: irradiance=${nasaData.averageAnnualIrradiance}, sunHours=${nasaData.averageAnnualSunHours}")
         
         // Calculate monthly generation
         val monthlyGeneration = mutableMapOf<Int, Double>()

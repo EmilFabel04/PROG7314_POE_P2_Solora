@@ -154,6 +154,15 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                 result.fold(
                     onSuccess = { outputs ->
                         android.util.Log.d("QuotesViewModel", "Calculation successful: ${outputs.systemKw}kW system, ${outputs.panels} panels, R${outputs.monthlySavingsRands} savings")
+                        
+                        // Debug NASA data
+                        if (outputs.detailedAnalysis?.locationData != null) {
+                            val nasaData = outputs.detailedAnalysis.locationData
+                            android.util.Log.d("QuotesViewModel", "NASA data in calculation: irradiance=${nasaData.averageAnnualIrradiance}, sunHours=${nasaData.averageAnnualSunHours}")
+                        } else {
+                            android.util.Log.w("QuotesViewModel", "WARNING: No NASA data in detailedAnalysis!")
+                        }
+                        
                         _lastCalculation.value = outputs
                         _calculationState.value = CalculationState.Success(outputs)
                     },
@@ -228,6 +237,12 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                 ).value.companySettings
                 
                 android.util.Log.d("QuotesViewModel", "Saving quote with panelWatt=${calculation.panelWatt}W (from calculation)")
+                
+                // Debug NASA data before saving
+                val nasaData = calculation.detailedAnalysis?.locationData
+                android.util.Log.d("QuotesViewModel", "NASA data for saving: irradiance=${nasaData?.averageAnnualIrradiance}, sunHours=${nasaData?.averageAnnualSunHours}")
+                android.util.Log.d("QuotesViewModel", "detailedAnalysis is null: ${calculation.detailedAnalysis == null}")
+                android.util.Log.d("QuotesViewModel", "locationData is null: ${nasaData == null}")
                 
                 val quote = FirebaseQuote(
                     reference = reference,
