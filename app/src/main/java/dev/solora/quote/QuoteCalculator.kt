@@ -174,10 +174,10 @@ object QuoteCalculator {
         
         android.util.Log.d("QuoteCalculator", "Getting NASA data for lat=${location.latitude}, lon=${location.longitude}")
         
-        // Get NASA solar data
-        val nasaDataResult = nasaClient.getSolarData(location.latitude, location.longitude)
+        // Get NASA solar data with fallback
+        val nasaDataResult = nasaClient.getSolarDataWithFallback(location.latitude, location.longitude)
         if (nasaDataResult.isFailure) {
-            android.util.Log.e("QuoteCalculator", "NASA API failed in calculateDetailedAnalysis: ${nasaDataResult.exceptionOrNull()?.message}")
+            android.util.Log.e("QuoteCalculator", "NASA API failed even with fallback: ${nasaDataResult.exceptionOrNull()?.message}")
             return null
         }
         

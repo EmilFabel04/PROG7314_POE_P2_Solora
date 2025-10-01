@@ -472,7 +472,7 @@ class QuotesFragment : Fragment() {
                 
                 // Test with Cape Town coordinates
                 val nasaClient = dev.solora.quote.NasaPowerClient()
-                val result = nasaClient.getSolarData(-33.9249, 18.4241) // Cape Town
+                val result = nasaClient.getSolarDataWithFallback(-33.9249, 18.4241) // Cape Town
                 
                 if (result.isSuccess) {
                     val data = result.getOrNull()
