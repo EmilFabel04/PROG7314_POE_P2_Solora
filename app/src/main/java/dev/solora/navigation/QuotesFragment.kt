@@ -388,7 +388,7 @@ class QuotesFragment : Fragment() {
                         appendLine("Number of Panels: ${(quote.systemKwp * 1000 / quote.panelWatt).toInt()}")
                         appendLine("Total System Size: ${String.format("%.1f", quote.systemKwp)} kW")
                         appendLine("Recommended Inverter: ${String.format("%.1f", quote.systemKwp * 0.8)} kW")
-                        appendLine("Estimated Monthly Savings: R ${String.format("%.2f", quote.savingsFirstYear)}")
+                        appendLine("Estimated Monthly Savings: R ${String.format("%.2f", quote.monthlySavings)}")
                     }
                     
                     // Pre-fill client address from calculation
@@ -433,14 +433,16 @@ class QuotesFragment : Fragment() {
         // Calculate panels and inverter from saved quote data
         val panels = (quote.systemKwp * 1000 / quote.panelWatt).toInt()
         val inverter = quote.systemKwp * 0.8
-        val monthlySavings = quote.savingsFirstYear / 12
         
         // Format date
         val dateText = quote.createdAt?.toDate()?.let {
             java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale.getDefault()).format(it)
         } ?: "Unknown date"
         
-        // Build detailed message with company info
+        // Get current settings for company info
+        val currentSettings = settingsViewModel.settings.value
+        
+        // Build detailed message with company info from settings
         val details = buildString {
             appendLine("═══════════════════════════")
             appendLine("QUOTE DETAILS")
@@ -463,37 +465,51 @@ class QuotesFragment : Fragment() {
             appendLine()
             appendLine("FINANCIAL DETAILS")
             appendLine("───────────────────────────")
-            appendLine("Monthly Savings: R ${String.format("%.2f", monthlySavings)}")
-            appendLine("Annual Savings: R ${String.format("%.2f", quote.savingsFirstYear)}")
+            appendLine("Monthly Savings: R ${String.format("%.2f", quote.monthlySavings)}")
+            appendLine("Annual Savings: R ${String.format("%.2f", quote.monthlySavings * 12)}")
             appendLine("Payback Period: ${quote.paybackMonths} months")
             appendLine()
-            if (quote.companyName.isNotEmpty()) {
+            quote.averageAnnualIrradiance?.let { irradiance ->
+                appendLine("NASA SOLAR DATA")
+                appendLine("───────────────────────────")
+                appendLine("Solar Irradiance: ${String.format("%.2f", irradiance)} kWh/m²/day")
+                quote.averageAnnualSunHours?.let { sunHours ->
+                    appendLine("Average Sun Hours: ${String.format("%.2f", sunHours)} hours/day")
+                }
+                quote.latitude?.let { lat ->
+                    quote.longitude?.let { lon ->
+                        appendLine("Location: ${String.format("%.4f", lat)}, ${String.format("%.4f", lon)}")
+                    }
+                }
+                appendLine()
+            }
+            if (currentSettings.companySettings.companyName.isNotEmpty()) {
                 appendLine("COMPANY INFORMATION")
                 appendLine("───────────────────────────")
-                appendLine("Company: ${quote.companyName}")
-                if (quote.companyAddress.isNotEmpty()) {
-                    appendLine("Address: ${quote.companyAddress}")
+                appendLine("Company: ${currentSettings.companySettings.companyName}")
+                if (currentSettings.companySettings.companyAddress.isNotEmpty()) {
+                    appendLine("Address: ${currentSettings.companySettings.companyAddress}")
                 }
-                if (quote.companyPhone.isNotEmpty()) {
-                    appendLine("Phone: ${quote.companyPhone}")
+                if (currentSettings.companySettings.companyPhone.isNotEmpty()) {
+                    appendLine("Phone: ${currentSettings.companySettings.companyPhone}")
                 }
-                if (quote.companyEmail.isNotEmpty()) {
-                    appendLine("Email: ${quote.companyEmail}")
+                if (currentSettings.companySettings.companyEmail.isNotEmpty()) {
+                    appendLine("Email: ${currentSettings.companySettings.companyEmail}")
                 }
                 appendLine()
                 appendLine("CONSULTANT DETAILS")
                 appendLine("───────────────────────────")
-                if (quote.consultantName.isNotEmpty()) {
-                    appendLine("Name: ${quote.consultantName}")
+                if (currentSettings.companySettings.consultantName.isNotEmpty()) {
+                    appendLine("Name: ${currentSettings.companySettings.consultantName}")
                 }
-                if (quote.consultantPhone.isNotEmpty()) {
-                    appendLine("Phone: ${quote.consultantPhone}")
+                if (currentSettings.companySettings.consultantPhone.isNotEmpty()) {
+                    appendLine("Phone: ${currentSettings.companySettings.consultantPhone}")
                 }
-                if (quote.consultantEmail.isNotEmpty()) {
-                    appendLine("Email: ${quote.consultantEmail}")
+                if (currentSettings.companySettings.consultantEmail.isNotEmpty()) {
+                    appendLine("Email: ${currentSettings.companySettings.consultantEmail}")
                 }
-                if (quote.consultantLicense.isNotEmpty()) {
-                    appendLine("License: ${quote.consultantLicense}")
+                if (currentSettings.companySettings.consultantLicense.isNotEmpty()) {
+                    appendLine("License: ${currentSettings.companySettings.consultantLicense}")
                 }
             }
             appendLine()
@@ -545,7 +561,7 @@ class QuotesListAdapter(
             tvClientName.text = quote.clientName
             tvClientAddress.text = quote.address
             tvSystemSize.text = "${String.format("%.1f", quote.systemKwp)} kW"
-            tvSavings.text = "R ${String.format("%.0f", quote.savingsFirstYear / 12)}"
+            tvSavings.text = "R ${String.format("%.0f", quote.monthlySavings)}"
             
             // Format date
             val dateText = quote.createdAt?.toDate()?.let {

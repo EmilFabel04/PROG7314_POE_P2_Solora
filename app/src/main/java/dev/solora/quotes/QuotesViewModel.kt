@@ -199,50 +199,30 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     ) {
         viewModelScope.launch {
             try {
-                // Get company settings
-                val companySettings = settingsRepository.settings.stateIn(
-                    viewModelScope,
-                    SharingStarted.WhileSubscribed(5000),
-                    dev.solora.settings.AppSettings()
-                ).value.companySettings
-                
                 android.util.Log.d("QuotesViewModel", "Saving quote with panelWatt=${calculation.panelWatt}W (from calculation)")
                 
                 val quote = FirebaseQuote(
                     reference = reference,
                     clientName = clientName,
                     address = address,
+                    // Input data
                     usageKwh = calculation.monthlyUsageKwh,
                     billRands = calculation.monthlyBillRands,
                     tariff = calculation.tariffRPerKwh,
                     panelWatt = calculation.panelWatt,
-                    sunHours = calculation.sunHoursPerDay,
-                    systemKwp = calculation.systemKw,
-                    estimatedGeneration = calculation.estimatedMonthlyGeneration,
-                    paybackMonths = calculation.paybackMonths,
-                    savingsFirstYear = calculation.monthlySavingsRands * 12,
-                    dateEpoch = System.currentTimeMillis(),
-                    userId = FirebaseAuth.getInstance().currentUser?.uid ?: "",
-                    // Add NASA data if available
+                    // Location data
                     latitude = calculation.detailedAnalysis?.locationData?.latitude,
                     longitude = calculation.detailedAnalysis?.locationData?.longitude,
+                    // NASA API solar data
                     averageAnnualIrradiance = calculation.detailedAnalysis?.locationData?.averageAnnualIrradiance,
                     averageAnnualSunHours = calculation.detailedAnalysis?.locationData?.averageAnnualSunHours,
-                    optimalMonth = calculation.detailedAnalysis?.optimalMonth,
-                    optimalMonthIrradiance = calculation.detailedAnalysis?.optimalMonthIrradiance,
-                    temperature = calculation.detailedAnalysis?.averageTemperature,
-                    windSpeed = calculation.detailedAnalysis?.averageWindSpeed,
-                    humidity = calculation.detailedAnalysis?.averageHumidity,
-                    // Add company information
-                    companyName = companySettings.companyName,
-                    companyAddress = companySettings.companyAddress,
-                    companyPhone = companySettings.companyPhone,
-                    companyEmail = companySettings.companyEmail,
-                    companyWebsite = companySettings.companyWebsite,
-                    consultantName = companySettings.consultantName,
-                    consultantPhone = companySettings.consultantPhone,
-                    consultantEmail = companySettings.consultantEmail,
-                    consultantLicense = companySettings.consultantLicense
+                    // Calculation results
+                    systemKwp = calculation.systemKw,
+                    estimatedGeneration = calculation.estimatedMonthlyGeneration,
+                    monthlySavings = calculation.monthlySavingsRands,
+                    paybackMonths = calculation.paybackMonths,
+                    // Metadata
+                    userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
                 )
 
                 val result = firebaseRepository.saveQuote(quote)

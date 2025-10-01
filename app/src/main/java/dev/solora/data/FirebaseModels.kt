@@ -11,37 +11,24 @@ data class FirebaseQuote(
     val reference: String = "",
     val clientName: String = "",
     val address: String = "",
+    // Input data
     val usageKwh: Double? = null,
     val billRands: Double? = null,
     val tariff: Double = 0.0,
     val panelWatt: Int = 0,
-    val sunHours: Double = 0.0,
-    val systemKwp: Double = 0.0,
-    val estimatedGeneration: Double = 0.0,
-    val paybackMonths: Int = 0,
-    val savingsFirstYear: Double = 0.0,
-    val dateEpoch: Long = 0L,
-    val userId: String = "", // Link to Firebase Auth user
-    // NASA API data
+    // Location data
     val latitude: Double? = null,
     val longitude: Double? = null,
+    // NASA API solar data
     val averageAnnualIrradiance: Double? = null,
     val averageAnnualSunHours: Double? = null,
-    val optimalMonth: Int? = null,
-    val optimalMonthIrradiance: Double? = null,
-    val temperature: Double? = null,
-    val windSpeed: Double? = null,
-    val humidity: Double? = null,
-    // Company information
-    val companyName: String = "",
-    val companyAddress: String = "",
-    val companyPhone: String = "",
-    val companyEmail: String = "",
-    val companyWebsite: String = "",
-    val consultantName: String = "",
-    val consultantPhone: String = "",
-    val consultantEmail: String = "",
-    val consultantLicense: String = "",
+    // Calculation results
+    val systemKwp: Double = 0.0,
+    val estimatedGeneration: Double = 0.0,
+    val monthlySavings: Double = 0.0,
+    val paybackMonths: Int = 0,
+    // Metadata
+    val userId: String = "", // Link to consultant
     @ServerTimestamp
     val createdAt: Timestamp? = null,
     @ServerTimestamp
