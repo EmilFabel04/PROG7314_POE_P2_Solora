@@ -5,6 +5,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.tasks.await
 
 class FirebaseRepository {
@@ -32,27 +34,48 @@ class FirebaseRepository {
         }
     }
 
-    suspend fun getQuotes(): Flow<List<FirebaseQuote>> = flow {
-        try {
-            val userId = getCurrentUserId() ?: throw Exception("User not authenticated")
-            android.util.Log.d("FirebaseRepository", "Fetching quotes for user: $userId")
+    suspend fun getQuotes(): Flow<List<FirebaseQuote>> = callbackFlow {
+        val userId = getCurrentUserId()
+        if (userId == null) {
+            android.util.Log.w("FirebaseRepository", "No authenticated user for quotes")
+            if (!isClosedForSend) {
+                trySend(emptyList())
+            }
+            awaitClose { }
+        } else {
+            android.util.Log.d("FirebaseRepository", "Setting up real-time listener for quotes (user: $userId)")
             
-            val snapshot = firestore.collection("quotes")
+            val listener = firestore.collection("quotes")
                 .whereEqualTo("userId", userId)
                 .orderBy("createdAt", Query.Direction.DESCENDING)
-                .get()
-                .await()
+                .addSnapshotListener { snapshot, error ->
+                    if (error != null) {
+                        android.util.Log.e("FirebaseRepository", "Error listening to quotes: ${error.message}", error)
+                        if (!isClosedForSend) {
+                            trySend(emptyList())
+                        }
+                        return@addSnapshotListener
+                    }
+                    
+                    if (snapshot != null) {
+                        val quotes = snapshot.documents.mapNotNull { doc ->
+                            doc.toObject(FirebaseQuote::class.java)?.copy(id = doc.id)
+                        }
+                        android.util.Log.d("FirebaseRepository", "Real-time update: ${quotes.size} quotes for user")
+                        if (!isClosedForSend) {
+                            trySend(quotes)
+                        }
+                    } else {
+                        if (!isClosedForSend) {
+                            trySend(emptyList())
+                        }
+                    }
+                }
             
-            val quotes = snapshot.documents.mapNotNull { doc ->
-                doc.toObject(FirebaseQuote::class.java)?.copy(id = doc.id)
+            awaitClose {
+                android.util.Log.d("FirebaseRepository", "Removing quotes listener")
+                listener.remove()
             }
-            
-            android.util.Log.d("FirebaseRepository", "Retrieved ${quotes.size} quotes for user")
-            
-            emit(quotes)
-        } catch (e: Exception) {
-            android.util.Log.e("FirebaseRepository", "Error fetching quotes: ${e.message}", e)
-            emit(emptyList())
         }
     }
 
@@ -127,23 +150,48 @@ class FirebaseRepository {
         }
     }
 
-    suspend fun getLeads(): Flow<List<FirebaseLead>> = flow {
-        try {
-            val userId = getCurrentUserId() ?: throw Exception("User not authenticated")
+    suspend fun getLeads(): Flow<List<FirebaseLead>> = callbackFlow {
+        val userId = getCurrentUserId()
+        if (userId == null) {
+            android.util.Log.w("FirebaseRepository", "No authenticated user for leads")
+            if (!isClosedForSend) {
+                trySend(emptyList())
+            }
+            awaitClose { }
+        } else {
+            android.util.Log.d("FirebaseRepository", "Setting up real-time listener for leads (user: $userId)")
             
-            val snapshot = firestore.collection("leads")
+            val listener = firestore.collection("leads")
                 .whereEqualTo("userId", userId)
                 .orderBy("createdAt", Query.Direction.DESCENDING)
-                .get()
-                .await()
+                .addSnapshotListener { snapshot, error ->
+                    if (error != null) {
+                        android.util.Log.e("FirebaseRepository", "Error listening to leads: ${error.message}", error)
+                        if (!isClosedForSend) {
+                            trySend(emptyList())
+                        }
+                        return@addSnapshotListener
+                    }
+                    
+                    if (snapshot != null) {
+                        val leads = snapshot.documents.mapNotNull { doc ->
+                            doc.toObject(FirebaseLead::class.java)?.copy(id = doc.id)
+                        }
+                        android.util.Log.d("FirebaseRepository", "Real-time update: ${leads.size} leads for user")
+                        if (!isClosedForSend) {
+                            trySend(leads)
+                        }
+                    } else {
+                        if (!isClosedForSend) {
+                            trySend(emptyList())
+                        }
+                    }
+                }
             
-            val leads = snapshot.documents.mapNotNull { doc ->
-                doc.toObject(FirebaseLead::class.java)?.copy(id = doc.id)
+            awaitClose {
+                android.util.Log.d("FirebaseRepository", "Removing leads listener")
+                listener.remove()
             }
-            
-            emit(leads)
-        } catch (e: Exception) {
-            emit(emptyList())
         }
     }
 
