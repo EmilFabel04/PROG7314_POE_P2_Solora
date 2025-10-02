@@ -9,6 +9,9 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import dev.solora.R
 import dev.solora.profile.ProfileViewModel
+import android.widget.Switch
+import android.view.View.OnClickListener
+import android.content.Context
 
 class ProfileFragment : Fragment() {
     private val profileViewModel: ProfileViewModel by viewModels()
@@ -17,10 +20,25 @@ class ProfileFragment : Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        view.findViewById<View>(R.id.btn_edit_profile).setOnClickListener { findNavController().navigate(R.id.action_to_edit_profile) }
-        view.findViewById<View>(R.id.btn_change_password).setOnClickListener { findNavController().navigate(R.id.action_to_change_password) }
-        view.findViewById<View>(R.id.btn_settings).setOnClickListener { findNavController().navigate(R.id.action_to_settings) }
-        view.findViewById<View>(R.id.btn_logout).setOnClickListener { findNavController().navigate(R.id.action_start_to_auth) }
+        val open = OnClickListener { idView ->
+            when (idView.id) {
+                R.id.row_edit_profile -> findNavController().navigate(R.id.action_to_edit_profile)
+                R.id.row_change_password -> findNavController().navigate(R.id.action_to_change_password)
+                R.id.row_authentication -> findNavController().navigate(R.id.action_to_authentication)
+                R.id.row_logout -> findNavController().navigate(R.id.action_start_to_auth)
+            }
+        }
+        view.findViewById<View>(R.id.row_edit_profile).setOnClickListener(open)
+        view.findViewById<View>(R.id.row_change_password).setOnClickListener(open)
+        view.findViewById<View>(R.id.row_authentication).setOnClickListener(open)
+        view.findViewById<View>(R.id.row_logout).setOnClickListener(open)
+
+        val shared = requireContext().getSharedPreferences("prefs", Context.MODE_PRIVATE)
+        val switchPush = view.findViewById<Switch>(R.id.switch_push)
+        switchPush.isChecked = shared.getBoolean("push_enabled", true)
+        switchPush.setOnCheckedChangeListener { _, isChecked ->
+            shared.edit().putBoolean("push_enabled", isChecked).apply()
+        }
     }
 }
 
