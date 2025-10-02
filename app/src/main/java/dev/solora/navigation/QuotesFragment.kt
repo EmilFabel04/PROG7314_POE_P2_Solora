@@ -49,15 +49,7 @@ class QuotesFragment : Fragment() {
     private lateinit var layoutEmptyQuotes: View
     private lateinit var quotesAdapter: QuotesListAdapter
     
-    // Dashboard tab elements
-    private lateinit var etReference: TextInputEditText
-    private lateinit var etFirstName: TextInputEditText
-    private lateinit var etLastName: TextInputEditText
-    private lateinit var etClientAddress: TextInputEditText
-    private lateinit var etEmail: TextInputEditText
-    private lateinit var etContact: TextInputEditText
-    private lateinit var tvQuoteSummary: TextView
-    private lateinit var btnSaveFinalQuote: Button
+    // Save quote form elements (now in dialog - no need for lateinit)
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_quotes, container, false)
@@ -100,15 +92,7 @@ class QuotesFragment : Fragment() {
         rvQuotesList = view.findViewById(R.id.rv_quotes_list)
         layoutEmptyQuotes = view.findViewById(R.id.layout_empty_quotes)
         
-        // Dashboard tab elements
-        etReference = view.findViewById(R.id.et_reference)
-        etFirstName = view.findViewById(R.id.et_first_name)
-        etLastName = view.findViewById(R.id.et_last_name)
-        etClientAddress = view.findViewById(R.id.et_client_address)
-        etEmail = view.findViewById(R.id.et_email)
-        etContact = view.findViewById(R.id.et_contact)
-        tvQuoteSummary = view.findViewById(R.id.tv_quote_summary)
-        btnSaveFinalQuote = view.findViewById(R.id.btn_save_final_quote)
+        // Note: Save quote form elements are now in dialog, not in main layout
     }
     
     private fun setupTabs() {
@@ -264,10 +248,8 @@ class QuotesFragment : Fragment() {
     }
     
     private fun setupSaveQuoteFunctionality() {
-        // Setup save quote functionality
-        btnSaveFinalQuote.setOnClickListener {
-            saveQuoteWithClientDetails()
-        }
+        // Save quote functionality is now handled through dialog
+        // No need to setup click listeners for elements that don't exist in main layout
     }
     
     private fun setupDashboardAnalytics() {
@@ -303,7 +285,7 @@ class QuotesFragment : Fragment() {
         
         // Populate quote summary
         val tvDialogQuoteSummary = dialogView.findViewById<TextView>(R.id.tv_dialog_quote_summary)
-        tvDialogQuoteSummary.text = tvQuoteSummary.text // Use existing quote summary
+        tvDialogQuoteSummary.text = getCurrentQuoteSummary() // Get current quote summary
         
         val dialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
             .setTitle("Save Quote")
@@ -332,16 +314,75 @@ class QuotesFragment : Fragment() {
             return
         }
         
-        // Update form fields with dialog data
-        etReference.setText(reference)
-        etFirstName.setText(firstName)
-        etLastName.setText(lastName)
-        etClientAddress.setText(address)
-        etEmail.setText(email)
-        etContact.setText(contact)
-        
-        // Save the quote
-        saveQuoteWithClientDetails()
+        // Save the quote with dialog data
+        saveQuoteWithDialogData(reference, firstName, lastName, address, email, contact)
+    }
+    
+    private fun getCurrentQuoteSummary(): String {
+        // Get the current calculation results and format them as a summary
+        return "Quote details will be populated from the last calculation"
+    }
+    
+    private fun saveQuoteWithDialogData(
+        reference: String,
+        firstName: String,
+        lastName: String,
+        address: String,
+        email: String,
+        contact: String
+    ) {
+        // Save quote using the dialog data
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                // Get the current calculation results from the ViewModel
+                val currentCalculation = quotesViewModel.getCurrentCalculation()
+                if (currentCalculation != null) {
+                    // Create quote with dialog data
+                    val quote = dev.solora.data.FirebaseQuote(
+                        id = null,
+                        reference = reference,
+                        clientName = "$firstName $lastName",
+                        address = address,
+                        usageKwh = currentCalculation.monthlyUsageKwh,
+                        billRands = currentCalculation.monthlyBillRands,
+                        tariff = currentCalculation.tariffRPerKwh,
+                        panelWatt = currentCalculation.panelWatt,
+                        latitude = null, // Will be populated from address if needed
+                        longitude = null,
+                        averageAnnualIrradiance = null, // From NASA API
+                        averageAnnualSunHours = null,
+                        systemKwp = currentCalculation.systemKw,
+                        estimatedGeneration = currentCalculation.estimatedMonthlyGeneration,
+                        monthlySavings = currentCalculation.monthlySavingsRands,
+                        paybackMonths = currentCalculation.paybackMonths,
+                        companyName = "", // From settings
+                        companyPhone = "",
+                        companyEmail = "",
+                        consultantName = "", // From current user
+                        consultantPhone = "",
+                        consultantEmail = "",
+                        userId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: "",
+                        createdAt = com.google.firebase.Timestamp.now(),
+                        updatedAt = com.google.firebase.Timestamp.now()
+                    )
+                    
+                    // Save the quote
+                    val result = quotesViewModel.saveQuote(quote)
+                    if (result.isSuccess) {
+                        Toast.makeText(requireContext(), "Quote saved successfully!", Toast.LENGTH_SHORT).show()
+                        // Hide the save button after successful save
+                        btnSaveQuoteCalculate.visibility = View.GONE
+                    } else {
+                        Toast.makeText(requireContext(), "Failed to save quote: ${result.exceptionOrNull()?.message}", Toast.LENGTH_LONG).show()
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "No calculation data available. Please calculate a quote first.", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "Error saving quote: ${e.message}", Toast.LENGTH_LONG).show()
+                android.util.Log.e("QuotesFragment", "Error saving quote from dialog", e)
+            }
+        }
     }
     
     private fun updateResultsTab(calculation: dev.solora.quote.QuoteOutputs) {

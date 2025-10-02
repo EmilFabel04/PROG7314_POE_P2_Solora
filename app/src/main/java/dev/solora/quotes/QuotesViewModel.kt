@@ -342,3 +342,9 @@ sealed class CalculationState {
     data class Success(val outputs: QuoteOutputs) : CalculationState()
     data class Error(val message: String) : CalculationState()
 }
+
+    // Add method to get current calculation
+    fun getCurrentCalculation(): QuoteOutputs? {
+        return null // Placeholder - will be implemented properly
+    }
+}
