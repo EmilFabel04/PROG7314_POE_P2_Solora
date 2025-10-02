@@ -4,4 +4,16 @@
         <item name="android:fontFamily">@font/poppins</item>
         <item name="android:textSize">10sp</item>
     </style>
+
+    <style name="CustomHintStyle" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="fontFamily">@font/poppins</item>
+        <item name="android:fontFamily">@font/poppins</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:textColor">@color/solora_orange</item>
+    </style>
+
+    <style name="CustomSuffixStyle" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="fontFamily">@font/poppins</item>
+        <item name="android:textColor">@color/solora_input_hint_gray</item>
+    </style>
 </resources>

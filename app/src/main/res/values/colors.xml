@@ -6,7 +6,7 @@
     <color name="solora_on_primary">#FFFFFF</color>
     <color name="solora_on_surface">#1E1E1E</color>
     
-    <!-- Missing Authentication Colors -->
+    <!-- Authentication Colors -->
     <color name="solora_light_grey">#F5F5F5</color>
     <color name="solora_dark_grey">#666666</color>
     <color name="solora_night_gray">#999999</color>
@@ -17,6 +17,9 @@
     <color name="solora_white">#FFFFFF</color>
     <color name="solora_surface">#FAFAFA</color>
     <color name="solora_border">#E0E0E0</color>
+
+    <!-- Input Hint Solora Colors -->
+    <color name="solora_input_hint_gray">#7D7D7D</color>
 </resources>
 
 

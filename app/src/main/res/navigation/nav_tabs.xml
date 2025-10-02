@@ -15,7 +15,7 @@
 
     <fragment
         android:id="@+id/quotesFragment"
-        android:name="dev.solora.navigation.QuotesFragment"
+        android:name="dev.solora.navigation.QuoteFragment"
         android:label="Quotes">
         <action
             android:id="@+id/action_quotes_to_quote_detail"

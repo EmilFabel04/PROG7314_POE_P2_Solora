@@ -76,7 +76,7 @@
                 android:textStyle="bold"
                 android:padding="12dp"
                 android:gravity="center"
-                android:background="@drawable/tab_selected"
+                android:background="@drawable/tab_selected_left"
                 android:clickable="true"
                 android:focusable="true" />
                 

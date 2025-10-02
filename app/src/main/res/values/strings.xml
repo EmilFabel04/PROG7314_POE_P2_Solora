@@ -18,6 +18,8 @@
     <string name="forgot_password_text"><u>Forgot password</u></string>
     <!-- Web client ID from Firebase Console - required for requestIdToken -->
     <string name="default_web_client_id">570014568272-akipotsp9timh1g4tescrdnh71tblmth.apps.googleusercontent.com</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
 
 

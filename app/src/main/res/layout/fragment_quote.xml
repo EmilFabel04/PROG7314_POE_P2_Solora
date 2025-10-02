@@ -3,73 +3,93 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#F5F5F5">
+    android:orientation="vertical">
 
     <!-- Orange Header -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/solora_orange"
+        android:layout_height="120dp"
+        android:background="@drawable/top_nav_bar_background_orange"
         android:orientation="vertical"
         android:padding="20dp">
-        
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="40dp"
             android:text="Solar Quotes"
             android:textColor="@android:color/white"
-            android:textSize="24sp"
-            android:textStyle="bold" />
-            
-        <!-- Tab Row -->
+            android:fontFamily="@font/poppins_bold"
+            android:textSize="30sp" />
+    </LinearLayout>
+
+    <!-- Tab Row -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp">
+
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="16dp">
-            
+            android:id="@+id/tab_calculate"
+            android:layout_width="120dp"
+            android:layout_height="40dp"
+            android:background="@drawable/tab_selected_left"
+            android:clickable="true"
+            android:focusable="true">
+
             <TextView
-                android:id="@+id/tab_calculate"
-                android:layout_width="0dp"
+                android:id="@+id/txt_tab_calculate"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_gravity="center"
+                android:layout_marginLeft="8dp"
                 android:text="calculate quote"
                 android:textColor="@android:color/white"
-                android:textStyle="bold"
-                android:padding="12dp"
-                android:gravity="center"
-                android:background="@drawable/tab_selected"
-                android:clickable="true"
-                android:focusable="true" />
-                
+                android:fontFamily="@font/poppins_medium"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/tab_view"
+            android:layout_width="120dp"
+            android:layout_height="40dp"
+            android:background="@drawable/tab_unselected_middle"
+            android:clickable="true"
+            android:focusable="true" >
+
             <TextView
-                android:id="@+id/tab_view"
-                android:layout_width="0dp"
+                android:id="@+id/txt_tab_view"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_gravity="center"
+                android:layout_marginLeft="23dp"
                 android:text="view quote"
-                android:textColor="@android:color/white"
-                android:alpha="0.7"
-                android:padding="12dp"
-                android:gravity="center"
-                android:background="@drawable/tab_unselected"
-                android:clickable="true"
-                android:focusable="true" />
-                
+                android:textColor="@color/solora_orange"
+                android:fontFamily="@font/poppins_medium"
+                android:textSize="13sp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/tab_dashboard"
+            android:layout_width="120dp"
+            android:layout_height="40dp"
+            android:background="@drawable/tab_unselected_right"
+            android:clickable="true"
+            android:focusable="true">
+
             <TextView
-                android:id="@+id/tab_dashboard"
-                android:layout_width="0dp"
+                android:id="@+id/txt_tab_dashboard"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_gravity="center"
+                android:layout_marginLeft="25dp"
                 android:text="dashboard"
-                android:textColor="@android:color/white"
-                android:alpha="0.7"
-                android:padding="12dp"
-                android:gravity="center"
-                android:background="@drawable/tab_unselected"
-                android:clickable="true"
-                android:focusable="true" />
+                android:textColor="@color/solora_orange"
+                android:fontFamily="@font/poppins_medium"
+                android:textSize="13sp" />
         </LinearLayout>
     </LinearLayout>
 
@@ -78,7 +98,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
-        
+
         <!-- Calculate Quote Tab Content -->
         <ScrollView
             android:id="@+id/content_calculate"
@@ -89,87 +109,132 @@
             android:paddingTop="16dp"
             android:clipToPadding="false"
             android:visibility="visible">
-            
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingBottom="32dp">
-                
+
                 <!-- Calculate Quote Card -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp"
                     app:cardUseCompatPadding="true"
                     android:layout_marginBottom="16dp">
-                    
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:background="#FC8224"
                         android:orientation="vertical"
                         android:padding="20dp">
-                        
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_marginBottom="16dp"
+                            android:fontFamily="@font/poppins_semibold"
                             android:text="Calculate Quote"
-                            android:textStyle="bold"
-                            android:textSize="18sp"
-                            android:layout_marginBottom="16dp" />
-                        
+                            android:textColor="@color/solora_black"
+                            android:textSize="25sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Address"
+                            android:fontFamily="@font/poppins"
+                            android:textSize="16sp"
+                            android:textColor="@color/solora_black"/>
+
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Address"
+                            android:background="@drawable/input_field_background_grey"
+                            app:boxBackgroundMode="none"
                             android:layout_marginBottom="12dp"
-                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-                            
+                            android:hint="Enter the address">
+
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/et_address"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content" />
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:fontFamily="@font/poppins"/>
                         </com.google.android.material.textfield.TextInputLayout>
-                        
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Monthly Usage"
+                            android:fontFamily="@font/poppins"
+                            android:textSize="16sp"
+                            android:textColor="@color/solora_black"/>
+
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Monthly Usage"
+                            android:background="@drawable/input_field_background_grey"
+                            app:boxBackgroundMode="none"
                             android:layout_marginBottom="12dp"
-                            app:suffixText="kWh"
-                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-                            
+                            android:hint="Enter the monthly usage"
+                            app:suffixText="kWh">
+
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/et_usage"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:inputType="numberDecimal" />
+                                android:inputType="numberDecimal"
+                                android:fontFamily="@font/poppins"/>
                         </com.google.android.material.textfield.TextInputLayout>
-                        
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Monthly Bill"
+                            android:fontFamily="@font/poppins"
+                            android:textSize="16sp"
+                            android:textColor="@color/solora_black"/>
+
                         <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Monthly Bill"
+                            android:background="@drawable/input_field_background_grey"
+                            app:boxBackgroundMode="none"
                             android:layout_marginBottom="12dp"
-                            app:prefixText="R "
-                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-                            
+                            android:hint="Enter the monthly bill"
+                            app:prefixText="R ">
+
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/et_bill"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:inputType="numberDecimal" />
+                                android:inputType="numberDecimal"
+                                android:fontFamily="@font/poppins"/>
                         </com.google.android.material.textfield.TextInputLayout>
-                        
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Tariff"
+                            android:fontFamily="@font/poppins"
+                            android:textSize="16sp"
+                            android:textColor="@color/solora_black"/>
+
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Tariff"
+                            android:background="@drawable/input_field_background_grey"
+                            app:boxBackgroundMode="none"
                             android:layout_marginBottom="12dp"
                             app:suffixText="R/kWh"
-                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-                            
+                            app:suffixTextAppearance="@style/CustomSuffixStyle">
+
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/et_tariff"
                                 android:layout_width="match_parent"
@@ -177,32 +242,54 @@
                                 android:inputType="numberDecimal"
                                 android:text="2.50" />
                         </com.google.android.material.textfield.TextInputLayout>
-                        
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Panel Size"
+                            android:fontFamily="@font/poppins"
+                            android:textSize="16sp"
+                            android:textColor="@color/solora_black"/>
+
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Panel Size"
+                            app:boxBackgroundMode="none"
                             android:layout_marginBottom="16dp"
-                            app:suffixText="W"
-                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-                            
+                            app:suffixText="W">
+
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/et_panel"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:background="@drawable/input_field_background_grey"
                                 android:inputType="number"
                                 android:text="420" />
                         </com.google.android.material.textfield.TextInputLayout>
-                        
-                        <Button
+
+                        <LinearLayout
                             android:id="@+id/btn_calculate"
-                            android:layout_width="match_parent"
-                            android:layout_height="56dp"
-                            android:text="calculate"
-                            android:backgroundTint="@color/solora_orange"
-                            android:textColor="@android:color/white"
-                            android:textAllCaps="false"
-                            android:textSize="16sp" />
+                            android:layout_width="250dp"
+                            android:layout_height="50dp"
+                            android:orientation="horizontal"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:layout_gravity="center"
+                            android:layout_marginTop="30dp"
+                            android:layout_marginBottom="24dp"
+                            android:background="@drawable/authentication_button_background_orange">
+
+                            <TextView
+                                android:id="@+id/txt_calculate"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginLeft="90dp"
+                                android:fontFamily="@font/poppins_medium"
+                                android:text="calculate"
+                                android:textColor="@color/solora_on_primary"
+                                android:textSize="14sp"/>
+                        </LinearLayout>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
@@ -425,5 +512,4 @@
             </LinearLayout>
         </ScrollView>
     </FrameLayout>
-
 </LinearLayout>

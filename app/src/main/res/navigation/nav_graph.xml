@@ -42,7 +42,7 @@
 
     <fragment
         android:id="@+id/quotesFragment"
-        android:name="dev.solora.navigation.QuotesFragment" />
+        android:name="dev.solora.navigation.QuoteFragment" />
 
     <fragment
         android:id="@+id/leadsFragment"

@@ -52,6 +52,9 @@
                 app:destination="@id/main_graph"
                 app:popUpTo="@id/auth_graph"
                 app:popUpToInclusive="true" />
+            <action
+                android:id="@+id/action_register_to_login"
+                app:destination="@id/loginFragment" />
         </fragment>
     </navigation>
 

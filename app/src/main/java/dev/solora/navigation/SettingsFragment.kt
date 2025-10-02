@@ -155,13 +155,13 @@ class SettingsFragment : Fragment() {
     private fun updateTabAppearance() {
         when (currentTab) {
             0 -> {
-                tabCalculation.setBackgroundResource(R.drawable.tab_selected)
+                tabCalculation.setBackgroundResource(R.drawable.tab_selected_left)
                 tabCalculation.alpha = 1.0f
                 tabCompany.setBackgroundResource(R.drawable.tab_unselected)
                 tabCompany.alpha = 0.7f
             }
             1 -> {
-                tabCompany.setBackgroundResource(R.drawable.tab_selected)
+                tabCompany.setBackgroundResource(R.drawable.tab_selected_left)
                 tabCompany.alpha = 1.0f
                 tabCalculation.setBackgroundResource(R.drawable.tab_unselected)
                 tabCalculation.alpha = 0.7f
