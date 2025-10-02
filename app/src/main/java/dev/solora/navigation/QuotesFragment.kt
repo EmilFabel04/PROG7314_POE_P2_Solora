@@ -8,10 +8,12 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import android.widget.ScrollView
 import com.google.android.material.textfield.TextInputEditText
 import dev.solora.R
 import dev.solora.quotes.QuotesViewModel
@@ -263,8 +265,10 @@ class QuotesFragment : Fragment() {
     
     private fun setupDashboardTab() {
         // Clear existing content and add dashboard
-        contentDashboard.removeAllViews()
-        contentDashboard.addView(dashboardContent)
+        if (contentDashboard is ViewGroup) {
+            contentDashboard.removeAllViews()
+            contentDashboard.addView(dashboardContent)
+        }
         
         // Initialize dashboard UI elements
         initializeDashboardViews()
