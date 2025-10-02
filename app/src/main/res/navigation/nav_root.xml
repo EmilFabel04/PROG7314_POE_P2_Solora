@@ -75,6 +75,9 @@
                 android:id="@+id/action_to_change_password"
                 app:destination="@+id/changePasswordFragment" />
             <action
+                android:id="@+id/action_to_authentication"
+                app:destination="@+id/authenticationFragment" />
+            <action
                 android:id="@+id/action_to_quote_detail"
                 app:destination="@id/quoteDetailFragment" />
         </fragment>
@@ -98,6 +101,11 @@
             android:id="@+id/changePasswordFragment"
             android:name="dev.solora.navigation.ChangePasswordFragment"
             android:label="Change Password" />
+
+        <fragment
+            android:id="@+id/authenticationFragment"
+            android:name="dev.solora.navigation.AuthenticationFragment"
+            android:label="Authentication" />
 
         <fragment
             android:id="@+id/quoteDetailFragment"
