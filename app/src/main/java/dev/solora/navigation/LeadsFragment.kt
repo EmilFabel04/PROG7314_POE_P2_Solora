@@ -31,7 +31,6 @@ class LeadsFragment : Fragment() {
     private lateinit var layoutEmptyLeads: View
     private lateinit var fabAddLead: FloatingActionButton
     private lateinit var btnAddLeadFallback: Button
-    private lateinit var btnAddLeadHeader: Button
     private lateinit var btnAddLeadEmpty: Button
     private lateinit var overlayAddLead: View
     
@@ -41,9 +40,7 @@ class LeadsFragment : Fragment() {
     private lateinit var etAddress: EditText
     private lateinit var etEmail: EditText
     private lateinit var etContact: EditText
-    private lateinit var spinnerSource: AutoCompleteTextView
     private lateinit var btnAdd: Button
-    private lateinit var btnCancel: Button
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         android.util.Log.d("LeadsFragment", "===== UPDATED LEADS FRAGMENT ONCREATEVIEW CALLED =====")
@@ -72,19 +69,15 @@ class LeadsFragment : Fragment() {
         layoutEmptyLeads = view.findViewById(R.id.layout_empty_leads)
         fabAddLead = view.findViewById(R.id.fab_add_lead)
         btnAddLeadFallback = view.findViewById(R.id.btn_add_lead_fallback)
-        btnAddLeadHeader = view.findViewById(R.id.btn_add_lead_header)
         btnAddLeadEmpty = view.findViewById(R.id.btn_add_lead_empty)
         overlayAddLead = view.findViewById(R.id.overlay_add_lead)
         
         android.util.Log.d("LeadsFragment", "Views initialized. FAB found: ${fabAddLead != null}")
         if (fabAddLead != null) {
-            android.util.Log.d("LeadsFragment", "FAB visibility: ${fabAddLead.visibility}, alpha: ${fabAddLead.alpha}")
-            // Explicitly ensure FAB is visible
-            fabAddLead.visibility = View.VISIBLE
-            fabAddLead.alpha = 1.0f
+            android.util.Log.d("LeadsFragment", "FAB initialized - visibility will be controlled by observeLeads()")
+            android.util.Log.d("LeadsFragment", "FAB initial visibility: ${fabAddLead.visibility}")
             fabAddLead.isClickable = true
             fabAddLead.isFocusable = true
-            android.util.Log.d("LeadsFragment", "FAB visibility set to VISIBLE")
         } else {
             android.util.Log.e("LeadsFragment", "FAB not found in layout!")
             // Show fallback button if FAB doesn't work
@@ -97,14 +90,8 @@ class LeadsFragment : Fragment() {
         etAddress = view.findViewById(R.id.et_address)
         etEmail = view.findViewById(R.id.et_email)
         etContact = view.findViewById(R.id.et_contact)
-        spinnerSource = view.findViewById(R.id.spinner_source)
         btnAdd = view.findViewById(R.id.btn_add)
-        btnCancel = view.findViewById(R.id.btn_cancel)
         
-        // Setup spinner with lead sources
-        val leadSources = arrayOf("Website", "Referral", "Cold Call", "Social Media", "Advertisement", "Other")
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, leadSources)
-        spinnerSource.setAdapter(adapter)
     }
     
     private fun setupRecyclerView() {
@@ -176,9 +163,14 @@ class LeadsFragment : Fragment() {
     private fun setupClickListeners() {
         android.util.Log.d("LeadsFragment", "Setting up click listeners. FAB found: ${::fabAddLead.isInitialized}")
         
-        fabAddLead.setOnClickListener {
-            android.util.Log.d("LeadsFragment", "FAB clicked - showing add lead modal")
-            showAddLeadModal()
+        if (::fabAddLead.isInitialized) {
+            fabAddLead.setOnClickListener {
+                android.util.Log.d("LeadsFragment", "FAB clicked - showing add lead modal")
+                showAddLeadModal()
+            }
+            android.util.Log.d("LeadsFragment", "FAB click listener set up successfully")
+        } else {
+            android.util.Log.e("LeadsFragment", "FAB not initialized - cannot set click listener")
         }
 
         // Also setup fallback button click listener
@@ -187,20 +179,11 @@ class LeadsFragment : Fragment() {
             showAddLeadModal()
         }
 
-        // Setup header button click listener
-        btnAddLeadHeader.setOnClickListener {
-            android.util.Log.d("LeadsFragment", "Header button clicked - showing add lead modal")
-            showAddLeadModal()
-        }
 
         // Setup empty state button click listener
         btnAddLeadEmpty.setOnClickListener {
             android.util.Log.d("LeadsFragment", "Empty state button clicked - showing add lead modal")
             showAddLeadModal()
-        }
-        
-        btnCancel.setOnClickListener {
-            hideAddLeadModal()
         }
         
         btnAdd.setOnClickListener {
@@ -221,15 +204,26 @@ class LeadsFragment : Fragment() {
                     android.util.Log.d("LeadsFragment", "Leads updated: ${leads.size} leads received")
                     leadsAdapter.submitList(leads)
                     
-                    // Show/hide empty state
+                    // Show/hide empty state and FAB
                     if (leads.isEmpty()) {
                         rvLeads.visibility = View.GONE
                         layoutEmptyLeads.visibility = View.VISIBLE
-                        android.util.Log.d("LeadsFragment", "Showing empty state (no leads)")
+                        if (::fabAddLead.isInitialized) {
+                            fabAddLead.visibility = View.GONE
+                            android.util.Log.d("LeadsFragment", "FAB visibility set to GONE")
+                        }
+                        android.util.Log.d("LeadsFragment", "Showing empty state (no leads) - hiding FAB")
                     } else {
                         rvLeads.visibility = View.VISIBLE
                         layoutEmptyLeads.visibility = View.GONE
-                        android.util.Log.d("LeadsFragment", "Displaying ${leads.size} leads in RecyclerView")
+                        if (::fabAddLead.isInitialized) {
+                            fabAddLead.visibility = View.VISIBLE
+                            android.util.Log.d("LeadsFragment", "FAB visibility set to VISIBLE")
+                            android.util.Log.d("LeadsFragment", "FAB actual visibility after setting: ${fabAddLead.visibility}")
+                        } else {
+                            android.util.Log.e("LeadsFragment", "FAB not initialized when trying to show it!")
+                        }
+                        android.util.Log.d("LeadsFragment", "Displaying ${leads.size} leads in RecyclerView - showing FAB")
                     }
                 }
             } catch (e: kotlinx.coroutines.CancellationException) {
@@ -256,7 +250,6 @@ class LeadsFragment : Fragment() {
         etAddress.text.clear()
         etEmail.text.clear()
         etContact.text.clear()
-        spinnerSource.text.clear()
     }
     
     private fun addFirebaseLead() {
@@ -265,7 +258,7 @@ class LeadsFragment : Fragment() {
         val address = etAddress.text.toString().trim()
         val email = etEmail.text.toString().trim()
         val contact = etContact.text.toString().trim()
-        val source = spinnerSource.text.toString().trim().ifEmpty { "Other" }
+        val source = "Other"
         
         // Validation
         if (firstName.isEmpty()) {
