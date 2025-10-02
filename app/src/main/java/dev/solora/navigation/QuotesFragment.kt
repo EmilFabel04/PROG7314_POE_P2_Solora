@@ -42,6 +42,7 @@ class QuotesFragment : Fragment() {
     private lateinit var etTariff: TextInputEditText
     private lateinit var etPanel: TextInputEditText
     private lateinit var btnCalculate: Button
+    private lateinit var btnSaveQuoteCalculate: Button
     
     // View tab elements (quotes list)
     private lateinit var rvQuotesList: androidx.recyclerview.widget.RecyclerView
@@ -70,6 +71,7 @@ class QuotesFragment : Fragment() {
         setupCalculateTab()
         setupViewTab()
         setupDashboardTab()
+        setupSaveQuoteFunctionality()
         observeViewModel()
         observeSettings()
     }
@@ -92,6 +94,7 @@ class QuotesFragment : Fragment() {
         etTariff = view.findViewById(R.id.et_tariff)
         etPanel = view.findViewById(R.id.et_panel)
         btnCalculate = view.findViewById(R.id.btn_calculate)
+        btnSaveQuoteCalculate = view.findViewById(R.id.btn_save_quote_calculate)
         
         // View tab elements (quotes list)
         rvQuotesList = view.findViewById(R.id.rv_quotes_list)
@@ -206,6 +209,10 @@ class QuotesFragment : Fragment() {
                 Toast.makeText(requireContext(), "Please enter valid numbers", Toast.LENGTH_SHORT).show()
             }
         }
+        
+        btnSaveQuoteCalculate.setOnClickListener {
+            showSaveQuoteDialog()
+        }
     }
     
     private fun setupViewTab() {
@@ -252,9 +259,89 @@ class QuotesFragment : Fragment() {
     }
     
     private fun setupDashboardTab() {
+        // Setup dashboard with analytics
+        setupDashboardAnalytics()
+    }
+    
+    private fun setupSaveQuoteFunctionality() {
+        // Setup save quote functionality
         btnSaveFinalQuote.setOnClickListener {
             saveQuoteWithClientDetails()
         }
+    }
+    
+    private fun setupDashboardAnalytics() {
+        // Observe quotes for dashboard updates
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                quotesViewModel.quotes.collect { quotes ->
+                    updateDashboardData(quotes)
+                }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                android.util.Log.d("QuotesFragment", "Dashboard observation cancelled")
+            } catch (e: Exception) {
+                android.util.Log.e("QuotesFragment", "Error observing quotes for dashboard", e)
+            }
+        }
+    }
+    
+    private fun updateDashboardData(quotes: List<dev.solora.data.FirebaseQuote>) {
+        // Update dashboard statistics
+        android.util.Log.d("QuotesFragment", "Updating dashboard with ${quotes.size} quotes")
+        
+        // For now, just log the data - we'll implement proper dashboard UI later
+        val totalRevenue = quotes.sumOf { it.monthlySavings * 12 * 5 } // 5 years estimate
+        val avgSystemSize = if (quotes.isNotEmpty()) quotes.mapNotNull { it.systemKwp }.average() else 0.0
+        val avgSavings = if (quotes.isNotEmpty()) quotes.mapNotNull { it.monthlySavings }.average() else 0.0
+        
+        android.util.Log.d("QuotesFragment", "Dashboard stats: ${quotes.size} quotes, R${totalRevenue} revenue, ${avgSystemSize}kW avg size, R${avgSavings} avg savings")
+    }
+    
+    private fun showSaveQuoteDialog() {
+        // Create a dialog to save quote with client details
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_save_quote, null)
+        
+        // Populate quote summary
+        val tvDialogQuoteSummary = dialogView.findViewById<TextView>(R.id.tv_dialog_quote_summary)
+        tvDialogQuoteSummary.text = tvQuoteSummary.text // Use existing quote summary
+        
+        val dialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle("Save Quote")
+            .setView(dialogView)
+            .setPositiveButton("Save") { _, _ ->
+                saveQuoteFromDialog(dialogView)
+            }
+            .setNegativeButton("Cancel", null)
+            .create()
+        
+        dialog.show()
+    }
+    
+    private fun saveQuoteFromDialog(dialogView: View) {
+        // Get form data from dialog
+        val reference = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_reference).text.toString()
+        val firstName = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_first_name).text.toString()
+        val lastName = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_last_name).text.toString()
+        val address = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_client_address).text.toString()
+        val email = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_email).text.toString()
+        val contact = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_contact).text.toString()
+        
+        // Validate required fields
+        if (reference.isBlank() || firstName.isBlank() || lastName.isBlank()) {
+            Toast.makeText(requireContext(), "Please fill in reference, first name, and last name", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        // Update form fields with dialog data
+        etReference.setText(reference)
+        etFirstName.setText(firstName)
+        etLastName.setText(lastName)
+        etClientAddress.setText(address)
+        etEmail.setText(email)
+        etContact.setText(contact)
+        
+        // Save the quote
+        saveQuoteWithClientDetails()
     }
     
     private fun updateResultsTab(calculation: dev.solora.quote.QuoteOutputs) {
