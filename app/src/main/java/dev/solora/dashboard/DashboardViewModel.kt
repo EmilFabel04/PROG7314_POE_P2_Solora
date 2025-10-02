@@ -8,6 +8,7 @@ import dev.solora.data.FirebaseQuote
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.Result
 
@@ -42,13 +43,9 @@ class DashboardViewModel(app: Application) : AndroidViewModel(app) {
                     apiResult.getOrNull() ?: emptyList()
                 } else {
                     android.util.Log.w("DashboardViewModel", "API failed, using direct Firestore: ${apiResult.exceptionOrNull()?.message}")
-                    // Fallback to direct Firestore
-                    val directResult = firebaseRepository.getQuotes()
-                    if (directResult.isSuccess) {
-                        directResult.getOrNull() ?: emptyList()
-                    } else {
-                        emptyList()
-                    }
+                    // Fallback to direct Firestore - collect the flow
+                    val directFlow = firebaseRepository.getQuotes()
+                    directFlow.first() // Get the first emission from the flow
                 }
 
                 android.util.Log.d("DashboardViewModel", "Loaded ${quotes.size} quotes for dashboard")

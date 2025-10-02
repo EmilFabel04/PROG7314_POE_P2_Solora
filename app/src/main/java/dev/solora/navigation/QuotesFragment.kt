@@ -265,9 +265,10 @@ class QuotesFragment : Fragment() {
     
     private fun setupDashboardTab() {
         // Clear existing content and add dashboard
-        if (contentDashboard is ViewGroup) {
-            contentDashboard.removeAllViews()
-            contentDashboard.addView(dashboardContent)
+        val viewGroup = contentDashboard as? ViewGroup
+        viewGroup?.let {
+            it.removeAllViews()
+            it.addView(dashboardContent)
         }
         
         // Initialize dashboard UI elements
