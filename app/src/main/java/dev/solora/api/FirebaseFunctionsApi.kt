@@ -217,7 +217,7 @@ class FirebaseFunctionsApi {
                 "limit" to limit
             )
             
-            val result = functions
+            val result = this.functions
                 .getHttpsCallable("getLeads")
                 .call(data)
                 .await()
@@ -249,7 +249,7 @@ class FirebaseFunctionsApi {
                 "limit" to limit
             )
             
-            val result = functions
+            val result = this.functions
                 .getHttpsCallable("getQuotes")
                 .call(data)
                 .await()
@@ -277,7 +277,7 @@ class FirebaseFunctionsApi {
                 "settings" to settings
             )
             
-            val result = functions
+            val result = this.functions
                 .getHttpsCallable("updateSettings")
                 .call(data)
                 .await()
@@ -304,7 +304,7 @@ class FirebaseFunctionsApi {
                 "offlineData" to offlineData
             )
             
-            val result = functions
+            val result = this.functions
                 .getHttpsCallable("syncData")
                 .call(data)
                 .await()
@@ -328,7 +328,7 @@ class FirebaseFunctionsApi {
         return try {
             android.util.Log.d("FirebaseFunctionsApi", "Calling healthCheck function")
             
-            val result = functions
+            val result = this.functions
                 .getHttpsCallable("healthCheck")
                 .call()
                 .await()

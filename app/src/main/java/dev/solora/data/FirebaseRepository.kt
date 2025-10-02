@@ -355,7 +355,7 @@ class FirebaseRepository {
             val result = apiService.getLeads(search, status, limit)
             if (result.isSuccess) {
                 val leadsData = result.getOrNull() ?: emptyList()
-                val leads = leadsData.mapNotNull { data: Map<String, Any> ->
+                val leads = leadsData.mapNotNull { data ->
                     try {
                         FirebaseLead(
                             id = data["id"] as? String,
@@ -366,8 +366,8 @@ class FirebaseRepository {
                             notes = data["notes"] as? String,
                             quoteId = data["quoteId"] as? String,
                             userId = data["userId"] as? String ?: "",
-                            createdAt = data["createdAt"] as? Timestamp,
-                            updatedAt = data["updatedAt"] as? Timestamp
+                            createdAt = data["createdAt"] as? com.google.firebase.Timestamp,
+                            updatedAt = data["updatedAt"] as? com.google.firebase.Timestamp
                         )
                     } catch (e: Exception) {
                         android.util.Log.w("FirebaseRepository", "Failed to parse lead: ${e.message}")
@@ -396,7 +396,7 @@ class FirebaseRepository {
             val result = apiService.getQuotes(search, limit)
             if (result.isSuccess) {
                 val quotesData = result.getOrNull() ?: emptyList()
-                val quotes = quotesData.mapNotNull { data: Map<String, Any> ->
+                val quotes = quotesData.mapNotNull { data ->
                     try {
                         FirebaseQuote(
                             id = data["id"] as? String,
@@ -422,8 +422,8 @@ class FirebaseRepository {
                             consultantPhone = data["consultantPhone"] as? String ?: "",
                             consultantEmail = data["consultantEmail"] as? String ?: "",
                             userId = data["userId"] as? String ?: "",
-                            createdAt = data["createdAt"] as? Timestamp,
-                            updatedAt = data["updatedAt"] as? Timestamp
+                            createdAt = data["createdAt"] as? com.google.firebase.Timestamp,
+                            updatedAt = data["updatedAt"] as? com.google.firebase.Timestamp
                         )
                     } catch (e: Exception) {
                         android.util.Log.w("FirebaseRepository", "Failed to parse quote: ${e.message}")
@@ -618,8 +618,8 @@ class FirebaseRepository {
                         consultantPhone = quoteData.get("consultantPhone") as? String ?: "",
                         consultantEmail = quoteData.get("consultantEmail") as? String ?: "",
                         userId = quoteData.get("userId") as? String ?: "",
-                        createdAt = quoteData.get("createdAt") as? Timestamp,
-                        updatedAt = quoteData.get("updatedAt") as? Timestamp
+                        createdAt = quoteData.get("createdAt") as? com.google.firebase.Timestamp,
+                        updatedAt = quoteData.get("updatedAt") as? com.google.firebase.Timestamp
                     )
                     android.util.Log.d("FirebaseRepository", "Quote retrieved via API: ${quote.reference}")
                     Result.success(quote)
