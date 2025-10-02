@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/authentication_form_background_orange"
+        android:padding="16dp">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Logout of your account?" android:textStyle="bold" android:textSize="18sp" android:textColor="@android:color/white"/>
+        <TextView android:id="@+id/btn_logout" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Logout" android:paddingVertical="12dp" android:layout_marginTop="16dp" android:textColor="@android:color/white"/>
+        <TextView android:id="@+id/btn_cancel" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="cancel" android:paddingVertical="12dp" android:textColor="@android:color/white"/>
+    </LinearLayout>
+
+</FrameLayout>
+
+

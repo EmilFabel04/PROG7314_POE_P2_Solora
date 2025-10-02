@@ -23,14 +23,20 @@ class ProfileFragment : Fragment() {
         val open = OnClickListener { idView ->
             when (idView.id) {
                 R.id.row_edit_profile -> findNavController().navigate(R.id.action_to_edit_profile)
-                R.id.row_change_password -> findNavController().navigate(R.id.action_to_change_password)
+                R.id.row_change_password -> ChangePasswordBottomSheet().show(parentFragmentManager, "change_password")
                 R.id.row_authentication -> findNavController().navigate(R.id.action_to_authentication)
-                R.id.row_logout -> findNavController().navigate(R.id.action_start_to_auth)
+                R.id.row_language -> LanguagePickerBottomSheet { selected ->
+                    view.findViewById<android.widget.TextView>(R.id.tv_language)?.text = selected
+                }.show(parentFragmentManager, "language_picker")
+                R.id.row_logout -> LogoutConfirmBottomSheet {
+                    findNavController().navigate(R.id.action_start_to_auth)
+                }.show(parentFragmentManager, "logout_confirm")
             }
         }
         view.findViewById<View>(R.id.row_edit_profile).setOnClickListener(open)
         view.findViewById<View>(R.id.row_change_password).setOnClickListener(open)
         view.findViewById<View>(R.id.row_authentication).setOnClickListener(open)
+        view.findViewById<View>(R.id.row_language).setOnClickListener(open)
         view.findViewById<View>(R.id.row_logout).setOnClickListener(open)
 
         val shared = requireContext().getSharedPreferences("prefs", Context.MODE_PRIVATE)
