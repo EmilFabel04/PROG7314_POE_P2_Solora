@@ -217,7 +217,7 @@ class FirebaseFunctionsApi {
                 "limit" to limit
             )
             
-            val result = this.functions
+            val result = functions
                 .getHttpsCallable("getLeads")
                 .call(data)
                 .await()
@@ -249,7 +249,7 @@ class FirebaseFunctionsApi {
                 "limit" to limit
             )
             
-            val result = this.functions
+            val result = functions
                 .getHttpsCallable("getQuotes")
                 .call(data)
                 .await()
@@ -277,7 +277,7 @@ class FirebaseFunctionsApi {
                 "settings" to settings
             )
             
-            val result = this.functions
+            val result = functions
                 .getHttpsCallable("updateSettings")
                 .call(data)
                 .await()
@@ -304,7 +304,7 @@ class FirebaseFunctionsApi {
                 "offlineData" to offlineData
             )
             
-            val result = this.functions
+            val result = functions
                 .getHttpsCallable("syncData")
                 .call(data)
                 .await()
@@ -328,7 +328,7 @@ class FirebaseFunctionsApi {
         return try {
             android.util.Log.d("FirebaseFunctionsApi", "Calling healthCheck function")
             
-            val result = this.functions
+            val result = functions
                 .getHttpsCallable("healthCheck")
                 .call()
                 .await()
@@ -339,6 +339,75 @@ class FirebaseFunctionsApi {
             Result.success(response)
         } catch (e: Exception) {
             android.util.Log.e("FirebaseFunctionsApi", "Health check error: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Get user profile via Cloud Function
+     */
+    suspend fun getUserProfile(): Result<Map<String, Any>?> {
+        return try {
+            android.util.Log.d("FirebaseFunctionsApi", "Calling getUserProfile function")
+            
+            val result = functions
+                .getHttpsCallable("getUserProfile")
+                .call()
+                .await()
+            
+            @Suppress("UNCHECKED_CAST")
+            val response = result.data as Map<String, Any>
+            val userProfile = response["userProfile"] as? Map<String, Any>
+            
+            if (userProfile != null) {
+                android.util.Log.d("FirebaseFunctionsApi", "User profile retrieved via API")
+                Result.success(userProfile)
+            } else {
+                android.util.Log.d("FirebaseFunctionsApi", "No user profile found via API")
+                Result.success(null)
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseFunctionsApi", "Get user profile error: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Update user profile via Cloud Function
+     */
+    suspend fun updateUserProfile(user: dev.solora.data.FirebaseUser): Result<Map<String, Any>?> {
+        return try {
+            android.util.Log.d("FirebaseFunctionsApi", "Calling updateUserProfile function")
+            
+            val data = hashMapOf<String, Any>(
+                "userProfile" to mapOf(
+                    "name" to user.name,
+                    "surname" to user.surname,
+                    "email" to user.email,
+                    "phone" to (user.phone ?: ""),
+                    "company" to (user.company ?: ""),
+                    "role" to user.role
+                )
+            )
+            
+            val result = functions
+                .getHttpsCallable("updateUserProfile")
+                .call(data)
+                .await()
+            
+            @Suppress("UNCHECKED_CAST")
+            val response = result.data as Map<String, Any>
+            val updatedProfile = response["userProfile"] as? Map<String, Any>
+            
+            if (updatedProfile != null) {
+                android.util.Log.d("FirebaseFunctionsApi", "User profile updated via API")
+                Result.success(updatedProfile)
+            } else {
+                android.util.Log.d("FirebaseFunctionsApi", "User profile update failed via API")
+                Result.success(null)
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseFunctionsApi", "Update user profile error: ${e.message}", e)
             Result.failure(e)
         }
     }

@@ -34,6 +34,17 @@
         <action
             android:id="@+id/action_to_settings"
             app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_to_edit_profile"
+            app:destination="@id/editProfileFragment" />
+        <action
+            android:id="@+id/action_to_change_password"
+            app:destination="@id/changePasswordFragment" />
+        <action
+            android:id="@+id/action_start_to_auth"
+            app:destination="@id/auth_graph"
+            app:popUpTo="@id/nav_root"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
@@ -50,6 +61,16 @@
         android:id="@+id/settingsFragment"
         android:name="dev.solora.navigation.SettingsFragment"
         android:label="Settings" />
+
+    <fragment
+        android:id="@+id/editProfileFragment"
+        android:name="dev.solora.navigation.EditProfileFragment"
+        android:label="Edit Profile" />
+
+    <fragment
+        android:id="@+id/changePasswordFragment"
+        android:name="dev.solora.navigation.ChangePasswordFragment"
+        android:label="Change Password" />
 
 </navigation>
 

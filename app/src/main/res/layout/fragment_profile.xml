@@ -70,9 +70,9 @@
                     android:orientation="vertical"
                     android:gravity="center_horizontal"
                     android:layout_marginTop="8dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="milla@solora.co.za"/>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="+27 82 123 4567"/>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Cape Town, South Africa"/>
+                    <TextView android:id="@+id/tv_email" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="milla@solora.co.za"/>
+                    <TextView android:id="@+id/tv_phone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="+27 82 123 4567"/>
+                    <TextView android:id="@+id/tv_location" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Cape Town, South Africa"/>
                 </LinearLayout>
 
                 <TextView
@@ -112,6 +112,7 @@
                     android:layout_marginTop="8dp">
 
                     <LinearLayout
+                        android:id="@+id/btn_edit_profile"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
@@ -123,6 +124,7 @@
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/btn_change_password"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
@@ -134,6 +136,7 @@
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/btn_settings"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
@@ -145,6 +148,7 @@
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/btn_logout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
@@ -158,26 +162,6 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <Button
-            android:id="@+id/btn_edit_profile"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:visibility="gone"/>
-        <Button
-            android:id="@+id/btn_change_password"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:visibility="gone"/>
-        <Button
-            android:id="@+id/btn_settings"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:visibility="gone"/>
-        <Button
-            android:id="@+id/btn_logout"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:visibility="gone"/>
 
     </LinearLayout>
 

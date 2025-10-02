@@ -276,13 +276,24 @@ class FirebaseRepository {
         return try {
             val userId = getCurrentUserId() ?: throw Exception("User not authenticated")
             
-            firestore.collection("users")
-                .document(userId)
-                .set(user.copy(id = userId))
-                .await()
-            
-            Result.success(userId)
+            // Try API first, fallback to direct Firestore
+            val apiResult = apiService.updateUserProfile(user.copy(id = userId))
+            if (apiResult.isSuccess) {
+                android.util.Log.d("FirebaseRepository", "User profile saved via API")
+                Result.success(userId)
+            } else {
+                android.util.Log.w("FirebaseRepository", "API failed, using direct Firestore: ${apiResult.exceptionOrNull()?.message}")
+                
+                // Fallback to direct Firestore
+                firestore.collection("users")
+                    .document(userId)
+                    .set(user.copy(id = userId))
+                    .await()
+                
+                Result.success(userId)
+            }
         } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Save user profile error: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -291,19 +302,55 @@ class FirebaseRepository {
         return try {
             val userId = getCurrentUserId() ?: throw Exception("User not authenticated")
             
-            val doc = firestore.collection("users")
-                .document(userId)
-                .get()
-                .await()
-            
-            if (doc.exists()) {
-                val user = doc.toObject(FirebaseUser::class.java)?.copy(id = doc.id)
-                Result.success(user)
+            // Try API first, fallback to direct Firestore
+            val apiResult = apiService.getUserProfile()
+            if (apiResult.isSuccess) {
+                val userData = apiResult.getOrNull()
+                if (userData != null) {
+                    val user = convertMapToFirebaseUser(userData)
+                    android.util.Log.d("FirebaseRepository", "User profile retrieved via API")
+                    Result.success(user)
+                } else {
+                    Result.success(null)
+                }
             } else {
-                Result.success(null)
+                android.util.Log.w("FirebaseRepository", "API failed, using direct Firestore: ${apiResult.exceptionOrNull()?.message}")
+                
+                // Fallback to direct Firestore
+                val doc = firestore.collection("users")
+                    .document(userId)
+                    .get()
+                    .await()
+                
+                if (doc.exists()) {
+                    val user = doc.toObject(FirebaseUser::class.java)?.copy(id = doc.id)
+                    Result.success(user)
+                } else {
+                    Result.success(null)
+                }
             }
         } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Get user profile error: ${e.message}", e)
             Result.failure(e)
+        }
+    }
+    
+    private fun convertMapToFirebaseUser(data: Map<String, Any>): FirebaseUser? {
+        return try {
+            FirebaseUser(
+                id = data["id"] as? String,
+                name = data["name"] as? String ?: "",
+                surname = data["surname"] as? String ?: "",
+                email = data["email"] as? String ?: "",
+                phone = data["phone"] as? String,
+                company = data["company"] as? String,
+                role = data["role"] as? String ?: "sales_consultant",
+                createdAt = data["createdAt"] as? com.google.firebase.Timestamp,
+                updatedAt = data["updatedAt"] as? com.google.firebase.Timestamp
+            )
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Error converting map to FirebaseUser: ${e.message}", e)
+            null
         }
     }
 
@@ -355,7 +402,7 @@ class FirebaseRepository {
             val result = apiService.getLeads(search, status, limit)
             if (result.isSuccess) {
                 val leadsData = result.getOrNull() ?: emptyList()
-                val leads = leadsData.mapNotNull { data ->
+                val leads = leadsData.mapNotNull { data: Map<String, Any> ->
                     try {
                         FirebaseLead(
                             id = data["id"] as? String,
@@ -366,8 +413,8 @@ class FirebaseRepository {
                             notes = data["notes"] as? String,
                             quoteId = data["quoteId"] as? String,
                             userId = data["userId"] as? String ?: "",
-                            createdAt = data["createdAt"] as? com.google.firebase.Timestamp,
-                            updatedAt = data["updatedAt"] as? com.google.firebase.Timestamp
+                            createdAt = data["createdAt"] as? Timestamp,
+                            updatedAt = data["updatedAt"] as? Timestamp
                         )
                     } catch (e: Exception) {
                         android.util.Log.w("FirebaseRepository", "Failed to parse lead: ${e.message}")
@@ -396,7 +443,7 @@ class FirebaseRepository {
             val result = apiService.getQuotes(search, limit)
             if (result.isSuccess) {
                 val quotesData = result.getOrNull() ?: emptyList()
-                val quotes = quotesData.mapNotNull { data ->
+                val quotes = quotesData.mapNotNull { data: Map<String, Any> ->
                     try {
                         FirebaseQuote(
                             id = data["id"] as? String,
@@ -422,8 +469,8 @@ class FirebaseRepository {
                             consultantPhone = data["consultantPhone"] as? String ?: "",
                             consultantEmail = data["consultantEmail"] as? String ?: "",
                             userId = data["userId"] as? String ?: "",
-                            createdAt = data["createdAt"] as? com.google.firebase.Timestamp,
-                            updatedAt = data["updatedAt"] as? com.google.firebase.Timestamp
+                            createdAt = data["createdAt"] as? Timestamp,
+                            updatedAt = data["updatedAt"] as? Timestamp
                         )
                     } catch (e: Exception) {
                         android.util.Log.w("FirebaseRepository", "Failed to parse quote: ${e.message}")
@@ -618,8 +665,8 @@ class FirebaseRepository {
                         consultantPhone = quoteData.get("consultantPhone") as? String ?: "",
                         consultantEmail = quoteData.get("consultantEmail") as? String ?: "",
                         userId = quoteData.get("userId") as? String ?: "",
-                        createdAt = quoteData.get("createdAt") as? com.google.firebase.Timestamp,
-                        updatedAt = quoteData.get("updatedAt") as? com.google.firebase.Timestamp
+                        createdAt = quoteData.get("createdAt") as? Timestamp,
+                        updatedAt = quoteData.get("updatedAt") as? Timestamp
                     )
                     android.util.Log.d("FirebaseRepository", "Quote retrieved via API: ${quote.reference}")
                     Result.success(quote)
