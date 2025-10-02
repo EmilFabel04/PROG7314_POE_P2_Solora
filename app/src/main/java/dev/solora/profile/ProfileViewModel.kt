@@ -58,18 +58,19 @@ class ProfileViewModel(app: Application) : AndroidViewModel(app) {
             _errorMessage.value = null
             
             try {
-                val user = FirebaseUser(
+                val updatedUser = FirebaseUser(
                     name = name,
                     surname = surname,
                     email = email,
                     phone = phone,
                     company = company,
-                    role = "sales_consultant"
+                    role = _userProfile.value?.role ?: "sales_consultant"
                 )
                 
-                val result = firebaseRepository.saveUserProfile(user)
+                val result = firebaseRepository.saveUserProfile(updatedUser)
                 if (result.isSuccess) {
-                    _userProfile.value = user.copy(id = result.getOrNull())
+                    // Reload profile after successful update
+                    loadUserProfile()
                 } else {
                     _errorMessage.value = result.exceptionOrNull()?.message ?: "Failed to update profile"
                 }
@@ -80,7 +81,11 @@ class ProfileViewModel(app: Application) : AndroidViewModel(app) {
             }
         }
     }
-
+    
+    fun refreshProfile() {
+        loadUserProfile()
+    }
+    
     fun clearError() {
         _errorMessage.value = null
     }
