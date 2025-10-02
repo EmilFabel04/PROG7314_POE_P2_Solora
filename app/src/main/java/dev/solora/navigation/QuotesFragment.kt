@@ -18,12 +18,15 @@ import dev.solora.quotes.QuotesViewModel
 import dev.solora.quotes.CalculationState
 import dev.solora.leads.LeadsViewModel
 import dev.solora.settings.SettingsViewModel
+import dev.solora.dashboard.DashboardViewModel
+import dev.solora.dashboard.DashboardData
 import kotlinx.coroutines.launch
 
 class QuotesFragment : Fragment() {
     private val quotesViewModel: QuotesViewModel by viewModels()
     private val leadsViewModel: LeadsViewModel by viewModels()
     private val settingsViewModel: SettingsViewModel by viewModels()
+    private val dashboardViewModel: DashboardViewModel by viewModels()
     private var isFirebaseTest = false
     private var currentTab = 0 // 0: calculate, 1: view, 2: dashboard
     
@@ -35,6 +38,9 @@ class QuotesFragment : Fragment() {
     private lateinit var contentView: View
     private lateinit var contentDashboard: View
     
+    // Dashboard elements
+    private lateinit var dashboardContent: View
+    
     // Calculate tab elements
     private lateinit var etAddress: TextInputEditText
     private lateinit var etUsage: TextInputEditText
@@ -42,14 +48,21 @@ class QuotesFragment : Fragment() {
     private lateinit var etTariff: TextInputEditText
     private lateinit var etPanel: TextInputEditText
     private lateinit var btnCalculate: Button
-    private lateinit var btnSaveQuoteCalculate: Button
     
     // View tab elements (quotes list)
     private lateinit var rvQuotesList: androidx.recyclerview.widget.RecyclerView
     private lateinit var layoutEmptyQuotes: View
     private lateinit var quotesAdapter: QuotesListAdapter
     
-    // Save quote form elements (now in dialog - no need for lateinit)
+    // Dashboard tab elements
+    private lateinit var etReference: TextInputEditText
+    private lateinit var etFirstName: TextInputEditText
+    private lateinit var etLastName: TextInputEditText
+    private lateinit var etClientAddress: TextInputEditText
+    private lateinit var etEmail: TextInputEditText
+    private lateinit var etContact: TextInputEditText
+    private lateinit var tvQuoteSummary: TextView
+    private lateinit var btnSaveFinalQuote: Button
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_quotes, container, false)
@@ -63,9 +76,9 @@ class QuotesFragment : Fragment() {
         setupCalculateTab()
         setupViewTab()
         setupDashboardTab()
-        setupSaveQuoteFunctionality()
         observeViewModel()
         observeSettings()
+        observeDashboard()
     }
     
     private fun initializeViews(view: View) {
@@ -79,6 +92,9 @@ class QuotesFragment : Fragment() {
         contentView = view.findViewById(R.id.content_view)
         contentDashboard = view.findViewById(R.id.content_dashboard)
         
+        // Dashboard content
+        dashboardContent = LayoutInflater.from(requireContext()).inflate(R.layout.dashboard_content, null)
+        
         // Calculate tab elements
         etAddress = view.findViewById(R.id.et_address)
         etUsage = view.findViewById(R.id.et_usage)
@@ -86,13 +102,20 @@ class QuotesFragment : Fragment() {
         etTariff = view.findViewById(R.id.et_tariff)
         etPanel = view.findViewById(R.id.et_panel)
         btnCalculate = view.findViewById(R.id.btn_calculate)
-        btnSaveQuoteCalculate = view.findViewById(R.id.btn_save_quote_calculate)
         
         // View tab elements (quotes list)
         rvQuotesList = view.findViewById(R.id.rv_quotes_list)
         layoutEmptyQuotes = view.findViewById(R.id.layout_empty_quotes)
         
-        // Note: Save quote form elements are now in dialog, not in main layout
+        // Dashboard tab elements
+        etReference = view.findViewById(R.id.et_reference)
+        etFirstName = view.findViewById(R.id.et_first_name)
+        etLastName = view.findViewById(R.id.et_last_name)
+        etClientAddress = view.findViewById(R.id.et_client_address)
+        etEmail = view.findViewById(R.id.et_email)
+        etContact = view.findViewById(R.id.et_contact)
+        tvQuoteSummary = view.findViewById(R.id.tv_quote_summary)
+        btnSaveFinalQuote = view.findViewById(R.id.btn_save_final_quote)
     }
     
     private fun setupTabs() {
@@ -193,10 +216,6 @@ class QuotesFragment : Fragment() {
                 Toast.makeText(requireContext(), "Please enter valid numbers", Toast.LENGTH_SHORT).show()
             }
         }
-        
-        btnSaveQuoteCalculate.setOnClickListener {
-            showSaveQuoteDialog()
-        }
     }
     
     private fun setupViewTab() {
@@ -243,145 +262,144 @@ class QuotesFragment : Fragment() {
     }
     
     private fun setupDashboardTab() {
-        // Setup dashboard with analytics
-        setupDashboardAnalytics()
+        // Clear existing content and add dashboard
+        contentDashboard.removeAllViews()
+        contentDashboard.addView(dashboardContent)
+        
+        // Initialize dashboard UI elements
+        initializeDashboardViews()
+        
+        // Load dashboard data when tab is shown
+        dashboardViewModel.loadDashboardData()
     }
     
-    private fun setupSaveQuoteFunctionality() {
-        // Save quote functionality is now handled through dialog
-        // No need to setup click listeners for elements that don't exist in main layout
+    private fun initializeDashboardViews() {
+        // Statistics cards
+        // These will be populated by observeDashboard()
     }
     
-    private fun setupDashboardAnalytics() {
-        // Observe quotes for dashboard updates
+    private fun observeDashboard() {
         viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                quotesViewModel.quotes.collect { quotes ->
-                    updateDashboardData(quotes)
+            dashboardViewModel.dashboardData.collect { dashboardData ->
+                updateDashboardUI(dashboardData)
+            }
+        }
+        
+        viewLifecycleOwner.lifecycleScope.launch {
+            dashboardViewModel.isLoading.collect { isLoading ->
+                // Show/hide loading indicator if needed
+                if (isLoading) {
+                    android.util.Log.d("QuotesFragment", "Dashboard loading...")
                 }
-            } catch (e: kotlinx.coroutines.CancellationException) {
-                android.util.Log.d("QuotesFragment", "Dashboard observation cancelled")
-            } catch (e: Exception) {
-                android.util.Log.e("QuotesFragment", "Error observing quotes for dashboard", e)
+            }
+        }
+        
+        viewLifecycleOwner.lifecycleScope.launch {
+            dashboardViewModel.error.collect { error ->
+                if (error != null) {
+                    Toast.makeText(requireContext(), "Dashboard Error: $error", Toast.LENGTH_LONG).show()
+                    android.util.Log.e("QuotesFragment", "Dashboard error: $error")
+                }
             }
         }
     }
     
-    private fun updateDashboardData(quotes: List<dev.solora.data.FirebaseQuote>) {
-        // Update dashboard statistics
-        android.util.Log.d("QuotesFragment", "Updating dashboard with ${quotes.size} quotes")
-        
-        // For now, just log the data - we'll implement proper dashboard UI later
-        val totalRevenue = quotes.sumOf { it.monthlySavings * 12 * 5 } // 5 years estimate
-        val avgSystemSize = if (quotes.isNotEmpty()) quotes.mapNotNull { it.systemKwp }.average() else 0.0
-        val avgSavings = if (quotes.isNotEmpty()) quotes.mapNotNull { it.monthlySavings }.average() else 0.0
-        
-        android.util.Log.d("QuotesFragment", "Dashboard stats: ${quotes.size} quotes, R${totalRevenue} revenue, ${avgSystemSize}kW avg size, R${avgSavings} avg savings")
-    }
-    
-    private fun showSaveQuoteDialog() {
-        // Create a dialog to save quote with client details
-        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_save_quote, null)
-        
-        // Populate quote summary
-        val tvDialogQuoteSummary = dialogView.findViewById<TextView>(R.id.tv_dialog_quote_summary)
-        tvDialogQuoteSummary.text = getCurrentQuoteSummary() // Get current quote summary
-        
-        val dialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
-            .setTitle("Save Quote")
-            .setView(dialogView)
-            .setPositiveButton("Save") { _, _ ->
-                saveQuoteFromDialog(dialogView)
+    private fun updateDashboardUI(dashboardData: DashboardData) {
+        try {
+            // Update statistics cards
+            dashboardContent.findViewById<TextView>(R.id.tv_total_quotes).text = dashboardData.totalQuotes.toString()
+            dashboardContent.findViewById<TextView>(R.id.tv_avg_system_size).text = String.format("%.1f", dashboardData.averageSystemSize)
+            dashboardContent.findViewById<TextView>(R.id.tv_total_revenue).text = "R${String.format("%.0f", dashboardData.totalRevenue)}"
+            dashboardContent.findViewById<TextView>(R.id.tv_avg_savings).text = "R${String.format("%.0f", dashboardData.averageMonthlySavings)}"
+            
+            // Update system size distribution
+            val maxCount = maxOf(
+                dashboardData.systemSizeDistribution.size0to3kw,
+                dashboardData.systemSizeDistribution.size3to6kw,
+                dashboardData.systemSizeDistribution.size6to10kw,
+                dashboardData.systemSizeDistribution.size10kwPlus
+            )
+            
+            if (maxCount > 0) {
+                updateBarChart(R.id.bar_0_3kw, dashboardData.systemSizeDistribution.size0to3kw, maxCount)
+                updateBarChart(R.id.bar_3_6kw, dashboardData.systemSizeDistribution.size3to6kw, maxCount)
+                updateBarChart(R.id.bar_6_10kw, dashboardData.systemSizeDistribution.size6to10kw, maxCount)
+                updateBarChart(R.id.bar_10kw_plus, dashboardData.systemSizeDistribution.size10kwPlus, maxCount)
             }
-            .setNegativeButton("Cancel", null)
-            .create()
-        
-        dialog.show()
+            
+            dashboardContent.findViewById<TextView>(R.id.tv_count_0_3kw).text = dashboardData.systemSizeDistribution.size0to3kw.toString()
+            dashboardContent.findViewById<TextView>(R.id.tv_count_3_6kw).text = dashboardData.systemSizeDistribution.size3to6kw.toString()
+            dashboardContent.findViewById<TextView>(R.id.tv_count_6_10kw).text = dashboardData.systemSizeDistribution.size6to10kw.toString()
+            dashboardContent.findViewById<TextView>(R.id.tv_count_10kw_plus).text = dashboardData.systemSizeDistribution.size10kwPlus.toString()
+            
+            // Update monthly performance
+            dashboardContent.findViewById<TextView>(R.id.tv_quotes_this_month).text = "${dashboardData.monthlyPerformance.quotesThisMonth} quotes"
+            dashboardContent.findViewById<TextView>(R.id.tv_quotes_last_month).text = "${dashboardData.monthlyPerformance.quotesLastMonth} quotes"
+            dashboardContent.findViewById<TextView>(R.id.tv_growth_percentage).text = "${String.format("%.1f", dashboardData.monthlyPerformance.growthPercentage)}%"
+            
+            // Update top locations
+            updateTopLocations(dashboardData.topLocations)
+            
+            android.util.Log.d("QuotesFragment", "Dashboard UI updated successfully")
+            
+        } catch (e: Exception) {
+            android.util.Log.e("QuotesFragment", "Error updating dashboard UI: ${e.message}", e)
+            Toast.makeText(requireContext(), "Error updating dashboard: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
     }
     
-    private fun saveQuoteFromDialog(dialogView: View) {
-        // Get form data from dialog
-        val reference = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_reference).text.toString()
-        val firstName = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_first_name).text.toString()
-        val lastName = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_last_name).text.toString()
-        val address = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_client_address).text.toString()
-        val email = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_email).text.toString()
-        val contact = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_contact).text.toString()
+    private fun updateBarChart(barId: Int, count: Int, maxCount: Int) {
+        val bar = dashboardContent.findViewById<View>(barId)
+        val layoutParams = bar.layoutParams
         
-        // Validate required fields
-        if (reference.isBlank() || firstName.isBlank() || lastName.isBlank()) {
-            Toast.makeText(requireContext(), "Please fill in reference, first name, and last name", Toast.LENGTH_SHORT).show()
+        // Calculate width percentage (minimum 10% for visibility)
+        val percentage = if (maxCount > 0) {
+            maxOf(0.1f, count.toFloat() / maxCount.toFloat())
+        } else {
+            0.1f
+        }
+        
+        // Update bar width (this is a simplified approach)
+        bar.alpha = percentage
+    }
+    
+    private fun updateTopLocations(topLocations: List<dev.solora.dashboard.LocationStats>) {
+        val layout = dashboardContent.findViewById<LinearLayout>(R.id.layout_top_locations)
+        layout.removeAllViews()
+        
+        if (topLocations.isEmpty()) {
+            val emptyText = TextView(requireContext()).apply {
+                text = "No location data available"
+                textSize = 14f
+                setTextColor(resources.getColor(android.R.color.darker_gray, null))
+                setPadding(0, 16, 0, 16)
+            }
+            layout.addView(emptyText)
             return
         }
         
-        // Save the quote with dialog data
-        saveQuoteWithDialogData(reference, firstName, lastName, address, email, contact)
-    }
-    
-    private fun getCurrentQuoteSummary(): String {
-        // Get the current calculation results and format them as a summary
-        return "Quote details will be populated from the last calculation"
-    }
-    
-    private fun saveQuoteWithDialogData(
-        reference: String,
-        firstName: String,
-        lastName: String,
-        address: String,
-        email: String,
-        contact: String
-    ) {
-        // Save quote using the dialog data
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                // Get the current calculation results from the ViewModel
-                val currentCalculation = quotesViewModel.getCurrentCalculation()
-                if (currentCalculation != null) {
-                    // Create quote with dialog data
-                    val quote = dev.solora.data.FirebaseQuote(
-                        id = null,
-                        reference = reference,
-                        clientName = "$firstName $lastName",
-                        address = address,
-                        usageKwh = currentCalculation.monthlyUsageKwh,
-                        billRands = currentCalculation.monthlyBillRands,
-                        tariff = currentCalculation.tariffRPerKwh,
-                        panelWatt = currentCalculation.panelWatt,
-                        latitude = null, // Will be populated from address if needed
-                        longitude = null,
-                        averageAnnualIrradiance = null, // From NASA API
-                        averageAnnualSunHours = null,
-                        systemKwp = currentCalculation.systemKw,
-                        estimatedGeneration = currentCalculation.estimatedMonthlyGeneration,
-                        monthlySavings = currentCalculation.monthlySavingsRands,
-                        paybackMonths = currentCalculation.paybackMonths,
-                        companyName = "", // From settings
-                        companyPhone = "",
-                        companyEmail = "",
-                        consultantName = "", // From current user
-                        consultantPhone = "",
-                        consultantEmail = "",
-                        userId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: "",
-                        createdAt = com.google.firebase.Timestamp.now(),
-                        updatedAt = com.google.firebase.Timestamp.now()
-                    )
-                    
-                    // Save the quote
-                    val result = quotesViewModel.saveQuote(quote)
-                    if (result.isSuccess) {
-                        Toast.makeText(requireContext(), "Quote saved successfully!", Toast.LENGTH_SHORT).show()
-                        // Hide the save button after successful save
-                        btnSaveQuoteCalculate.visibility = View.GONE
-                    } else {
-                        Toast.makeText(requireContext(), "Failed to save quote: ${result.exceptionOrNull()?.message}", Toast.LENGTH_LONG).show()
-                    }
-                } else {
-                    Toast.makeText(requireContext(), "No calculation data available. Please calculate a quote first.", Toast.LENGTH_SHORT).show()
-                }
-            } catch (e: Exception) {
-                Toast.makeText(requireContext(), "Error saving quote: ${e.message}", Toast.LENGTH_LONG).show()
-                android.util.Log.e("QuotesFragment", "Error saving quote from dialog", e)
+        topLocations.forEach { location ->
+            val locationView = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.HORIZONTAL
+                setPadding(0, 8, 0, 8)
             }
+            
+            val locationText = TextView(requireContext()).apply {
+                text = location.location
+                textSize = 14f
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            }
+            
+            val countText = TextView(requireContext()).apply {
+                text = "${location.count} quotes"
+                textSize = 12f
+                setTextColor(resources.getColor(android.R.color.darker_gray, null))
+                gravity = android.view.Gravity.END
+            }
+            
+            locationView.addView(locationText)
+            locationView.addView(countText)
+            layout.addView(locationView)
         }
     }
     
