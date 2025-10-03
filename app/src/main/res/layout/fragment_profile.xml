@@ -9,21 +9,20 @@
     <!-- Orange Header -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="@color/solora_orange"
-        android:padding="16dp"
-        android:gravity="center_vertical">
+        android:layout_height="120dp"
+        android:background="@drawable/top_nav_bar_background_orange"
+        android:orientation="vertical"
+        android:padding="20dp">
 
         <TextView
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:layout_marginTop="40dp"
             android:text="Profile"
             android:textColor="@android:color/white"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
+            android:fontFamily="@font/poppins_bold"
+            android:textSize="30sp" />
     </LinearLayout>
 
     <!-- Profile Content -->
@@ -50,8 +49,8 @@
                 <!-- Avatar -->
                 <TextView
                     android:id="@+id/tv_avatar"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
                     android:gravity="center"
                     android:text="AS"
                     android:textStyle="bold"
@@ -72,8 +71,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Alice Smith"
-                        android:textStyle="bold"
-                        android:textSize="18sp"
+                        android:fontFamily="@font/poppins_bold"
+                        android:textSize="20sp"
                         android:textColor="@android:color/black" />
 
                     <TextView
@@ -81,8 +80,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Sales Representative"
+                        android:fontFamily="@font/poppins"
                         android:textColor="#666666"
-                        android:textSize="14sp"
+                        android:textSize="12sp"
                         android:layout_marginTop="2dp" />
 
                 </LinearLayout>
@@ -95,39 +95,53 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- Edit Profile -->
                 <LinearLayout
-                    android:id="@+id/btn_edit_profile"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingVertical="16dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true">
+                    android:orientation="vertical">
 
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@android:drawable/ic_menu_edit"
-                        android:tint="#666666"
-                        android:layout_marginEnd="16dp" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@drawable/line_background_orange"/>
 
-                    <TextView
-                        android:layout_width="0dp"
+                    <!-- Edit Profile -->
+                    <LinearLayout
+                        android:id="@+id/btn_edit_profile"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Edit Profile"
-                        android:textColor="@android:color/black"
-                        android:textSize="16sp" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingVertical="16dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
 
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@android:drawable/ic_media_next"
-                        android:tint="#666666" />
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:background="@drawable/edit_icon_orange"
+                            android:layout_marginEnd="16dp" />
 
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Edit Profile"
+                            android:fontFamily="@font/poppins"
+                            android:textColor="#6F6F6F"
+                            android:textSize="16sp" />
+
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:background="@drawable/forward_icon_orange" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@drawable/line_background_orange"/>
                 </LinearLayout>
 
                 <!-- Divider -->
@@ -136,39 +150,49 @@
                     android:layout_height="1dp"
                     android:background="#E0E0E0" />
 
-                <!-- Change Password -->
                 <LinearLayout
-                    android:id="@+id/btn_change_password"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingVertical="16dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true">
+                    android:orientation="vertical">
 
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@android:drawable/ic_lock_lock"
-                        android:tint="#666666"
-                        android:layout_marginEnd="16dp" />
-
-                    <TextView
-                        android:layout_width="0dp"
+                    <!-- Change Password -->
+                    <LinearLayout
+                        android:id="@+id/btn_change_password"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Change Password"
-                        android:textColor="@android:color/black"
-                        android:textSize="16sp" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingVertical="16dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
 
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@android:drawable/ic_media_next"
-                        android:tint="#666666" />
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:background="@drawable/change_password_icon_orange"
+                            android:layout_marginEnd="16dp" />
 
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Change Password"
+                            android:fontFamily="@font/poppins"
+                            android:textColor="#6F6F6F"
+                            android:textSize="16sp" />
+
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:background="@drawable/forward_icon_orange" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@drawable/line_background_orange"/>
                 </LinearLayout>
 
                 <!-- Divider -->
@@ -177,46 +201,61 @@
                     android:layout_height="1dp"
                     android:background="#E0E0E0" />
 
-                <!-- Authentication -->
                 <LinearLayout
-                    android:id="@+id/btn_authentication"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingVertical="16dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true">
+                    android:orientation="vertical">
 
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@android:drawable/ic_secure"
-                        android:tint="#666666"
-                        android:layout_marginEnd="16dp" />
-
-                    <TextView
-                        android:layout_width="0dp"
+                    <!-- Authentication -->
+                    <LinearLayout
+                        android:id="@+id/btn_authentication"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Authentication"
-                        android:textColor="@android:color/black"
-                        android:textSize="16sp" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingVertical="16dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
 
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@android:drawable/ic_media_next"
-                        android:tint="#666666" />
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:background="@drawable/face_id_icon_orange"
+                            android:layout_marginEnd="16dp" />
 
-                </LinearLayout>
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Authentication"
+                            android:fontFamily="@font/poppins"
+                            android:textColor="#6F6F6F"
+                            android:textSize="16sp" />
+
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:background="@drawable/forward_icon_orange" />
+
+                    </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@drawable/line_background_orange"/>
+            </LinearLayout>
 
                 <!-- Divider -->
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="#E0E0E0" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
                 <!-- Language -->
                 <LinearLayout
@@ -233,8 +272,7 @@
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:src="@android:drawable/ic_dialog_map"
-                        android:tint="#666666"
+                        android:background="@drawable/change_icon_language"
                         android:layout_marginEnd="16dp" />
 
                     <TextView
@@ -242,22 +280,32 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="Language"
-                        android:textColor="@android:color/black"
+                        android:fontFamily="@font/poppins"
+                        android:textColor="#6F6F6F"
                         android:textSize="16sp" />
 
                     <ImageView
                         android:layout_width="16dp"
                         android:layout_height="16dp"
-                        android:src="@android:drawable/ic_media_next"
-                        android:tint="#666666" />
+                        android:background="@drawable/forward_icon_orange" />
 
                 </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@drawable/line_background_orange"/>
+            </LinearLayout>
 
                 <!-- Divider -->
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="#E0E0E0" />
+
+            <LinearLayout android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
                 <!-- Push Notifications -->
                 <LinearLayout
@@ -274,8 +322,7 @@
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:src="@android:drawable/ic_popup_reminder"
-                        android:tint="#666666"
+                        android:background="@drawable/notification_icon_orange_outline"
                         android:layout_marginEnd="16dp" />
 
                     <TextView
@@ -283,7 +330,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="Push-notifications"
-                        android:textColor="@android:color/black"
+                        android:fontFamily="@font/poppins"
+                        android:textColor="#6F6F6F"
                         android:textSize="16sp" />
 
                     <Switch
@@ -294,51 +342,63 @@
 
                 </LinearLayout>
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@drawable/line_background_orange"/>
+            </LinearLayout>
+
                 <!-- Divider -->
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="#E0E0E0" />
 
-                <!-- Logout -->
                 <LinearLayout
-                    android:id="@+id/btn_logout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingVertical="16dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true">
+                    android:orientation="vertical">
 
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@android:drawable/ic_menu_revert"
-                        android:tint="#666666"
-                        android:layout_marginEnd="16dp" />
-
-                    <TextView
-                        android:layout_width="0dp"
+                    <!-- Logout -->
+                    <LinearLayout
+                        android:id="@+id/btn_logout"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Logout"
-                        android:textColor="@android:color/black"
-                        android:textSize="16sp" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingVertical="16dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
 
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@android:drawable/ic_media_next"
-                        android:tint="#666666" />
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:background="@drawable/logout_icon_orange"
+                            android:layout_marginEnd="16dp" />
 
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Logout"
+                            android:fontFamily="@font/poppins"
+                            android:textColor="#6F6F6F"
+                            android:textSize="16sp" />
+
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:background="@drawable/forward_icon_orange" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@drawable/line_background_orange"/>
                 </LinearLayout>
-
             </LinearLayout>
-
         </LinearLayout>
-
     </ScrollView>
-
 </LinearLayout>
