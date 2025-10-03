@@ -151,8 +151,8 @@ class RecentQuotesAdapter(
         private val tvAmount: TextView = itemView.findViewById(R.id.tv_amount)
         
         fun bind(quote: FirebaseQuote, onQuoteClick: (FirebaseQuote) -> Unit) {
-            tvAddress.text = quote.location ?: "Unknown Address"
-            tvAmount.text = "R${quote.totalCost?.toInt() ?: 0}"
+            tvAddress.text = quote.address.ifEmpty { "Unknown Address" }
+            tvAmount.text = "R${quote.monthlySavings.toInt()}"
             
             itemView.setOnClickListener {
                 onQuoteClick(quote)
