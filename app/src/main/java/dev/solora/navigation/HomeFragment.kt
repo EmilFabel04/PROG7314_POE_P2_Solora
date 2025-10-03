@@ -16,6 +16,7 @@ import com.google.android.material.card.MaterialCardView
 import dev.solora.R
 import dev.solora.quotes.QuotesViewModel
 import dev.solora.leads.LeadsViewModel
+import dev.solora.settings.SettingsViewModel
 import dev.solora.data.FirebaseQuote
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -25,6 +26,7 @@ class HomeFragment : Fragment() {
     
     private val quotesViewModel: QuotesViewModel by viewModels()
     private val leadsViewModel: LeadsViewModel by viewModels()
+    private val settingsViewModel: SettingsViewModel by viewModels()
     
     // UI Elements
     private lateinit var tvCompanyName: TextView
@@ -96,6 +98,31 @@ class HomeFragment : Fragment() {
                 tvLeadsCount.text = leads.size.toString()
             }
         }
+        
+        // Observe settings to update company and consultant info
+        viewLifecycleOwner.lifecycleScope.launch {
+            settingsViewModel.settings.collect { settings ->
+                updateCompanyInfo(settings.companySettings)
+            }
+        }
+    }
+    
+    private fun updateCompanyInfo(companySettings: dev.solora.settings.CompanySettings) {
+        // Update company name
+        val companyName = if (companySettings.companyName.isNotEmpty()) {
+            companySettings.companyName
+        } else {
+            "SOLORA"
+        }
+        tvCompanyName.text = companyName
+        
+        // Update consultant name
+        val consultantName = if (companySettings.consultantName.isNotEmpty()) {
+            "Consultant: ${companySettings.consultantName}"
+        } else {
+            "Consultant: Not Set"
+        }
+        tvConsultantName.text = consultantName
     }
     
     private fun loadRecentQuotes() {
