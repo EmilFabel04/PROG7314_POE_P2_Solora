@@ -30,16 +30,16 @@ class CircleChartView @JvmOverloads constructor(
     private var centerX: Float = 0f
     private var centerY: Float = 0f
     private var radius: Float = 0f
-    private val strokeWidth = 30f
+    private val strokeWidth = 50f
     
-    // Default colors
+    // Orange shades color scheme
     private val defaultColors = listOf(
-        ContextCompat.getColor(context, R.color.solora_orange),
-        Color.parseColor("#4CAF50"), // Green
-        Color.parseColor("#2196F3"), // Blue
-        Color.parseColor("#FF9800"), // Orange
-        Color.parseColor("#9C27B0"), // Purple
-        Color.parseColor("#F44336")  // Red
+        ContextCompat.getColor(context, R.color.solora_orange), // Main orange
+        Color.parseColor("#FF8C42"), // Light orange
+        Color.parseColor("#E85A2C"), // Medium orange
+        Color.parseColor("#D44A1A"), // Dark orange
+        Color.parseColor("#FFB366"), // Very light orange
+        Color.parseColor("#CC4A1A")  // Very dark orange
     )
     
     init {
