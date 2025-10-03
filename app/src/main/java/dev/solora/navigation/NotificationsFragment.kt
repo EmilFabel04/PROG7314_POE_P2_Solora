@@ -25,19 +25,29 @@ class NotificationsFragment : Fragment() {
     }
     
     private fun setupClickListeners(view: View) {
-        // Find the notification card and set up click listener
-        val notificationCard = view.findViewById<com.google.android.material.card.MaterialCardView>(R.id.notification_card)
-        notificationCard?.setOnClickListener {
-            showComingSoonToast()
+        try {
+            // Find the notification card and set up click listener
+            val notificationCard = view.findViewById<com.google.android.material.card.MaterialCardView>(R.id.notification_card)
+            notificationCard?.setOnClickListener {
+                showComingSoonToast()
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("NotificationsFragment", "Error setting up click listeners: ${e.message}", e)
         }
     }
     
     private fun showComingSoonToast() {
-        Toast.makeText(
-            requireContext(), 
-            "Push notifications coming soon!", 
-            Toast.LENGTH_LONG
-        ).show()
+        try {
+            context?.let { ctx ->
+                Toast.makeText(
+                    ctx, 
+                    "Push notifications coming soon!", 
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("NotificationsFragment", "Error showing toast: ${e.message}", e)
+        }
     }
 }
 
