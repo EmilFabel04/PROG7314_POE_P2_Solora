@@ -217,7 +217,7 @@
                         <ImageView
                             android:layout_width="48dp"
                             android:layout_height="48dp"
-                            android:src="@android:drawable/ic_menu_calculator"
+                            android:src="@android:drawable/ic_menu_edit"
                             android:tint="@color/solora_orange"
                             android:layout_marginBottom="12dp" />
 
