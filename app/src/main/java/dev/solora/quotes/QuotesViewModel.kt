@@ -307,12 +307,20 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     // Get quote by ID
-    fun getQuoteById(quoteId: String) {
-        viewModelScope.launch {
+    suspend fun getQuoteById(quoteId: String): dev.solora.data.FirebaseQuote? {
+        return try {
             val result = firebaseRepository.getQuoteById(quoteId)
             if (result.isSuccess) {
-                _lastQuote.value = result.getOrNull()
+                val quote = result.getOrNull()
+        _lastQuote.value = quote
+                quote
+            } else {
+                android.util.Log.e("QuotesViewModel", "Error getting quote by ID: ${result.exceptionOrNull()?.message}")
+                null
             }
+        } catch (e: Exception) {
+            android.util.Log.e("QuotesViewModel", "Exception getting quote by ID: ${e.message}", e)
+            null
         }
     }
 
