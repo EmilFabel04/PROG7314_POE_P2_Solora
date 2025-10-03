@@ -19,10 +19,12 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 import dev.solora.R
 import dev.solora.profile.ProfileViewModel
+import dev.solora.settings.SettingsViewModel
 import kotlinx.coroutines.launch
 
 class ProfileFragment : Fragment() {
     private val profileViewModel: ProfileViewModel by viewModels()
+    private val settingsViewModel: SettingsViewModel by viewModels()
     private val auth = FirebaseAuth.getInstance()
     
     // UI Elements
@@ -198,14 +200,25 @@ class ProfileFragment : Fragment() {
         val etEmail = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_email)
         val etPhone = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_phone)
         val etCompany = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_company)
+        val etConsultantPhone = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_consultant_phone)
+        val etConsultantEmail = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_consultant_email)
+        val etConsultantLicense = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_consultant_license)
         
-        // Populate fields with current data
+        // Populate fields with current user data
         currentUser?.let { user ->
             etName.setText(user.name)
             etSurname.setText(user.surname)
             etEmail.setText(user.email)
             etPhone.setText(user.phone ?: "")
             etCompany.setText(user.company ?: "")
+        }
+        
+        // Populate consultant fields with settings data
+        val currentSettings = settingsViewModel.settings.value
+        currentSettings?.let { settings ->
+            etConsultantPhone.setText(settings.companySettings.consultantPhone)
+            etConsultantEmail.setText(settings.companySettings.consultantEmail)
+            etConsultantLicense.setText(settings.companySettings.consultantLicense)
         }
         
         // Create dialog
@@ -224,7 +237,7 @@ class ProfileFragment : Fragment() {
         }
         
         dialogView.findViewById<Button>(R.id.btn_save_edit_profile).setOnClickListener {
-            saveProfileFromDialog(etName, etSurname, etEmail, etPhone, etCompany, dialog)
+            saveProfileFromDialog(etName, etSurname, etEmail, etPhone, etCompany, etConsultantPhone, etConsultantEmail, etConsultantLicense, dialog)
         }
         
         dialog.show()
@@ -266,6 +279,9 @@ class ProfileFragment : Fragment() {
         etEmail: TextInputEditText,
         etPhone: TextInputEditText,
         etCompany: TextInputEditText,
+        etConsultantPhone: TextInputEditText,
+        etConsultantEmail: TextInputEditText,
+        etConsultantLicense: TextInputEditText,
         dialog: AlertDialog
     ) {
         try {
@@ -274,6 +290,11 @@ class ProfileFragment : Fragment() {
             val email = etEmail.text.toString().trim()
             val phone = etPhone.text.toString().trim().takeIf { it.isNotEmpty() }
             val company = etCompany.text.toString().trim().takeIf { it.isNotEmpty() }
+            
+            // Consultant information
+            val consultantPhone = etConsultantPhone.text.toString().trim().takeIf { it.isNotEmpty() }
+            val consultantEmail = etConsultantEmail.text.toString().trim().takeIf { it.isNotEmpty() }
+            val consultantLicense = etConsultantLicense.text.toString().trim().takeIf { it.isNotEmpty() }
             
             // Basic validation
             if (name.isEmpty() || surname.isEmpty() || email.isEmpty()) {
@@ -286,7 +307,15 @@ class ProfileFragment : Fragment() {
                 return
             }
             
-            // Save profile
+            // Validate consultant email if provided
+            consultantEmail?.let { consultantEmailValue ->
+                if (!android.util.Patterns.EMAIL_ADDRESS.matcher(consultantEmailValue).matches()) {
+                    Toast.makeText(requireContext(), "Please enter a valid consultant email address", Toast.LENGTH_SHORT).show()
+                    return
+                }
+            }
+            
+            // Save user profile
             profileViewModel.updateUserProfile(
                 name = name,
                 surname = surname,
@@ -295,7 +324,18 @@ class ProfileFragment : Fragment() {
                 company = company
             )
             
-            Toast.makeText(requireContext(), "Profile updated successfully", Toast.LENGTH_SHORT).show()
+            // Update consultant settings
+            val currentSettings = settingsViewModel.settings.value
+            if (currentSettings != null) {
+                val updatedCompanySettings = currentSettings.companySettings.copy(
+                    consultantPhone = consultantPhone ?: currentSettings.companySettings.consultantPhone,
+                    consultantEmail = consultantEmail ?: currentSettings.companySettings.consultantEmail,
+                    consultantLicense = consultantLicense ?: currentSettings.companySettings.consultantLicense
+                )
+                settingsViewModel.updateCompanySettings(updatedCompanySettings)
+            }
+            
+            Toast.makeText(requireContext(), "Profile and consultant information updated successfully", Toast.LENGTH_SHORT).show()
             dialog.dismiss()
             
         } catch (e: Exception) {

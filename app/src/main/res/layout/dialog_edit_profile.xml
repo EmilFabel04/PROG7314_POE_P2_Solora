@@ -107,7 +107,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="16dp"
         app:boxStrokeColor="@color/solora_orange"
         app:hintTextColor="@color/solora_orange"
         app:startIconTint="@color/solora_orange">
@@ -117,6 +117,67 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Company"
+            android:inputType="text" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Consultant Information Section -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Consultant Information"
+        android:textColor="@color/solora_orange"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="12dp" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:boxStrokeColor="@color/solora_orange"
+        app:hintTextColor="@color/solora_orange"
+        app:startIconTint="@color/solora_orange">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_dialog_consultant_phone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Consultant Phone"
+            android:inputType="phone" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:boxStrokeColor="@color/solora_orange"
+        app:hintTextColor="@color/solora_orange"
+        app:startIconTint="@color/solora_orange">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_dialog_consultant_email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Consultant Email"
+            android:inputType="textEmailAddress" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        app:boxStrokeColor="@color/solora_orange"
+        app:hintTextColor="@color/solora_orange"
+        app:startIconTint="@color/solora_orange">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_dialog_consultant_license"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Consultant License Number"
             android:inputType="text" />
 
     </com.google.android.material.textfield.TextInputLayout>
