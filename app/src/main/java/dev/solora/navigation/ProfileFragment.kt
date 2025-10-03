@@ -293,14 +293,40 @@ class ProfileFragment : Fragment() {
                             val appSettings = dev.solora.settings.AppSettings(companySettings = companySettings)
                             populateFormFromSettings(appSettings, etName, etSurname, etEmail, etPhone, etCompany, etCompanyName, etCompanyAddress, etCompanyPhone, etCompanyEmail, etCompanyWebsite)
                         } else {
-                            android.util.Log.d("ProfileFragment", "API returned null data, using user profile fallback")
-                            // Final fallback: Use user profile data
-                            populateFormFromUserProfile(etName, etSurname, etEmail, etPhone, etCompany, etCompanyName, etCompanyAddress, etCompanyPhone, etCompanyEmail, etCompanyWebsite)
+                            android.util.Log.d("ProfileFragment", "API returned null data, trying getUserProfile API")
+                            // Try getUserProfile API endpoint
+                            val userProfileResult = firebaseApi.getUserProfile()
+                            if (userProfileResult.isSuccess) {
+                                val userProfileData = userProfileResult.getOrNull()
+                                if (userProfileData != null) {
+                                    android.util.Log.d("ProfileFragment", "Got user profile data from API: $userProfileData")
+                                    populateFormFromApiUserProfile(userProfileData, etName, etSurname, etEmail, etPhone, etCompany, etCompanyName, etCompanyAddress, etCompanyPhone, etCompanyEmail, etCompanyWebsite)
+                                } else {
+                                    android.util.Log.d("ProfileFragment", "No user profile data from API, using ViewModel fallback")
+                                    populateFormFromUserProfile(etName, etSurname, etEmail, etPhone, etCompany, etCompanyName, etCompanyAddress, etCompanyPhone, etCompanyEmail, etCompanyWebsite)
+                                }
+                            } else {
+                                android.util.Log.d("ProfileFragment", "getUserProfile API failed: ${userProfileResult.exceptionOrNull()?.message}, using ViewModel fallback")
+                                populateFormFromUserProfile(etName, etSurname, etEmail, etPhone, etCompany, etCompanyName, etCompanyAddress, etCompanyPhone, etCompanyEmail, etCompanyWebsite)
+                            }
                         }
                     } else {
-                        android.util.Log.d("ProfileFragment", "API call failed: ${result.exceptionOrNull()?.message}, using user profile fallback")
-                        // Final fallback: Use user profile data
-                        populateFormFromUserProfile(etName, etSurname, etEmail, etPhone, etCompany, etCompanyName, etCompanyAddress, etCompanyPhone, etCompanyEmail, etCompanyWebsite)
+                        android.util.Log.d("ProfileFragment", "getSettings API call failed: ${result.exceptionOrNull()?.message}, trying getUserProfile API")
+                        // Try getUserProfile API as fallback
+                        val userProfileResult = firebaseApi.getUserProfile()
+                        if (userProfileResult.isSuccess) {
+                            val userProfileData = userProfileResult.getOrNull()
+                            if (userProfileData != null) {
+                                android.util.Log.d("ProfileFragment", "Got user profile data from API fallback: $userProfileData")
+                                populateFormFromApiUserProfile(userProfileData, etName, etSurname, etEmail, etPhone, etCompany, etCompanyName, etCompanyAddress, etCompanyPhone, etCompanyEmail, etCompanyWebsite)
+                            } else {
+                                android.util.Log.d("ProfileFragment", "No user profile data from API fallback, using ViewModel fallback")
+                                populateFormFromUserProfile(etName, etSurname, etEmail, etPhone, etCompany, etCompanyName, etCompanyAddress, etCompanyPhone, etCompanyEmail, etCompanyWebsite)
+                            }
+                        } else {
+                            android.util.Log.d("ProfileFragment", "getUserProfile API fallback failed: ${userProfileResult.exceptionOrNull()?.message}, using ViewModel fallback")
+                            populateFormFromUserProfile(etName, etSurname, etEmail, etPhone, etCompany, etCompanyName, etCompanyAddress, etCompanyPhone, etCompanyEmail, etCompanyWebsite)
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -381,6 +407,52 @@ class ProfileFragment : Fragment() {
         }
         
         android.util.Log.d("ProfileFragment", "Form populated from user profile fallback")
+    }
+    
+    private fun populateFormFromApiUserProfile(
+        userProfileData: Map<String, Any>,
+        etName: TextInputEditText,
+        etSurname: TextInputEditText,
+        etEmail: TextInputEditText,
+        etPhone: TextInputEditText,
+        etCompany: TextInputEditText,
+        etCompanyName: TextInputEditText,
+        etCompanyAddress: TextInputEditText,
+        etCompanyPhone: TextInputEditText,
+        etCompanyEmail: TextInputEditText,
+        etCompanyWebsite: TextInputEditText
+    ) {
+        android.util.Log.d("ProfileFragment", "populateFormFromApiUserProfile called with data: $userProfileData")
+        
+        // Extract user profile data from API response
+        val name = userProfileData["name"] as? String ?: ""
+        val surname = userProfileData["surname"] as? String ?: ""
+        val email = userProfileData["email"] as? String ?: ""
+        val phone = userProfileData["phone"] as? String ?: ""
+        val company = userProfileData["company"] as? String ?: ""
+        
+        // Extract company information if available
+        val companyName = userProfileData["companyName"] as? String ?: ""
+        val companyAddress = userProfileData["companyAddress"] as? String ?: ""
+        val companyPhone = userProfileData["companyPhone"] as? String ?: ""
+        val companyEmail = userProfileData["companyEmail"] as? String ?: ""
+        val companyWebsite = userProfileData["companyWebsite"] as? String ?: ""
+        
+        android.util.Log.d("ProfileFragment", "Setting form fields from API user profile - Name: '$name', Email: '$email', Phone: '$phone', Company: '$company'")
+        
+        // Populate form fields
+        etName.setText(name)
+        etSurname.setText(surname)
+        etEmail.setText(email)
+        etPhone.setText(phone)
+        etCompany.setText(company)
+        etCompanyName.setText(companyName)
+        etCompanyAddress.setText(companyAddress)
+        etCompanyPhone.setText(companyPhone)
+        etCompanyEmail.setText(companyEmail)
+        etCompanyWebsite.setText(companyWebsite)
+        
+        android.util.Log.d("ProfileFragment", "Form populated from API user profile data")
     }
     
     private fun showChangePasswordDialog() {
@@ -478,14 +550,46 @@ class ProfileFragment : Fragment() {
                 settingsViewModel.updateCompanySettings(updatedCompanySettings)
             }
             
-            // Also update the user profile as a fallback
-            profileViewModel.updateUserProfile(
-                name = name,
-                surname = surname.ifEmpty { name }, // Use name as surname if empty
-                email = email,
-                phone = phone,
-                company = companyName ?: company
-            )
+            // Also update the user profile via API
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    val userProfile = dev.solora.data.FirebaseUser(
+                        id = null,
+                        name = name,
+                        surname = surname.ifEmpty { name },
+                        email = email,
+                        phone = phone,
+                        company = companyName ?: company,
+                        createdAt = null,
+                        updatedAt = null
+                    )
+                    
+                    val apiResult = firebaseApi.updateUserProfile(userProfile)
+                    if (apiResult.isSuccess) {
+                        android.util.Log.d("ProfileFragment", "User profile updated via API successfully")
+                    } else {
+                        android.util.Log.w("ProfileFragment", "API user profile update failed: ${apiResult.exceptionOrNull()?.message}")
+                        // Fallback to ViewModel
+                        profileViewModel.updateUserProfile(
+                            name = name,
+                            surname = surname.ifEmpty { name },
+                            email = email,
+                            phone = phone,
+                            company = companyName ?: company
+                        )
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("ProfileFragment", "Error updating user profile via API: ${e.message}", e)
+                    // Fallback to ViewModel
+                    profileViewModel.updateUserProfile(
+                        name = name,
+                        surname = surname.ifEmpty { name },
+                        email = email,
+                        phone = phone,
+                        company = companyName ?: company
+                    )
+                }
+            }
             
             Toast.makeText(requireContext(), "Profile and company information updated successfully", Toast.LENGTH_SHORT).show()
             dialog.dismiss()

@@ -18,6 +18,7 @@ import dev.solora.quotes.QuotesViewModel
 import dev.solora.leads.LeadsViewModel
 import dev.solora.settings.SettingsViewModel
 import dev.solora.data.FirebaseQuote
+import dev.solora.api.FirebaseFunctionsApi
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -27,6 +28,7 @@ class HomeFragment : Fragment() {
     private val quotesViewModel: QuotesViewModel by viewModels()
     private val leadsViewModel: LeadsViewModel by viewModels()
     private val settingsViewModel: SettingsViewModel by viewModels()
+    private val apiService = FirebaseFunctionsApi()
     
     // UI Elements
     private lateinit var tvCompanyName: TextView
@@ -50,6 +52,7 @@ class HomeFragment : Fragment() {
         setupClickListeners()
         observeData()
         loadRecentQuotes()
+        performApiRefresh()
     }
     
     private fun initializeViews(view: View) {
@@ -260,5 +263,54 @@ class HomeFragment : Fragment() {
         emptyView.addView(emptyText)
         emptyView.addView(subText)
         layoutRecentQuotes.addView(emptyView)
+    }
+    
+    private fun performApiRefresh() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                // Refresh quotes count via API
+                val quotesResult = apiService.getQuotes(search = null, limit = null)
+                if (quotesResult.isSuccess) {
+                    val quotes = quotesResult.getOrNull() ?: emptyList()
+                    tvQuotesCount.text = quotes.size.toString()
+                    android.util.Log.d("HomeFragment", "Refreshed quotes count via API: ${quotes.size}")
+                }
+                
+                // Refresh leads count via API
+                val leadsResult = apiService.getLeads(search = null, status = null, limit = null)
+                if (leadsResult.isSuccess) {
+                    val leads = leadsResult.getOrNull() ?: emptyList()
+                    tvLeadsCount.text = leads.size.toString()
+                    android.util.Log.d("HomeFragment", "Refreshed leads count via API: ${leads.size}")
+                }
+                
+                // Refresh settings via API to ensure company info is up to date
+                val settingsResult = apiService.getSettings()
+                if (settingsResult.isSuccess) {
+                    val settingsData = settingsResult.getOrNull()
+                    if (settingsData != null) {
+                        val companyName = settingsData["companyName"] as? String ?: "SOLORA"
+                        val consultantName = settingsData["consultantName"] as? String ?: "Not Set"
+                        
+                        tvCompanyName.text = companyName
+                        tvConsultantName.text = "Consultant: $consultantName"
+                        android.util.Log.d("HomeFragment", "Refreshed company info via API: $companyName, $consultantName")
+                    }
+                }
+                
+                // Sync any pending data
+                val syncData = mapOf<String, Any>(
+                    "timestamp" to System.currentTimeMillis(),
+                    "source" to "home_refresh"
+                )
+                val syncResult = apiService.syncData(syncData)
+                if (syncResult.isSuccess) {
+                    android.util.Log.d("HomeFragment", "Data sync completed via API")
+                }
+                
+            } catch (e: Exception) {
+                android.util.Log.e("HomeFragment", "Error during API refresh: ${e.message}", e)
+            }
+        }
     }
 }
