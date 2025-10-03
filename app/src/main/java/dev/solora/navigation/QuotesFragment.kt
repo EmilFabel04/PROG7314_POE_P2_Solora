@@ -373,25 +373,22 @@ class QuotesFragment : Fragment() {
             dashboardContent.findViewById<TextView>(R.id.tv_total_revenue).text = "R${String.format("%.0f", dashboardData.totalRevenue)}"
             dashboardContent.findViewById<TextView>(R.id.tv_avg_savings).text = "R${String.format("%.0f", dashboardData.averageMonthlySavings)}"
             
-            // Update system size distribution
-            val maxCount = maxOf(
-                dashboardData.systemSizeDistribution.size0to3kw,
-                dashboardData.systemSizeDistribution.size3to6kw,
-                dashboardData.systemSizeDistribution.size6to10kw,
-                dashboardData.systemSizeDistribution.size10kwPlus
+            // Update circle chart with system size distribution
+            val circleChart = dashboardContent.findViewById<dev.solora.ui.views.CircleChartView>(R.id.circle_chart)
+            val labels = listOf("0-3 kW", "3-6 kW", "6-10 kW", "10+ kW")
+            val values = listOf(
+                dashboardData.systemSizeDistribution.size0to3kw.toFloat(),
+                dashboardData.systemSizeDistribution.size3to6kw.toFloat(),
+                dashboardData.systemSizeDistribution.size6to10kw.toFloat(),
+                dashboardData.systemSizeDistribution.size10kwPlus.toFloat()
             )
+            circleChart.setChartDataSimple(labels, values)
             
-            if (maxCount > 0) {
-                updateBarChart(R.id.bar_0_3kw, dashboardData.systemSizeDistribution.size0to3kw, maxCount)
-                updateBarChart(R.id.bar_3_6kw, dashboardData.systemSizeDistribution.size3to6kw, maxCount)
-                updateBarChart(R.id.bar_6_10kw, dashboardData.systemSizeDistribution.size6to10kw, maxCount)
-                updateBarChart(R.id.bar_10kw_plus, dashboardData.systemSizeDistribution.size10kwPlus, maxCount)
-            }
-            
-            dashboardContent.findViewById<TextView>(R.id.tv_count_0_3kw).text = dashboardData.systemSizeDistribution.size0to3kw.toString()
-            dashboardContent.findViewById<TextView>(R.id.tv_count_3_6kw).text = dashboardData.systemSizeDistribution.size3to6kw.toString()
-            dashboardContent.findViewById<TextView>(R.id.tv_count_6_10kw).text = dashboardData.systemSizeDistribution.size6to10kw.toString()
-            dashboardContent.findViewById<TextView>(R.id.tv_count_10kw_plus).text = dashboardData.systemSizeDistribution.size10kwPlus.toString()
+            // Update legend
+            dashboardContent.findViewById<TextView>(R.id.tv_legend_0_3kw).text = "0-3 kW (${dashboardData.systemSizeDistribution.size0to3kw})"
+            dashboardContent.findViewById<TextView>(R.id.tv_legend_3_6kw).text = "3-6 kW (${dashboardData.systemSizeDistribution.size3to6kw})"
+            dashboardContent.findViewById<TextView>(R.id.tv_legend_6_10kw).text = "6-10 kW (${dashboardData.systemSizeDistribution.size6to10kw})"
+            dashboardContent.findViewById<TextView>(R.id.tv_legend_10kw_plus).text = "10+ kW (${dashboardData.systemSizeDistribution.size10kwPlus})"
             
             // Update monthly performance
             dashboardContent.findViewById<TextView>(R.id.tv_quotes_this_month).text = "${dashboardData.monthlyPerformance.quotesThisMonth} quotes"
@@ -409,20 +406,6 @@ class QuotesFragment : Fragment() {
         }
     }
     
-    private fun updateBarChart(barId: Int, count: Int, maxCount: Int) {
-        val bar = dashboardContent.findViewById<View>(barId)
-        val layoutParams = bar.layoutParams
-        
-        // Calculate width percentage (minimum 10% for visibility)
-        val percentage = if (maxCount > 0) {
-            maxOf(0.1f, count.toFloat() / maxCount.toFloat())
-        } else {
-            0.1f
-        }
-        
-        // Update bar width (this is a simplified approach)
-        bar.alpha = percentage
-    }
     
     private fun updateTopLocations(topLocations: List<dev.solora.dashboard.LocationStats>) {
         val layout = dashboardContent.findViewById<LinearLayout>(R.id.layout_top_locations)
@@ -439,28 +422,51 @@ class QuotesFragment : Fragment() {
             return
         }
         
-        topLocations.forEach { location ->
+        topLocations.take(5).forEachIndexed { index, location ->
             val locationView = LinearLayout(requireContext()).apply {
                 orientation = LinearLayout.HORIZONTAL
-                setPadding(0, 8, 0, 8)
+                setPadding(0, 12, 0, 12)
+                gravity = android.view.Gravity.CENTER_VERTICAL
+            }
+            
+            // Rank number
+            val rankText = TextView(requireContext()).apply {
+                text = "${index + 1}."
+                textSize = 16f
+                setTextColor(resources.getColor(R.color.solora_orange, null))
+                setTypeface(null, android.graphics.Typeface.BOLD)
+                minWidth = 32
             }
             
             val locationText = TextView(requireContext()).apply {
                 text = location.location
                 textSize = 14f
+                setTextColor(android.graphics.Color.BLACK)
                 layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+                setPadding(16, 0, 0, 0)
             }
             
             val countText = TextView(requireContext()).apply {
                 text = "${location.count} quotes"
-                textSize = 12f
-                setTextColor(resources.getColor(android.R.color.darker_gray, null))
-                gravity = android.view.Gravity.END
+                textSize = 14f
+                setTextColor(resources.getColor(R.color.solora_orange, null))
+                setTypeface(null, android.graphics.Typeface.BOLD)
             }
             
+            locationView.addView(rankText)
             locationView.addView(locationText)
             locationView.addView(countText)
             layout.addView(locationView)
+            
+            // Add divider except for last item
+            if (index < topLocations.take(5).size - 1) {
+                val divider = View(requireContext()).apply {
+                    layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1)
+                    setBackgroundColor(android.graphics.Color.parseColor("#E0E0E0"))
+                    setPadding(0, 8, 0, 8)
+                }
+                layout.addView(divider)
+            }
         }
     }
     
