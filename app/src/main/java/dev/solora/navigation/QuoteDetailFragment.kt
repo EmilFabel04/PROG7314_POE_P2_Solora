@@ -14,13 +14,19 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import dev.solora.R
 import dev.solora.quotes.QuotesViewModel
+import dev.solora.pdf.PdfGenerator
+import dev.solora.pdf.FileShareUtils
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.io.File
 
 class QuoteDetailFragment : Fragment() {
     private val quotesViewModel: QuotesViewModel by viewModels()
+    private lateinit var pdfGenerator: PdfGenerator
     
     // UI Components
     private lateinit var btnBackDetail: ImageButton
@@ -47,6 +53,7 @@ class QuoteDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
+        pdfGenerator = PdfGenerator(requireContext())
         initializeViews(view)
         setupClickListeners()
         
@@ -170,8 +177,38 @@ class QuoteDetailFragment : Fragment() {
     }
     
     private fun exportToPdf() {
-        // TODO: Implement PDF export functionality
-        Toast.makeText(requireContext(), "PDF export coming soon!", Toast.LENGTH_SHORT).show()
-        android.util.Log.d("QuoteDetailFragment", "PDF export requested for quote: ${currentQuote?.reference}")
+        currentQuote?.let { quote ->
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    // Show loading message
+                    Toast.makeText(requireContext(), "Generating PDF...", Toast.LENGTH_SHORT).show()
+                    
+                    // Generate PDF in background thread
+                    val pdfFile = withContext(Dispatchers.IO) {
+                        pdfGenerator.generateQuotePdf(quote)
+                    }
+                    
+                    if (pdfFile != null) {
+                        // Show success message
+                        Toast.makeText(requireContext(), "PDF generated successfully!", Toast.LENGTH_SHORT).show()
+                        
+                        // Share the PDF file
+                        val reference = if (quote.reference.isNotEmpty()) quote.reference else "REF-${quote.id?.takeLast(5) ?: "00000"}"
+                        FileShareUtils.sharePdfFile(requireContext(), pdfFile, reference)
+                        
+                        android.util.Log.d("QuoteDetailFragment", "PDF exported successfully: ${pdfFile.name}")
+                    } else {
+                        Toast.makeText(requireContext(), "Failed to generate PDF", Toast.LENGTH_SHORT).show()
+                        android.util.Log.e("QuoteDetailFragment", "PDF generation failed for quote: ${quote.reference}")
+                    }
+                    
+                } catch (e: Exception) {
+                    Toast.makeText(requireContext(), "Error generating PDF: ${e.message}", Toast.LENGTH_SHORT).show()
+                    android.util.Log.e("QuoteDetailFragment", "PDF export error: ${e.message}", e)
+                }
+            }
+        } ?: run {
+            Toast.makeText(requireContext(), "No quote data available", Toast.LENGTH_SHORT).show()
+        }
     }
 }
