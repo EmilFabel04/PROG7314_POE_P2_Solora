@@ -120,6 +120,13 @@ class ProfileFragment : Fragment() {
                 }
             }
         }
+        
+        // Observe settings to ensure they're loaded
+        viewLifecycleOwner.lifecycleScope.launch {
+            settingsViewModel.settings.collect { settings ->
+                android.util.Log.d("ProfileFragment", "Settings observed: consultantName=${settings.companySettings.consultantName}")
+            }
+        }
     }
     
     private fun updateUI(user: dev.solora.data.FirebaseUser) {
@@ -243,19 +250,29 @@ class ProfileFragment : Fragment() {
     ) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
+                android.util.Log.d("ProfileFragment", "Starting to load user settings...")
+                
                 // Try to get settings from SettingsViewModel first
                 val currentSettings = settingsViewModel.settings.value
+                android.util.Log.d("ProfileFragment", "SettingsViewModel value: $currentSettings")
                 
                 if (currentSettings != null && currentSettings.companySettings.consultantName.isNotEmpty()) {
+                    android.util.Log.d("ProfileFragment", "Using SettingsViewModel data: ${currentSettings.companySettings.consultantName}")
                     // Populate with settings data
                     populateFormFromSettings(currentSettings, etName, etSurname, etEmail, etPhone, etCompany, etCompanyName, etCompanyAddress, etCompanyPhone, etCompanyEmail, etCompanyWebsite)
                 } else {
+                    android.util.Log.d("ProfileFragment", "SettingsViewModel empty, trying REST API...")
+                    
                     // Fallback: Use REST API to get user settings
                     val firebaseApi = FirebaseFunctionsApi()
                     val result = firebaseApi.getSettings()
                     
+                    android.util.Log.d("ProfileFragment", "REST API result: $result")
+                    
                     if (result.isSuccess) {
                         val settingsData = result.getOrNull()
+                        android.util.Log.d("ProfileFragment", "API settings data: $settingsData")
+                        
                         if (settingsData != null) {
                             // Create CompanySettings from the API response
                             val companySettings = dev.solora.settings.CompanySettings(
@@ -270,11 +287,18 @@ class ProfileFragment : Fragment() {
                                 consultantLicense = settingsData["consultantLicense"] as? String ?: ""
                             )
                             
+                            android.util.Log.d("ProfileFragment", "Created CompanySettings: consultantName=${companySettings.consultantName}, consultantEmail=${companySettings.consultantEmail}")
+                            
                             // Create AppSettings with the company settings
                             val appSettings = dev.solora.settings.AppSettings(companySettings = companySettings)
                             populateFormFromSettings(appSettings, etName, etSurname, etEmail, etPhone, etCompany, etCompanyName, etCompanyAddress, etCompanyPhone, etCompanyEmail, etCompanyWebsite)
+                        } else {
+                            android.util.Log.d("ProfileFragment", "API returned null data, using user profile fallback")
+                            // Final fallback: Use user profile data
+                            populateFormFromUserProfile(etName, etSurname, etEmail, etPhone, etCompany, etCompanyName, etCompanyAddress, etCompanyPhone, etCompanyEmail, etCompanyWebsite)
                         }
                     } else {
+                        android.util.Log.d("ProfileFragment", "API call failed: ${result.exceptionOrNull()?.message}, using user profile fallback")
                         // Final fallback: Use user profile data
                         populateFormFromUserProfile(etName, etSurname, etEmail, etPhone, etCompany, etCompanyName, etCompanyAddress, etCompanyPhone, etCompanyEmail, etCompanyWebsite)
                     }
@@ -300,12 +324,21 @@ class ProfileFragment : Fragment() {
         etCompanyEmail: TextInputEditText,
         etCompanyWebsite: TextInputEditText
     ) {
+        android.util.Log.d("ProfileFragment", "populateFormFromSettings called with consultantName: ${settings.companySettings.consultantName}")
+        
         // Populate consultant information from settings
-        etName.setText(settings.companySettings.consultantName)
+        val consultantName = settings.companySettings.consultantName
+        val consultantEmail = settings.companySettings.consultantEmail
+        val consultantPhone = settings.companySettings.consultantPhone
+        val companyName = settings.companySettings.companyName
+        
+        android.util.Log.d("ProfileFragment", "Setting form fields - Name: '$consultantName', Email: '$consultantEmail', Phone: '$consultantPhone', Company: '$companyName'")
+        
+        etName.setText(consultantName)
         etSurname.setText("") // Surname not stored in settings
-        etEmail.setText(settings.companySettings.consultantEmail)
-        etPhone.setText(settings.companySettings.consultantPhone)
-        etCompany.setText(settings.companySettings.companyName)
+        etEmail.setText(consultantEmail)
+        etPhone.setText(consultantPhone)
+        etCompany.setText(companyName)
         
         // Populate company information
         etCompanyName.setText(settings.companySettings.companyName)
@@ -314,7 +347,7 @@ class ProfileFragment : Fragment() {
         etCompanyEmail.setText(settings.companySettings.companyEmail)
         etCompanyWebsite.setText(settings.companySettings.companyWebsite)
         
-        android.util.Log.d("ProfileFragment", "Form populated from settings: ${settings.companySettings.consultantName}")
+        android.util.Log.d("ProfileFragment", "Form fields set successfully")
     }
     
     private fun populateFormFromUserProfile(
@@ -329,9 +362,15 @@ class ProfileFragment : Fragment() {
         etCompanyEmail: TextInputEditText,
         etCompanyWebsite: TextInputEditText
     ) {
+        android.util.Log.d("ProfileFragment", "populateFormFromUserProfile called - fallback to user profile data")
+        
         // Fallback to user profile data
         val currentUser = profileViewModel.userProfile.value
+        android.util.Log.d("ProfileFragment", "Current user profile: $currentUser")
+        
         currentUser?.let { user ->
+            android.util.Log.d("ProfileFragment", "Setting form fields from user profile - Name: '${user.name}', Email: '${user.email}', Phone: '${user.phone}', Company: '${user.company}'")
+            
             etName.setText(user.name)
             etSurname.setText(user.surname)
             etEmail.setText(user.email)
