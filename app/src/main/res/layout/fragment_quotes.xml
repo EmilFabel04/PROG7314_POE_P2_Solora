@@ -87,14 +87,17 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:paddingTop="16dp"
+            android:paddingBottom="16dp"
             android:clipToPadding="false"
+            android:scrollbars="vertical"
+            android:fillViewport="true"
             android:visibility="visible">
             
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingBottom="32dp">
+                android:paddingBottom="80dp">
                 
                 <!-- Calculate Quote Card -->
                 <com.google.android.material.card.MaterialCardView
@@ -260,14 +263,17 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:paddingTop="16dp"
+            android:paddingBottom="16dp"
             android:clipToPadding="false"
+            android:scrollbars="vertical"
+            android:fillViewport="true"
             android:visibility="gone">
             
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingBottom="48dp">
+                android:paddingBottom="80dp">
                 
                 <!-- Quote Information Card -->
                 <com.google.android.material.card.MaterialCardView
