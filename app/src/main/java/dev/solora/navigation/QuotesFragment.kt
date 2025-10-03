@@ -672,7 +672,7 @@ class QuotesListAdapter(
 ) : androidx.recyclerview.widget.ListAdapter<dev.solora.data.FirebaseQuote, QuotesListAdapter.QuoteViewHolder>(QuoteDiffCallback()) {
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): QuoteViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_quote, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_quote_simple, parent, false)
         return QuoteViewHolder(view, onQuoteClick)
     }
     
@@ -685,23 +685,24 @@ class QuotesListAdapter(
         private val onQuoteClick: (dev.solora.data.FirebaseQuote) -> Unit
     ) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
         
-        private val tvReference: TextView = itemView.findViewById(R.id.tv_quote_reference)
-        private val tvDate: TextView = itemView.findViewById(R.id.tv_quote_date)
-        private val tvClientName: TextView = itemView.findViewById(R.id.tv_client_name)
-        private val tvClientAddress: TextView = itemView.findViewById(R.id.tv_client_address)
-        private val tvSystemSize: TextView = itemView.findViewById(R.id.tv_system_size)
-        private val tvSavings: TextView = itemView.findViewById(R.id.tv_savings)
+        private val tvReference: TextView = itemView.findViewById(R.id.tv_reference)
+        private val tvAddress: TextView = itemView.findViewById(R.id.tv_address)
+        private val tvDate: TextView = itemView.findViewById(R.id.tv_date)
         
         fun bind(quote: dev.solora.data.FirebaseQuote) {
-            tvReference.text = quote.reference
-            tvClientName.text = quote.clientName
-            tvClientAddress.text = quote.address
-            tvSystemSize.text = "${String.format("%.1f", quote.systemKwp)} kW"
-            tvSavings.text = "R ${String.format("%.0f", quote.monthlySavings)}"
+            // Set reference number (use quote ID if reference is empty)
+            tvReference.text = if (quote.reference.isNotEmpty()) {
+                quote.reference
+            } else {
+                "REF-${quote.id?.takeLast(5) ?: "00000"}"
+            }
+            
+            // Set address
+            tvAddress.text = quote.address
             
             // Format date
             val dateText = quote.createdAt?.toDate()?.let {
-                java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale.getDefault()).format(it)
+                java.text.SimpleDateFormat("dd MMMM yyyy", java.util.Locale.getDefault()).format(it)
             } ?: "Unknown"
             tvDate.text = dateText
             
