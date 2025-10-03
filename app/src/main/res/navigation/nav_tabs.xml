@@ -11,6 +11,9 @@
         <action
             android:id="@+id/action_to_settings"
             app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_to_notifications"
+            app:destination="@id/notificationsFragment" />
     </fragment>
 
     <fragment
@@ -71,6 +74,11 @@
         android:id="@+id/changePasswordFragment"
         android:name="dev.solora.navigation.ChangePasswordFragment"
         android:label="Change Password" />
+
+    <fragment
+        android:id="@+id/notificationsFragment"
+        android:name="dev.solora.navigation.NotificationsFragment"
+        android:label="Notifications" />
 
 </navigation>
 
