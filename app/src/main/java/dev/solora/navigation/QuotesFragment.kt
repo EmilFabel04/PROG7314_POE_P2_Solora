@@ -222,19 +222,25 @@ class QuotesFragment : Fragment() {
     
     private fun setupViewTab() {
         // Setup RecyclerView
-        quotesAdapter = QuotesListAdapter { quote ->
-            // Navigate to quote detail page
-            android.util.Log.d("QuotesFragment", "Quote clicked: ID=${quote.id}, Reference=${quote.reference}")
-            
-            if (quote.id.isNullOrBlank()) {
-                android.util.Log.e("QuotesFragment", "ERROR: Quote ID is null or blank!")
-                Toast.makeText(requireContext(), "Error: Quote ID is missing", Toast.LENGTH_SHORT).show()
-                return@QuotesListAdapter
+        quotesAdapter = QuotesListAdapter(
+            onQuoteClick = { quote ->
+                // Navigate to quote detail page
+                android.util.Log.d("QuotesFragment", "Quote clicked: ID=${quote.id}, Reference=${quote.reference}")
+                
+                if (quote.id.isNullOrBlank()) {
+                    android.util.Log.e("QuotesFragment", "ERROR: Quote ID is null or blank!")
+                    Toast.makeText(requireContext(), "Error: Quote ID is missing", Toast.LENGTH_SHORT).show()
+                    return@QuotesListAdapter
+                }
+                
+                val bundle = Bundle().apply { putString("id", quote.id) }
+                findNavController().navigate(R.id.quoteDetailFragment, bundle)
+            },
+            onQuoteLongPress = { quote ->
+                // Show toast with quote details
+                showQuoteDetailsToast(quote)
             }
-            
-            val bundle = Bundle().apply { putString("id", quote.id) }
-            findNavController().navigate(R.id.quoteDetailFragment, bundle)
-        }
+        )
         rvQuotesList.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
         rvQuotesList.adapter = quotesAdapter
         
@@ -261,6 +267,24 @@ class QuotesFragment : Fragment() {
                 android.util.Log.e("QuotesFragment", "Error observing quotes", e)
             }
         }
+    }
+    
+    private fun showQuoteDetailsToast(quote: dev.solora.data.FirebaseQuote) {
+        val address = quote.address.ifEmpty { "Address not available" }
+        val systemSize = if (quote.systemKwp > 0) "${String.format("%.1f", quote.systemKwp)} kW" else "Not available"
+        
+        // Calculate estimated total cost based on system size (rough estimate: R8500 per kW)
+        val totalCost = if (quote.systemKwp > 0) {
+            val estimatedCost = quote.systemKwp * 8500
+            "R ${String.format("%.0f", estimatedCost)}"
+        } else {
+            "Not available"
+        }
+        
+        val toastMessage = "Address: $address\nSystem Size: $systemSize\nTotal Cost: $totalCost"
+        
+        Toast.makeText(requireContext(), toastMessage, Toast.LENGTH_LONG).show()
+        android.util.Log.d("QuotesFragment", "Long press toast: $toastMessage")
     }
     
     private fun setupDashboardTab() {
@@ -668,12 +692,13 @@ class QuotesFragment : Fragment() {
 
 // QuotesListAdapter for RecyclerView
 class QuotesListAdapter(
-    private val onQuoteClick: (dev.solora.data.FirebaseQuote) -> Unit
+    private val onQuoteClick: (dev.solora.data.FirebaseQuote) -> Unit,
+    private val onQuoteLongPress: (dev.solora.data.FirebaseQuote) -> Unit
 ) : androidx.recyclerview.widget.ListAdapter<dev.solora.data.FirebaseQuote, QuotesListAdapter.QuoteViewHolder>(QuoteDiffCallback()) {
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): QuoteViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_quote_simple, parent, false)
-        return QuoteViewHolder(view, onQuoteClick)
+        return QuoteViewHolder(view, onQuoteClick, onQuoteLongPress)
     }
     
     override fun onBindViewHolder(holder: QuoteViewHolder, position: Int) {
@@ -682,7 +707,8 @@ class QuotesListAdapter(
     
     class QuoteViewHolder(
         itemView: View,
-        private val onQuoteClick: (dev.solora.data.FirebaseQuote) -> Unit
+        private val onQuoteClick: (dev.solora.data.FirebaseQuote) -> Unit,
+        private val onQuoteLongPress: (dev.solora.data.FirebaseQuote) -> Unit
     ) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
         
         private val tvReference: TextView = itemView.findViewById(R.id.tv_reference)
@@ -708,6 +734,11 @@ class QuotesListAdapter(
             
             itemView.setOnClickListener {
                 onQuoteClick(quote)
+            }
+            
+            itemView.setOnLongClickListener {
+                onQuoteLongPress(quote)
+                true // Return true to consume the long press event
             }
         }
     }
