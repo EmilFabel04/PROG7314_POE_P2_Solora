@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:maxHeight="600dp"
+    android:fillViewport="true">
+
+<LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="@android:color/white"
-    android:padding="24dp">
+    android:padding="@dimen/dialog_padding">
 
     <!-- Header -->
     <LinearLayout
@@ -21,13 +27,13 @@
             android:layout_weight="1"
             android:text="Edit Profile"
             android:textColor="@color/solora_orange"
-            android:textSize="20sp"
+            android:textSize="@dimen/text_size_title"
             android:textStyle="bold" />
 
         <ImageButton
             android:id="@+id/btn_close_edit_profile"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@android:drawable/ic_menu_close_clear_cancel"
             android:tint="@color/solora_orange"
@@ -39,7 +45,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="@dimen/form_field_spacing"
         app:boxStrokeColor="@color/solora_orange"
         app:hintTextColor="@color/solora_orange"
         app:startIconTint="@color/solora_orange">
@@ -56,7 +62,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="@dimen/form_field_spacing"
         app:boxStrokeColor="@color/solora_orange"
         app:hintTextColor="@color/solora_orange"
         app:startIconTint="@color/solora_orange">
@@ -73,7 +79,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="@dimen/form_field_spacing"
         app:boxStrokeColor="@color/solora_orange"
         app:hintTextColor="@color/solora_orange"
         app:startIconTint="@color/solora_orange">
@@ -90,7 +96,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="@dimen/form_field_spacing"
         app:boxStrokeColor="@color/solora_orange"
         app:hintTextColor="@color/solora_orange"
         app:startIconTint="@color/solora_orange">
@@ -107,7 +113,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="@dimen/form_field_spacing"
         app:boxStrokeColor="@color/solora_orange"
         app:hintTextColor="@color/solora_orange"
         app:startIconTint="@color/solora_orange">
@@ -134,7 +140,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="@dimen/form_field_spacing"
         app:boxStrokeColor="@color/solora_orange"
         app:hintTextColor="@color/solora_orange"
         app:startIconTint="@color/solora_orange">
@@ -151,7 +157,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="@dimen/form_field_spacing"
         app:boxStrokeColor="@color/solora_orange"
         app:hintTextColor="@color/solora_orange"
         app:startIconTint="@color/solora_orange">
@@ -168,7 +174,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="@dimen/form_field_spacing"
         app:boxStrokeColor="@color/solora_orange"
         app:hintTextColor="@color/solora_orange"
         app:startIconTint="@color/solora_orange">
@@ -185,7 +191,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="@dimen/form_field_spacing"
         app:boxStrokeColor="@color/solora_orange"
         app:hintTextColor="@color/solora_orange"
         app:startIconTint="@color/solora_orange">
@@ -247,3 +253,5 @@
     </LinearLayout>
 
 </LinearLayout>
+
+</ScrollView>

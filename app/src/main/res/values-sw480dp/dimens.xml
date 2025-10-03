@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Large phone dimensions (5" screens and up) -->
+    <dimen name="header_height">60dp</dimen>
+    <dimen name="header_padding">20dp</dimen>
+    <dimen name="content_padding">20dp</dimen>
+    <dimen name="card_margin">10dp</dimen>
+    <dimen name="card_padding">18dp</dimen>
+    <dimen name="button_height">52dp</dimen>
+    <dimen name="text_size_title">22sp</dimen>
+    <dimen name="text_size_body">15sp</dimen>
+    <dimen name="text_size_small">13sp</dimen>
+    <dimen name="icon_size">26dp</dimen>
+    <dimen name="fab_margin">20dp</dimen>
+    <dimen name="dialog_padding">28dp</dimen>
+    <dimen name="form_field_spacing">14dp</dimen>
+</resources>

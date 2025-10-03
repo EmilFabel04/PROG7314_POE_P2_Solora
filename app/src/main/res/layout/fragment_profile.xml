@@ -9,10 +9,10 @@
     <!-- Orange Header -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/header_height"
         android:orientation="horizontal"
         android:background="@color/solora_orange"
-        android:padding="16dp"
+        android:padding="@dimen/header_padding"
         android:gravity="center_vertical">
 
         <TextView
@@ -21,7 +21,7 @@
             android:layout_weight="1"
             android:text="Profile"
             android:textColor="@android:color/white"
-            android:textSize="20sp"
+            android:textSize="@dimen/text_size_title"
             android:textStyle="bold" />
 
     </LinearLayout>
@@ -31,7 +31,8 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:padding="16dp">
+        android:padding="@dimen/content_padding"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"

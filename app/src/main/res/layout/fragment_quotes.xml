@@ -12,14 +12,14 @@
         android:layout_height="wrap_content"
         android:background="@color/solora_orange"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:padding="@dimen/content_padding">
         
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Solar Quotes"
             android:textColor="@android:color/white"
-            android:textSize="24sp"
+            android:textSize="@dimen/text_size_title"
             android:textStyle="bold" />
             
         <!-- Tab Row -->
