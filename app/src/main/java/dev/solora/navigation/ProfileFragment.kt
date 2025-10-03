@@ -52,7 +52,7 @@ class ProfileFragment : Fragment() {
         // Edit Profile
         view.findViewById<View>(R.id.btn_edit_profile)?.setOnClickListener {
             try {
-                findNavController().navigate(R.id.action_to_edit_profile)
+                findNavController().navigate(R.id.action_profile_to_edit_profile)
             } catch (e: Exception) {
                 android.util.Log.e("ProfileFragment", "Edit profile navigation error: ${e.message}")
                 Toast.makeText(requireContext(), "Edit profile not available", Toast.LENGTH_SHORT).show()
@@ -62,7 +62,7 @@ class ProfileFragment : Fragment() {
         // Change Password
         view.findViewById<View>(R.id.btn_change_password)?.setOnClickListener {
             try {
-                findNavController().navigate(R.id.action_to_change_password)
+                findNavController().navigate(R.id.action_profile_to_change_password)
             } catch (e: Exception) {
                 android.util.Log.e("ProfileFragment", "Change password navigation error: ${e.message}")
                 Toast.makeText(requireContext(), "Change password not available", Toast.LENGTH_SHORT).show()
@@ -181,7 +181,7 @@ class ProfileFragment : Fragment() {
             android.util.Log.d("ProfileFragment", "User signed out from Firebase Auth")
             
             // Navigate to auth screen
-            findNavController().navigate(R.id.action_start_to_auth)
+            findNavController().navigate(R.id.action_profile_to_auth)
             
             android.util.Log.d("ProfileFragment", "User logged out and navigated to auth screen")
             

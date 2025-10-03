@@ -233,7 +233,7 @@ class QuotesFragment : Fragment() {
             }
             
             val bundle = Bundle().apply { putString("id", quote.id) }
-            findNavController().navigate(R.id.quoteDetailFragment, bundle)
+            findNavController().navigate(R.id.action_quotes_to_quote_detail, bundle)
         }
         rvQuotesList.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
         rvQuotesList.adapter = quotesAdapter

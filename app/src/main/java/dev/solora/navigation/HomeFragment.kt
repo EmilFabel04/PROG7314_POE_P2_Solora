@@ -55,29 +55,29 @@ class HomeFragment : Fragment() {
     private fun setupClickListeners(view: View) {
         // Header buttons
         view.findViewById<View>(R.id.btn_notifications)?.setOnClickListener {
-            findNavController().navigate(R.id.action_to_notifications)
+            findNavController().navigate(R.id.action_home_to_notifications)
         }
         
         view.findViewById<View>(R.id.btn_settings)?.setOnClickListener {
-            findNavController().navigate(R.id.action_to_settings)
+            findNavController().navigate(R.id.action_home_to_settings)
         }
         
         // Action cards
         view.findViewById<View>(R.id.card_add_leads)?.setOnClickListener {
-            findNavController().navigate(R.id.leadsFragment)
+            findNavController().navigate(R.id.action_home_to_leads)
         }
         
         view.findViewById<View>(R.id.card_calculate_quote)?.setOnClickListener {
-            findNavController().navigate(R.id.quotesFragment)
+            findNavController().navigate(R.id.action_home_to_quotes)
         }
         
         // Recent quotes section
         view.findViewById<View>(R.id.tv_view_all_quotes)?.setOnClickListener {
-            findNavController().navigate(R.id.quotesFragment)
+            findNavController().navigate(R.id.action_home_to_quotes)
         }
         
         view.findViewById<View>(R.id.btn_create_first_quote)?.setOnClickListener {
-            findNavController().navigate(R.id.quotesFragment)
+            findNavController().navigate(R.id.action_home_to_quotes)
         }
     }
     
@@ -85,7 +85,7 @@ class HomeFragment : Fragment() {
         val quotesAdapter = RecentQuotesAdapter { quote ->
             // Navigate to quote detail when clicked
             val bundle = Bundle().apply { putString("id", quote.id) }
-            findNavController().navigate(R.id.quoteDetailFragment, bundle)
+            findNavController().navigate(R.id.action_home_to_quote_detail, bundle)
         }
         
         rvRecentQuotes.layoutManager = LinearLayoutManager(requireContext())
