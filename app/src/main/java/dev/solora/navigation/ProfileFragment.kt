@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
@@ -11,6 +12,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 import dev.solora.R
 import dev.solora.profile.ProfileViewModel
@@ -51,22 +54,12 @@ class ProfileFragment : Fragment() {
     private fun setupClickListeners(view: View) {
         // Edit Profile
         view.findViewById<View>(R.id.btn_edit_profile)?.setOnClickListener {
-            try {
-                findNavController().navigate(R.id.action_to_edit_profile)
-            } catch (e: Exception) {
-                android.util.Log.e("ProfileFragment", "Edit profile navigation error: ${e.message}")
-                Toast.makeText(requireContext(), "Edit profile not available", Toast.LENGTH_SHORT).show()
-            }
+            showEditProfileDialog()
         }
         
         // Change Password
         view.findViewById<View>(R.id.btn_change_password)?.setOnClickListener {
-            try {
-                findNavController().navigate(R.id.action_to_change_password)
-            } catch (e: Exception) {
-                android.util.Log.e("ProfileFragment", "Change password navigation error: ${e.message}")
-                Toast.makeText(requireContext(), "Change password not available", Toast.LENGTH_SHORT).show()
-            }
+            showChangePasswordDialog()
         }
         
         // Authentication
@@ -188,6 +181,168 @@ class ProfileFragment : Fragment() {
         } catch (e: Exception) {
             android.util.Log.e("ProfileFragment", "Logout error: ${e.message}", e)
             Toast.makeText(requireContext(), "Logout failed: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    private fun showEditProfileDialog() {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_edit_profile, null)
+        
+        // Get current user data
+        val currentUser = profileViewModel.userProfile.value
+        
+        // Initialize form fields
+        val etName = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_name)
+        val etSurname = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_surname)
+        val etEmail = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_email)
+        val etPhone = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_phone)
+        val etCompany = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_company)
+        
+        // Populate fields with current data
+        currentUser?.let { user ->
+            etName.setText(user.name)
+            etSurname.setText(user.surname)
+            etEmail.setText(user.email)
+            etPhone.setText(user.phone ?: "")
+            etCompany.setText(user.company ?: "")
+        }
+        
+        // Create dialog
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+        
+        // Set up button click listeners
+        dialogView.findViewById<ImageButton>(R.id.btn_close_edit_profile).setOnClickListener {
+            dialog.dismiss()
+        }
+        
+        dialogView.findViewById<Button>(R.id.btn_cancel_edit_profile).setOnClickListener {
+            dialog.dismiss()
+        }
+        
+        dialogView.findViewById<Button>(R.id.btn_save_edit_profile).setOnClickListener {
+            saveProfileFromDialog(etName, etSurname, etEmail, etPhone, etCompany, dialog)
+        }
+        
+        dialog.show()
+    }
+    
+    private fun showChangePasswordDialog() {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_change_password, null)
+        
+        // Initialize form fields
+        val etCurrentPassword = dialogView.findViewById<TextInputEditText>(R.id.et_current_password)
+        val etNewPassword = dialogView.findViewById<TextInputEditText>(R.id.et_new_password)
+        val etConfirmPassword = dialogView.findViewById<TextInputEditText>(R.id.et_confirm_password)
+        
+        // Create dialog
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+        
+        // Set up button click listeners
+        dialogView.findViewById<ImageButton>(R.id.btn_close_change_password).setOnClickListener {
+            dialog.dismiss()
+        }
+        
+        dialogView.findViewById<Button>(R.id.btn_cancel_change_password).setOnClickListener {
+            dialog.dismiss()
+        }
+        
+        dialogView.findViewById<Button>(R.id.btn_save_change_password).setOnClickListener {
+            changePasswordFromDialog(etCurrentPassword, etNewPassword, etConfirmPassword, dialog)
+        }
+        
+        dialog.show()
+    }
+    
+    private fun saveProfileFromDialog(
+        etName: TextInputEditText,
+        etSurname: TextInputEditText,
+        etEmail: TextInputEditText,
+        etPhone: TextInputEditText,
+        etCompany: TextInputEditText,
+        dialog: android.app.AlertDialog
+    ) {
+        try {
+            val name = etName.text.toString().trim()
+            val surname = etSurname.text.toString().trim()
+            val email = etEmail.text.toString().trim()
+            val phone = etPhone.text.toString().trim().takeIf { it.isNotEmpty() }
+            val company = etCompany.text.toString().trim().takeIf { it.isNotEmpty() }
+            
+            // Basic validation
+            if (name.isEmpty() || surname.isEmpty() || email.isEmpty()) {
+                Toast.makeText(requireContext(), "Please fill in all required fields", Toast.LENGTH_SHORT).show()
+                return
+            }
+            
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                Toast.makeText(requireContext(), "Please enter a valid email address", Toast.LENGTH_SHORT).show()
+                return
+            }
+            
+            // Save profile
+            profileViewModel.updateUserProfile(
+                name = name,
+                surname = surname,
+                email = email,
+                phone = phone,
+                company = company
+            )
+            
+            Toast.makeText(requireContext(), "Profile updated successfully", Toast.LENGTH_SHORT).show()
+            dialog.dismiss()
+            
+        } catch (e: Exception) {
+            android.util.Log.e("ProfileFragment", "Error saving profile: ${e.message}", e)
+            Toast.makeText(requireContext(), "Error saving profile", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    private fun changePasswordFromDialog(
+        etCurrentPassword: TextInputEditText,
+        etNewPassword: TextInputEditText,
+        etConfirmPassword: TextInputEditText,
+        dialog: android.app.AlertDialog
+    ) {
+        try {
+            val currentPassword = etCurrentPassword.text.toString().trim()
+            val newPassword = etNewPassword.text.toString().trim()
+            val confirmPassword = etConfirmPassword.text.toString().trim()
+            
+            // Basic validation
+            if (currentPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
+                Toast.makeText(requireContext(), "Please fill in all password fields", Toast.LENGTH_SHORT).show()
+                return
+            }
+            
+            if (newPassword.length < 6) {
+                Toast.makeText(requireContext(), "New password must be at least 6 characters long", Toast.LENGTH_SHORT).show()
+                return
+            }
+            
+            if (newPassword != confirmPassword) {
+                Toast.makeText(requireContext(), "New passwords do not match", Toast.LENGTH_SHORT).show()
+                return
+            }
+            
+            // Change password using Firebase Auth
+            val user = auth.currentUser
+            if (user != null) {
+                // For now, just show success message
+                // In a real implementation, you would re-authenticate and update password
+                Toast.makeText(requireContext(), "Password change feature coming soon!", Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
+            } else {
+                Toast.makeText(requireContext(), "No user logged in", Toast.LENGTH_SHORT).show()
+            }
+            
+        } catch (e: Exception) {
+            android.util.Log.e("ProfileFragment", "Error changing password: ${e.message}", e)
+            Toast.makeText(requireContext(), "Error changing password", Toast.LENGTH_SHORT).show()
         }
     }
 }
