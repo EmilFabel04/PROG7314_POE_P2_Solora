@@ -11,12 +11,14 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.google.firebase.auth.FirebaseAuth
 import dev.solora.R
 import dev.solora.profile.ProfileViewModel
 import kotlinx.coroutines.launch
 
 class ProfileFragment : Fragment() {
     private val profileViewModel: ProfileViewModel by viewModels()
+    private val auth = FirebaseAuth.getInstance()
     
     // UI Elements
     private lateinit var tvAvatar: TextView
@@ -172,12 +174,20 @@ class ProfileFragment : Fragment() {
     private fun logout() {
         try {
             Toast.makeText(requireContext(), "Logging out...", Toast.LENGTH_SHORT).show()
+            
+            // Sign out from Firebase Auth
+            auth.signOut()
+            
+            android.util.Log.d("ProfileFragment", "User signed out from Firebase Auth")
+            
             // Navigate to auth screen
             findNavController().navigate(R.id.action_start_to_auth)
-            android.util.Log.d("ProfileFragment", "User logged out")
+            
+            android.util.Log.d("ProfileFragment", "User logged out and navigated to auth screen")
+            
         } catch (e: Exception) {
-            android.util.Log.e("ProfileFragment", "Logout navigation error: ${e.message}")
-            Toast.makeText(requireContext(), "Logout failed", Toast.LENGTH_SHORT).show()
+            android.util.Log.e("ProfileFragment", "Logout error: ${e.message}", e)
+            Toast.makeText(requireContext(), "Logout failed: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 }

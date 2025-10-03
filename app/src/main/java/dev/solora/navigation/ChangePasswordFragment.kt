@@ -22,6 +22,7 @@ class ChangePasswordFragment : Fragment() {
     private lateinit var etConfirmPassword: TextInputEditText
     private lateinit var btnSave: Button
     private lateinit var btnCancel: Button
+    private lateinit var btnBack: android.widget.ImageView
     
     private val auth = FirebaseAuth.getInstance()
     
@@ -42,9 +43,14 @@ class ChangePasswordFragment : Fragment() {
         etConfirmPassword = view.findViewById(R.id.et_confirm_password)
         btnSave = view.findViewById(R.id.btn_save)
         btnCancel = view.findViewById(R.id.btn_cancel)
+        btnBack = view.findViewById(R.id.btn_back)
     }
     
     private fun setupClickListeners() {
+        btnBack.setOnClickListener {
+            findNavController().popBackStack()
+        }
+        
         btnCancel.setOnClickListener {
             findNavController().popBackStack()
         }
