@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -21,10 +22,7 @@ class ProfileFragment : Fragment() {
     private lateinit var tvAvatar: TextView
     private lateinit var tvName: TextView
     private lateinit var tvTitle: TextView
-    private lateinit var tvEmail: TextView
-    private lateinit var tvPhone: TextView
-    private lateinit var tvLocation: TextView
-    private lateinit var tvBio: TextView
+    private lateinit var switchNotifications: Switch
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_profile, container, false)
@@ -36,38 +34,60 @@ class ProfileFragment : Fragment() {
         initializeViews(view)
         setupClickListeners(view)
         observeViewModel()
+        
+        // Load user profile
+        profileViewModel.loadUserProfile()
     }
     
     private fun initializeViews(view: View) {
         tvAvatar = view.findViewById(R.id.tv_avatar)
         tvName = view.findViewById(R.id.tv_name)
         tvTitle = view.findViewById(R.id.tv_title)
-        tvEmail = view.findViewById(R.id.tv_email)
-        tvPhone = view.findViewById(R.id.tv_phone)
-        tvLocation = view.findViewById(R.id.tv_location)
-        tvBio = view.findViewById(R.id.tv_bio)
+        switchNotifications = view.findViewById(R.id.switch_notifications)
     }
     
     private fun setupClickListeners(view: View) {
-        // Set up click listeners for the action items
-        val actionItems = listOf(
-            R.id.btn_edit_profile to R.id.action_to_edit_profile,
-            R.id.btn_change_password to R.id.action_to_change_password,
-            R.id.btn_settings to R.id.action_to_settings
-        )
-        
-        actionItems.forEach { (viewId, actionId) ->
-            view.findViewById<View>(viewId)?.setOnClickListener {
-                try {
-                    findNavController().navigate(actionId)
-                } catch (e: Exception) {
-                    android.util.Log.e("ProfileFragment", "Navigation error: ${e.message}")
-                    Toast.makeText(requireContext(), "Navigation not available", Toast.LENGTH_SHORT).show()
-                }
+        // Edit Profile
+        view.findViewById<View>(R.id.btn_edit_profile)?.setOnClickListener {
+            try {
+                findNavController().navigate(R.id.action_to_edit_profile)
+            } catch (e: Exception) {
+                android.util.Log.e("ProfileFragment", "Edit profile navigation error: ${e.message}")
+                Toast.makeText(requireContext(), "Edit profile not available", Toast.LENGTH_SHORT).show()
             }
         }
         
-        // Logout functionality
+        // Change Password
+        view.findViewById<View>(R.id.btn_change_password)?.setOnClickListener {
+            try {
+                findNavController().navigate(R.id.action_to_change_password)
+            } catch (e: Exception) {
+                android.util.Log.e("ProfileFragment", "Change password navigation error: ${e.message}")
+                Toast.makeText(requireContext(), "Change password not available", Toast.LENGTH_SHORT).show()
+            }
+        }
+        
+        // Authentication
+        view.findViewById<View>(R.id.btn_authentication)?.setOnClickListener {
+            showAuthenticationDialog()
+        }
+        
+        // Language
+        view.findViewById<View>(R.id.btn_language)?.setOnClickListener {
+            showLanguageDialog()
+        }
+        
+        // Notifications Toggle
+        view.findViewById<View>(R.id.btn_notifications)?.setOnClickListener {
+            // Toggle the switch
+            switchNotifications.isChecked = !switchNotifications.isChecked
+        }
+        
+        switchNotifications.setOnCheckedChangeListener { _, isChecked ->
+            handleNotificationToggle(isChecked)
+        }
+        
+        // Logout
         view.findViewById<View>(R.id.btn_logout)?.setOnClickListener {
             logout()
         }
@@ -79,7 +99,6 @@ class ProfileFragment : Fragment() {
                 userProfile?.let { user ->
                     updateUI(user)
                 } ?: run {
-                    // No profile data - show default or loading state
                     showDefaultProfile()
                 }
             }
@@ -87,7 +106,6 @@ class ProfileFragment : Fragment() {
         
         viewLifecycleOwner.lifecycleScope.launch {
             profileViewModel.isLoading.collect { isLoading ->
-                // Handle loading state if needed
                 if (isLoading) {
                     android.util.Log.d("ProfileFragment", "Loading profile...")
                 }
@@ -114,18 +132,10 @@ class ProfileFragment : Fragment() {
             tvName.text = "${user.name} ${user.surname}"
             tvTitle.text = when (user.role) {
                 "admin" -> "Administrator"
-                "sales_consultant" -> "Sales Consultant"
+                "sales_consultant" -> "Sales Representative"
                 "manager" -> "Manager"
                 else -> "Team Member"
             }
-            
-            // Update contact information
-            tvEmail.text = user.email
-            tvPhone.text = user.phone ?: "Not provided"
-            tvLocation.text = user.company ?: "Not specified"
-            
-            // Update bio
-            tvBio.text = "Dedicated to guiding clients through sustainable solar solutions."
             
             android.util.Log.d("ProfileFragment", "Profile UI updated for user: ${user.name} ${user.surname}")
             
@@ -139,14 +149,29 @@ class ProfileFragment : Fragment() {
         tvAvatar.text = "??"
         tvName.text = "Loading..."
         tvTitle.text = ""
-        tvEmail.text = ""
-        tvPhone.text = ""
-        tvLocation.text = ""
-        tvBio.text = ""
+    }
+    
+    private fun showAuthenticationDialog() {
+        Toast.makeText(requireContext(), "Authentication settings coming soon!", Toast.LENGTH_LONG).show()
+    }
+    
+    private fun showLanguageDialog() {
+        Toast.makeText(requireContext(), "Language settings coming soon!", Toast.LENGTH_LONG).show()
+    }
+    
+    private fun handleNotificationToggle(isEnabled: Boolean) {
+        if (isEnabled) {
+            Toast.makeText(requireContext(), "Push notifications enabled", Toast.LENGTH_SHORT).show()
+            android.util.Log.d("ProfileFragment", "Notifications enabled")
+        } else {
+            Toast.makeText(requireContext(), "Push notifications disabled", Toast.LENGTH_SHORT).show()
+            android.util.Log.d("ProfileFragment", "Notifications disabled")
+        }
     }
     
     private fun logout() {
         try {
+            Toast.makeText(requireContext(), "Logging out...", Toast.LENGTH_SHORT).show()
             // Navigate to auth screen
             findNavController().navigate(R.id.action_start_to_auth)
             android.util.Log.d("ProfileFragment", "User logged out")
@@ -156,5 +181,3 @@ class ProfileFragment : Fragment() {
         }
     }
 }
-
-
