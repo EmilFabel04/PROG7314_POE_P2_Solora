@@ -22,6 +22,14 @@ class HomeFragment : Fragment() {
     private val quotesViewModel: QuotesViewModel by viewModels()
     private val leadsViewModel: LeadsViewModel by viewModels()
     
+    // UI Elements
+    private lateinit var tvCompanyName: TextView
+    private lateinit var tvConsultantName: TextView
+    private lateinit var tvQuotesCount: TextView
+    private lateinit var tvLeadsCount: TextView
+    private lateinit var rvRecentQuotes: RecyclerView
+    private lateinit var cardEmptyQuotes: View
+    
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_home, container, false)
     }
@@ -29,14 +37,51 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        // Get references to UI elements
-        val tvSavings = view.findViewById<TextView>(R.id.tv_savings)
-        val tvQuotes = view.findViewById<TextView>(R.id.tv_quotes)
-        val tvLeads = view.findViewById<TextView>(R.id.tv_leads)
-        val rvRecentQuotes = view.findViewById<RecyclerView>(R.id.rv_recent_quotes)
-        val cardEmptyQuotes = view.findViewById<View>(R.id.card_empty_quotes)
+        initializeViews(view)
+        setupClickListeners(view)
+        setupRecyclerView()
+        observeData()
+    }
+    
+    private fun initializeViews(view: View) {
+        tvCompanyName = view.findViewById(R.id.tv_company_name)
+        tvConsultantName = view.findViewById(R.id.tv_consultant_name)
+        tvQuotesCount = view.findViewById(R.id.tv_quotes_count)
+        tvLeadsCount = view.findViewById(R.id.tv_leads_count)
+        rvRecentQuotes = view.findViewById(R.id.rv_recent_quotes)
+        cardEmptyQuotes = view.findViewById(R.id.card_empty_quotes)
+    }
+    
+    private fun setupClickListeners(view: View) {
+        // Header buttons
+        view.findViewById<View>(R.id.btn_notifications)?.setOnClickListener {
+            findNavController().navigate(R.id.action_to_notifications)
+        }
         
-        // Set up RecyclerView
+        view.findViewById<View>(R.id.btn_settings)?.setOnClickListener {
+            findNavController().navigate(R.id.action_to_settings)
+        }
+        
+        // Action cards
+        view.findViewById<View>(R.id.card_add_leads)?.setOnClickListener {
+            findNavController().navigate(R.id.leadsFragment)
+        }
+        
+        view.findViewById<View>(R.id.card_calculate_quote)?.setOnClickListener {
+            findNavController().navigate(R.id.quotesFragment)
+        }
+        
+        // Recent quotes section
+        view.findViewById<View>(R.id.tv_view_all_quotes)?.setOnClickListener {
+            findNavController().navigate(R.id.quotesFragment)
+        }
+        
+        view.findViewById<View>(R.id.btn_create_first_quote)?.setOnClickListener {
+            findNavController().navigate(R.id.quotesFragment)
+        }
+    }
+    
+    private fun setupRecyclerView() {
         val quotesAdapter = RecentQuotesAdapter { quote ->
             // Navigate to quote detail when clicked
             val bundle = Bundle().apply { putString("id", quote.id) }
@@ -45,23 +90,20 @@ class HomeFragment : Fragment() {
         
         rvRecentQuotes.layoutManager = LinearLayoutManager(requireContext())
         rvRecentQuotes.adapter = quotesAdapter
-        
+    }
+    
+    private fun observeData() {
         // Observe quotes data
         viewLifecycleOwner.lifecycleScope.launch {
             quotesViewModel.quotes.collect { quotes ->
-                // Update quote count
-                tvQuotes.text = "Quotes ${quotes.size}"
+                tvQuotesCount.text = quotes.size.toString()
                 
-                // Calculate total monthly savings
-                val totalSavings = quotes.sumOf { it.monthlySavings }
-                tvSavings.text = "R ${String.format("%.0f", totalSavings)}"
-                
-                // Update recent quotes (show max 3)
-                val recentQuotes = quotes.take(3)
-                quotesAdapter.submitList(recentQuotes)
+                // Show recent quotes (limit to 5)
+                val recentQuotes = quotes.take(5)
+                (rvRecentQuotes.adapter as? RecentQuotesAdapter)?.submitList(recentQuotes)
                 
                 // Show/hide empty state
-                if (quotes.isEmpty()) {
+                if (recentQuotes.isEmpty()) {
                     rvRecentQuotes.visibility = View.GONE
                     cardEmptyQuotes.visibility = View.VISIBLE
                 } else {
@@ -74,57 +116,9 @@ class HomeFragment : Fragment() {
         // Observe leads data
         viewLifecycleOwner.lifecycleScope.launch {
             leadsViewModel.leads.collect { leads ->
-                tvLeads.text = "Leads ${leads.size}"
+                tvLeadsCount.text = leads.size.toString()
             }
         }
-        
-        // Set up navigation for action cards
-        setupNavigation(view)
-    }
-    
-    private fun setupNavigation(view: View) {
-        // Hero section stats - clickable for navigation
-        view.findViewById<View>(R.id.tv_quotes).setOnClickListener {
-            findNavController().navigate(R.id.quotesFragment)
-        }
-        view.findViewById<View>(R.id.tv_leads).setOnClickListener {
-            findNavController().navigate(R.id.leadsFragment)
-        }
-        
-        // Quick action cards - make the entire cards clickable
-        val calculateQuoteCard = view.findViewById<View>(R.id.card_calculate_quote)
-        calculateQuoteCard?.setOnClickListener {
-            findNavController().navigate(R.id.quotesFragment)
-        }
-        
-        val viewLeadsCard = view.findViewById<View>(R.id.card_view_leads)
-        viewLeadsCard?.setOnClickListener {
-            findNavController().navigate(R.id.leadsFragment)
-        }
-        
-        val notificationsCard = view.findViewById<View>(R.id.card_notifications)
-        notificationsCard?.setOnClickListener {
-            findNavController().navigate(R.id.action_to_notifications)
-        }
-        
-        // Settings button
-        view.findViewById<View>(R.id.btn_settings).setOnClickListener {
-            findNavController().navigate(R.id.action_to_settings)
-        }
-        
-        // Recent quotes section navigation
-        view.findViewById<View>(R.id.tv_view_all_quotes).setOnClickListener {
-            findNavController().navigate(R.id.quotesFragment)
-        }
-        
-        view.findViewById<View>(R.id.btn_create_first_quote)?.setOnClickListener {
-            findNavController().navigate(R.id.quotesFragment)
-        }
-        
-        // Hidden buttons for backward compatibility
-        view.findViewById<View>(R.id.btn_quotes).setOnClickListener { findNavController().navigate(R.id.quotesFragment) }
-        view.findViewById<View>(R.id.btn_leads).setOnClickListener { findNavController().navigate(R.id.leadsFragment) }
-        view.findViewById<View>(R.id.btn_notifications).setOnClickListener { findNavController().navigate(R.id.action_to_notifications) }
     }
 }
 
@@ -147,26 +141,22 @@ class RecentQuotesAdapter(
     }
     
     override fun onBindViewHolder(holder: QuoteViewHolder, position: Int) {
-        holder.bind(quotes[position])
+        holder.bind(quotes[position], onQuoteClick)
     }
     
     override fun getItemCount(): Int = quotes.size
     
-    inner class QuoteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val tvReference = itemView.findViewById<TextView>(R.id.tv_quote_reference)
-        private val tvClient = itemView.findViewById<TextView>(R.id.tv_quote_client)
-        private val tvSystem = itemView.findViewById<TextView>(R.id.tv_quote_system)
-        private val tvSavings = itemView.findViewById<TextView>(R.id.tv_quote_savings)
+    class QuoteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val tvAddress: TextView = itemView.findViewById(R.id.tv_address)
+        private val tvAmount: TextView = itemView.findViewById(R.id.tv_amount)
         
-        fun bind(quote: FirebaseQuote) {
-            tvReference.text = quote.reference
-            tvClient.text = quote.clientName
-            tvSystem.text = "${String.format("%.1f", quote.systemKwp)} kW"
-            tvSavings.text = "R${String.format("%.0f", quote.monthlySavings)}/month"
+        fun bind(quote: FirebaseQuote, onQuoteClick: (FirebaseQuote) -> Unit) {
+            tvAddress.text = quote.location ?: "Unknown Address"
+            tvAmount.text = "R${quote.totalCost?.toInt() ?: 0}"
             
-            itemView.setOnClickListener { onQuoteClick(quote) }
+            itemView.setOnClickListener {
+                onQuoteClick(quote)
+            }
         }
     }
 }
-
-

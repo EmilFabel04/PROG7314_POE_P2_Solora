@@ -1,215 +1,403 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingStart="16dp"
-    android:paddingEnd="16dp"
-    android:paddingTop="16dp"
-    android:clipToPadding="false">
+    android:orientation="vertical"
+    android:background="@android:color/white">
 
+    <!-- Orange Header with Icons -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingBottom="32dp">
+        android:orientation="horizontal"
+        android:background="@color/solora_orange"
+        android:padding="16dp"
+        android:gravity="center_vertical">
 
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="28dp"
-            app:cardUseCompatPadding="true">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_home_hero"
-                android:orientation="vertical"
-                android:padding="20dp">
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Welcome back" android:textColor="#CCFFFFFF"/>
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Solora Consultant" android:textColor="#FFFFFF" android:textSize="22sp" android:textStyle="bold"/>
-                    </LinearLayout>
-                    <ImageButton android:id="@+id/btn_settings" android:layout_width="40dp" android:layout_height="40dp" android:background="@android:color/transparent" android:src="@android:drawable/ic_menu_manage" android:tint="#FFFFFF"/>
-                </LinearLayout>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Projected monthly savings" android:textColor="#B3FFFFFF" android:layout_marginTop="8dp"/>
-                <TextView android:id="@+id/tv_savings" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="R 0" android:textColor="#FFFFFF" android:textSize="28sp" android:textStyle="bold"/>
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="8dp">
-                    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="10dp" android:background="#1AFFFFFF" android:layout_marginEnd="12dp">
-                        <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@android:drawable/ic_menu_sort_by_size" android:tint="#FFFFFF"/>
-                        <TextView android:id="@+id/tv_quotes" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Quotes 0" android:textColor="#FFFFFF" android:layout_marginStart="6dp"/>
-                    </LinearLayout>
-                    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="10dp" android:background="#1AFFFFFF">
-                        <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@android:drawable/ic_menu_myplaces" android:tint="#FFFFFF"/>
-                        <TextView android:id="@+id/tv_leads" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Leads 0" android:textColor="#FFFFFF" android:layout_marginStart="6dp"/>
-                    </LinearLayout>
-                </LinearLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+            android:layout_weight="1"
+            android:text="Solora"
+            android:textColor="@android:color/white"
+            android:textSize="24sp"
+            android:textStyle="bold" />
 
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Quick actions" android:textStyle="bold" android:layout_marginTop="16dp"/>
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-            <com.google.android.material.card.MaterialCardView 
-                android:id="@+id/card_calculate_quote"
-                android:layout_width="0dp" 
-                android:layout_height="wrap_content" 
-                android:layout_weight="1" 
-                app:cardCornerRadius="22dp" 
-                app:cardUseCompatPadding="true" 
-                android:layout_marginEnd="8dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground">
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="16dp" android:gravity="center_vertical">
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Calculate quote" android:textStyle="bold"/>
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Capture site info" android:textColor="#99000000"/>
-                    </LinearLayout>
-                    <ImageView android:layout_width="44dp" android:layout_height="44dp" android:background="@drawable/shape_circle_icon" android:src="@android:drawable/ic_menu_edit" android:tint="@color/solora_orange"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-            <com.google.android.material.card.MaterialCardView 
-                android:id="@+id/card_view_leads"
-                android:layout_width="0dp" 
-                android:layout_height="wrap_content" 
-                android:layout_weight="1" 
-                app:cardCornerRadius="22dp" 
-                app:cardUseCompatPadding="true" 
-                android:layout_marginStart="8dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground">
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="16dp" android:gravity="center_vertical">
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="View leads" android:textStyle="bold"/>
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Manage pipeline" android:textColor="#99000000"/>
-                    </LinearLayout>
-                    <ImageView android:layout_width="44dp" android:layout_height="44dp" android:background="@drawable/shape_circle_icon" android:src="@android:drawable/ic_menu_myplaces" android:tint="@color/solora_orange"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-        </LinearLayout>
-        <com.google.android.material.card.MaterialCardView 
-            android:id="@+id/card_notifications"
-            android:layout_width="match_parent" 
-            android:layout_height="wrap_content" 
-            app:cardCornerRadius="22dp" 
-            app:cardUseCompatPadding="true" 
-            android:layout_marginTop="12dp"
+        <ImageView
+            android:id="@+id/btn_notifications"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@android:drawable/ic_popup_reminder"
+            android:tint="@android:color/white"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
             android:focusable="true"
-            android:foreground="?android:attr/selectableItemBackground">
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="16dp" android:gravity="center_vertical">
-                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Notifications" android:textStyle="bold"/>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Recent updates" android:textColor="#99000000"/>
-                </LinearLayout>
-                <ImageView android:layout_width="44dp" android:layout_height="44dp" android:background="@drawable/shape_circle_icon" android:src="@android:drawable/ic_dialog_info" android:tint="@color/solora_orange"/>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+            android:padding="4dp"
+            android:layout_marginEnd="12dp" />
 
-        <!-- Recent Quotes Section -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="24dp"
-            android:gravity="center_vertical">
-            
-            <TextView 
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Recent quotes" 
-                android:textStyle="bold" />
-                
-            <TextView
-                android:id="@+id/tv_view_all_quotes"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="View all"
-                android:textColor="@color/solora_orange"
-                android:textStyle="bold"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="?android:attr/selectableItemBackground"
-                android:padding="8dp" />
-        </LinearLayout>
-        
-        <!-- Recent Quotes List -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_recent_quotes"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:nestedScrollingEnabled="false" />
-            
-        <!-- Empty state for quotes -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/card_empty_quotes"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="16dp"
-            app:cardUseCompatPadding="true"
-            android:layout_marginTop="8dp"
-            android:visibility="gone">
-            
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="24dp"
-                android:gravity="center">
-                
-                <ImageView
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
-                    android:src="@android:drawable/ic_menu_edit"
-                    android:tint="@color/solora_orange"
-                    android:alpha="0.6" />
-                    
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="No quotes yet"
-                    android:textStyle="bold"
-                    android:layout_marginTop="16dp" />
-                    
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Start by creating your first solar quote"
-                    android:textColor="#99000000"
-                    android:gravity="center"
-                    android:layout_marginTop="8dp" />
-                    
-                <Button
-                    android:id="@+id/btn_create_first_quote"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Create Quote"
-                    android:backgroundTint="@color/solora_orange"
-                    android:layout_marginTop="16dp" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <Button
-            android:id="@+id/btn_quotes"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:visibility="gone" />
-        <Button
-            android:id="@+id/btn_leads"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:visibility="gone" />
-        <Button
-            android:id="@+id/btn_notifications"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:visibility="gone" />
+        <ImageView
+            android:id="@+id/btn_settings"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@android:drawable/ic_menu_preferences"
+            android:tint="@android:color/white"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="4dp" />
 
     </LinearLayout>
 
-</ScrollView>
+    <!-- Scrollable Content -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="16dp">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
+            <!-- Main Info Block -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                app:cardUseCompatPadding="true"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:id="@+id/tv_company_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Solora Solar Solutions"
+                        android:textColor="@color/solora_orange"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_consultant_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Welcome back, Consultant"
+                        android:textColor="@android:color/black"
+                        android:textSize="16sp"
+                        android:layout_marginTop="8dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="16dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="horizontal"
+                            android:padding="12dp"
+                            android:background="#F5F5F5"
+                            android:layout_marginEnd="8dp">
+
+                            <ImageView
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:src="@android:drawable/ic_menu_sort_by_size"
+                                android:tint="@color/solora_orange"
+                                android:layout_marginEnd="8dp" />
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Quotes"
+                                    android:textSize="12sp"
+                                    android:textColor="#666666" />
+
+                                <TextView
+                                    android:id="@+id/tv_quotes_count"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="0"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@android:color/black" />
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="horizontal"
+                            android:padding="12dp"
+                            android:background="#F5F5F5"
+                            android:layout_marginStart="8dp">
+
+                            <ImageView
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:src="@android:drawable/ic_menu_myplaces"
+                                android:tint="@color/solora_orange"
+                                android:layout_marginEnd="8dp" />
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Leads"
+                                    android:textSize="12sp"
+                                    android:textColor="#666666" />
+
+                                <TextView
+                                    android:id="@+id/tv_leads_count"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="0"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@android:color/black" />
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Action Cards Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="24dp">
+
+                <!-- Add Leads Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_add_leads"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:cardUseCompatPadding="true"
+                    android:layout_marginEnd="8dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp"
+                        android:gravity="center">
+
+                        <ImageView
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:src="@android:drawable/ic_menu_add"
+                            android:tint="@color/solora_orange"
+                            android:background="@drawable/shape_circle_soft"
+                            android:padding="12dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Add Leads"
+                            android:textStyle="bold"
+                            android:textSize="14sp"
+                            android:textColor="@android:color/black"
+                            android:layout_marginTop="12dp"
+                            android:gravity="center" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Manage prospects"
+                            android:textSize="12sp"
+                            android:textColor="#666666"
+                            android:layout_marginTop="4dp"
+                            android:gravity="center" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Calculate Quote Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_calculate_quote"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:cardUseCompatPadding="true"
+                    android:layout_marginStart="8dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp"
+                        android:gravity="center">
+
+                        <ImageView
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:src="@android:drawable/ic_menu_edit"
+                            android:tint="@color/solora_orange"
+                            android:background="@drawable/shape_circle_soft"
+                            android:padding="12dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Calculate Quote"
+                            android:textStyle="bold"
+                            android:textSize="14sp"
+                            android:textColor="@android:color/black"
+                            android:layout_marginTop="12dp"
+                            android:gravity="center" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Generate solar quotes"
+                            android:textSize="12sp"
+                            android:textColor="#666666"
+                            android:layout_marginTop="4dp"
+                            android:gravity="center" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
+            <!-- Recent Quotes Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Recent Quotes"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black" />
+
+                <TextView
+                    android:id="@+id/tv_view_all_quotes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="View All"
+                    android:textColor="@color/solora_orange"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:padding="8dp" />
+
+            </LinearLayout>
+
+            <!-- Recent Quotes List -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_recent_quotes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false" />
+
+            <!-- Empty state for quotes -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_empty_quotes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardUseCompatPadding="true"
+                android:layout_marginTop="8dp"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="24dp"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:src="@android:drawable/ic_menu_edit"
+                        android:tint="@color/solora_orange"
+                        android:alpha="0.6" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="No quotes yet"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:layout_marginTop="16dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Start by creating your first solar quote"
+                        android:textColor="#666666"
+                        android:textSize="14sp"
+                        android:gravity="center"
+                        android:layout_marginTop="8dp" />
+
+                    <Button
+                        android:id="@+id/btn_create_first_quote"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Create Quote"
+                        android:backgroundTint="@color/solora_orange"
+                        android:textColor="@android:color/white"
+                        android:layout_marginTop="16dp" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>

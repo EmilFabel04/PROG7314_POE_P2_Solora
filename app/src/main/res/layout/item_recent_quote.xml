@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView 
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:cardCornerRadius="16dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
     app:cardUseCompatPadding="true"
+    android:layout_marginBottom="8dp"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?android:attr/selectableItemBackground">
@@ -17,96 +18,46 @@
         android:padding="16dp"
         android:gravity="center_vertical">
 
-        <!-- Quote Icon -->
-        <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/shape_circle_icon"
-            android:src="@android:drawable/ic_menu_edit"
-            android:tint="@color/solora_orange"
-            android:layout_marginEnd="16dp" />
-
-        <!-- Quote Details -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical">
 
-            <!-- Reference and Client -->
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/tv_address"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:text="123 Main Street"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black" />
 
-                <TextView
-                    android:id="@+id/tv_quote_reference"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Q001"
-                    android:textStyle="bold"
-                    android:textSize="16sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text=" • "
-                    android:textColor="#99000000"
-                    android:layout_marginHorizontal="4dp" />
-
-                <TextView
-                    android:id="@+id/tv_quote_client"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="John Doe"
-                    android:textColor="#99000000"
-                    android:singleLine="true"
-                    android:ellipsize="end" />
-            </LinearLayout>
-
-            <!-- System and Savings -->
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="4dp"
-                android:gravity="center_vertical">
+                android:text="Solar Installation Quote"
+                android:textSize="12sp"
+                android:textColor="#666666"
+                android:layout_marginTop="2dp" />
 
-                <TextView
-                    android:id="@+id/tv_quote_system"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="5.2 kW"
-                    android:textSize="14sp"
-                    android:textColor="#99000000" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text=" • "
-                    android:textColor="#99000000"
-                    android:layout_marginHorizontal="4dp" />
-
-                <TextView
-                    android:id="@+id/tv_quote_savings"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="R2400/month"
-                    android:textSize="14sp"
-                    android:textColor="@color/solora_orange"
-                    android:textStyle="bold" />
-            </LinearLayout>
         </LinearLayout>
 
-        <!-- Arrow indicator -->
+        <TextView
+            android:id="@+id/tv_amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="R56,700"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/solora_orange"
+            android:layout_marginEnd="8dp" />
+
         <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@android:drawable/ic_menu_more"
-            android:tint="#CCCCCC"
-            android:rotation="270" />
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@android:drawable/ic_media_next"
+            android:tint="#666666" />
 
     </LinearLayout>
 
