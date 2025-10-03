@@ -101,13 +101,10 @@ class HomeFragment : Fragment() {
     private fun loadRecentQuotes() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                // Get recent quotes (last 5)
-                val currentUser = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
-                if (currentUser != null) {
-                    val quotes = quotesViewModel.getQuotesByTimeframe(30) // Last 30 days
-                    displayRecentQuotes(quotes.take(5))
-                } else {
-                    displayEmptyQuotes()
+                // Get recent quotes (last 5) from the quotes flow
+                quotesViewModel.quotes.collect { quotes ->
+                    val recentQuotes = quotes.take(5) // Get the 5 most recent quotes
+                    displayRecentQuotes(recentQuotes)
                 }
             } catch (e: Exception) {
                 android.util.Log.e("HomeFragment", "Error loading recent quotes: ${e.message}", e)
