@@ -200,25 +200,45 @@ class ProfileFragment : Fragment() {
         val etEmail = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_email)
         val etPhone = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_phone)
         val etCompany = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_company)
-        val etConsultantPhone = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_consultant_phone)
-        val etConsultantEmail = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_consultant_email)
-        val etConsultantLicense = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_consultant_license)
+        val etCompanyName = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_company_name)
+        val etCompanyAddress = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_company_address)
+        val etCompanyPhone = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_company_phone)
+        val etCompanyEmail = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_company_email)
+        val etCompanyWebsite = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_company_website)
         
-        // Populate fields with current user data
-        currentUser?.let { user ->
-            etName.setText(user.name)
-            etSurname.setText(user.surname)
-            etEmail.setText(user.email)
-            etPhone.setText(user.phone ?: "")
-            etCompany.setText(user.company ?: "")
-        }
-        
-        // Populate consultant fields with settings data
+        // Populate fields with current user data from user_settings (consultant info)
         val currentSettings = settingsViewModel.settings.value
         currentSettings?.let { settings ->
-            etConsultantPhone.setText(settings.companySettings.consultantPhone)
-            etConsultantEmail.setText(settings.companySettings.consultantEmail)
-            etConsultantLicense.setText(settings.companySettings.consultantLicense)
+            // Use consultant information from settings as the main profile data
+            etName.setText(settings.companySettings.consultantName)
+            etSurname.setText("") // Surname not stored in settings, leave empty
+            etEmail.setText(settings.companySettings.consultantEmail)
+            etPhone.setText(settings.companySettings.consultantPhone)
+            etCompany.setText(settings.companySettings.companyName)
+            
+            // Company information
+            etCompanyName.setText(settings.companySettings.companyName)
+            etCompanyAddress.setText(settings.companySettings.companyAddress)
+            etCompanyPhone.setText(settings.companySettings.companyPhone)
+            etCompanyEmail.setText(settings.companySettings.companyEmail)
+            etCompanyWebsite.setText(settings.companySettings.companyWebsite)
+        }
+        
+        // Fallback to user profile data if settings are empty
+        currentUser?.let { user ->
+            if (currentSettings?.companySettings?.consultantName.isNullOrEmpty()) {
+                etName.setText(user.name)
+            }
+            if (currentSettings?.companySettings?.consultantEmail.isNullOrEmpty()) {
+                etEmail.setText(user.email)
+            }
+            if (currentSettings?.companySettings?.consultantPhone.isNullOrEmpty()) {
+                etPhone.setText(user.phone ?: "")
+            }
+            if (currentSettings?.companySettings?.companyName.isNullOrEmpty()) {
+                etCompany.setText(user.company ?: "")
+                etCompanyName.setText(user.company ?: "")
+            }
         }
         
         // Create dialog
@@ -237,7 +257,7 @@ class ProfileFragment : Fragment() {
         }
         
         dialogView.findViewById<Button>(R.id.btn_save_edit_profile).setOnClickListener {
-            saveProfileFromDialog(etName, etSurname, etEmail, etPhone, etCompany, etConsultantPhone, etConsultantEmail, etConsultantLicense, dialog)
+            saveProfileFromDialog(etName, etSurname, etEmail, etPhone, etCompany, etCompanyName, etCompanyAddress, etCompanyPhone, etCompanyEmail, etCompanyWebsite, dialog)
         }
         
         dialog.show()
@@ -279,9 +299,11 @@ class ProfileFragment : Fragment() {
         etEmail: TextInputEditText,
         etPhone: TextInputEditText,
         etCompany: TextInputEditText,
-        etConsultantPhone: TextInputEditText,
-        etConsultantEmail: TextInputEditText,
-        etConsultantLicense: TextInputEditText,
+        etCompanyName: TextInputEditText,
+        etCompanyAddress: TextInputEditText,
+        etCompanyPhone: TextInputEditText,
+        etCompanyEmail: TextInputEditText,
+        etCompanyWebsite: TextInputEditText,
         dialog: AlertDialog
     ) {
         try {
@@ -291,14 +313,16 @@ class ProfileFragment : Fragment() {
             val phone = etPhone.text.toString().trim().takeIf { it.isNotEmpty() }
             val company = etCompany.text.toString().trim().takeIf { it.isNotEmpty() }
             
-            // Consultant information
-            val consultantPhone = etConsultantPhone.text.toString().trim().takeIf { it.isNotEmpty() }
-            val consultantEmail = etConsultantEmail.text.toString().trim().takeIf { it.isNotEmpty() }
-            val consultantLicense = etConsultantLicense.text.toString().trim().takeIf { it.isNotEmpty() }
+            // Company information
+            val companyName = etCompanyName.text.toString().trim().takeIf { it.isNotEmpty() }
+            val companyAddress = etCompanyAddress.text.toString().trim().takeIf { it.isNotEmpty() }
+            val companyPhone = etCompanyPhone.text.toString().trim().takeIf { it.isNotEmpty() }
+            val companyEmail = etCompanyEmail.text.toString().trim().takeIf { it.isNotEmpty() }
+            val companyWebsite = etCompanyWebsite.text.toString().trim().takeIf { it.isNotEmpty() }
             
             // Basic validation
-            if (name.isEmpty() || surname.isEmpty() || email.isEmpty()) {
-                Toast.makeText(requireContext(), "Please fill in all required fields", Toast.LENGTH_SHORT).show()
+            if (name.isEmpty() || email.isEmpty()) {
+                Toast.makeText(requireContext(), "Please fill in name and email fields", Toast.LENGTH_SHORT).show()
                 return
             }
             
@@ -307,35 +331,43 @@ class ProfileFragment : Fragment() {
                 return
             }
             
-            // Validate consultant email if provided
-            consultantEmail?.let { consultantEmailValue ->
-                if (!android.util.Patterns.EMAIL_ADDRESS.matcher(consultantEmailValue).matches()) {
-                    Toast.makeText(requireContext(), "Please enter a valid consultant email address", Toast.LENGTH_SHORT).show()
+            // Validate company email if provided
+            companyEmail?.let { companyEmailValue ->
+                if (!android.util.Patterns.EMAIL_ADDRESS.matcher(companyEmailValue).matches()) {
+                    Toast.makeText(requireContext(), "Please enter a valid company email address", Toast.LENGTH_SHORT).show()
                     return
                 }
             }
             
-            // Save user profile
-            profileViewModel.updateUserProfile(
-                name = name,
-                surname = surname,
-                email = email,
-                phone = phone,
-                company = company
-            )
-            
-            // Update consultant settings
+            // Update company settings with all the information
             val currentSettings = settingsViewModel.settings.value
             if (currentSettings != null) {
                 val updatedCompanySettings = currentSettings.companySettings.copy(
-                    consultantPhone = consultantPhone ?: currentSettings.companySettings.consultantPhone,
-                    consultantEmail = consultantEmail ?: currentSettings.companySettings.consultantEmail,
-                    consultantLicense = consultantLicense ?: currentSettings.companySettings.consultantLicense
+                    // Consultant information (stored as the user's profile in settings)
+                    consultantName = name,
+                    consultantEmail = email,
+                    consultantPhone = phone ?: currentSettings.companySettings.consultantPhone,
+                    
+                    // Company information
+                    companyName = companyName ?: currentSettings.companySettings.companyName,
+                    companyAddress = companyAddress ?: currentSettings.companySettings.companyAddress,
+                    companyPhone = companyPhone ?: currentSettings.companySettings.companyPhone,
+                    companyEmail = companyEmail ?: currentSettings.companySettings.companyEmail,
+                    companyWebsite = companyWebsite ?: currentSettings.companySettings.companyWebsite
                 )
                 settingsViewModel.updateCompanySettings(updatedCompanySettings)
             }
             
-            Toast.makeText(requireContext(), "Profile and consultant information updated successfully", Toast.LENGTH_SHORT).show()
+            // Also update the user profile as a fallback
+            profileViewModel.updateUserProfile(
+                name = name,
+                surname = surname.ifEmpty { name }, // Use name as surname if empty
+                email = email,
+                phone = phone,
+                company = companyName ?: company
+            )
+            
+            Toast.makeText(requireContext(), "Profile and company information updated successfully", Toast.LENGTH_SHORT).show()
             dialog.dismiss()
             
         } catch (e: Exception) {
