@@ -41,6 +41,7 @@ class LeadsFragment : Fragment() {
     private lateinit var etEmail: EditText
     private lateinit var etContact: EditText
     private lateinit var btnAdd: Button
+    private lateinit var btnCancel: Button
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         android.util.Log.d("LeadsFragment", "===== UPDATED LEADS FRAGMENT ONCREATEVIEW CALLED =====")
@@ -91,6 +92,7 @@ class LeadsFragment : Fragment() {
         etEmail = view.findViewById(R.id.et_email)
         etContact = view.findViewById(R.id.et_contact)
         btnAdd = view.findViewById(R.id.btn_add)
+        btnCancel = view.findViewById(R.id.btn_cancel)
         
     }
     
@@ -188,6 +190,11 @@ class LeadsFragment : Fragment() {
         
         btnAdd.setOnClickListener {
             addFirebaseLead()
+        }
+        
+        btnCancel.setOnClickListener {
+            android.util.Log.d("LeadsFragment", "Cancel button clicked - hiding add lead modal")
+            hideAddLeadModal()
         }
         
         // Close modal when clicking outside
