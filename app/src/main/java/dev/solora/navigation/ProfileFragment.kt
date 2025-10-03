@@ -20,6 +20,7 @@ import com.google.firebase.auth.FirebaseAuth
 import dev.solora.R
 import dev.solora.profile.ProfileViewModel
 import dev.solora.settings.SettingsViewModel
+import dev.solora.api.FirebaseFunctionsApi
 import kotlinx.coroutines.launch
 
 class ProfileFragment : Fragment() {
@@ -191,9 +192,6 @@ class ProfileFragment : Fragment() {
     private fun showEditProfileDialog() {
         val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_edit_profile, null)
         
-        // Get current user data
-        val currentUser = profileViewModel.userProfile.value
-        
         // Initialize form fields
         val etName = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_name)
         val etSurname = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_surname)
@@ -206,40 +204,8 @@ class ProfileFragment : Fragment() {
         val etCompanyEmail = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_company_email)
         val etCompanyWebsite = dialogView.findViewById<TextInputEditText>(R.id.et_dialog_company_website)
         
-        // Populate fields with current user data from user_settings (consultant info)
-        val currentSettings = settingsViewModel.settings.value
-        currentSettings?.let { settings ->
-            // Use consultant information from settings as the main profile data
-            etName.setText(settings.companySettings.consultantName)
-            etSurname.setText("") // Surname not stored in settings, leave empty
-            etEmail.setText(settings.companySettings.consultantEmail)
-            etPhone.setText(settings.companySettings.consultantPhone)
-            etCompany.setText(settings.companySettings.companyName)
-            
-            // Company information
-            etCompanyName.setText(settings.companySettings.companyName)
-            etCompanyAddress.setText(settings.companySettings.companyAddress)
-            etCompanyPhone.setText(settings.companySettings.companyPhone)
-            etCompanyEmail.setText(settings.companySettings.companyEmail)
-            etCompanyWebsite.setText(settings.companySettings.companyWebsite)
-        }
-        
-        // Fallback to user profile data if settings are empty
-        currentUser?.let { user ->
-            if (currentSettings?.companySettings?.consultantName.isNullOrEmpty()) {
-                etName.setText(user.name)
-            }
-            if (currentSettings?.companySettings?.consultantEmail.isNullOrEmpty()) {
-                etEmail.setText(user.email)
-            }
-            if (currentSettings?.companySettings?.consultantPhone.isNullOrEmpty()) {
-                etPhone.setText(user.phone ?: "")
-            }
-            if (currentSettings?.companySettings?.companyName.isNullOrEmpty()) {
-                etCompany.setText(user.company ?: "")
-                etCompanyName.setText(user.company ?: "")
-            }
-        }
+        // Load user settings data and populate form
+        loadUserSettingsAndPopulateForm(etName, etSurname, etEmail, etPhone, etCompany, etCompanyName, etCompanyAddress, etCompanyPhone, etCompanyEmail, etCompanyWebsite)
         
         // Create dialog
         val dialog = MaterialAlertDialogBuilder(requireContext())
@@ -261,6 +227,121 @@ class ProfileFragment : Fragment() {
         }
         
         dialog.show()
+    }
+    
+    private fun loadUserSettingsAndPopulateForm(
+        etName: TextInputEditText,
+        etSurname: TextInputEditText,
+        etEmail: TextInputEditText,
+        etPhone: TextInputEditText,
+        etCompany: TextInputEditText,
+        etCompanyName: TextInputEditText,
+        etCompanyAddress: TextInputEditText,
+        etCompanyPhone: TextInputEditText,
+        etCompanyEmail: TextInputEditText,
+        etCompanyWebsite: TextInputEditText
+    ) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                // Try to get settings from SettingsViewModel first
+                val currentSettings = settingsViewModel.settings.value
+                
+                if (currentSettings != null && currentSettings.companySettings.consultantName.isNotEmpty()) {
+                    // Populate with settings data
+                    populateFormFromSettings(currentSettings, etName, etSurname, etEmail, etPhone, etCompany, etCompanyName, etCompanyAddress, etCompanyPhone, etCompanyEmail, etCompanyWebsite)
+                } else {
+                    // Fallback: Use REST API to get user settings
+                    val firebaseApi = FirebaseFunctionsApi()
+                    val result = firebaseApi.getSettings()
+                    
+                    if (result.isSuccess) {
+                        val settingsData = result.getOrNull()
+                        if (settingsData != null) {
+                            // Create CompanySettings from the API response
+                            val companySettings = dev.solora.settings.CompanySettings(
+                                companyName = settingsData["companyName"] as? String ?: "",
+                                companyAddress = settingsData["companyAddress"] as? String ?: "",
+                                companyPhone = settingsData["companyPhone"] as? String ?: "",
+                                companyEmail = settingsData["companyEmail"] as? String ?: "",
+                                companyWebsite = settingsData["companyWebsite"] as? String ?: "",
+                                consultantName = settingsData["consultantName"] as? String ?: "",
+                                consultantPhone = settingsData["consultantPhone"] as? String ?: "",
+                                consultantEmail = settingsData["consultantEmail"] as? String ?: "",
+                                consultantLicense = settingsData["consultantLicense"] as? String ?: ""
+                            )
+                            
+                            // Create AppSettings with the company settings
+                            val appSettings = dev.solora.settings.AppSettings(companySettings = companySettings)
+                            populateFormFromSettings(appSettings, etName, etSurname, etEmail, etPhone, etCompany, etCompanyName, etCompanyAddress, etCompanyPhone, etCompanyEmail, etCompanyWebsite)
+                        }
+                    } else {
+                        // Final fallback: Use user profile data
+                        populateFormFromUserProfile(etName, etSurname, etEmail, etPhone, etCompany, etCompanyName, etCompanyAddress, etCompanyPhone, etCompanyEmail, etCompanyWebsite)
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("ProfileFragment", "Error loading user settings: ${e.message}", e)
+                // Fallback to user profile data
+                populateFormFromUserProfile(etName, etSurname, etEmail, etPhone, etCompany, etCompanyName, etCompanyAddress, etCompanyPhone, etCompanyEmail, etCompanyWebsite)
+            }
+        }
+    }
+    
+    private fun populateFormFromSettings(
+        settings: dev.solora.settings.AppSettings,
+        etName: TextInputEditText,
+        etSurname: TextInputEditText,
+        etEmail: TextInputEditText,
+        etPhone: TextInputEditText,
+        etCompany: TextInputEditText,
+        etCompanyName: TextInputEditText,
+        etCompanyAddress: TextInputEditText,
+        etCompanyPhone: TextInputEditText,
+        etCompanyEmail: TextInputEditText,
+        etCompanyWebsite: TextInputEditText
+    ) {
+        // Populate consultant information from settings
+        etName.setText(settings.companySettings.consultantName)
+        etSurname.setText("") // Surname not stored in settings
+        etEmail.setText(settings.companySettings.consultantEmail)
+        etPhone.setText(settings.companySettings.consultantPhone)
+        etCompany.setText(settings.companySettings.companyName)
+        
+        // Populate company information
+        etCompanyName.setText(settings.companySettings.companyName)
+        etCompanyAddress.setText(settings.companySettings.companyAddress)
+        etCompanyPhone.setText(settings.companySettings.companyPhone)
+        etCompanyEmail.setText(settings.companySettings.companyEmail)
+        etCompanyWebsite.setText(settings.companySettings.companyWebsite)
+        
+        android.util.Log.d("ProfileFragment", "Form populated from settings: ${settings.companySettings.consultantName}")
+    }
+    
+    private fun populateFormFromUserProfile(
+        etName: TextInputEditText,
+        etSurname: TextInputEditText,
+        etEmail: TextInputEditText,
+        etPhone: TextInputEditText,
+        etCompany: TextInputEditText,
+        etCompanyName: TextInputEditText,
+        etCompanyAddress: TextInputEditText,
+        etCompanyPhone: TextInputEditText,
+        etCompanyEmail: TextInputEditText,
+        etCompanyWebsite: TextInputEditText
+    ) {
+        // Fallback to user profile data
+        val currentUser = profileViewModel.userProfile.value
+        currentUser?.let { user ->
+            etName.setText(user.name)
+            etSurname.setText(user.surname)
+            etEmail.setText(user.email)
+            etPhone.setText(user.phone ?: "")
+            etCompany.setText(user.company ?: "")
+            etCompanyName.setText(user.company ?: "")
+            // Leave other company fields empty
+        }
+        
+        android.util.Log.d("ProfileFragment", "Form populated from user profile fallback")
     }
     
     private fun showChangePasswordDialog() {
