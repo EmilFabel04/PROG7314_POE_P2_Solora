@@ -4,18 +4,22 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.card.MaterialCardView
 import dev.solora.R
 import dev.solora.quotes.QuotesViewModel
 import dev.solora.leads.LeadsViewModel
 import dev.solora.data.FirebaseQuote
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
 class HomeFragment : Fragment() {
     
@@ -27,8 +31,11 @@ class HomeFragment : Fragment() {
     private lateinit var tvConsultantName: TextView
     private lateinit var tvQuotesCount: TextView
     private lateinit var tvLeadsCount: TextView
-    private lateinit var rvRecentQuotes: RecyclerView
-    private lateinit var cardEmptyQuotes: View
+    private lateinit var btnNotifications: ImageView
+    private lateinit var btnSettings: ImageView
+    private lateinit var cardCalculateQuote: MaterialCardView
+    private lateinit var cardAddLeads: MaterialCardView
+    private lateinit var layoutRecentQuotes: LinearLayout
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_home, container, false)
@@ -38,9 +45,9 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         
         initializeViews(view)
-        setupClickListeners(view)
-        setupRecyclerView()
+        setupClickListeners()
         observeData()
+        loadRecentQuotes()
     }
     
     private fun initializeViews(view: View) {
@@ -48,115 +55,186 @@ class HomeFragment : Fragment() {
         tvConsultantName = view.findViewById(R.id.tv_consultant_name)
         tvQuotesCount = view.findViewById(R.id.tv_quotes_count)
         tvLeadsCount = view.findViewById(R.id.tv_leads_count)
-        rvRecentQuotes = view.findViewById(R.id.rv_recent_quotes)
-        cardEmptyQuotes = view.findViewById(R.id.card_empty_quotes)
+        btnNotifications = view.findViewById(R.id.btn_notifications)
+        btnSettings = view.findViewById(R.id.btn_settings)
+        cardCalculateQuote = view.findViewById(R.id.card_calculate_quote)
+        cardAddLeads = view.findViewById(R.id.card_add_leads)
+        layoutRecentQuotes = view.findViewById(R.id.layout_recent_quotes)
     }
     
-    private fun setupClickListeners(view: View) {
-        // Header buttons
-        view.findViewById<View>(R.id.btn_notifications)?.setOnClickListener {
-            findNavController().navigate(R.id.action_to_notifications)
+    private fun setupClickListeners() {
+        btnNotifications.setOnClickListener {
+            Toast.makeText(requireContext(), "Push notifications coming soon!", Toast.LENGTH_SHORT).show()
         }
         
-        view.findViewById<View>(R.id.btn_settings)?.setOnClickListener {
-            findNavController().navigate(R.id.action_to_settings)
+        btnSettings.setOnClickListener {
+            findNavController().navigate(R.id.settingsFragment)
         }
         
-        // Action cards
-        view.findViewById<View>(R.id.card_add_leads)?.setOnClickListener {
+        cardCalculateQuote.setOnClickListener {
+            // Navigate to quotes tab and switch to calculate tab
+            findNavController().navigate(R.id.quotesFragment)
+        }
+        
+        cardAddLeads.setOnClickListener {
+            // Navigate to leads fragment
             findNavController().navigate(R.id.leadsFragment)
         }
-        
-        view.findViewById<View>(R.id.card_calculate_quote)?.setOnClickListener {
-            findNavController().navigate(R.id.quotesFragment)
-        }
-        
-        // Recent quotes section
-        view.findViewById<View>(R.id.tv_view_all_quotes)?.setOnClickListener {
-            findNavController().navigate(R.id.quotesFragment)
-        }
-        
-        view.findViewById<View>(R.id.btn_create_first_quote)?.setOnClickListener {
-            findNavController().navigate(R.id.quotesFragment)
-        }
-    }
-    
-    private fun setupRecyclerView() {
-        val quotesAdapter = RecentQuotesAdapter { quote ->
-            // Navigate to quote detail when clicked
-            val bundle = Bundle().apply { putString("id", quote.id) }
-            findNavController().navigate(R.id.quoteDetailFragment, bundle)
-        }
-        
-        rvRecentQuotes.layoutManager = LinearLayoutManager(requireContext())
-        rvRecentQuotes.adapter = quotesAdapter
     }
     
     private fun observeData() {
-        // Observe quotes data
+        // Observe quotes count
         viewLifecycleOwner.lifecycleScope.launch {
             quotesViewModel.quotes.collect { quotes ->
                 tvQuotesCount.text = quotes.size.toString()
-                
-                // Show recent quotes (limit to 5)
-                val recentQuotes = quotes.take(5)
-                (rvRecentQuotes.adapter as? RecentQuotesAdapter)?.submitList(recentQuotes)
-                
-                // Show/hide empty state
-                if (recentQuotes.isEmpty()) {
-                    rvRecentQuotes.visibility = View.GONE
-                    cardEmptyQuotes.visibility = View.VISIBLE
-                } else {
-                    rvRecentQuotes.visibility = View.VISIBLE
-                    cardEmptyQuotes.visibility = View.GONE
-                }
             }
         }
         
-        // Observe leads data
+        // Observe leads count
         viewLifecycleOwner.lifecycleScope.launch {
             leadsViewModel.leads.collect { leads ->
                 tvLeadsCount.text = leads.size.toString()
             }
         }
     }
-}
-
-// Simple adapter for recent quotes
-class RecentQuotesAdapter(
-    private val onQuoteClick: (FirebaseQuote) -> Unit
-) : RecyclerView.Adapter<RecentQuotesAdapter.QuoteViewHolder>() {
     
-    private var quotes: List<FirebaseQuote> = emptyList()
-    
-    fun submitList(newQuotes: List<FirebaseQuote>) {
-        quotes = newQuotes
-        notifyDataSetChanged()
-    }
-    
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): QuoteViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_recent_quote, parent, false)
-        return QuoteViewHolder(view)
-    }
-    
-    override fun onBindViewHolder(holder: QuoteViewHolder, position: Int) {
-        holder.bind(quotes[position], onQuoteClick)
-    }
-    
-    override fun getItemCount(): Int = quotes.size
-    
-    class QuoteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val tvAddress: TextView = itemView.findViewById(R.id.tv_address)
-        private val tvAmount: TextView = itemView.findViewById(R.id.tv_amount)
-        
-        fun bind(quote: FirebaseQuote, onQuoteClick: (FirebaseQuote) -> Unit) {
-            tvAddress.text = quote.address.ifEmpty { "Unknown Address" }
-            tvAmount.text = "R${quote.monthlySavings.toInt()}"
-            
-            itemView.setOnClickListener {
-                onQuoteClick(quote)
+    private fun loadRecentQuotes() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                // Get recent quotes (last 5)
+                val currentUser = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+                if (currentUser != null) {
+                    val quotes = quotesViewModel.getQuotesByTimeframe(30) // Last 30 days
+                    displayRecentQuotes(quotes.take(5))
+                } else {
+                    displayEmptyQuotes()
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("HomeFragment", "Error loading recent quotes: ${e.message}", e)
+                displayEmptyQuotes()
             }
         }
+    }
+    
+    private fun displayRecentQuotes(quotes: List<FirebaseQuote>) {
+        layoutRecentQuotes.removeAllViews()
+        
+        if (quotes.isEmpty()) {
+            displayEmptyQuotes()
+            return
+        }
+        
+        quotes.forEach { quote ->
+            val quoteView = createQuoteItemView(quote)
+            layoutRecentQuotes.addView(quoteView)
+            
+            // Add divider except for last item
+            if (quote != quotes.last()) {
+                val divider = View(requireContext()).apply {
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT, 1
+                    )
+                    setBackgroundColor(android.graphics.Color.parseColor("#E0E0E0"))
+                    setPadding(0, 8, 0, 8)
+                }
+                layoutRecentQuotes.addView(divider)
+            }
+        }
+    }
+    
+    private fun createQuoteItemView(quote: FirebaseQuote): View {
+        val quoteView = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.HORIZONTAL
+            setPadding(0, 12, 0, 12)
+            gravity = android.view.Gravity.CENTER_VERTICAL
+        }
+        
+        // Quote icon
+        val iconView = ImageView(requireContext()).apply {
+            layoutParams = LinearLayout.LayoutParams(48, 48)
+            setImageResource(android.R.drawable.ic_menu_report_image)
+            setColorFilter(resources.getColor(R.color.solora_orange, null))
+        }
+        
+        // Quote details
+        val detailsLayout = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(
+                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f
+            )
+            setPadding(16, 0, 0, 0)
+        }
+        
+        // Reference and address
+        val referenceText = TextView(requireContext()).apply {
+            val reference = if (quote.reference.isNotEmpty()) quote.reference else "REF-${quote.id?.takeLast(5) ?: "00000"}"
+            text = reference
+            textSize = 14f
+            setTextColor(android.graphics.Color.BLACK)
+            setTypeface(null, android.graphics.Typeface.BOLD)
+        }
+        
+        val addressText = TextView(requireContext()).apply {
+            text = quote.address.ifEmpty { "Address not available" }
+            textSize = 12f
+            setTextColor(android.graphics.Color.parseColor("#666666"))
+        }
+        
+        // Date
+        val dateText = TextView(requireContext()).apply {
+            val dateString = quote.createdAt?.toDate()?.let {
+                SimpleDateFormat("dd MMM", Locale.getDefault()).format(it)
+            } ?: "Unknown"
+            text = dateString
+            textSize = 12f
+            setTextColor(resources.getColor(R.color.solora_orange, null))
+            setTypeface(null, android.graphics.Typeface.BOLD)
+        }
+        
+        detailsLayout.addView(referenceText)
+        detailsLayout.addView(addressText)
+        
+        quoteView.addView(iconView)
+        quoteView.addView(detailsLayout)
+        quoteView.addView(dateText)
+        
+        // Click listener for quote item
+        quoteView.setOnClickListener {
+            if (!quote.id.isNullOrBlank()) {
+                val bundle = Bundle().apply { putString("id", quote.id) }
+                findNavController().navigate(R.id.quoteDetailFragment, bundle)
+            }
+        }
+        
+        return quoteView
+    }
+    
+    private fun displayEmptyQuotes() {
+        layoutRecentQuotes.removeAllViews()
+        
+        val emptyView = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = android.view.Gravity.CENTER
+            setPadding(32, 32, 32, 32)
+        }
+        
+        val emptyText = TextView(requireContext()).apply {
+            text = "No recent quotes"
+            textSize = 14f
+            setTextColor(android.graphics.Color.parseColor("#666666"))
+            gravity = android.view.Gravity.CENTER
+        }
+        
+        val subText = TextView(requireContext()).apply {
+            text = "Create your first quote to get started"
+            textSize = 12f
+            setTextColor(android.graphics.Color.parseColor("#999999"))
+            gravity = android.view.Gravity.CENTER
+            setPadding(0, 8, 0, 0)
+        }
+        
+        emptyView.addView(emptyText)
+        emptyView.addView(subText)
+        layoutRecentQuotes.addView(emptyView)
     }
 }
