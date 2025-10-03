@@ -9,7 +9,11 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import android.widget.LinearLayout
+import android.widget.Button
+import android.widget.ImageButton
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.DialogFragment
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -237,8 +241,8 @@ class QuotesFragment : Fragment() {
                 findNavController().navigate(R.id.quoteDetailFragment, bundle)
             },
             onQuoteLongPress = { quote ->
-                // Show toast with quote details
-                showQuoteDetailsToast(quote)
+                // Show dialog with quote details
+                showQuotePreviewDialog(quote)
             }
         )
         rvQuotesList.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
@@ -269,7 +273,10 @@ class QuotesFragment : Fragment() {
         }
     }
     
-    private fun showQuoteDetailsToast(quote: dev.solora.data.FirebaseQuote) {
+    private fun showQuotePreviewDialog(quote: dev.solora.data.FirebaseQuote) {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_quote_preview, null)
+        
+        // Set quote data
         val address = quote.address.ifEmpty { "Address not available" }
         val systemSize = if (quote.systemKwp > 0) "${String.format("%.1f", quote.systemKwp)} kW" else "Not available"
         
@@ -281,10 +288,36 @@ class QuotesFragment : Fragment() {
             "Not available"
         }
         
-        val toastMessage = "Address: $address\nSystem Size: $systemSize\nTotal Cost: $totalCost"
+        dialogView.findViewById<TextView>(R.id.tv_preview_address).text = address
+        dialogView.findViewById<TextView>(R.id.tv_preview_system_size).text = systemSize
+        dialogView.findViewById<TextView>(R.id.tv_preview_total_cost).text = totalCost
         
-        Toast.makeText(requireContext(), toastMessage, Toast.LENGTH_LONG).show()
-        android.util.Log.d("QuotesFragment", "Long press toast: $toastMessage")
+        // Create and show dialog
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+        
+        // Set up button click listeners
+        dialogView.findViewById<ImageButton>(R.id.btn_close).setOnClickListener {
+            dialog.dismiss()
+        }
+        
+        dialogView.findViewById<Button>(R.id.btn_close_dialog).setOnClickListener {
+            dialog.dismiss()
+        }
+        
+        dialogView.findViewById<Button>(R.id.btn_view_full).setOnClickListener {
+            dialog.dismiss()
+            // Navigate to full quote detail
+            if (!quote.id.isNullOrBlank()) {
+                val bundle = Bundle().apply { putString("id", quote.id) }
+                findNavController().navigate(R.id.quoteDetailFragment, bundle)
+            }
+        }
+        
+        dialog.show()
+        android.util.Log.d("QuotesFragment", "Quote preview dialog shown for: $address")
     }
     
     private fun setupDashboardTab() {
