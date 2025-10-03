@@ -5,9 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -264,7 +266,7 @@ class ProfileFragment : Fragment() {
         etEmail: TextInputEditText,
         etPhone: TextInputEditText,
         etCompany: TextInputEditText,
-        dialog: android.app.AlertDialog
+        dialog: AlertDialog
     ) {
         try {
             val name = etName.text.toString().trim()
@@ -306,7 +308,7 @@ class ProfileFragment : Fragment() {
         etCurrentPassword: TextInputEditText,
         etNewPassword: TextInputEditText,
         etConfirmPassword: TextInputEditText,
-        dialog: android.app.AlertDialog
+        dialog: AlertDialog
     ) {
         try {
             val currentPassword = etCurrentPassword.text.toString().trim()
