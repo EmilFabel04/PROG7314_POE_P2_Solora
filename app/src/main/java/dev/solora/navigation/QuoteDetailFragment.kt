@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -13,27 +14,35 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import dev.solora.R
 import dev.solora.quotes.QuotesViewModel
-import dev.solora.leads.LeadsViewModel
+import dev.solora.pdf.PdfGenerator
+import dev.solora.pdf.FileShareUtils
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.io.File
 
 class QuoteDetailFragment : Fragment() {
     private val quotesViewModel: QuotesViewModel by viewModels()
-    private val leadsViewModel: LeadsViewModel by viewModels()
+    private lateinit var pdfGenerator: PdfGenerator
     
-    private lateinit var btnBackDetail: android.widget.ImageButton
-    private lateinit var tvReference: TextView
-    private lateinit var tvDate: TextView
-    private lateinit var tvClientInfo: TextView
-    private lateinit var tvEnergyDetails: TextView
-    private lateinit var tvSystemDesign: TextView
-    private lateinit var tvFinancialAnalysis: TextView
-    private lateinit var tvEnvironmentalImpact: TextView
-    private lateinit var btnConvertToLead: Button
+    // UI Components
+    private lateinit var btnBackDetail: ImageButton
+    private lateinit var tvQuoteReference: TextView
+    private lateinit var tvClientName: TextView
+    private lateinit var tvClientAddress: TextView
+    private lateinit var tvQuoteDate: TextView
+    private lateinit var tvMonthlySavings: TextView
+    private lateinit var tvRecommendedPanels: TextView
+    private lateinit var tvSystemSize: TextView
+    private lateinit var tvRecommendedInverter: TextView
+    private lateinit var tvCoverage: TextView
+    private lateinit var tvSystemCost: TextView
+    private lateinit var tvTax: TextView
+    private lateinit var tvTotalCost: TextView
     private lateinit var btnExportPdf: Button
-    private lateinit var btnShare: Button
     
     private var currentQuote: dev.solora.data.FirebaseQuote? = null
     
@@ -44,271 +53,162 @@ class QuoteDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
+        pdfGenerator = PdfGenerator(requireContext())
         initializeViews(view)
         setupClickListeners()
         
         val quoteId = requireArguments().getString("id") ?: ""
-        android.util.Log.d("QuoteDetailFragment", "Looking for quote with ID: $quoteId")
-        
-        if (quoteId.isEmpty()) {
-            android.util.Log.e("QuoteDetailFragment", "ERROR: Quote ID is empty!")
-            Toast.makeText(requireContext(), "Error: Quote ID not found", Toast.LENGTH_LONG).show()
-            findNavController().navigateUp()
-            return
+        if (quoteId.isNotEmpty()) {
+            loadQuoteDetails(quoteId)
+        } else {
+            Toast.makeText(requireContext(), "Quote ID not provided", Toast.LENGTH_SHORT).show()
+            findNavController().popBackStack()
         }
-        
-        observeQuote(quoteId)
     }
     
     private fun initializeViews(view: View) {
         btnBackDetail = view.findViewById(R.id.btn_back_detail)
-        tvReference = view.findViewById(R.id.tv_reference)
-        tvDate = view.findViewById(R.id.tv_date)
-        tvClientInfo = view.findViewById(R.id.tv_client_info)
-        tvEnergyDetails = view.findViewById(R.id.tv_energy_details)
-        tvSystemDesign = view.findViewById(R.id.tv_system_design)
-        tvFinancialAnalysis = view.findViewById(R.id.tv_financial_analysis)
-        tvEnvironmentalImpact = view.findViewById(R.id.tv_environmental_impact)
-        btnConvertToLead = view.findViewById(R.id.btn_convert_to_lead)
+        tvQuoteReference = view.findViewById(R.id.tv_quote_reference)
+        tvClientName = view.findViewById(R.id.tv_client_name)
+        tvClientAddress = view.findViewById(R.id.tv_client_address)
+        tvQuoteDate = view.findViewById(R.id.tv_quote_date)
+        tvMonthlySavings = view.findViewById(R.id.tv_monthly_savings)
+        tvRecommendedPanels = view.findViewById(R.id.tv_recommended_panels)
+        tvSystemSize = view.findViewById(R.id.tv_system_size)
+        tvRecommendedInverter = view.findViewById(R.id.tv_recommended_inverter)
+        tvCoverage = view.findViewById(R.id.tv_coverage)
+        tvSystemCost = view.findViewById(R.id.tv_system_cost)
+        tvTax = view.findViewById(R.id.tv_tax)
+        tvTotalCost = view.findViewById(R.id.tv_total_cost)
         btnExportPdf = view.findViewById(R.id.btn_export_pdf)
-        btnShare = view.findViewById(R.id.btn_share)
     }
     
     private fun setupClickListeners() {
         btnBackDetail.setOnClickListener {
-            findNavController().navigateUp()
-        }
-        
-        btnConvertToLead.setOnClickListener {
-            convertToLead()
+            findNavController().popBackStack()
         }
         
         btnExportPdf.setOnClickListener {
             exportToPdf()
         }
-        
-        btnShare.setOnClickListener {
-            shareQuote()
-        }
     }
     
-    private fun observeQuote(quoteId: String) {
+    private fun loadQuoteDetails(quoteId: String) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                android.util.Log.d("QuoteDetailFragment", "Calling getQuoteById for: $quoteId")
-                
-                // Check if quoteId is valid
-                if (quoteId.isBlank()) {
-                    android.util.Log.e("QuoteDetailFragment", "Quote ID is blank!")
-                    Toast.makeText(requireContext(), "Invalid quote ID", Toast.LENGTH_LONG).show()
-                    findNavController().navigateUp()
-                    return@launch
-                }
-                
-                quotesViewModel.getQuoteById(quoteId)
-                
-                quotesViewModel.lastQuote.collect { quote ->
-                    android.util.Log.d("QuoteDetailFragment", "Received quote: ${quote?.id} - ${quote?.reference}")
+                val quote = quotesViewModel.getQuoteById(quoteId)
+                if (quote != null) {
                     currentQuote = quote
-                    
-                    if (quote != null) {
-                        android.util.Log.d("QuoteDetailFragment", "Quote found, populating details")
-                        populateQuoteDetails(quote)
-                    } else {
-                        android.util.Log.w("QuoteDetailFragment", "Quote is null, showing not found")
-                        showQuoteNotFound()
-                    }
+                    displayQuoteDetails(quote)
+                } else {
+                    Toast.makeText(requireContext(), "Quote not found", Toast.LENGTH_SHORT).show()
+                    findNavController().popBackStack()
                 }
             } catch (e: Exception) {
-                android.util.Log.e("QuoteDetailFragment", "Error observing quote: ${e.message}", e)
-                Toast.makeText(requireContext(), "Error loading quote: ${e.message}", Toast.LENGTH_LONG).show()
-                findNavController().navigateUp()
+                android.util.Log.e("QuoteDetailFragment", "Error loading quote: ${e.message}", e)
+                Toast.makeText(requireContext(), "Error loading quote details", Toast.LENGTH_SHORT).show()
+                findNavController().popBackStack()
             }
         }
     }
     
-    private fun populateQuoteDetails(quote: dev.solora.data.FirebaseQuote) {
-        try {
-            // Header
-            tvReference.text = quote.reference ?: "Unknown Reference"
-            tvDate.text = quote.createdAt?.toDate()?.let {
-                SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(it)
-            } ?: "Unknown date"
+    private fun displayQuoteDetails(quote: dev.solora.data.FirebaseQuote) {
+        // Reference number
+        val reference = if (quote.reference.isNotEmpty()) {
+            quote.reference
+        } else {
+            "REF-${quote.id?.takeLast(5) ?: "00000"}"
+        }
+        tvQuoteReference.text = "Ref no. $reference"
         
-        // Client Information
-        tvClientInfo.text = buildString {
-            appendLine("To: ${quote.clientName}")
-            appendLine("${quote.address}")
-            appendLine()
-            appendLine("From: Solora")
-            appendLine("+27 (0)82 123 4567")
-            appendLine("info@solora.co.za")
+        // Client details
+        tvClientName.text = quote.clientName.ifEmpty { "Temporary Client" }
+        tvClientAddress.text = quote.address.ifEmpty { "Address not available" }
+        
+        // Date
+        val dateText = quote.createdAt?.toDate()?.let {
+            SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(it)
+        } ?: "Unknown"
+        tvQuoteDate.text = dateText
+        
+        // Monthly savings
+        val monthlySavings = if (quote.monthlySavings > 0) {
+            "R ${String.format("%.2f", quote.monthlySavings)}"
+        } else {
+            "R 1,170.00" // Default value
+        }
+        tvMonthlySavings.text = monthlySavings
+        
+        // System details
+        val systemSize = quote.systemKwp
+        val panelCount = if (systemSize > 0) {
+            (systemSize * 1000 / 550).toInt() // Assuming 550W panels
+        } else {
+            12 // Default
         }
         
-        // Energy Details - Current Energy Information
-        tvEnergyDetails.text = buildString {
-            appendLine("CURRENT ENERGY INFORMATION")
-            appendLine()
-            quote.usageKwh?.let { 
-                appendLine("Monthly Usage                    ${String.format("%.0f", it)} kWh") 
-            }
-            quote.billRands?.let { 
-                appendLine("Average Bill                     R ${String.format("%.2f", it)}") 
-            }
-            appendLine("Tariff Rate                      R ${String.format("%.2f", quote.tariff)}/kWh")
+        tvRecommendedPanels.text = "$panelCount x 550W"
+        tvSystemSize.text = if (systemSize > 0) "${String.format("%.1f", systemSize)}KW" else "6.6KW"
+        tvRecommendedInverter.text = if (systemSize > 0) "${String.format("%.0f", systemSize)}KW" else "6KW"
+        
+        // Coverage (estimated based on system size)
+        val coverage = if (systemSize > 0) {
+            ((systemSize * 150) / 1000 * 100).toInt() // Rough estimation
+        } else {
+            95 // Default
+        }
+        tvCoverage.text = "${coverage}%"
+        
+        // Cost breakdown
+        val systemCost = if (systemSize > 0) {
+            systemSize * 8500 // R8500 per kW
+        } else {
+            56700.0 // Default
         }
         
-        // System Design - Solar System Specifications
-        tvSystemDesign.text = buildString {
-            appendLine("RECOMMENDED SYSTEM")
-            appendLine()
-            appendLine("Panel                            ${quote.panelWatt}W")
-            appendLine("Quantity                         ${(quote.systemKwp * 1000 / quote.panelWatt).toInt()}")
-            appendLine("Recommended Inverter             ${String.format("%.0f", quote.systemKwp * 0.8)}kW")
-            appendLine("Total System Size                ${String.format("%.2f", quote.systemKwp)}kW")
-            val monthlyGeneration = quote.estimatedGeneration
-            val usagePercentage = if (quote.usageKwh != null && quote.usageKwh > 0) {
-                (monthlyGeneration / quote.usageKwh) * 100
-            } else {
-                0.0
-            }
-            appendLine("Percentage of monthly usage      ${String.format("%.0f", usagePercentage)}%")
-        }
+        val tax = systemCost * 0.15 // 15% VAT
+        val totalCost = systemCost + tax
         
-        // Financial Analysis - Quotation breakdown like in Figma
-        tvFinancialAnalysis.text = buildString {
-            appendLine("QUOTATION")
-            appendLine()
-            
-            val systemCost = quote.systemKwp * 15000
-            val vatAmount = systemCost * 0.15
-            val totalCost = systemCost + vatAmount
-            
-            appendLine("Solar System                     R ${String.format("%.2f", systemCost)}")
-            appendLine("Installation                     R 0.00")
-            appendLine("VAT                              R ${String.format("%.2f", vatAmount)}")
-            appendLine()
-            appendLine("Subtotal                         R ${String.format("%.2f", systemCost)}")
-            appendLine("Tax                              R ${String.format("%.2f", vatAmount)}")
-            appendLine("Total Due                        R ${String.format("%.2f", totalCost)}")
-            appendLine()
-            appendLine("ESTIMATED MONTHLY SAVINGS")
-            appendLine("R ${String.format("%.2f", quote.monthlySavings)}")
-            appendLine()
-            quote.paybackMonths?.let { 
-                appendLine("PAYBACK PERIOD")
-                appendLine("${String.format("%.1f", it)} years")
-            }
-        }
+        tvSystemCost.text = "R ${String.format("%.2f", systemCost)}"
+        tvTax.text = "R ${String.format("%.2f", tax)}"
+        tvTotalCost.text = "R ${String.format("%.2f", totalCost)}"
         
-        // Hide environmental impact to match clean design
-        view?.findViewById<View>(R.id.card_environmental)?.visibility = View.GONE
-        
-        } catch (e: Exception) {
-            android.util.Log.e("QuoteDetailFragment", "Error populating quote details: ${e.message}", e)
-            Toast.makeText(requireContext(), "Error displaying quote details", Toast.LENGTH_SHORT).show()
-        }
-    }
-    
-    private fun showQuoteNotFound() {
-        tvReference.text = "Quote Not Found"
-        tvClientInfo.text = "The requested quote could not be loaded. It may have been deleted or doesn't exist."
-        tvEnergyDetails.text = ""
-        tvSystemDesign.text = ""
-        tvFinancialAnalysis.text = ""
-        tvEnvironmentalImpact.text = ""
-        
-        btnConvertToLead.isEnabled = false
-        btnShare.isEnabled = false
-    }
-    
-    private fun convertToLead() {
-        try {
-            currentQuote?.let { quote ->
-                android.util.Log.d("QuoteDetailFragment", "Converting quote ${quote.reference} to lead")
-                
-                // Validate quote ID
-                if (quote.id.isNullOrBlank()) {
-                    Toast.makeText(requireContext(), "Cannot convert quote: Invalid quote ID", Toast.LENGTH_SHORT).show()
-                    return
-                }
-                
-                // Create lead from quote using LeadsViewModel
-                leadsViewModel.createLeadFromQuote(
-                    quoteId = quote.id,
-                    clientName = quote.clientName ?: "Unknown Client",
-                    address = quote.address ?: "Unknown Address",
-                    contactInfo = "", // Will be filled in later by the consultant
-                    notes = "Lead converted from quote ${quote.reference ?: "Unknown"}. System: ${String.format("%.2f", quote.systemKwp)}kW, Monthly savings: R${String.format("%.2f", quote.monthlySavings)}"
-                )
-                
-                Toast.makeText(
-                    requireContext(), 
-                    "Quote successfully converted to lead! Check the Leads tab.", 
-                    Toast.LENGTH_LONG
-                ).show()
-                
-                // Navigate to leads tab
-                findNavController().navigate(R.id.leadsFragment)
-                
-            } ?: run {
-                Toast.makeText(requireContext(), "No quote available to convert", Toast.LENGTH_SHORT).show()
-            }
-        } catch (e: Exception) {
-            android.util.Log.e("QuoteDetailFragment", "Error converting quote to lead: ${e.message}", e)
-            Toast.makeText(requireContext(), "Error converting quote to lead: ${e.message}", Toast.LENGTH_LONG).show()
-        }
+        android.util.Log.d("QuoteDetailFragment", "Quote details displayed for: $reference")
     }
     
     private fun exportToPdf() {
-        Toast.makeText(requireContext(), "PDF export functionality coming soon!", Toast.LENGTH_SHORT).show()
-    }
-    
-    private fun shareQuote() {
         currentQuote?.let { quote ->
-            val systemCost = quote.systemKwp * 15000
-            val vatAmount = systemCost * 0.15
-            val totalCost = systemCost + vatAmount
-            
-            val shareText = buildString {
-                appendLine("SOLAR QUOTE - ${quote.reference}")
-                appendLine("═══════════════════════════════════")
-                appendLine()
-                appendLine("CLIENT: ${quote.clientName}")
-                appendLine("LOCATION: ${quote.address}")
-                appendLine()
-                appendLine("RECOMMENDED SYSTEM:")
-                appendLine("Panel Rating: ${quote.panelWatt}W")
-                appendLine("Quantity: ${(quote.systemKwp * 1000 / quote.panelWatt).toInt()}")
-                appendLine("System Size: ${String.format("%.2f", quote.systemKwp)} kW")
-                appendLine("Inverter: ${String.format("%.2f", quote.systemKwp * 0.8)} kW")
-                appendLine()
-                appendLine("QUOTATION:")
-                appendLine("Solar System: R ${String.format("%.2f", systemCost)}")
-                appendLine("Installation: R 0.00")
-                appendLine("VAT: R ${String.format("%.2f", vatAmount)}")
-                appendLine("Total Due: R ${String.format("%.2f", totalCost)}")
-                appendLine()
-                appendLine("ESTIMATED MONTHLY SAVINGS:")
-                appendLine("R ${String.format("%.2f", quote.monthlySavings)}")
-                quote.paybackMonths?.let { 
-                    appendLine("PAYBACK PERIOD: ${String.format("%.1f", it)} years")
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    // Show loading message
+                    Toast.makeText(requireContext(), "Generating PDF...", Toast.LENGTH_SHORT).show()
+                    
+                    // Generate PDF in background thread
+                    val pdfFile = withContext(Dispatchers.IO) {
+                        pdfGenerator.generateQuotePdf(quote)
+                    }
+                    
+                    if (pdfFile != null) {
+                        // Show success message
+                        Toast.makeText(requireContext(), "PDF generated successfully!", Toast.LENGTH_SHORT).show()
+                        
+                        // Share the PDF file
+                        val reference = if (quote.reference.isNotEmpty()) quote.reference else "REF-${quote.id?.takeLast(5) ?: "00000"}"
+                        FileShareUtils.sharePdfFile(requireContext(), pdfFile, reference)
+                        
+                        android.util.Log.d("QuoteDetailFragment", "PDF exported successfully: ${pdfFile.name}")
+                    } else {
+                        Toast.makeText(requireContext(), "Failed to generate PDF", Toast.LENGTH_SHORT).show()
+                        android.util.Log.e("QuoteDetailFragment", "PDF generation failed for quote: ${quote.reference}")
+                    }
+                    
+                } catch (e: Exception) {
+                    Toast.makeText(requireContext(), "Error generating PDF: ${e.message}", Toast.LENGTH_SHORT).show()
+                    android.util.Log.e("QuoteDetailFragment", "PDF export error: ${e.message}", e)
                 }
-                appendLine()
-                appendLine("Solora Solar Solutions")
-                appendLine("+27 (0)82 123 4567")
-                appendLine("info@solora.co.za")
             }
-            
-            val shareIntent = android.content.Intent().apply {
-                action = android.content.Intent.ACTION_SEND
-                type = "text/plain"
-                putExtra(android.content.Intent.EXTRA_TEXT, shareText)
-                putExtra(android.content.Intent.EXTRA_SUBJECT, "Solar Quote - ${quote.reference}")
-            }
-            startActivity(android.content.Intent.createChooser(shareIntent, "Share Quote"))
         } ?: run {
-            Toast.makeText(requireContext(), "Quote not available for sharing", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "No quote data available", Toast.LENGTH_SHORT).show()
         }
     }
 }

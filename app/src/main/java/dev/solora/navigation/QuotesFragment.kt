@@ -9,7 +9,10 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import android.widget.LinearLayout
+import android.widget.ImageButton
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.DialogFragment
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -222,19 +225,25 @@ class QuotesFragment : Fragment() {
     
     private fun setupViewTab() {
         // Setup RecyclerView
-        quotesAdapter = QuotesListAdapter { quote ->
-            // Navigate to quote detail page
-            android.util.Log.d("QuotesFragment", "Quote clicked: ID=${quote.id}, Reference=${quote.reference}")
-            
-            if (quote.id.isNullOrBlank()) {
-                android.util.Log.e("QuotesFragment", "ERROR: Quote ID is null or blank!")
-                Toast.makeText(requireContext(), "Error: Quote ID is missing", Toast.LENGTH_SHORT).show()
-                return@QuotesListAdapter
+        quotesAdapter = QuotesListAdapter(
+            onQuoteClick = { quote ->
+                // Navigate to quote detail page
+                android.util.Log.d("QuotesFragment", "Quote clicked: ID=${quote.id}, Reference=${quote.reference}")
+                
+                if (quote.id.isNullOrBlank()) {
+                    android.util.Log.e("QuotesFragment", "ERROR: Quote ID is null or blank!")
+                    Toast.makeText(requireContext(), "Error: Quote ID is missing", Toast.LENGTH_SHORT).show()
+                    return@QuotesListAdapter
+                }
+                
+                val bundle = Bundle().apply { putString("id", quote.id) }
+                findNavController().navigate(R.id.quoteDetailFragment, bundle)
+            },
+            onQuoteLongPress = { quote ->
+                // Show dialog with quote details
+                showQuotePreviewDialog(quote)
             }
-            
-            val bundle = Bundle().apply { putString("id", quote.id) }
-            findNavController().navigate(R.id.action_quotes_to_quote_detail, bundle)
-        }
+        )
         rvQuotesList.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
         rvQuotesList.adapter = quotesAdapter
         
@@ -261,6 +270,53 @@ class QuotesFragment : Fragment() {
                 android.util.Log.e("QuotesFragment", "Error observing quotes", e)
             }
         }
+    }
+    
+    private fun showQuotePreviewDialog(quote: dev.solora.data.FirebaseQuote) {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_quote_preview, null)
+        
+        // Set quote data
+        val address = quote.address.ifEmpty { "Address not available" }
+        val systemSize = if (quote.systemKwp > 0) "${String.format("%.1f", quote.systemKwp)} kW" else "Not available"
+        
+        // Calculate estimated total cost based on system size (rough estimate: R8500 per kW)
+        val totalCost = if (quote.systemKwp > 0) {
+            val estimatedCost = quote.systemKwp * 8500
+            "R ${String.format("%.0f", estimatedCost)}"
+        } else {
+            "Not available"
+        }
+        
+        dialogView.findViewById<TextView>(R.id.tv_preview_address).text = address
+        dialogView.findViewById<TextView>(R.id.tv_preview_system_size).text = systemSize
+        dialogView.findViewById<TextView>(R.id.tv_preview_total_cost).text = totalCost
+        
+        // Create and show dialog
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+        
+        // Set up button click listeners
+        dialogView.findViewById<ImageButton>(R.id.btn_close).setOnClickListener {
+            dialog.dismiss()
+        }
+        
+        dialogView.findViewById<Button>(R.id.btn_close_dialog).setOnClickListener {
+            dialog.dismiss()
+        }
+        
+        dialogView.findViewById<Button>(R.id.btn_view_full).setOnClickListener {
+            dialog.dismiss()
+            // Navigate to full quote detail
+            if (!quote.id.isNullOrBlank()) {
+                val bundle = Bundle().apply { putString("id", quote.id) }
+                findNavController().navigate(R.id.quoteDetailFragment, bundle)
+            }
+        }
+        
+        dialog.show()
+        android.util.Log.d("QuotesFragment", "Quote preview dialog shown for: $address")
     }
     
     private fun setupDashboardTab() {
@@ -317,25 +373,22 @@ class QuotesFragment : Fragment() {
             dashboardContent.findViewById<TextView>(R.id.tv_total_revenue).text = "R${String.format("%.0f", dashboardData.totalRevenue)}"
             dashboardContent.findViewById<TextView>(R.id.tv_avg_savings).text = "R${String.format("%.0f", dashboardData.averageMonthlySavings)}"
             
-            // Update system size distribution
-            val maxCount = maxOf(
-                dashboardData.systemSizeDistribution.size0to3kw,
-                dashboardData.systemSizeDistribution.size3to6kw,
-                dashboardData.systemSizeDistribution.size6to10kw,
-                dashboardData.systemSizeDistribution.size10kwPlus
+            // Update circle chart with system size distribution
+            val circleChart = dashboardContent.findViewById<dev.solora.ui.views.CircleChartView>(R.id.circle_chart)
+            val labels = listOf("0-3 kW", "3-6 kW", "6-10 kW", "10+ kW")
+            val values = listOf(
+                dashboardData.systemSizeDistribution.size0to3kw.toFloat(),
+                dashboardData.systemSizeDistribution.size3to6kw.toFloat(),
+                dashboardData.systemSizeDistribution.size6to10kw.toFloat(),
+                dashboardData.systemSizeDistribution.size10kwPlus.toFloat()
             )
+            circleChart.setChartDataSimple(labels, values)
             
-            if (maxCount > 0) {
-                updateBarChart(R.id.bar_0_3kw, dashboardData.systemSizeDistribution.size0to3kw, maxCount)
-                updateBarChart(R.id.bar_3_6kw, dashboardData.systemSizeDistribution.size3to6kw, maxCount)
-                updateBarChart(R.id.bar_6_10kw, dashboardData.systemSizeDistribution.size6to10kw, maxCount)
-                updateBarChart(R.id.bar_10kw_plus, dashboardData.systemSizeDistribution.size10kwPlus, maxCount)
-            }
-            
-            dashboardContent.findViewById<TextView>(R.id.tv_count_0_3kw).text = dashboardData.systemSizeDistribution.size0to3kw.toString()
-            dashboardContent.findViewById<TextView>(R.id.tv_count_3_6kw).text = dashboardData.systemSizeDistribution.size3to6kw.toString()
-            dashboardContent.findViewById<TextView>(R.id.tv_count_6_10kw).text = dashboardData.systemSizeDistribution.size6to10kw.toString()
-            dashboardContent.findViewById<TextView>(R.id.tv_count_10kw_plus).text = dashboardData.systemSizeDistribution.size10kwPlus.toString()
+            // Update legend
+            dashboardContent.findViewById<TextView>(R.id.tv_legend_0_3kw).text = "0-3 kW (${dashboardData.systemSizeDistribution.size0to3kw})"
+            dashboardContent.findViewById<TextView>(R.id.tv_legend_3_6kw).text = "3-6 kW (${dashboardData.systemSizeDistribution.size3to6kw})"
+            dashboardContent.findViewById<TextView>(R.id.tv_legend_6_10kw).text = "6-10 kW (${dashboardData.systemSizeDistribution.size6to10kw})"
+            dashboardContent.findViewById<TextView>(R.id.tv_legend_10kw_plus).text = "10+ kW (${dashboardData.systemSizeDistribution.size10kwPlus})"
             
             // Update monthly performance
             dashboardContent.findViewById<TextView>(R.id.tv_quotes_this_month).text = "${dashboardData.monthlyPerformance.quotesThisMonth} quotes"
@@ -353,20 +406,6 @@ class QuotesFragment : Fragment() {
         }
     }
     
-    private fun updateBarChart(barId: Int, count: Int, maxCount: Int) {
-        val bar = dashboardContent.findViewById<View>(barId)
-        val layoutParams = bar.layoutParams
-        
-        // Calculate width percentage (minimum 10% for visibility)
-        val percentage = if (maxCount > 0) {
-            maxOf(0.1f, count.toFloat() / maxCount.toFloat())
-        } else {
-            0.1f
-        }
-        
-        // Update bar width (this is a simplified approach)
-        bar.alpha = percentage
-    }
     
     private fun updateTopLocations(topLocations: List<dev.solora.dashboard.LocationStats>) {
         val layout = dashboardContent.findViewById<LinearLayout>(R.id.layout_top_locations)
@@ -383,28 +422,51 @@ class QuotesFragment : Fragment() {
             return
         }
         
-        topLocations.forEach { location ->
+        topLocations.take(5).forEachIndexed { index, location ->
             val locationView = LinearLayout(requireContext()).apply {
                 orientation = LinearLayout.HORIZONTAL
-                setPadding(0, 8, 0, 8)
+                setPadding(0, 12, 0, 12)
+                gravity = android.view.Gravity.CENTER_VERTICAL
+            }
+            
+            // Rank number
+            val rankText = TextView(requireContext()).apply {
+                text = "${index + 1}."
+                textSize = 16f
+                setTextColor(resources.getColor(R.color.solora_orange, null))
+                setTypeface(null, android.graphics.Typeface.BOLD)
+                minWidth = 32
             }
             
             val locationText = TextView(requireContext()).apply {
                 text = location.location
                 textSize = 14f
+                setTextColor(android.graphics.Color.BLACK)
                 layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+                setPadding(16, 0, 0, 0)
             }
             
             val countText = TextView(requireContext()).apply {
                 text = "${location.count} quotes"
-                textSize = 12f
-                setTextColor(resources.getColor(android.R.color.darker_gray, null))
-                gravity = android.view.Gravity.END
+                textSize = 14f
+                setTextColor(resources.getColor(R.color.solora_orange, null))
+                setTypeface(null, android.graphics.Typeface.BOLD)
             }
             
+            locationView.addView(rankText)
             locationView.addView(locationText)
             locationView.addView(countText)
             layout.addView(locationView)
+            
+            // Add divider except for last item
+            if (index < topLocations.take(5).size - 1) {
+                val divider = View(requireContext()).apply {
+                    layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1)
+                    setBackgroundColor(android.graphics.Color.parseColor("#E0E0E0"))
+                    setPadding(0, 8, 0, 8)
+                }
+                layout.addView(divider)
+            }
         }
     }
     
@@ -668,12 +730,13 @@ class QuotesFragment : Fragment() {
 
 // QuotesListAdapter for RecyclerView
 class QuotesListAdapter(
-    private val onQuoteClick: (dev.solora.data.FirebaseQuote) -> Unit
+    private val onQuoteClick: (dev.solora.data.FirebaseQuote) -> Unit,
+    private val onQuoteLongPress: (dev.solora.data.FirebaseQuote) -> Unit
 ) : androidx.recyclerview.widget.ListAdapter<dev.solora.data.FirebaseQuote, QuotesListAdapter.QuoteViewHolder>(QuoteDiffCallback()) {
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): QuoteViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_quote, parent, false)
-        return QuoteViewHolder(view, onQuoteClick)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_quote_simple, parent, false)
+        return QuoteViewHolder(view, onQuoteClick, onQuoteLongPress)
     }
     
     override fun onBindViewHolder(holder: QuoteViewHolder, position: Int) {
@@ -682,31 +745,38 @@ class QuotesListAdapter(
     
     class QuoteViewHolder(
         itemView: View,
-        private val onQuoteClick: (dev.solora.data.FirebaseQuote) -> Unit
+        private val onQuoteClick: (dev.solora.data.FirebaseQuote) -> Unit,
+        private val onQuoteLongPress: (dev.solora.data.FirebaseQuote) -> Unit
     ) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
         
-        private val tvReference: TextView = itemView.findViewById(R.id.tv_quote_reference)
-        private val tvDate: TextView = itemView.findViewById(R.id.tv_quote_date)
-        private val tvClientName: TextView = itemView.findViewById(R.id.tv_client_name)
-        private val tvClientAddress: TextView = itemView.findViewById(R.id.tv_client_address)
-        private val tvSystemSize: TextView = itemView.findViewById(R.id.tv_system_size)
-        private val tvSavings: TextView = itemView.findViewById(R.id.tv_savings)
+        private val tvReference: TextView = itemView.findViewById(R.id.tv_reference)
+        private val tvAddress: TextView = itemView.findViewById(R.id.tv_address)
+        private val tvDate: TextView = itemView.findViewById(R.id.tv_date)
         
         fun bind(quote: dev.solora.data.FirebaseQuote) {
-            tvReference.text = quote.reference
-            tvClientName.text = quote.clientName
-            tvClientAddress.text = quote.address
-            tvSystemSize.text = "${String.format("%.1f", quote.systemKwp)} kW"
-            tvSavings.text = "R ${String.format("%.0f", quote.monthlySavings)}"
+            // Set reference number (use quote ID if reference is empty)
+            tvReference.text = if (quote.reference.isNotEmpty()) {
+                quote.reference
+            } else {
+                "REF-${quote.id?.takeLast(5) ?: "00000"}"
+            }
+            
+            // Set address
+            tvAddress.text = quote.address
             
             // Format date
             val dateText = quote.createdAt?.toDate()?.let {
-                java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale.getDefault()).format(it)
+                java.text.SimpleDateFormat("dd MMMM yyyy", java.util.Locale.getDefault()).format(it)
             } ?: "Unknown"
             tvDate.text = dateText
             
             itemView.setOnClickListener {
                 onQuoteClick(quote)
+            }
+            
+            itemView.setOnLongClickListener {
+                onQuoteLongPress(quote)
+                true // Return true to consume the long press event
             }
         }
     }

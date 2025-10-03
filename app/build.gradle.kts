@@ -77,6 +77,10 @@ dependencies {
 
 	// Networking
 	implementation("io.ktor:ktor-client-android:2.3.12")
+	
+	// PDF Generation
+	implementation("com.itextpdf:itext7-core:8.0.5")
+	implementation("com.itextpdf:html2pdf:5.0.5")
 	implementation("io.ktor:ktor-client-content-negotiation:2.3.12")
 	implementation("io.ktor:ktor-client-logging:2.3.12")
 	implementation("io.ktor:ktor-client-core:2.3.12")
