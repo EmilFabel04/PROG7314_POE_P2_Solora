@@ -5,11 +5,12 @@
     android:layout_height="wrap_content"
     android:layout_marginStart="16dp"
     android:layout_marginEnd="16dp"
-    android:layout_marginTop="8dp"
-    android:layout_marginBottom="8dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="2dp"
+    android:layout_marginTop="4dp"
+    android:layout_marginBottom="4dp"
+    app:cardCornerRadius="6dp"
+    app:cardElevation="1dp"
     app:cardUseCompatPadding="true"
+    app:cardBackgroundColor="@android:color/white"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground">
@@ -18,7 +19,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="12dp"
+        android:minHeight="60dp">
 
         <!-- Reference Number -->
         <TextView
@@ -27,9 +29,9 @@
             android:layout_height="wrap_content"
             android:text="REF-12345"
             android:textColor="@color/solora_orange"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="4dp" />
 
         <!-- Address -->
         <TextView
@@ -38,8 +40,10 @@
             android:layout_height="wrap_content"
             android:text="123 Main Street, Cape Town"
             android:textColor="@android:color/black"
-            android:textSize="14sp"
-            android:layout_marginBottom="4dp" />
+            android:textSize="13sp"
+            android:layout_marginBottom="2dp"
+            android:maxLines="2"
+            android:ellipsize="end" />
 
         <!-- Date -->
         <TextView
@@ -48,7 +52,7 @@
             android:layout_height="wrap_content"
             android:text="15 December 2024"
             android:textColor="#666666"
-            android:textSize="12sp" />
+            android:textSize="11sp" />
 
     </LinearLayout>
 
