@@ -21,23 +21,13 @@
             android:gravity="center_vertical">
             
             <TextView
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:text="Leads"
                 android:textColor="@android:color/white"
                 android:textSize="24sp"
-                android:textStyle="bold" />
-                
-            <Button
-                android:id="@+id/btn_add_lead_header"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="+ Add Lead"
-                android:textColor="@color/solora_orange"
-                android:backgroundTint="@android:color/white"
-                android:textAllCaps="false"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:gravity="center" />
         </LinearLayout>
 
         <!-- Scrollable Content Area -->
@@ -190,7 +180,8 @@
         android:layout_height="56dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        android:layout_margin="24dp"
+        android:layout_marginBottom="100dp"
+        android:layout_marginEnd="24dp"
         android:src="@drawable/ic_add"
         android:backgroundTint="@color/solora_orange"
         android:tint="@android:color/white"
