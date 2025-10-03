@@ -5,13 +5,18 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.textfield.TextInputEditText
 import dev.solora.R
@@ -66,8 +71,15 @@ class QuoteFragment : Fragment() {
     private lateinit var etClientAddress: TextInputEditText
     private lateinit var etEmail: TextInputEditText
     private lateinit var etContact: TextInputEditText
+    private lateinit var btnSaveFinalQuote: LinearLayout
+
+    // Quote Details Section
     private lateinit var tvQuoteSummary: TextView
-    private lateinit var btnSaveFinalQuote: Button
+    private var layoutQuoteDetails: LinearLayout? = null
+    private var txtNumberOfPanels: TextView? = null
+    private var txtTotalSystemSize: TextView? = null
+    private var txtRecommendedInverter: TextView? = null
+    private var txtEstimatedMonthlySavings: TextView? = null
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_quote, container, false)
@@ -83,8 +95,9 @@ class QuoteFragment : Fragment() {
         setupDashboardTab()
         observeViewModel()
         observeSettings()
+        setupClientDropdown(view)
     }
-    
+
     private fun initializeViews(view: View) {
         // Tab containers
         tabCalculateContainer = view.findViewById(R.id.tab_calculate)
@@ -114,14 +127,21 @@ class QuoteFragment : Fragment() {
         rvQuotesList = view.findViewById(R.id.rv_quotes_list)
         layoutEmptyQuotes = view.findViewById(R.id.layout_empty_quotes)
         
-        // Dashboard tab elements
+        // Dashboard tab elements - Client details
         etReference = view.findViewById(R.id.et_reference)
         etFirstName = view.findViewById(R.id.et_first_name)
         etLastName = view.findViewById(R.id.et_last_name)
         etClientAddress = view.findViewById(R.id.et_client_address)
         etEmail = view.findViewById(R.id.et_email)
         etContact = view.findViewById(R.id.et_contact)
+
+        // Quote details elements
         tvQuoteSummary = view.findViewById(R.id.tv_quote_summary)
+        layoutQuoteDetails = view.findViewById(R.id.quote_details_section)
+        txtNumberOfPanels = view.findViewById(R.id.txt_number_of_panels)
+        txtTotalSystemSize = view.findViewById(R.id.txt_total_system_size)
+        txtRecommendedInverter = view.findViewById(R.id.txt_recommended_inverter)
+        txtEstimatedMonthlySavings = view.findViewById(R.id.txt_estimated_monthly_savings)
         btnSaveFinalQuote = view.findViewById(R.id.btn_save_final_quote)
     }
 
@@ -226,6 +246,7 @@ class QuoteFragment : Fragment() {
             val bundle = Bundle().apply { putString("id", quote.id) }
             findNavController().navigate(R.id.quoteDetailFragment, bundle)
         }
+
         rvQuotesList.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
         rvQuotesList.adapter = quotesAdapter
         
@@ -253,42 +274,99 @@ class QuoteFragment : Fragment() {
             }
         }
     }
-    
+
+    private fun setupClientDropdown(view: View) {
+        val etClientDropdown = view.findViewById<AutoCompleteTextView>(R.id.et_client_dropdown)
+        val btnDropdown = view.findViewById<ImageButton>(R.id.btn_dropdown)
+        val tvNoClients = view.findViewById<TextView>(R.id.tv_no_clients)
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                leadsViewModel.leads.collect { clients ->
+                    if (clients.isEmpty()) {
+                        etClientDropdown.setAdapter(null)
+                        tvNoClients.visibility = View.VISIBLE
+                    } else {
+                        tvNoClients.visibility = View.GONE
+
+                        val adapter = ArrayAdapter(
+                            requireContext(),
+                            R.layout.item_client_dropdown,
+                            clients.map { it.name }
+                        )
+                        etClientDropdown.setAdapter(adapter)
+
+                        etClientDropdown.setOnItemClickListener { _, _, pos, _ ->
+                            val selectedClient = clients[pos]
+                            etClientDropdown.setText(selectedClient.name, false)
+                        }
+
+                        btnDropdown.setOnClickListener {
+                            if (!etClientDropdown.isPopupShowing) {
+                                etClientDropdown.showDropDown()
+                            } else {
+                                etClientDropdown.dismissDropDown()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private fun setupDashboardTab() {
         btnSaveFinalQuote.setOnClickListener {
             saveQuoteWithClientDetails()
         }
     }
-    
+
     private fun updateResultsTab(calculation: dev.solora.quote.QuoteOutputs) {
-        // Update dashboard tab summary
-        tvQuoteSummary.text = buildString {
-            appendLine("Number of Panels: ${calculation.panels}")
-            appendLine("Total System Size: ${String.format("%.1f", calculation.systemKw)} kW")
-            appendLine("Recommended Inverter: ${String.format("%.1f", calculation.inverterKw)} kW")
-            appendLine("Estimated Monthly Savings: R ${String.format("%.2f", calculation.monthlySavingsRands)}")
-            appendLine("Estimated Monthly Generation: ${String.format("%.0f", calculation.estimatedMonthlyGeneration)} kWh")
-            appendLine("Payback Period: ${calculation.paybackMonths} months")
-            
-            // Add NASA data if available
-            calculation.detailedAnalysis?.let { analysis ->
-                appendLine("")
-                appendLine("NASA Solar Data:")
-                analysis.locationData?.let { location ->
-                    appendLine("Location: ${String.format("%.4f", location.latitude)}, ${String.format("%.4f", location.longitude)}")
-                    appendLine("Average Annual Irradiance: ${String.format("%.1f", location.averageAnnualIrradiance)} kWh/m²/day")
-                    appendLine("Average Annual Sun Hours: ${String.format("%.1f", location.averageAnnualSunHours)} hours/day")
-                }
-                analysis.optimalMonth?.let { month ->
-                    appendLine("Optimal Solar Month: ${getMonthName(month)}")
-                }
-                analysis.averageTemperature?.let { temp ->
-                    appendLine("Average Temperature: ${String.format("%.1f", temp)}°C")
-                }
+        // If the structured details layout exists, populate fields there and show it.
+        if (layoutQuoteDetails != null &&
+            txtNumberOfPanels != null &&
+            txtTotalSystemSize != null &&
+            txtRecommendedInverter != null &&
+            txtEstimatedMonthlySavings != null
+        ) {
+            txtNumberOfPanels!!.text = calculation.panels.toString()
+            txtTotalSystemSize!!.text = "${String.format("%.1f", calculation.systemKw)} kW"
+            txtRecommendedInverter!!.text = "${String.format("%.1f", calculation.inverterKw)} kW"
+            txtEstimatedMonthlySavings!!.text =
+                "R ${String.format("%.2f", calculation.monthlySavingsRands)}"
+
+            // Show structured layout, hide the old summary TextView
+            layoutQuoteDetails!!.visibility = View.VISIBLE
+            tvQuoteSummary.visibility = View.GONE
+        } else {
+            // Fallback: still populate the fields if they're there
+            tvQuoteSummary.visibility = View.GONE // hide the placeholder
+
+            txtNumberOfPanels?.text = calculation.panels.toString()
+            txtTotalSystemSize?.text = String.format("%.1f kW", calculation.systemKw)
+            txtRecommendedInverter?.text = String.format("%.1f kW", calculation.inverterKw)
+            txtEstimatedMonthlySavings?.text =
+                "R ${String.format("%.2f", calculation.monthlySavingsRands)}"
+
+            // If structured layout is not available at all, show old summary instead
+            if (layoutQuoteDetails == null) {
+                tvQuoteSummary.visibility = View.VISIBLE
+                tvQuoteSummary.text = """
+            Number of Panels: ${calculation.panels}
+            Total System Size: ${String.format("%.1f", calculation.systemKw)} kW
+            Recommended Inverter: ${String.format("%.1f", calculation.inverterKw)} kW
+            Estimated Monthly Savings: R ${String.format("%.2f", calculation.monthlySavingsRands)}
+            Estimated Monthly Generation: ${
+                    String.format(
+                        "%.0f",
+                        calculation.estimatedMonthlyGeneration
+                    )
+                } kWh
+            Payback Period: ${calculation.paybackMonths} months
+        """.trimIndent()
+            } else {
+                layoutQuoteDetails?.visibility = View.VISIBLE
             }
         }
-        
-        android.util.Log.d("QuoteFragment", "Results updated: ${calculation.systemKw}kW system, R${calculation.monthlySavingsRands} savings")
     }
     
     private fun getMonthName(month: Int): String {
@@ -394,7 +472,7 @@ class QuoteFragment : Fragment() {
                 }
             }
         }
-        
+
         // Observe last quote for results display
         viewLifecycleOwner.lifecycleScope.launch {
             quotesViewModel.lastQuote.collect { quote ->
@@ -406,7 +484,7 @@ class QuoteFragment : Fragment() {
                         appendLine("Recommended Inverter: ${String.format("%.1f", quote.systemKwp * 0.8)} kW")
                         appendLine("Estimated Monthly Savings: R ${String.format("%.2f", quote.monthlySavings)}")
                     }
-                    
+
                     // Pre-fill client address from calculation
                     if (etClientAddress.text.toString().isEmpty()) {
                         etClientAddress.setText(quote.address)

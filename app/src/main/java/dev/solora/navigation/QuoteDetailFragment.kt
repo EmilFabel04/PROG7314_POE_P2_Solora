@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -23,7 +24,7 @@ class QuoteDetailFragment : Fragment() {
     private val quotesViewModel: QuotesViewModel by viewModels()
     private val leadsViewModel: LeadsViewModel by viewModels()
     
-    private lateinit var btnBackDetail: android.widget.ImageButton
+    private lateinit var btnBackDetail: ImageButton
     private lateinit var tvReference: TextView
     private lateinit var tvDate: TextView
     private lateinit var tvClientInfo: TextView
@@ -32,7 +33,7 @@ class QuoteDetailFragment : Fragment() {
     private lateinit var tvFinancialAnalysis: TextView
     private lateinit var tvEnvironmentalImpact: TextView
     private lateinit var btnConvertToLead: Button
-    private lateinit var btnExportPdf: Button
+    private lateinit var btnExportPdf: ImageButton
     private lateinit var btnShare: Button
     
     private var currentQuote: dev.solora.data.FirebaseQuote? = null

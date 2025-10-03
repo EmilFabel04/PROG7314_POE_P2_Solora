@@ -1,6 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- Orange Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:background="@drawable/top_nav_bar_background_orange"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="40dp"
+            android:text="Quote Details"
+            android:textColor="@android:color/white"
+            android:fontFamily="@font/poppins_bold"
+            android:textSize="30sp" />
+    </LinearLayout>
+
+
+<ScrollView
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F8F9FA"
@@ -21,36 +46,27 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:paddingBottom="8dp">
+            android:layout_marginTop="10dp">
 
             <ImageButton
                 android:id="@+id/btn_back_detail"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@android:drawable/ic_menu_revert"
-                android:tint="@color/solora_orange"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:background="@drawable/arrow_back_icon_black"
                 android:contentDescription="Back"
                 android:layout_marginEnd="8dp" />
 
-            <TextView
+            <!-- This empty View takes all remaining space -->
+            <View
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Quote Details"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="@color/solora_orange" />
+                android:layout_height="0dp"
+                android:layout_weight="1" />
 
-            <Button
+            <ImageButton
                 android:id="@+id/btn_export_pdf"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:text="Export PDF"
-                android:textSize="12sp"
-                android:backgroundTint="@color/solora_orange"
-                android:textColor="@android:color/white"
-                android:drawableStart="@android:drawable/ic_menu_save"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:background="@drawable/share_icon_orange"
                 android:drawablePadding="4dp"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp" />
@@ -89,7 +105,7 @@
                             android:text="QUOTE"
                             android:textColor="@android:color/white"
                             android:textSize="32sp"
-                            android:textStyle="bold" />
+                            android:fontFamily="@font/poppins_bold" />
 
                         <TextView
                             android:id="@+id/tv_reference"
@@ -97,6 +113,7 @@
                             android:layout_height="wrap_content"
                             android:text="Q240926-1234"
                             android:textColor="@android:color/white"
+                            android:fontFamily="@font/poppins"
                             android:textSize="20sp"
                             android:layout_marginTop="4dp" />
 
@@ -105,6 +122,7 @@
                             android:layout_height="wrap_content"
                             android:text="Solar System Proposal"
                             android:textColor="#E0FFFFFF"
+                            android:fontFamily="@font/poppins"
                             android:textSize="14sp"
                             android:layout_marginTop="8dp" />
 
@@ -114,6 +132,7 @@
                             android:layout_height="wrap_content"
                             android:text="26 Sep 2024"
                             android:textColor="#B3FFFFFF"
+                            android:fontFamily="@font/poppins"
                             android:textSize="12sp"
                             android:layout_marginTop="8dp" />
                     </LinearLayout>
@@ -140,15 +159,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="20dp"
+                android:background="@drawable/quote_item_background_white">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="CONTACT DETAILS"
-                    android:textStyle="bold"
+                    android:fontFamily="@font/poppins_bold"
                     android:textSize="16sp"
-                    android:textColor="#333333"
+                    android:textColor="@color/solora_black"
                     android:layout_marginBottom="16dp"
                     android:letterSpacing="0.1" />
 
@@ -157,6 +177,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
+                    android:fontFamily="@font/poppins"
                     android:lineSpacingExtra="2dp"
                     android:textColor="#555555" />
             </LinearLayout>
@@ -174,15 +195,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="20dp"
+                android:background="@drawable/quote_item_background_white">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="CURRENT USAGE"
-                    android:textStyle="bold"
+                    android:fontFamily="@font/poppins_bold"
                     android:textSize="16sp"
-                    android:textColor="#333333"
+                    android:textColor="@color/solora_black"
                     android:layout_marginBottom="16dp"
                     android:letterSpacing="0.1" />
 
@@ -191,6 +213,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
+                    android:fontFamily="@font/poppins"
                     android:lineSpacingExtra="2dp"
                     android:textColor="#555555" />
             </LinearLayout>
@@ -208,15 +231,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="20dp"
+                android:background="@drawable/quote_item_background_white">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="RECOMMENDED SYSTEM"
-                    android:textStyle="bold"
+                    android:fontFamily="@font/poppins_bold"
                     android:textSize="16sp"
-                    android:textColor="#333333"
+                    android:textColor="@color/solora_black"
                     android:layout_marginBottom="16dp"
                     android:letterSpacing="0.1" />
 
@@ -225,6 +249,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
+                    android:fontFamily="@font/poppins"
                     android:lineSpacingExtra="2dp"
                     android:textColor="#555555" />
             </LinearLayout>
@@ -242,15 +267,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="20dp"
+                android:background="@drawable/quote_item_background_white">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="QUOTATION"
-                    android:textStyle="bold"
+                    android:fontFamily="@font/poppins_bold"
                     android:textSize="16sp"
-                    android:textColor="#333333"
+                    android:textColor="@color/solora_black"
                     android:layout_marginBottom="16dp"
                     android:letterSpacing="0.1" />
 
@@ -259,6 +285,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
+                    android:fontFamily="@font/poppins"
                     android:lineSpacingExtra="2dp"
                     android:textColor="#555555" />
             </LinearLayout>
@@ -327,13 +354,13 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="20dp"
-                android:gravity="center">
+                android:gravity="center"
+                android:background="@drawable/quote_item_background_white">
 
                 <ImageView
                     android:layout_width="80dp"
                     android:layout_height="40dp"
                     android:src="@drawable/solora_logo"
-                    android:tint="@color/solora_orange"
                     android:layout_marginBottom="12dp" />
 
                 <TextView
@@ -341,6 +368,7 @@
                     android:layout_height="wrap_content"
                     android:text="25 Elliot Crescent, Cape Town, South Africa, 7550"
                     android:textSize="12sp"
+                    android:fontFamily="@font/poppins"
                     android:textColor="#666666"
                     android:gravity="center"
                     android:layout_marginBottom="4dp" />
@@ -350,6 +378,7 @@
                     android:layout_height="wrap_content"
                     android:text="+27 (0)82 123 4567"
                     android:textSize="12sp"
+                    android:fontFamily="@font/poppins"
                     android:textColor="#666666"
                     android:layout_marginBottom="4dp" />
 
@@ -358,6 +387,7 @@
                     android:layout_height="wrap_content"
                     android:text="info@solaraenergy.co.za"
                     android:textSize="12sp"
+                    android:fontFamily="@font/poppins"
                     android:textColor="#666666" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -409,5 +439,5 @@
             android:visibility="gone" />
 
     </LinearLayout>
-
 </ScrollView>
+</LinearLayout>

@@ -7,7 +7,6 @@
     app:cardCornerRadius="12dp"
     app:cardElevation="2dp"
     app:cardUseCompatPadding="false"
-    android:foreground="?attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true">
 
@@ -15,7 +14,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:background="@drawable/quote_item_background_white">
 
         <!-- Header with reference and date -->
         <LinearLayout
@@ -30,7 +30,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Q-2024-001"
-                android:textStyle="bold"
+                android:fontFamily="@font/poppins_semibold"
                 android:textSize="16sp"
                 android:textColor="@color/solora_orange" />
 
@@ -50,7 +50,8 @@
             android:layout_height="wrap_content"
             android:text="John Smith"
             android:textSize="14sp"
-            android:textStyle="bold"
+            android:fontFamily="@font/poppins_medium"
+            android:textColor="@color/solora_black"
             android:layout_marginBottom="4dp" />
 
         <!-- Address -->
@@ -60,6 +61,7 @@
             android:layout_height="wrap_content"
             android:text="123 Main Street, Cape Town"
             android:textSize="12sp"
+            android:fontFamily="@font/poppins"
             android:textColor="#666666"
             android:layout_marginBottom="12dp"
             android:maxLines="1"
@@ -75,7 +77,7 @@
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="3"
                 android:orientation="vertical">
 
                 <TextView
@@ -83,6 +85,7 @@
                     android:layout_height="wrap_content"
                     android:text="System"
                     android:textSize="10sp"
+                    android:fontFamily="@font/poppins"
                     android:textColor="#999999" />
 
                 <TextView
@@ -91,7 +94,7 @@
                     android:layout_height="wrap_content"
                     android:text="5.3 kW"
                     android:textSize="14sp"
-                    android:textStyle="bold" />
+                    android:fontFamily="@font/poppins_bold" />
             </LinearLayout>
 
             <!-- Savings -->
@@ -106,6 +109,7 @@
                     android:layout_height="wrap_content"
                     android:text="Monthly Savings"
                     android:textSize="10sp"
+                    android:fontFamily="@font/poppins"
                     android:textColor="#999999" />
 
                 <TextView
@@ -114,7 +118,7 @@
                     android:layout_height="wrap_content"
                     android:text="R 1,600"
                     android:textSize="14sp"
-                    android:textStyle="bold"
+                    android:fontFamily="@font/poppins_bold"
                     android:textColor="@color/solora_orange" />
             </LinearLayout>
         </LinearLayout>
