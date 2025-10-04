@@ -27,6 +27,7 @@ class ProfileFragment : Fragment() {
     private val profileViewModel: ProfileViewModel by viewModels()
     private val settingsViewModel: SettingsViewModel by viewModels()
     private val auth = FirebaseAuth.getInstance()
+    private val firebaseApi = FirebaseFunctionsApi()
     
     // UI Elements
     private lateinit var tvAvatar: TextView

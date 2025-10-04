@@ -269,7 +269,7 @@ class HomeFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 // Refresh quotes count via API
-                val quotesResult = apiService.getQuotes(search = null, limit = null)
+                val quotesResult = apiService.getQuotes(search = null, limit = 100) // Set a reasonable limit
                 if (quotesResult.isSuccess) {
                     val quotes = quotesResult.getOrNull() ?: emptyList()
                     tvQuotesCount.text = quotes.size.toString()
@@ -277,7 +277,7 @@ class HomeFragment : Fragment() {
                 }
                 
                 // Refresh leads count via API
-                val leadsResult = apiService.getLeads(search = null, status = null, limit = null)
+                val leadsResult = apiService.getLeads(search = null, status = null, limit = 100) // Set a reasonable limit
                 if (leadsResult.isSuccess) {
                     val leads = leadsResult.getOrNull() ?: emptyList()
                     tvLeadsCount.text = leads.size.toString()
