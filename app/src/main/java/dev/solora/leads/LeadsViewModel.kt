@@ -180,4 +180,70 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
             }
         }
     }
+    
+    // Synchronous version for immediate feedback
+    suspend fun linkQuoteToLeadSync(leadId: String, quoteId: String): Boolean {
+        return try {
+            // Get the current lead
+            val result = firebaseRepository.getLeadById(leadId)
+            if (result.isSuccess) {
+                val currentLead = result.getOrNull()
+                if (currentLead != null) {
+                    // Update the lead with the quote ID
+                    val updatedLead = currentLead.copy(quoteId = quoteId)
+                    val updateResult = firebaseRepository.updateLead(leadId, updatedLead)
+                    
+                    if (updateResult.isSuccess) {
+                        android.util.Log.d("LeadsViewModel", "Quote $quoteId linked to lead $leadId")
+                        true
+                    } else {
+                        android.util.Log.e("LeadsViewModel", "Failed to link quote to lead: ${updateResult.exceptionOrNull()?.message}")
+                        false
+                    }
+                } else {
+                    android.util.Log.e("LeadsViewModel", "Lead not found: $leadId")
+                    false
+                }
+            } else {
+                android.util.Log.e("LeadsViewModel", "Error getting lead: ${result.exceptionOrNull()?.message}")
+                false
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("LeadsViewModel", "Error linking quote to lead: ${e.message}", e)
+            false
+        }
+    }
+    
+    // Synchronous version for immediate feedback
+    suspend fun createLeadFromQuoteSync(
+        quoteId: String,
+        clientName: String,
+        address: String,
+        email: String = "",
+        phone: String = "",
+        notes: String = ""
+    ): Boolean {
+        return try {
+            val lead = FirebaseLead(
+                name = clientName,
+                email = email,
+                phone = phone,
+                status = "qualified", // Leads from quotes are typically qualified
+                notes = notes.ifEmpty { "Lead created from quote. Address: $address" },
+                quoteId = quoteId
+            )
+            
+            val result = firebaseRepository.saveLead(lead)
+            if (result.isSuccess) {
+                android.util.Log.d("LeadsViewModel", "Lead from quote saved to Firebase: ${result.getOrNull()}")
+                true
+            } else {
+                android.util.Log.e("LeadsViewModel", "Failed to save lead from quote to Firebase: ${result.exceptionOrNull()?.message}")
+                false
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("LeadsViewModel", "Error creating lead from quote: ${e.message}")
+            false
+        }
+    }
 }

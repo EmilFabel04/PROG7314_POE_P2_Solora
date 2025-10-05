@@ -194,19 +194,37 @@ class ClientDetailsFragment : Fragment() {
                     if (savedQuote != null && savedQuote.id != null) {
                         if (selectedLead != null) {
                             // Link quote to existing lead
-                            leadsViewModel.linkQuoteToLead(selectedLead!!.id!!, savedQuote.id!!)
-                            Toast.makeText(requireContext(), "Quote saved and linked to existing lead!", Toast.LENGTH_LONG).show()
+                            try {
+                                val linkResult = leadsViewModel.linkQuoteToLeadSync(selectedLead!!.id!!, savedQuote.id!!)
+                                if (linkResult) {
+                                    Toast.makeText(requireContext(), "Quote saved and linked to existing lead!", Toast.LENGTH_LONG).show()
+                                } else {
+                                    Toast.makeText(requireContext(), "Quote saved but lead linking failed", Toast.LENGTH_SHORT).show()
+                                }
+                            } catch (e: Exception) {
+                                android.util.Log.e("ClientDetailsFragment", "Error linking quote to lead: ${e.message}", e)
+                                Toast.makeText(requireContext(), "Quote saved but lead linking failed: ${e.message}", Toast.LENGTH_LONG).show()
+                            }
                         } else {
                             // Create new lead with quote link
-                            leadsViewModel.createLeadFromQuote(
-                                quoteId = savedQuote.id!!,
-                                clientName = clientName,
-                                address = address,
-                                email = email,
-                                phone = contact,
-                                notes = "Lead created from quote: $reference"
-                            )
-                            Toast.makeText(requireContext(), "Quote saved and new lead created!", Toast.LENGTH_LONG).show()
+                            try {
+                                val createResult = leadsViewModel.createLeadFromQuoteSync(
+                                    quoteId = savedQuote.id!!,
+                                    clientName = clientName,
+                                    address = address,
+                                    email = email,
+                                    phone = contact,
+                                    notes = "Lead created from quote: $reference"
+                                )
+                                if (createResult) {
+                                    Toast.makeText(requireContext(), "Quote saved and new lead created!", Toast.LENGTH_LONG).show()
+                                } else {
+                                    Toast.makeText(requireContext(), "Quote saved but lead creation failed", Toast.LENGTH_SHORT).show()
+                                }
+                            } catch (e: Exception) {
+                                android.util.Log.e("ClientDetailsFragment", "Error creating lead from quote: ${e.message}", e)
+                                Toast.makeText(requireContext(), "Quote saved but lead creation failed: ${e.message}", Toast.LENGTH_LONG).show()
+                            }
                         }
                         
                         // Navigate back to quotes view tab
