@@ -3,19 +3,19 @@
     <item
         android:id="@+id/homeFragment"
         android:title="Home"
-        android:icon="@android:drawable/ic_menu_view" />
+        android:icon="@drawable/home_icon_selector" />
     <item
         android:id="@+id/quotesFragment"
         android:title="Quotes"
-        android:icon="@android:drawable/ic_menu_myplaces" />
+        android:icon="@drawable/quote_icon_selector" />
     <item
         android:id="@+id/leadsFragment"
         android:title="Leads"
-        android:icon="@android:drawable/ic_menu_sort_by_size" />
+        android:icon="@drawable/leads_icon_selector" />
     <item
         android:id="@+id/profileFragment"
         android:title="Profile"
-        android:icon="@android:drawable/ic_menu_manage" />
+        android:icon="@drawable/profile_icon_selector" />
 </menu>
 
 

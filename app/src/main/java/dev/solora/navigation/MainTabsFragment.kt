@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -26,8 +27,13 @@ class MainTabsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val navHost = childFragmentManager.findFragmentById(R.id.tabs_nav_host) as NavHostFragment
         childNavController = navHost.navController
-        view.findViewById<BottomNavigationView>(R.id.bottom_nav)
-            .setupWithNavController(childNavController)
+        
+        val bottomNav = view.findViewById<BottomNavigationView>(R.id.bottom_nav)
+        bottomNav.setupWithNavController(childNavController)
+        
+        // Apply orange theming to bottom navigation
+        bottomNav.itemIconTintList = null // Disable default tinting
+        bottomNav.itemTextColor = ContextCompat.getColorStateList(requireContext(), R.drawable.bottom_nav_text_color)
     }
 }
 
