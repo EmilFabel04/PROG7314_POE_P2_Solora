@@ -8,8 +8,9 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
+import android.os.Bundle
 import dev.solora.R
 import dev.solora.data.FirebaseQuote
 import dev.solora.pdf.FileShareUtils
@@ -22,7 +23,7 @@ import java.util.*
 
 class QuotePdfPreviewFragment : Fragment() {
     
-    private val args: QuotePdfPreviewFragmentArgs by navArgs()
+    private var quoteId: String = ""
     private lateinit var btnBack: ImageButton
     private lateinit var btnSharePdf: Button
     private lateinit var tvReference: TextView
@@ -82,7 +83,7 @@ class QuotePdfPreviewFragment : Fragment() {
     
     private fun loadQuoteData() {
         // Get quote data from arguments
-        val quoteId = args.quoteId
+        quoteId = arguments?.getString("quoteId") ?: ""
         if (quoteId.isNotEmpty()) {
             // Load quote from ViewModel or Repository
             // For now, we'll use a placeholder - in real implementation, load from database
