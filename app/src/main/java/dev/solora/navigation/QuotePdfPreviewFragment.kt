@@ -46,6 +46,18 @@ class QuotePdfPreviewFragment : Fragment() {
     private lateinit var tvTax: TextView
     private lateinit var tvTotalCost: TextView
     
+    // Footer TextViews
+    private lateinit var tvFooterCompanyName: TextView
+    private lateinit var tvFooterCompanyAddress: TextView
+    private lateinit var tvFooterCompanyPhone: TextView
+    private lateinit var tvFooterCompanyEmail: TextView
+    private lateinit var tvFooterCompanyWebsite: TextView
+    private lateinit var tvFooterQuoteRef: TextView
+    private lateinit var tvFooterQuoteDate: TextView
+    private lateinit var tvFooterQuoteValid: TextView
+    private lateinit var tvFooterCustom: TextView
+    private lateinit var tvFooterThanks: TextView
+    
     private var currentQuote: FirebaseQuote? = null
     private val pdfGenerator by lazy { PdfGenerator(requireContext()) }
     
@@ -80,6 +92,18 @@ class QuotePdfPreviewFragment : Fragment() {
         tvSystemCost = view.findViewById(R.id.tv_system_cost)
         tvTax = view.findViewById(R.id.tv_tax)
         tvTotalCost = view.findViewById(R.id.tv_total_cost)
+        
+        // Footer TextViews
+        tvFooterCompanyName = view.findViewById(R.id.tv_footer_company_name)
+        tvFooterCompanyAddress = view.findViewById(R.id.tv_footer_company_address)
+        tvFooterCompanyPhone = view.findViewById(R.id.tv_footer_company_phone)
+        tvFooterCompanyEmail = view.findViewById(R.id.tv_footer_company_email)
+        tvFooterCompanyWebsite = view.findViewById(R.id.tv_footer_company_website)
+        tvFooterQuoteRef = view.findViewById(R.id.tv_footer_quote_ref)
+        tvFooterQuoteDate = view.findViewById(R.id.tv_footer_quote_date)
+        tvFooterQuoteValid = view.findViewById(R.id.tv_footer_quote_valid)
+        tvFooterCustom = view.findViewById(R.id.tv_footer_custom)
+        tvFooterThanks = view.findViewById(R.id.tv_footer_thanks)
     }
     
     private fun setupClickListeners() {
@@ -102,21 +126,21 @@ class QuotePdfPreviewFragment : Fragment() {
     }
     
     private fun updateCompanyInfo() {
-        // Update company name
+        // Update header company name
         tvCompanyName.text = if (companySettings.companyName.isNotEmpty()) {
             companySettings.companyName
         } else {
             "SOLORA"
         }
         
-        // Update company address
+        // Update header company address
         tvCompanyAddress.text = if (companySettings.companyAddress.isNotEmpty()) {
             companySettings.companyAddress
         } else {
             "Solar Solutions"
         }
         
-        // Update company contact info
+        // Update header company contact info
         val contactInfo = mutableListOf<String>()
         if (companySettings.companyPhone.isNotEmpty()) {
             contactInfo.add("Tel: ${companySettings.companyPhone}")
@@ -129,6 +153,47 @@ class QuotePdfPreviewFragment : Fragment() {
         }
         
         tvCompanyContact.text = contactInfo.joinToString(" • ")
+        
+        // Update footer company information
+        tvFooterCompanyName.text = if (companySettings.companyName.isNotEmpty()) {
+            companySettings.companyName
+        } else {
+            "SOLORA"
+        }
+        
+        tvFooterCompanyAddress.text = if (companySettings.companyAddress.isNotEmpty()) {
+            companySettings.companyAddress
+        } else {
+            ""
+        }
+        
+        tvFooterCompanyPhone.text = if (companySettings.companyPhone.isNotEmpty()) {
+            "Phone: ${companySettings.companyPhone}"
+        } else {
+            ""
+        }
+        
+        tvFooterCompanyEmail.text = if (companySettings.companyEmail.isNotEmpty()) {
+            "Email: ${companySettings.companyEmail}"
+        } else {
+            ""
+        }
+        
+        tvFooterCompanyWebsite.text = if (companySettings.companyWebsite.isNotEmpty()) {
+            "Website: ${companySettings.companyWebsite}"
+        } else {
+            ""
+        }
+        
+        // Update footer custom message
+        tvFooterCustom.text = if (companySettings.quoteFooter.isNotEmpty()) {
+            companySettings.quoteFooter
+        } else {
+            ""
+        }
+        
+        // Update footer thanks message
+        tvFooterThanks.text = "Thank you for choosing ${if (companySettings.companyName.isNotEmpty()) companySettings.companyName else "SOLORA"} for your solar energy needs."
     }
     
     private fun loadQuoteData() {
@@ -206,6 +271,15 @@ class QuotePdfPreviewFragment : Fragment() {
         tvSystemCost.text = "R ${String.format("%.2f", systemCost)}"
         tvTax.text = "R ${String.format("%.2f", tax)}"
         tvTotalCost.text = "R ${String.format("%.2f", totalCost)}"
+        
+        // Update footer quote information
+        tvFooterQuoteRef.text = "Reference: $reference"
+        tvFooterQuoteDate.text = "Date Issued: $dateText"
+        
+        // Calculate valid until date (30 days from now)
+        val validUntilDate = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 30) }
+        val validUntilText = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(validUntilDate.time)
+        tvFooterQuoteValid.text = "Valid Until: $validUntilText"
     }
     
     private fun exportToPdf() {

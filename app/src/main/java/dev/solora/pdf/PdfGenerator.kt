@@ -184,11 +184,46 @@ class PdfGenerator(private val context: Context) {
         }
         .footer {
             margin-top: 40px;
-            text-align: center;
+            border-top: 2px solid #FF6B35;
+            padding-top: 30px;
+        }
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .company-details {
+            flex: 1;
+            margin-right: 20px;
+        }
+        .company-details h3 {
+            color: #FF6B35;
+            font-size: 16px;
+            margin: 0 0 10px 0;
+            font-weight: bold;
+        }
+        .company-details p {
+            margin: 3px 0;
+            color: #333;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .quote-info {
+            flex: 1;
+            text-align: right;
+        }
+        .quote-info p {
+            margin: 3px 0;
             color: #666;
             font-size: 12px;
+        }
+        .footer-bottom {
+            text-align: center;
+            color: #666;
+            font-size: 11px;
             border-top: 1px solid #eee;
-            padding-top: 20px;
+            padding-top: 15px;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -197,14 +232,7 @@ class PdfGenerator(private val context: Context) {
         <div class="header">
             <div class="company-info">
                 <h1>${if (companySettings.companyName.isNotEmpty()) companySettings.companyName else "SOLORA"}</h1>
-                <p>${if (companySettings.companyAddress.isNotEmpty()) companySettings.companyAddress else "Solar Solutions"}</p>
-                ${if (companySettings.companyPhone.isNotEmpty() || companySettings.companyEmail.isNotEmpty() || companySettings.companyWebsite.isNotEmpty()) {
-                    val contactInfo = mutableListOf<String>()
-                    if (companySettings.companyPhone.isNotEmpty()) contactInfo.add("Tel: ${companySettings.companyPhone}")
-                    if (companySettings.companyEmail.isNotEmpty()) contactInfo.add("Email: ${companySettings.companyEmail}")
-                    if (companySettings.companyWebsite.isNotEmpty()) contactInfo.add("Web: ${companySettings.companyWebsite}")
-                    "<p style=\"font-size: 12px; color: #666; margin-top: 5px;\">${contactInfo.joinToString(" • ")}</p>"
-                } else ""}
+                <p>Solar Solutions</p>
             </div>
             <div class="quote-ref">
                 Ref no. $reference
@@ -268,10 +296,28 @@ class PdfGenerator(private val context: Context) {
         </div>
         
         <div class="footer">
-            <p>This quote is valid for 30 days from the date of issue.</p>
-            <p>For any questions, please contact us at ${if (companySettings.companyEmail.isNotEmpty()) companySettings.companyEmail else "info@solora.co.za"}</p>
-            ${if (companySettings.quoteFooter.isNotEmpty()) "<p>${companySettings.quoteFooter}</p>" else ""}
-            <p>Generated on ${SimpleDateFormat("dd MMMM yyyy 'at' HH:mm", Locale.getDefault()).format(Date())}</p>
+            <div class="footer-content">
+                <div class="company-details">
+                    <h3>${if (companySettings.companyName.isNotEmpty()) companySettings.companyName else "SOLORA"}</h3>
+                    ${if (companySettings.companyAddress.isNotEmpty()) "<p><strong>Address:</strong><br>${companySettings.companyAddress}</p>" else ""}
+                    ${if (companySettings.companyPhone.isNotEmpty()) "<p><strong>Phone:</strong> ${companySettings.companyPhone}</p>" else ""}
+                    ${if (companySettings.companyEmail.isNotEmpty()) "<p><strong>Email:</strong> ${companySettings.companyEmail}</p>" else ""}
+                    ${if (companySettings.companyWebsite.isNotEmpty()) "<p><strong>Website:</strong> ${companySettings.companyWebsite}</p>" else ""}
+                    ${if (companySettings.consultantName.isNotEmpty()) "<p><strong>Consultant:</strong> ${companySettings.consultantName}</p>" else ""}
+                    ${if (companySettings.consultantLicense.isNotEmpty()) "<p><strong>License:</strong> ${companySettings.consultantLicense}</p>" else ""}
+                </div>
+                <div class="quote-info">
+                    <p><strong>Quote Reference:</strong> $reference</p>
+                    <p><strong>Date Issued:</strong> $dateText</p>
+                    <p><strong>Valid Until:</strong> ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 30) }.time)}</p>
+                    <p><strong>Generated:</strong> ${SimpleDateFormat("dd MMM yyyy 'at' HH:mm", Locale.getDefault()).format(Date())}</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>This quote is valid for 30 days from the date of issue.</p>
+                ${if (companySettings.quoteFooter.isNotEmpty()) "<p>${companySettings.quoteFooter}</p>" else ""}
+                <p>Thank you for choosing ${if (companySettings.companyName.isNotEmpty()) companySettings.companyName else "SOLORA"} for your solar energy needs.</p>
+            </div>
         </div>
     </div>
 </body>
