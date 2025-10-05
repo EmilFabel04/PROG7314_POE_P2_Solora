@@ -10,7 +10,6 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import android.os.Bundle
 import dev.solora.R
 import dev.solora.data.FirebaseQuote
 import dev.solora.pdf.FileShareUtils
