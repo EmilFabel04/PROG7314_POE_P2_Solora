@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.card.MaterialCardView
 import dev.solora.R
 import dev.solora.quotes.QuotesViewModel
@@ -77,14 +78,42 @@ class HomeFragment : Fragment() {
         }
         
         cardCalculateQuote.setOnClickListener {
-            // Navigate to quotes tab and switch to calculate tab
-            findNavController().navigate(R.id.quotesFragment)
+            // Navigate to quotes tab using bottom navigation
+            try {
+                // Find the parent MainTabsFragment and access its bottom navigation
+                val parentFragment = parentFragment
+                if (parentFragment is MainTabsFragment) {
+                    val bottomNav = parentFragment.view?.findViewById<BottomNavigationView>(R.id.bottom_nav)
+                    bottomNav?.selectedItemId = R.id.quotesFragment
+                } else {
+                    // Fallback to direct navigation if parent access fails
+                    findNavController().navigate(R.id.quotesFragment)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("HomeFragment", "Error switching to quotes tab: ${e.message}")
+                // Fallback to direct navigation
+                findNavController().navigate(R.id.quotesFragment)
+            }
         }
         
         cardAddLeads.setOnClickListener {
             // Navigate to leads tab using bottom navigation
             // This will properly switch to the leads tab using the bottom navigation system
-            findNavController().navigate(R.id.leadsFragment)
+            try {
+                // Find the parent MainTabsFragment and access its bottom navigation
+                val parentFragment = parentFragment
+                if (parentFragment is MainTabsFragment) {
+                    val bottomNav = parentFragment.view?.findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottom_nav)
+                    bottomNav?.selectedItemId = R.id.leadsFragment
+                } else {
+                    // Fallback to direct navigation if parent access fails
+                    findNavController().navigate(R.id.leadsFragment)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("HomeFragment", "Error switching to leads tab: ${e.message}")
+                // Fallback to direct navigation
+                findNavController().navigate(R.id.leadsFragment)
+            }
         }
     }
     
