@@ -122,10 +122,12 @@ class ProfileFragment : Fragment() {
             }
         }
         
-        // Observe settings to ensure they're loaded
+        // Observe settings to ensure they're loaded and update profile display
         viewLifecycleOwner.lifecycleScope.launch {
             settingsViewModel.settings.collect { settings ->
                 android.util.Log.d("ProfileFragment", "Settings observed: consultantName=${settings.companySettings.consultantName}")
+                // Update profile display with consultant name from settings
+                updateProfileWithSettings(settings.companySettings)
             }
         }
     }
@@ -150,6 +152,32 @@ class ProfileFragment : Fragment() {
         } catch (e: Exception) {
             android.util.Log.e("ProfileFragment", "Error updating UI: ${e.message}", e)
             Toast.makeText(requireContext(), "Error displaying profile", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    private fun updateProfileWithSettings(companySettings: dev.solora.settings.CompanySettings) {
+        try {
+            // Update profile display with consultant name from settings
+            val consultantName = companySettings.consultantName
+            if (consultantName.isNotEmpty()) {
+                // Update name display with consultant name
+                tvName.text = consultantName
+                
+                // Update avatar with consultant name initials
+                val nameParts = consultantName.trim().split(" ")
+                val initials = if (nameParts.size >= 2) {
+                    "${nameParts[0].take(1)}${nameParts[1].take(1)}"
+                } else {
+                    consultantName.take(2)
+                }
+                tvAvatar.text = initials.uppercase()
+                
+                android.util.Log.d("ProfileFragment", "Profile updated with consultant name: $consultantName")
+            } else {
+                android.util.Log.d("ProfileFragment", "No consultant name set in settings")
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("ProfileFragment", "Error updating profile with settings: ${e.message}", e)
         }
     }
     
