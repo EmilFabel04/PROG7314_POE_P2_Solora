@@ -8,9 +8,9 @@
     <application
         android:allowBackup="true"
         android:name=".SoloraApp"
-        android:icon="@android:drawable/sym_def_app_icon"
+        android:icon="@drawable/solora_logo"
         android:label="Solora"
-        android:roundIcon="@android:drawable/sym_def_app_icon"
+        android:roundIcon="@drawable/solora_logo"
         android:supportsRtl="true"
         android:theme="@style/Theme.Solora">
         <activity

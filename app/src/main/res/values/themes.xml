@@ -6,6 +6,14 @@
         <item name="colorPrimaryContainer">@color/solora_orange_dark</item>
         <item name="android:navigationBarColor">@color/solora_orange</item>
     </style>
+    
+    <!-- Custom Toast Style -->
+    <style name="SoloraToast" parent="android:Widget.Toast">
+        <item name="android:background">@drawable/toast_background</item>
+        <item name="android:textColor">@color/solora_white</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:padding">16dp</item>
+    </style>
 </resources>
 
 
