@@ -83,13 +83,8 @@ class HomeFragment : Fragment() {
         
         cardAddLeads.setOnClickListener {
             // Navigate to leads tab using bottom navigation
-            // This will properly switch to the leads tab and allow back navigation
-            try {
-                findNavController().navigate(R.id.leadsFragment)
-            } catch (e: Exception) {
-                android.util.Log.e("HomeFragment", "Error navigating to leads: ${e.message}")
-                Toast.makeText(requireContext(), "Error navigating to leads page", Toast.LENGTH_SHORT).show()
-            }
+            // This will properly switch to the leads tab using the bottom navigation system
+            findNavController().navigate(R.id.leadsFragment)
         }
     }
     

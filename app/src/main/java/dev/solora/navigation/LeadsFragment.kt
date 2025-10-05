@@ -37,7 +37,6 @@ class LeadsFragment : Fragment() {
     private lateinit var btnAddLeadFallback: Button
     private lateinit var btnAddLeadEmpty: Button
     private lateinit var overlayAddLead: View
-    private lateinit var btnBackLeads: ImageButton
     
     // Form elements
     private lateinit var etFirstName: EditText
@@ -77,7 +76,6 @@ class LeadsFragment : Fragment() {
         btnAddLeadFallback = view.findViewById(R.id.btn_add_lead_fallback)
         btnAddLeadEmpty = view.findViewById(R.id.btn_add_lead_empty)
         overlayAddLead = view.findViewById(R.id.overlay_add_lead)
-        btnBackLeads = view.findViewById(R.id.btn_back_leads)
         
         android.util.Log.d("LeadsFragment", "Views initialized. FAB found: ${fabAddLead != null}")
         if (fabAddLead != null) {
@@ -181,23 +179,6 @@ class LeadsFragment : Fragment() {
     
     private fun setupClickListeners() {
         android.util.Log.d("LeadsFragment", "Setting up click listeners. FAB found: ${::fabAddLead.isInitialized}")
-        
-        // Setup back button
-        btnBackLeads.setOnClickListener {
-            android.util.Log.d("LeadsFragment", "Back button clicked - navigating back to home")
-            try {
-                // Try to navigate back to home fragment specifically
-                findNavController().navigate(R.id.homeFragment)
-            } catch (e: Exception) {
-                android.util.Log.e("LeadsFragment", "Error navigating to home: ${e.message}")
-                // Fallback to popBackStack
-                try {
-                    findNavController().popBackStack()
-                } catch (e2: Exception) {
-                    android.util.Log.e("LeadsFragment", "Error with popBackStack: ${e2.message}")
-                }
-            }
-        }
         
         if (::fabAddLead.isInitialized) {
             fabAddLead.setOnClickListener {
