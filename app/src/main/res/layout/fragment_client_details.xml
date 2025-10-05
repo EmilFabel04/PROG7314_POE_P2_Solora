@@ -39,7 +39,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/header"
-        android:padding="@dimen/content_padding">
+        android:padding="@dimen/content_padding"
+        android:paddingBottom="32dp"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -304,32 +306,19 @@
 
             </androidx.cardview.widget.CardView>
 
-            <!-- Save Lead Button -->
-            <Button
-                android:id="@+id/btn_save_lead"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:text="Save as Lead"
-                android:textColor="@color/solora_orange"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:background="@android:color/transparent"
-                android:drawableTop="@android:drawable/ic_menu_save"
-                android:drawablePadding="8dp"
-                android:layout_marginTop="16dp"
-                style="?android:attr/borderlessButtonStyle" />
-
-            <!-- Save Quote Button -->
+            <!-- Smart Save Button -->
             <Button
                 android:id="@+id/btn_save_quote_final"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="64dp"
                 android:text="Save Quote"
                 android:textColor="@android:color/white"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:background="@color/solora_orange"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:elevation="4dp" />
 
         </LinearLayout>
 
