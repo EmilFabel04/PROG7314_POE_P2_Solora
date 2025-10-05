@@ -13,13 +13,14 @@
     android:layout_margin="16dp"
     app:cardCornerRadius="16dp"
     app:cardElevation="8dp"
-    app:cardBackgroundColor="@android:color/white">
+    app:cardBackgroundColor="@color/solora_orange">
 
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="24dp">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/solora_orange"
+        android:padding="24dp">
 
     <!-- Header -->
     <LinearLayout
@@ -27,12 +28,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:layout_marginBottom="24dp"
-        android:background="@color/solora_orange"
-        android:padding="16dp"
-        android:layout_marginStart="-24dp"
-        android:layout_marginEnd="-24dp"
-        android:layout_marginTop="-24dp">
+        android:layout_marginBottom="24dp">
 
         <TextView
             android:layout_width="0dp"
@@ -40,13 +36,13 @@
             android:layout_weight="1"
             android:text="Edit Profile"
             android:textColor="@android:color/white"
-            android:textSize="20sp"
+            android:textSize="24sp"
             android:textStyle="bold" />
 
         <ImageButton
             android:id="@+id/btn_close_edit_profile"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@android:drawable/ic_menu_close_clear_cancel"
             android:tint="@android:color/white"
@@ -59,22 +55,25 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        app:boxStrokeColor="@color/solora_orange"
+        app:boxBackgroundColor="@android:color/white"
+        app:boxStrokeColor="@android:color/white"
+        app:boxStrokeWidth="0dp"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
         app:hintTextColor="@color/solora_orange"
         app:startIconTint="@color/solora_orange"
-        app:boxCornerRadiusTopStart="8dp"
-        app:boxCornerRadiusTopEnd="8dp"
-        app:boxCornerRadiusBottomStart="8dp"
-        app:boxCornerRadiusBottomEnd="8dp"
-        app:boxBackgroundColor="@color/solora_light_grey"
-        app:boxStrokeWidth="2dp"
-        app:boxStrokeWidthFocused="2dp">
+        app:endIconTint="@color/solora_orange"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_dialog_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="First Name"
+            android:textColor="@color/solora_on_surface"
+            android:textColorHint="@color/solora_orange"
             android:inputType="textPersonName" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -83,22 +82,25 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        app:boxStrokeColor="@color/solora_orange"
+        app:boxBackgroundColor="@android:color/white"
+        app:boxStrokeColor="@android:color/white"
+        app:boxStrokeWidth="0dp"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
         app:hintTextColor="@color/solora_orange"
         app:startIconTint="@color/solora_orange"
-        app:boxCornerRadiusTopStart="8dp"
-        app:boxCornerRadiusTopEnd="8dp"
-        app:boxCornerRadiusBottomStart="8dp"
-        app:boxCornerRadiusBottomEnd="8dp"
-        app:boxBackgroundColor="@color/solora_light_grey"
-        app:boxStrokeWidth="2dp"
-        app:boxStrokeWidthFocused="2dp">
+        app:endIconTint="@color/solora_orange"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_dialog_surname"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Last Name"
+            android:textColor="@color/solora_on_surface"
+            android:textColorHint="@color/solora_orange"
             android:inputType="textPersonName" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -107,22 +109,25 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        app:boxStrokeColor="@color/solora_orange"
+        app:boxBackgroundColor="@android:color/white"
+        app:boxStrokeColor="@android:color/white"
+        app:boxStrokeWidth="0dp"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
         app:hintTextColor="@color/solora_orange"
         app:startIconTint="@color/solora_orange"
-        app:boxCornerRadiusTopStart="8dp"
-        app:boxCornerRadiusTopEnd="8dp"
-        app:boxCornerRadiusBottomStart="8dp"
-        app:boxCornerRadiusBottomEnd="8dp"
-        app:boxBackgroundColor="@color/solora_light_grey"
-        app:boxStrokeWidth="2dp"
-        app:boxStrokeWidthFocused="2dp">
+        app:endIconTint="@color/solora_orange"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_dialog_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Email"
+            android:textColor="@color/solora_on_surface"
+            android:textColorHint="@color/solora_orange"
             android:inputType="textEmailAddress" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -131,22 +136,25 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        app:boxStrokeColor="@color/solora_orange"
+        app:boxBackgroundColor="@android:color/white"
+        app:boxStrokeColor="@android:color/white"
+        app:boxStrokeWidth="0dp"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
         app:hintTextColor="@color/solora_orange"
         app:startIconTint="@color/solora_orange"
-        app:boxCornerRadiusTopStart="8dp"
-        app:boxCornerRadiusTopEnd="8dp"
-        app:boxCornerRadiusBottomStart="8dp"
-        app:boxCornerRadiusBottomEnd="8dp"
-        app:boxBackgroundColor="@color/solora_light_grey"
-        app:boxStrokeWidth="2dp"
-        app:boxStrokeWidthFocused="2dp">
+        app:endIconTint="@color/solora_orange"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_dialog_phone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Phone Number"
+            android:textColor="@color/solora_on_surface"
+            android:textColorHint="@color/solora_orange"
             android:inputType="phone" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -155,22 +163,25 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        app:boxStrokeColor="@color/solora_orange"
+        app:boxBackgroundColor="@android:color/white"
+        app:boxStrokeColor="@android:color/white"
+        app:boxStrokeWidth="0dp"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
         app:hintTextColor="@color/solora_orange"
         app:startIconTint="@color/solora_orange"
-        app:boxCornerRadiusTopStart="8dp"
-        app:boxCornerRadiusTopEnd="8dp"
-        app:boxCornerRadiusBottomStart="8dp"
-        app:boxCornerRadiusBottomEnd="8dp"
-        app:boxBackgroundColor="@color/solora_light_grey"
-        app:boxStrokeWidth="2dp"
-        app:boxStrokeWidthFocused="2dp">
+        app:endIconTint="@color/solora_orange"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_dialog_company"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Company"
+            android:textColor="@color/solora_on_surface"
+            android:textColorHint="@color/solora_orange"
             android:inputType="text" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -180,37 +191,35 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Company Information"
-        android:textColor="@color/solora_orange"
+        android:textColor="@android:color/white"
         android:textSize="18sp"
         android:textStyle="bold"
         android:layout_marginTop="8dp"
-        android:layout_marginBottom="16dp"
-        android:background="@color/solora_orange"
-        android:textColor="@android:color/white"
-        android:padding="12dp"
-        android:layout_marginStart="-24dp"
-        android:layout_marginEnd="-24dp" />
+        android:layout_marginBottom="16dp" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        app:boxStrokeColor="@color/solora_orange"
+        app:boxBackgroundColor="@android:color/white"
+        app:boxStrokeColor="@android:color/white"
+        app:boxStrokeWidth="0dp"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
         app:hintTextColor="@color/solora_orange"
         app:startIconTint="@color/solora_orange"
-        app:boxCornerRadiusTopStart="8dp"
-        app:boxCornerRadiusTopEnd="8dp"
-        app:boxCornerRadiusBottomStart="8dp"
-        app:boxCornerRadiusBottomEnd="8dp"
-        app:boxBackgroundColor="@color/solora_light_grey"
-        app:boxStrokeWidth="2dp"
-        app:boxStrokeWidthFocused="2dp">
+        app:endIconTint="@color/solora_orange"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_dialog_company_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Company Name"
+            android:textColor="@color/solora_on_surface"
+            android:textColorHint="@color/solora_orange"
             android:inputType="text" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -219,22 +228,25 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        app:boxStrokeColor="@color/solora_orange"
+        app:boxBackgroundColor="@android:color/white"
+        app:boxStrokeColor="@android:color/white"
+        app:boxStrokeWidth="0dp"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
         app:hintTextColor="@color/solora_orange"
         app:startIconTint="@color/solora_orange"
-        app:boxCornerRadiusTopStart="8dp"
-        app:boxCornerRadiusTopEnd="8dp"
-        app:boxCornerRadiusBottomStart="8dp"
-        app:boxCornerRadiusBottomEnd="8dp"
-        app:boxBackgroundColor="@color/solora_light_grey"
-        app:boxStrokeWidth="2dp"
-        app:boxStrokeWidthFocused="2dp">
+        app:endIconTint="@color/solora_orange"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_dialog_company_address"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Company Address"
+            android:textColor="@color/solora_on_surface"
+            android:textColorHint="@color/solora_orange"
             android:inputType="textPostalAddress" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -243,22 +255,25 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        app:boxStrokeColor="@color/solora_orange"
+        app:boxBackgroundColor="@android:color/white"
+        app:boxStrokeColor="@android:color/white"
+        app:boxStrokeWidth="0dp"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
         app:hintTextColor="@color/solora_orange"
         app:startIconTint="@color/solora_orange"
-        app:boxCornerRadiusTopStart="8dp"
-        app:boxCornerRadiusTopEnd="8dp"
-        app:boxCornerRadiusBottomStart="8dp"
-        app:boxCornerRadiusBottomEnd="8dp"
-        app:boxBackgroundColor="@color/solora_light_grey"
-        app:boxStrokeWidth="2dp"
-        app:boxStrokeWidthFocused="2dp">
+        app:endIconTint="@color/solora_orange"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_dialog_company_phone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Company Phone"
+            android:textColor="@color/solora_on_surface"
+            android:textColorHint="@color/solora_orange"
             android:inputType="phone" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -267,22 +282,25 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        app:boxStrokeColor="@color/solora_orange"
+        app:boxBackgroundColor="@android:color/white"
+        app:boxStrokeColor="@android:color/white"
+        app:boxStrokeWidth="0dp"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
         app:hintTextColor="@color/solora_orange"
         app:startIconTint="@color/solora_orange"
-        app:boxCornerRadiusTopStart="8dp"
-        app:boxCornerRadiusTopEnd="8dp"
-        app:boxCornerRadiusBottomStart="8dp"
-        app:boxCornerRadiusBottomEnd="8dp"
-        app:boxBackgroundColor="@color/solora_light_grey"
-        app:boxStrokeWidth="2dp"
-        app:boxStrokeWidthFocused="2dp">
+        app:endIconTint="@color/solora_orange"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_dialog_company_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Company Email"
+            android:textColor="@color/solora_on_surface"
+            android:textColorHint="@color/solora_orange"
             android:inputType="textEmailAddress" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -291,22 +309,25 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
-        app:boxStrokeColor="@color/solora_orange"
+        app:boxBackgroundColor="@android:color/white"
+        app:boxStrokeColor="@android:color/white"
+        app:boxStrokeWidth="0dp"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
         app:hintTextColor="@color/solora_orange"
         app:startIconTint="@color/solora_orange"
-        app:boxCornerRadiusTopStart="8dp"
-        app:boxCornerRadiusTopEnd="8dp"
-        app:boxCornerRadiusBottomStart="8dp"
-        app:boxCornerRadiusBottomEnd="8dp"
-        app:boxBackgroundColor="@color/solora_light_grey"
-        app:boxStrokeWidth="2dp"
-        app:boxStrokeWidthFocused="2dp">
+        app:endIconTint="@color/solora_orange"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_dialog_company_website"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Company Website"
+            android:textColor="@color/solora_on_surface"
+            android:textColorHint="@color/solora_orange"
             android:inputType="textUri" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -322,29 +343,31 @@
         <Button
             android:id="@+id/btn_cancel_edit_profile"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:text="Cancel"
-            android:textColor="@color/solora_orange"
+            android:textColor="@android:color/white"
             android:backgroundTint="@android:color/transparent"
             android:layout_marginEnd="12dp"
             android:minWidth="100dp"
-            android:padding="12dp"
-            app:cornerRadius="8dp" />
+            android:textSize="16sp"
+            app:cornerRadius="24dp"
+            android:background="@drawable/button_outline_white" />
 
         <Button
             android:id="@+id/btn_save_edit_profile"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Save Changes"
-            android:textColor="@android:color/white"
-            android:backgroundTint="@color/solora_orange"
-            android:minWidth="120dp"
-            android:padding="12dp"
-            app:cornerRadius="8dp" />
+            android:layout_height="48dp"
+            android:text="Save"
+            android:textColor="@color/solora_orange"
+            android:backgroundTint="@android:color/white"
+            android:minWidth="100dp"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="24dp" />
 
     </LinearLayout>
 
-</LinearLayout>
+    </LinearLayout>
 
 </androidx.cardview.widget.CardView>
 
