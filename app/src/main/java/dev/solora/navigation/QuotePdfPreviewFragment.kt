@@ -33,7 +33,6 @@ class QuotePdfPreviewFragment : Fragment() {
     private lateinit var tvReference: TextView
     private lateinit var tvCompanyName: TextView
     private lateinit var tvCompanyAddress: TextView
-    private lateinit var tvCompanyContact: TextView
     private lateinit var tvClientName: TextView
     private lateinit var tvAddress: TextView
     private lateinit var tvDate: TextView
@@ -80,7 +79,6 @@ class QuotePdfPreviewFragment : Fragment() {
         tvReference = view.findViewById(R.id.tv_reference)
         tvCompanyName = view.findViewById(R.id.tv_company_name)
         tvCompanyAddress = view.findViewById(R.id.tv_company_address)
-        tvCompanyContact = view.findViewById(R.id.tv_company_contact)
         tvClientName = view.findViewById(R.id.tv_client_name)
         tvAddress = view.findViewById(R.id.tv_address)
         tvDate = view.findViewById(R.id.tv_date)
@@ -133,26 +131,8 @@ class QuotePdfPreviewFragment : Fragment() {
             "SOLORA"
         }
         
-        // Update header company address
-        tvCompanyAddress.text = if (companySettings.companyAddress.isNotEmpty()) {
-            companySettings.companyAddress
-        } else {
-            "Solar Solutions"
-        }
-        
-        // Update header company contact info
-        val contactInfo = mutableListOf<String>()
-        if (companySettings.companyPhone.isNotEmpty()) {
-            contactInfo.add("Tel: ${companySettings.companyPhone}")
-        }
-        if (companySettings.companyEmail.isNotEmpty()) {
-            contactInfo.add("Email: ${companySettings.companyEmail}")
-        }
-        if (companySettings.companyWebsite.isNotEmpty()) {
-            contactInfo.add("Web: ${companySettings.companyWebsite}")
-        }
-        
-        tvCompanyContact.text = contactInfo.joinToString(" • ")
+        // Update header company address (keep simple)
+        tvCompanyAddress.text = "Solar Solutions"
         
         // Update footer company information
         tvFooterCompanyName.text = if (companySettings.companyName.isNotEmpty()) {
@@ -162,7 +142,7 @@ class QuotePdfPreviewFragment : Fragment() {
         }
         
         tvFooterCompanyAddress.text = if (companySettings.companyAddress.isNotEmpty()) {
-            companySettings.companyAddress
+            "Address:\n${companySettings.companyAddress}"
         } else {
             ""
         }

@@ -183,47 +183,65 @@ class PdfGenerator(private val context: Context) {
             color: #FF6B35;
         }
         .footer {
-            margin-top: 40px;
-            border-top: 2px solid #FF6B35;
-            padding-top: 30px;
+            margin-top: 50px;
+            border-top: 3px solid #FF6B35;
+            padding-top: 40px;
+            background-color: #fafafa;
+            padding: 40px 30px;
+            border-radius: 8px;
         }
         .footer-content {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            gap: 40px;
         }
         .company-details {
             flex: 1;
-            margin-right: 20px;
         }
         .company-details h3 {
             color: #FF6B35;
-            font-size: 16px;
-            margin: 0 0 10px 0;
+            font-size: 18px;
+            margin: 0 0 15px 0;
             font-weight: bold;
+            border-bottom: 1px solid #FF6B35;
+            padding-bottom: 5px;
         }
         .company-details p {
-            margin: 3px 0;
+            margin: 8px 0;
             color: #333;
-            font-size: 12px;
-            line-height: 1.4;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .company-details strong {
+            color: #555;
+            font-weight: 600;
         }
         .quote-info {
             flex: 1;
             text-align: right;
         }
         .quote-info p {
-            margin: 3px 0;
+            margin: 8px 0;
             color: #666;
-            font-size: 12px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .quote-info strong {
+            color: #555;
+            font-weight: 600;
         }
         .footer-bottom {
             text-align: center;
             color: #666;
-            font-size: 11px;
-            border-top: 1px solid #eee;
-            padding-top: 15px;
-            margin-top: 20px;
+            font-size: 12px;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+            margin-top: 25px;
+            line-height: 1.6;
+        }
+        .footer-bottom p {
+            margin: 5px 0;
         }
     </style>
 </head>
@@ -307,16 +325,16 @@ class PdfGenerator(private val context: Context) {
                     ${if (companySettings.consultantLicense.isNotEmpty()) "<p><strong>License:</strong> ${companySettings.consultantLicense}</p>" else ""}
                 </div>
                 <div class="quote-info">
-                    <p><strong>Quote Reference:</strong> $reference</p>
-                    <p><strong>Date Issued:</strong> $dateText</p>
-                    <p><strong>Valid Until:</strong> ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 30) }.time)}</p>
-                    <p><strong>Generated:</strong> ${SimpleDateFormat("dd MMM yyyy 'at' HH:mm", Locale.getDefault()).format(Date())}</p>
+                    <p><strong>Quote Reference:</strong><br>$reference</p>
+                    <p><strong>Date Issued:</strong><br>$dateText</p>
+                    <p><strong>Valid Until:</strong><br>${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 30) }.time)}</p>
+                    <p><strong>Generated:</strong><br>${SimpleDateFormat("dd MMM yyyy 'at' HH:mm", Locale.getDefault()).format(Date())}</p>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>This quote is valid for 30 days from the date of issue.</p>
+                <p><strong>Quote Validity:</strong> This quote is valid for 30 days from the date of issue.</p>
                 ${if (companySettings.quoteFooter.isNotEmpty()) "<p>${companySettings.quoteFooter}</p>" else ""}
-                <p>Thank you for choosing ${if (companySettings.companyName.isNotEmpty()) companySettings.companyName else "SOLORA"} for your solar energy needs.</p>
+                <p><em>Thank you for choosing ${if (companySettings.companyName.isNotEmpty()) companySettings.companyName else "SOLORA"} for your solar energy needs.</em></p>
             </div>
         </div>
     </div>
