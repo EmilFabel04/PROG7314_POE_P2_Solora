@@ -84,6 +84,9 @@ class QuotesFragment : Fragment() {
         observeViewModel()
         observeSettings()
         observeDashboard()
+        
+        // Check if we're returning from client details (quote was saved)
+        checkIfReturningFromQuoteSave()
     }
     
     private fun initializeViews(view: View) {
@@ -150,6 +153,19 @@ class QuotesFragment : Fragment() {
             putString("calculated_address", address)
         }
         findNavController().navigate(R.id.quoteResultsFragment, bundle)
+    }
+    
+    private fun checkIfReturningFromQuoteSave() {
+        // Check if we have a saved quote (indicates we just returned from saving a quote)
+        viewLifecycleOwner.lifecycleScope.launch {
+            quotesViewModel.lastQuote.collect { quote ->
+                if (quote != null && quote.id != null) {
+                    // We have a saved quote, switch to view tab to show it
+                    switchToTab(1)
+                    android.util.Log.d("QuotesFragment", "Switching to view tab to show saved quote: ${quote.reference}")
+                }
+            }
+        }
     }
     
     private fun updateTabAppearance() {

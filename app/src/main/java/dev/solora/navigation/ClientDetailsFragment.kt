@@ -189,13 +189,18 @@ class ClientDetailsFragment : Fragment() {
         }
         
         val clientName = "$firstName $lastName"
-        val contactInfo = if (email.isNotEmpty()) "$email | $contact" else contact
         
         calculationOutputs?.let { outputs ->
             // Save the quote
             quotesViewModel.saveQuoteFromCalculation(reference, clientName, address, outputs)
             
-            // Show success message and navigate back
+            // If this is a new client (not selected from existing leads), save as lead
+            if (selectedLead == null) {
+                // Save as new lead only if not already an existing lead
+                leadsViewModel.addLead(clientName, email, contact, "Lead created from quote: $reference")
+            }
+            
+            // Show success message and navigate back to quotes view tab
             Toast.makeText(requireContext(), "Quote saved successfully!", Toast.LENGTH_LONG).show()
             findNavController().popBackStack(R.id.quotesFragment, false)
         } ?: run {

@@ -288,11 +288,10 @@ class LeadsFragment : Fragment() {
         // Generate reference number
         val reference = generateFirebaseLeadReference()
         val fullName = "$firstName $lastName"
-        val contactInfo = if (email.isNotEmpty()) "$email | $contact" else contact
         
-        // Add lead
-        android.util.Log.d("LeadsFragment", "Adding lead: $fullName, $address, $contactInfo, $source")
-        leadsViewModel.addLead(fullName, contactInfo, contactInfo, "")
+        // Add lead with separate email and phone fields
+        android.util.Log.d("LeadsFragment", "Adding lead: $fullName, email: $email, phone: $contact")
+        leadsViewModel.addLead(fullName, email, contact, "")
         
         // Clear form and hide modal
         clearForm()
