@@ -6,6 +6,7 @@ import com.itextpdf.html2pdf.HtmlConverter
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
 import dev.solora.data.FirebaseQuote
+import dev.solora.settings.CompanySettings
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
@@ -14,6 +15,10 @@ import java.util.*
 class PdfGenerator(private val context: Context) {
     
     fun generateQuotePdf(quote: FirebaseQuote): File? {
+        return generateQuotePdf(quote, CompanySettings())
+    }
+    
+    fun generateQuotePdf(quote: FirebaseQuote, companySettings: CompanySettings): File? {
         return try {
             // Create PDF directory if it doesn't exist
             val pdfDir = File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "Quotes")
@@ -28,7 +33,7 @@ class PdfGenerator(private val context: Context) {
             val pdfFile = File(pdfDir, filename)
             
             // Generate HTML content
-            val htmlContent = generateQuoteHtml(quote)
+            val htmlContent = generateQuoteHtml(quote, companySettings)
             
             // Convert HTML to PDF
             val outputStream = FileOutputStream(pdfFile)
@@ -44,7 +49,7 @@ class PdfGenerator(private val context: Context) {
         }
     }
     
-    private fun generateQuoteHtml(quote: FirebaseQuote): String {
+    private fun generateQuoteHtml(quote: FirebaseQuote, companySettings: CompanySettings = CompanySettings()): String {
         val reference = if (quote.reference.isNotEmpty()) quote.reference else "REF-${quote.id?.takeLast(5) ?: "00000"}"
         val dateText = quote.createdAt?.toDate()?.let {
             SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(it)
@@ -191,8 +196,15 @@ class PdfGenerator(private val context: Context) {
     <div class="container">
         <div class="header">
             <div class="company-info">
-                <h1>SOLORA</h1>
-                <p>Solar Solutions</p>
+                <h1>${if (companySettings.companyName.isNotEmpty()) companySettings.companyName else "SOLORA"}</h1>
+                <p>${if (companySettings.companyAddress.isNotEmpty()) companySettings.companyAddress else "Solar Solutions"}</p>
+                ${if (companySettings.companyPhone.isNotEmpty() || companySettings.companyEmail.isNotEmpty() || companySettings.companyWebsite.isNotEmpty()) {
+                    val contactInfo = mutableListOf<String>()
+                    if (companySettings.companyPhone.isNotEmpty()) contactInfo.add("Tel: ${companySettings.companyPhone}")
+                    if (companySettings.companyEmail.isNotEmpty()) contactInfo.add("Email: ${companySettings.companyEmail}")
+                    if (companySettings.companyWebsite.isNotEmpty()) contactInfo.add("Web: ${companySettings.companyWebsite}")
+                    "<p style=\"font-size: 12px; color: #666; margin-top: 5px;\">${contactInfo.joinToString(" • ")}</p>"
+                } else ""}
             </div>
             <div class="quote-ref">
                 Ref no. $reference
@@ -257,7 +269,8 @@ class PdfGenerator(private val context: Context) {
         
         <div class="footer">
             <p>This quote is valid for 30 days from the date of issue.</p>
-            <p>For any questions, please contact us at info@solora.co.za</p>
+            <p>For any questions, please contact us at ${if (companySettings.companyEmail.isNotEmpty()) companySettings.companyEmail else "info@solora.co.za"}</p>
+            ${if (companySettings.quoteFooter.isNotEmpty()) "<p>${companySettings.quoteFooter}</p>" else ""}
             <p>Generated on ${SimpleDateFormat("dd MMMM yyyy 'at' HH:mm", Locale.getDefault()).format(Date())}</p>
         </div>
     </div>

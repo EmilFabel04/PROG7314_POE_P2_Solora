@@ -8,12 +8,15 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import dev.solora.R
 import dev.solora.data.FirebaseQuote
 import dev.solora.pdf.FileShareUtils
 import dev.solora.pdf.PdfGenerator
+import dev.solora.settings.SettingsViewModel
+import dev.solora.settings.CompanySettings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -22,10 +25,15 @@ import java.util.*
 
 class QuotePdfPreviewFragment : Fragment() {
     
+    private val settingsViewModel: SettingsViewModel by viewModels()
     private var quoteId: String = ""
+    private var companySettings: CompanySettings = CompanySettings()
     private lateinit var btnBack: ImageButton
     private lateinit var btnSharePdf: Button
     private lateinit var tvReference: TextView
+    private lateinit var tvCompanyName: TextView
+    private lateinit var tvCompanyAddress: TextView
+    private lateinit var tvCompanyContact: TextView
     private lateinit var tvClientName: TextView
     private lateinit var tvAddress: TextView
     private lateinit var tvDate: TextView
@@ -50,6 +58,7 @@ class QuotePdfPreviewFragment : Fragment() {
         
         initializeViews(view)
         setupClickListeners()
+        observeSettings()
         loadQuoteData()
     }
     
@@ -57,6 +66,9 @@ class QuotePdfPreviewFragment : Fragment() {
         btnBack = view.findViewById(R.id.btn_back_pdf_preview)
         btnSharePdf = view.findViewById(R.id.btn_share_pdf)
         tvReference = view.findViewById(R.id.tv_reference)
+        tvCompanyName = view.findViewById(R.id.tv_company_name)
+        tvCompanyAddress = view.findViewById(R.id.tv_company_address)
+        tvCompanyContact = view.findViewById(R.id.tv_company_contact)
         tvClientName = view.findViewById(R.id.tv_client_name)
         tvAddress = view.findViewById(R.id.tv_address)
         tvDate = view.findViewById(R.id.tv_date)
@@ -78,6 +90,45 @@ class QuotePdfPreviewFragment : Fragment() {
         btnSharePdf.setOnClickListener {
             exportToPdf()
         }
+    }
+    
+    private fun observeSettings() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            settingsViewModel.settings.collect { settings ->
+                companySettings = settings.companySettings
+                updateCompanyInfo()
+            }
+        }
+    }
+    
+    private fun updateCompanyInfo() {
+        // Update company name
+        tvCompanyName.text = if (companySettings.companyName.isNotEmpty()) {
+            companySettings.companyName
+        } else {
+            "SOLORA"
+        }
+        
+        // Update company address
+        tvCompanyAddress.text = if (companySettings.companyAddress.isNotEmpty()) {
+            companySettings.companyAddress
+        } else {
+            "Solar Solutions"
+        }
+        
+        // Update company contact info
+        val contactInfo = mutableListOf<String>()
+        if (companySettings.companyPhone.isNotEmpty()) {
+            contactInfo.add("Tel: ${companySettings.companyPhone}")
+        }
+        if (companySettings.companyEmail.isNotEmpty()) {
+            contactInfo.add("Email: ${companySettings.companyEmail}")
+        }
+        if (companySettings.companyWebsite.isNotEmpty()) {
+            contactInfo.add("Web: ${companySettings.companyWebsite}")
+        }
+        
+        tvCompanyContact.text = contactInfo.joinToString(" • ")
     }
     
     private fun loadQuoteData() {
@@ -166,7 +217,7 @@ class QuotePdfPreviewFragment : Fragment() {
                     
                     // Generate PDF in background thread
                     val pdfFile = withContext(Dispatchers.IO) {
-                        pdfGenerator.generateQuotePdf(quote)
+                        pdfGenerator.generateQuotePdf(quote, companySettings)
                     }
                     
                     if (pdfFile != null) {
