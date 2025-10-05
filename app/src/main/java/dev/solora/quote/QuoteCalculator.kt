@@ -46,7 +46,7 @@ data class QuoteOutputs(
     val estimatedMonthlyGeneration: Double = 0.0,
     val paybackMonths: Int = 0,
     val monthlySavingsRands: Double = 0.0
-)
+) : java.io.Serializable
 
 data class DetailedAnalysis(
     val monthlyGeneration: Map<Int, Double>, // kWh per month

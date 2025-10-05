@@ -123,10 +123,7 @@ class ClientDetailsFragment : Fragment() {
         etLastName.setText(lead.name.split(" ").drop(1).joinToString(" "))
         etEmail.setText(lead.email)
         etContactNumber.setText(lead.phone)
-        // Don't override address if it was pre-populated from calculation
-        if (etAddress.text.toString().isEmpty()) {
-            etAddress.setText(lead.address)
-        }
+        // Note: FirebaseLead doesn't have address field, so we keep the pre-populated address from calculation
     }
     
     private fun saveQuoteWithClientDetails() {
