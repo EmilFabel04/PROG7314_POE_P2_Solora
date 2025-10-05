@@ -32,7 +32,6 @@ class QuotePdfPreviewFragment : Fragment() {
     private lateinit var btnSharePdf: Button
     private lateinit var tvReference: TextView
     private lateinit var tvCompanyName: TextView
-    private lateinit var tvCompanyAddress: TextView
     private lateinit var tvClientName: TextView
     private lateinit var tvAddress: TextView
     private lateinit var tvDate: TextView
@@ -78,7 +77,6 @@ class QuotePdfPreviewFragment : Fragment() {
         btnSharePdf = view.findViewById(R.id.btn_share_pdf)
         tvReference = view.findViewById(R.id.tv_reference)
         tvCompanyName = view.findViewById(R.id.tv_company_name)
-        tvCompanyAddress = view.findViewById(R.id.tv_company_address)
         tvClientName = view.findViewById(R.id.tv_client_name)
         tvAddress = view.findViewById(R.id.tv_address)
         tvDate = view.findViewById(R.id.tv_date)
@@ -130,9 +128,6 @@ class QuotePdfPreviewFragment : Fragment() {
         } else {
             "SOLORA"
         }
-        
-        // Update header company address (keep simple)
-        tvCompanyAddress.text = "Solar Solutions"
         
         // Update footer company information
         tvFooterCompanyName.text = if (companySettings.companyName.isNotEmpty()) {
