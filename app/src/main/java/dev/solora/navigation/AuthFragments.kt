@@ -211,7 +211,8 @@ class RegisterFragment : Fragment() {
         observeAuthStateAndNavigate(authViewModel)
 
         view.findViewById<View>(R.id.btn_back_login).setOnClickListener {
-            findNavController().popBackStack()
+            Log.d("RegisterFragment", "Back to login clicked!")
+            findNavController().navigate(R.id.action_register_to_login)
         }
 
         view.findViewById<View>(R.id.txt_btn_back_login).setOnClickListener {
