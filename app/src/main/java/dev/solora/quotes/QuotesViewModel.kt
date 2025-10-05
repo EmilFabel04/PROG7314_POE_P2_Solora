@@ -342,6 +342,11 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     fun clearCalculationState() {
         _calculationState.value = CalculationState.Idle
     }
+    
+    // Clear last quote
+    fun clearLastQuote() {
+        _lastQuote.value = null
+    }
 }
 
 sealed class CalculationState {

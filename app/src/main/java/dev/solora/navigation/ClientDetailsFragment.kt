@@ -227,6 +227,9 @@ class ClientDetailsFragment : Fragment() {
                             }
                         }
                         
+                        // Clear the last quote to prevent automatic tab switching
+                        quotesViewModel.clearLastQuote()
+                        
                         // Navigate back to quotes fragment and switch to view tab
                         findNavController().popBackStack(R.id.quotesFragment, false)
                     } else {

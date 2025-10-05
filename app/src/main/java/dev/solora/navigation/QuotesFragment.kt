@@ -87,6 +87,14 @@ class QuotesFragment : Fragment() {
         
         // Check if we're returning from client details (quote was saved)
         checkIfReturningFromQuoteSave()
+        
+        // Also check immediately if we should show view tab
+        val savedQuote = quotesViewModel.lastQuote.value
+        if (savedQuote != null && savedQuote.id != null) {
+            // Switch to view tab immediately to show the saved quote
+            switchToTab(1)
+            android.util.Log.d("QuotesFragment", "OnViewCreated: Switching to view tab to show saved quote: ${savedQuote.reference}")
+        }
     }
     
     private fun initializeViews(view: View) {
@@ -176,6 +184,17 @@ class QuotesFragment : Fragment() {
             // Switch to view tab to show the saved quote
             switchToTab(1)
             android.util.Log.d("QuotesFragment", "OnResume: Switching to view tab to show saved quote: ${savedQuote.reference}")
+        }
+    }
+    
+    override fun onStart() {
+        super.onStart()
+        // Also check on start in case onResume doesn't catch it
+        val savedQuote = quotesViewModel.lastQuote.value
+        if (savedQuote != null && savedQuote.id != null) {
+            // Switch to view tab to show the saved quote
+            switchToTab(1)
+            android.util.Log.d("QuotesFragment", "OnStart: Switching to view tab to show saved quote: ${savedQuote.reference}")
         }
     }
     
