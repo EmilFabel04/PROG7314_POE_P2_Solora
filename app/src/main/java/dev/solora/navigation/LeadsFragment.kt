@@ -185,7 +185,18 @@ class LeadsFragment : Fragment() {
         // Setup back button
         btnBackLeads.setOnClickListener {
             android.util.Log.d("LeadsFragment", "Back button clicked - navigating back to home")
-            findNavController().popBackStack()
+            try {
+                // Try to navigate back to home fragment specifically
+                findNavController().navigate(R.id.homeFragment)
+            } catch (e: Exception) {
+                android.util.Log.e("LeadsFragment", "Error navigating to home: ${e.message}")
+                // Fallback to popBackStack
+                try {
+                    findNavController().popBackStack()
+                } catch (e2: Exception) {
+                    android.util.Log.e("LeadsFragment", "Error with popBackStack: ${e2.message}")
+                }
+            }
         }
         
         if (::fabAddLead.isInitialized) {
