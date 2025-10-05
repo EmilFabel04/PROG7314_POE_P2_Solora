@@ -20,9 +20,19 @@
             android:padding="@dimen/header_padding"
             android:gravity="center_vertical">
             
+            <ImageButton
+                android:id="@+id/btn_back_leads"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/ic_menu_revert"
+                android:tint="@android:color/white"
+                android:contentDescription="Back" />
+            
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="Leads"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/text_size_title"
