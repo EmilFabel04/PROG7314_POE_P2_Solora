@@ -178,7 +178,11 @@ class QuoteDetailFragment : Fragment() {
     
     private fun exportToPdf() {
         currentQuote?.let { quote ->
-            viewLifecycleOwner.lifecycleScope.launch {
+            // Navigate to PDF preview page instead of directly exporting
+            val bundle = Bundle().apply {
+                putString("quoteId", quote.id ?: "")
+            }
+            findNavController().navigate(R.id.quotePdfPreviewFragment, bundle)
                 try {
                     // Show loading message
                     Toast.makeText(requireContext(), "Generating PDF...", Toast.LENGTH_SHORT).show()
