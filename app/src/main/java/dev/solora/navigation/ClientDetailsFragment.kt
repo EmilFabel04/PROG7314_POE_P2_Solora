@@ -191,18 +191,44 @@ class ClientDetailsFragment : Fragment() {
         val clientName = "$firstName $lastName"
         
         calculationOutputs?.let { outputs ->
-            // Save the quote
+            // Save the quote first
             quotesViewModel.saveQuoteFromCalculation(reference, clientName, address, outputs)
             
-            // If this is a new client (not selected from existing leads), save as lead
-            if (selectedLead == null) {
-                // Save as new lead only if not already an existing lead
-                leadsViewModel.addLead(clientName, email, contact, "Lead created from quote: $reference")
+            // Wait for quote to be saved, then link to lead
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    // Wait a bit for the quote to be saved
+                    kotlinx.coroutines.delay(1000)
+                    
+                    val savedQuote = quotesViewModel.lastQuote.value
+                    if (savedQuote != null && savedQuote.id != null) {
+                        if (selectedLead != null) {
+                            // Link quote to existing lead
+                            leadsViewModel.linkQuoteToLead(selectedLead!!.id!!, savedQuote.id!!)
+                            Toast.makeText(requireContext(), "Quote saved and linked to existing lead!", Toast.LENGTH_LONG).show()
+                        } else {
+                            // Create new lead with quote link
+                            leadsViewModel.createLeadFromQuote(
+                                quoteId = savedQuote.id!!,
+                                clientName = clientName,
+                                address = address,
+                                email = email,
+                                phone = contact,
+                                notes = "Lead created from quote: $reference"
+                            )
+                            Toast.makeText(requireContext(), "Quote saved and new lead created!", Toast.LENGTH_LONG).show()
+                        }
+                        
+                        // Navigate back to quotes view tab
+                        findNavController().popBackStack(R.id.quotesFragment, false)
+                    } else {
+                        Toast.makeText(requireContext(), "Quote saved but lead linking failed", Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("ClientDetailsFragment", "Error linking quote to lead: ${e.message}", e)
+                    Toast.makeText(requireContext(), "Quote saved but lead linking failed: ${e.message}", Toast.LENGTH_LONG).show()
+                }
             }
-            
-            // Show success message and navigate back to quotes view tab
-            Toast.makeText(requireContext(), "Quote saved successfully!", Toast.LENGTH_LONG).show()
-            findNavController().popBackStack(R.id.quotesFragment, false)
         } ?: run {
             Toast.makeText(requireContext(), "No calculation data available", Toast.LENGTH_SHORT).show()
         }

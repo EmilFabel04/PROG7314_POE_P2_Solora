@@ -594,7 +594,8 @@ class QuotesFragment : Fragment() {
                             quoteId = savedQuote.id!!,
                             clientName = clientName,
                             address = address,
-                            contactInfo = contactInfo,
+                            email = email,
+                            phone = contact,
                             notes = "Lead created from quote $reference. System: ${String.format("%.2f", calculation.systemKw)}kW, Monthly savings: R${String.format("%.2f", calculation.monthlySavingsRands)}"
                         )
                         
