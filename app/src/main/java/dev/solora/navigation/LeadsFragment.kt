@@ -5,6 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
+import android.widget.TextView
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.EditText
@@ -15,6 +17,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dev.solora.R
 import dev.solora.leads.LeadsViewModel
@@ -107,59 +110,70 @@ class LeadsFragment : Fragment() {
     }
     
     private fun showLeadDetails(lead: FirebaseLead) {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_lead_details, null)
+        
+        // Initialize views
+        val tvLeadName = dialogView.findViewById<TextView>(R.id.tv_lead_name)
+        val tvLeadEmail = dialogView.findViewById<TextView>(R.id.tv_lead_email)
+        val tvLeadPhone = dialogView.findViewById<TextView>(R.id.tv_lead_phone)
+        val tvLeadId = dialogView.findViewById<TextView>(R.id.tv_lead_id)
+        val tvLeadDate = dialogView.findViewById<TextView>(R.id.tv_lead_date)
+        val tvLeadStatus = dialogView.findViewById<TextView>(R.id.tv_lead_status)
+        val tvLeadNotes = dialogView.findViewById<TextView>(R.id.tv_lead_notes)
+        val tvQuoteId = dialogView.findViewById<TextView>(R.id.tv_quote_id)
+        val cardLeadNotes = dialogView.findViewById<androidx.cardview.widget.CardView>(R.id.card_lead_notes)
+        val cardLinkedQuote = dialogView.findViewById<androidx.cardview.widget.CardView>(R.id.card_linked_quote)
+        
         // Format date
         val dateText = lead.createdAt?.toDate()?.let {
             java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale.getDefault()).format(it)
         } ?: "Unknown date"
         
-        // Build detailed message
-        val details = buildString {
-            appendLine("═══════════════════════════")
-            appendLine("LEAD DETAILS")
-            appendLine("═══════════════════════════")
-            appendLine()
-            appendLine("ID: ${lead.id ?: "N/A"}")
-            appendLine("Date: $dateText")
-            appendLine()
-            appendLine("CONTACT INFORMATION")
-            appendLine("───────────────────────────")
-            appendLine("Name: ${lead.name}")
-            if (lead.email.isNotEmpty()) {
-                appendLine("Email: ${lead.email}")
-            }
-            if (lead.phone.isNotEmpty()) {
-                appendLine("Phone: ${lead.phone}")
-            }
-            appendLine()
-            appendLine("STATUS")
-            appendLine("───────────────────────────")
-            appendLine(lead.status.uppercase())
-            appendLine()
-            if (!lead.notes.isNullOrEmpty()) {
-                appendLine("NOTES")
-                appendLine("───────────────────────────")
-                appendLine(lead.notes)
-                appendLine()
-            }
-            if (lead.quoteId != null) {
-                appendLine("LINKED QUOTE")
-                appendLine("───────────────────────────")
-                appendLine("Quote ID: ${lead.quoteId}")
-                appendLine()
-            }
-            appendLine("═══════════════════════════")
+        // Populate data
+        tvLeadName.text = lead.name
+        tvLeadEmail.text = if (lead.email.isNotEmpty()) lead.email else "Not provided"
+        tvLeadPhone.text = if (lead.phone.isNotEmpty()) lead.phone else "Not provided"
+        tvLeadId.text = lead.id ?: "N/A"
+        tvLeadDate.text = dateText
+        tvLeadStatus.text = lead.status.uppercase()
+        
+        // Show/hide notes card
+        if (!lead.notes.isNullOrEmpty()) {
+            tvLeadNotes.text = lead.notes
+            cardLeadNotes.visibility = View.VISIBLE
+        } else {
+            cardLeadNotes.visibility = View.GONE
         }
         
-        // Show in dialog
-        android.app.AlertDialog.Builder(requireContext())
-            .setTitle("Lead: ${lead.name}")
-            .setMessage(details)
-            .setPositiveButton("Close", null)
-            .setNeutralButton("Update Status") { _, _ ->
-                // TODO: Show status update dialog
-                Toast.makeText(requireContext(), "Status update coming soon", Toast.LENGTH_SHORT).show()
-            }
-            .show()
+        // Show/hide linked quote card
+        if (lead.quoteId != null) {
+            tvQuoteId.text = "Quote ID: ${lead.quoteId}"
+            cardLinkedQuote.visibility = View.VISIBLE
+        } else {
+            cardLinkedQuote.visibility = View.GONE
+        }
+        
+        // Create dialog
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+        
+        // Set up button click listeners
+        dialogView.findViewById<ImageButton>(R.id.btn_close_lead_details).setOnClickListener {
+            dialog.dismiss()
+        }
+        
+        dialogView.findViewById<Button>(R.id.btn_close_lead_details_action).setOnClickListener {
+            dialog.dismiss()
+        }
+        
+        dialogView.findViewById<Button>(R.id.btn_update_status).setOnClickListener {
+            // TODO: Show status update dialog
+            Toast.makeText(requireContext(), "Status update coming soon", Toast.LENGTH_SHORT).show()
+        }
+        
+        dialog.show()
     }
     
     private fun setupClickListeners() {
