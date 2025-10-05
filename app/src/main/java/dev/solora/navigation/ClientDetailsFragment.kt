@@ -34,6 +34,7 @@ class ClientDetailsFragment : Fragment() {
     private lateinit var etAddress: TextInputEditText
     private lateinit var etEmail: TextInputEditText
     private lateinit var etContactNumber: TextInputEditText
+    private lateinit var btnSaveLead: Button
     private lateinit var btnSaveQuote: Button
     
     private var calculationOutputs: QuoteOutputs? = null
@@ -77,12 +78,17 @@ class ClientDetailsFragment : Fragment() {
         etAddress = view.findViewById(R.id.et_address)
         etEmail = view.findViewById(R.id.et_email)
         etContactNumber = view.findViewById(R.id.et_contact_number)
+        btnSaveLead = view.findViewById(R.id.btn_save_lead)
         btnSaveQuote = view.findViewById(R.id.btn_save_quote_final)
     }
     
     private fun setupClickListeners() {
         btnBack.setOnClickListener {
             findNavController().popBackStack()
+        }
+        
+        btnSaveLead.setOnClickListener {
+            saveClientAsLead()
         }
         
         btnSaveQuote.setOnClickListener {
@@ -108,7 +114,8 @@ class ClientDetailsFragment : Fragment() {
     private fun observeLeads() {
         viewLifecycleOwner.lifecycleScope.launch {
             leadsViewModel.leads.collect { leads ->
-                val leadNames = leads.map { "${it.name} - ${it.email}" }
+                // Show only lead names in the dropdown
+                val leadNames = leads.map { it.name }
                 val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, leadNames)
                 etSelectClient.setAdapter(adapter)
                 
@@ -124,6 +131,37 @@ class ClientDetailsFragment : Fragment() {
         etEmail.setText(lead.email)
         etContactNumber.setText(lead.phone)
         // Note: FirebaseLead doesn't have address field, so we keep the pre-populated address from calculation
+    }
+    
+    private fun saveClientAsLead() {
+        val firstName = etFirstName.text.toString().trim()
+        val lastName = etLastName.text.toString().trim()
+        val email = etEmail.text.toString().trim()
+        val contact = etContactNumber.text.toString().trim()
+        
+        // Validation
+        if (firstName.isEmpty() || lastName.isEmpty()) {
+            Toast.makeText(requireContext(), "Please enter client name", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        if (email.isEmpty()) {
+            Toast.makeText(requireContext(), "Please enter email address", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        if (contact.isEmpty()) {
+            Toast.makeText(requireContext(), "Please enter contact number", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        val clientName = "$firstName $lastName"
+        
+        // Save as lead
+        leadsViewModel.addLead(clientName, email, contact, "Lead created from quote calculation")
+        
+        // Show success message
+        Toast.makeText(requireContext(), "Client saved as lead successfully!", Toast.LENGTH_SHORT).show()
     }
     
     private fun saveQuoteWithClientDetails() {

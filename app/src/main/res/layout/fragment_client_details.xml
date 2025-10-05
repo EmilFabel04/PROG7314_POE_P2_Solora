@@ -304,6 +304,21 @@
 
             </androidx.cardview.widget.CardView>
 
+            <!-- Save Lead Button -->
+            <Button
+                android:id="@+id/btn_save_lead"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="Save as Lead"
+                android:textColor="@color/solora_orange"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:background="@android:color/transparent"
+                android:drawableTop="@android:drawable/ic_menu_save"
+                android:drawablePadding="8dp"
+                android:layout_marginTop="16dp"
+                style="?android:attr/borderlessButtonStyle" />
+
             <!-- Save Quote Button -->
             <Button
                 android:id="@+id/btn_save_quote_final"
@@ -314,7 +329,7 @@
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:background="@color/solora_orange"
-                android:layout_marginTop="16dp" />
+                android:layout_marginTop="8dp" />
 
         </LinearLayout>
 
