@@ -595,7 +595,6 @@ class QuotesFragment : Fragment() {
             val address = etClientAddress.text.toString().trim().ifEmpty { "Unknown Address" }
             val email = etEmail.text.toString().trim()
             val contact = etContact.text.toString().trim()
-            val contactInfo = if (email.isNotEmpty() && contact.isNotEmpty()) "$email | $contact" else email.ifEmpty { contact }
             
             android.util.Log.d("QuotesFragment", "Quote details - Ref: $reference, Client: $clientName, Address: $address")
             
