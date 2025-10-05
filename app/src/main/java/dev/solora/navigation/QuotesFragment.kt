@@ -144,6 +144,14 @@ class QuotesFragment : Fragment() {
         contentDashboard.visibility = if (tab == 2) View.VISIBLE else View.GONE
     }
     
+    private fun navigateToQuoteResults(outputs: dev.solora.quote.QuoteOutputs, address: String) {
+        val bundle = Bundle().apply {
+            putSerializable("calculation_outputs", outputs)
+            putString("calculated_address", address)
+        }
+        findNavController().navigate(R.id.quoteResultsFragment, bundle)
+    }
+    
     private fun updateTabAppearance() {
         // Reset all tabs
         tabCalculate.alpha = 0.7f
@@ -610,13 +618,13 @@ class QuotesFragment : Fragment() {
                     is CalculationState.Success -> {
                         btnCalculate.isEnabled = true
                         btnCalculate.text = "calculate"
-                        Toast.makeText(requireContext(), "Calculation complete! Enter client details to save.", Toast.LENGTH_LONG).show()
+                        Toast.makeText(requireContext(), "Calculation complete!", Toast.LENGTH_LONG).show()
                         
                         // Update the dashboard tab with calculation results
                         updateResultsTab(state.outputs)
                         
-                        // Automatically switch to dashboard tab to show results and save
-                        switchToTab(2)
+                        // Navigate to quote results fragment
+                        navigateToQuoteResults(state.outputs, etAddress.text.toString().trim())
                     }
                     is CalculationState.Error -> {
                         btnCalculate.isEnabled = true

@@ -15,6 +15,7 @@ import com.google.firebase.auth.FirebaseAuth
 
 class LeadsViewModel(app: Application) : AndroidViewModel(app) {
     private val firebaseRepository = FirebaseRepository()
+    private var leadsForSelection: List<FirebaseLead> = emptyList()
 
     init {
         val currentUser = FirebaseAuth.getInstance().currentUser
@@ -139,5 +140,13 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
                 android.util.Log.e("LeadsViewModel", "Error creating lead from quote: ${e.message}")
             }
         }
+    }
+    
+    fun setLeadsForSelection(leads: List<FirebaseLead>) {
+        leadsForSelection = leads
+    }
+    
+    fun getLeadsForSelection(): List<FirebaseLead> {
+        return leadsForSelection
     }
 }

@@ -23,6 +23,9 @@
         <action
             android:id="@+id/action_quotes_to_quote_detail"
             app:destination="@id/quoteDetailFragment" />
+        <action
+            android:id="@+id/action_quotes_to_quote_results"
+            app:destination="@id/quoteResultsFragment" />
     </fragment>
 
     <fragment
@@ -79,6 +82,35 @@
         android:id="@+id/notificationsFragment"
         android:name="dev.solora.navigation.NotificationsFragment"
         android:label="Notifications" />
+
+    <fragment
+        android:id="@+id/quoteResultsFragment"
+        android:name="dev.solora.navigation.QuoteResultsFragment"
+        android:label="Quote Results">
+        <argument
+            android:name="calculation_outputs"
+            app:argType="dev.solora.quote.QuoteOutputs" />
+        <argument
+            android:name="calculated_address"
+            app:argType="string"
+            android:defaultValue="" />
+        <action
+            android:id="@+id/action_quote_results_to_client_details"
+            app:destination="@id/clientDetailsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/clientDetailsFragment"
+        android:name="dev.solora.navigation.ClientDetailsFragment"
+        android:label="Client Details">
+        <argument
+            android:name="calculation_outputs"
+            app:argType="dev.solora.quote.QuoteOutputs" />
+        <argument
+            android:name="calculated_address"
+            app:argType="string"
+            android:defaultValue="" />
+    </fragment>
 
 </navigation>
 

@@ -26,10 +26,17 @@ class FirebaseRepository {
             
             val quoteWithUser = quote.copy(userId = userId)
             
-            val docRef = firestore.collection("quotes").add(quoteWithUser).await()
-            android.util.Log.d("FirebaseRepository", "Quote saved successfully with ID: ${docRef.id}")
-            
-            Result.success(docRef.id)
+            // Try API first, fallback to direct Firestore
+            val apiResult = saveQuoteViaApi(quoteWithUser)
+            if (apiResult.isSuccess) {
+                android.util.Log.d("FirebaseRepository", "Quote saved via API: ${apiResult.getOrNull()}")
+                apiResult
+            } else {
+                android.util.Log.w("FirebaseRepository", "API failed, using direct Firestore: ${apiResult.exceptionOrNull()?.message}")
+                val docRef = firestore.collection("quotes").add(quoteWithUser).await()
+                android.util.Log.d("FirebaseRepository", "Quote saved via Firestore with ID: ${docRef.id}")
+                Result.success(docRef.id)
+            }
         } catch (e: Exception) {
             android.util.Log.e("FirebaseRepository", "Failed to save quote: ${e.message}", e)
             Result.failure(e)
@@ -153,9 +160,19 @@ class FirebaseRepository {
             val userId = getCurrentUserId() ?: throw Exception("User not authenticated")
             val leadWithUser = lead.copy(userId = userId)
             
-            val docRef = firestore.collection("leads").add(leadWithUser).await()
-            Result.success(docRef.id)
+            // Try API first, fallback to direct Firestore
+            val apiResult = saveLeadViaApi(leadWithUser)
+            if (apiResult.isSuccess) {
+                android.util.Log.d("FirebaseRepository", "Lead saved via API: ${apiResult.getOrNull()}")
+                apiResult
+            } else {
+                android.util.Log.w("FirebaseRepository", "API failed, using direct Firestore: ${apiResult.exceptionOrNull()?.message}")
+                val docRef = firestore.collection("leads").add(leadWithUser).await()
+                android.util.Log.d("FirebaseRepository", "Lead saved via Firestore with ID: ${docRef.id}")
+                Result.success(docRef.id)
+            }
         } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Failed to save lead: ${e.message}", e)
             Result.failure(e)
         }
     }
