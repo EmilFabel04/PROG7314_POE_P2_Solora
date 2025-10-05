@@ -40,10 +40,13 @@
         android:layout_height="match_parent"
         android:layout_below="@id/header"
         android:padding="@dimen/content_padding"
-        android:paddingBottom="80dp"
+        android:paddingBottom="120dp"
         android:fillViewport="true"
         android:scrollbars="vertical"
-        android:fadeScrollbars="false">
+        android:fadeScrollbars="false"
+        android:scrollbarStyle="outsideOverlay"
+        android:scrollbarThumbVertical="@color/solora_orange"
+        android:scrollbarTrackVertical="@android:color/transparent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -319,7 +322,7 @@
                 android:textStyle="bold"
                 android:background="@color/solora_orange"
                 android:layout_marginTop="16dp"
-                android:layout_marginBottom="32dp"
+                android:layout_marginBottom="48dp"
                 android:elevation="4dp" />
 
         </LinearLayout>

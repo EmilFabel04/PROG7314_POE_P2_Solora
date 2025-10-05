@@ -227,7 +227,7 @@ class ClientDetailsFragment : Fragment() {
                             }
                         }
                         
-                        // Navigate back to quotes view tab
+                        // Navigate back to quotes fragment and switch to view tab
                         findNavController().popBackStack(R.id.quotesFragment, false)
                     } else {
                         Toast.makeText(requireContext(), "Quote saved but lead linking failed", Toast.LENGTH_SHORT).show()

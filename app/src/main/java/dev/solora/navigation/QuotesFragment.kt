@@ -168,6 +168,17 @@ class QuotesFragment : Fragment() {
         }
     }
     
+    override fun onResume() {
+        super.onResume()
+        // Check if we should switch to view tab when returning from client details
+        val savedQuote = quotesViewModel.lastQuote.value
+        if (savedQuote != null && savedQuote.id != null) {
+            // Switch to view tab to show the saved quote
+            switchToTab(1)
+            android.util.Log.d("QuotesFragment", "OnResume: Switching to view tab to show saved quote: ${savedQuote.reference}")
+        }
+    }
+    
     private fun updateTabAppearance() {
         // Reset all tabs
         tabCalculate.alpha = 0.7f
