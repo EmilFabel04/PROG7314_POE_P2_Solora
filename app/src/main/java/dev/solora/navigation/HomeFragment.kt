@@ -82,7 +82,8 @@ class HomeFragment : Fragment() {
         }
         
         cardAddLeads.setOnClickListener {
-            // Navigate to leads fragment
+            // Navigate to leads tab using bottom navigation
+            // This will properly switch to the leads tab and allow back navigation
             findNavController().navigate(R.id.leadsFragment)
         }
     }
