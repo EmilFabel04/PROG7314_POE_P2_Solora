@@ -180,25 +180,30 @@ class HomeFragment : Fragment() {
         quotes.forEach { quote ->
             val quoteView = createQuoteItemView(quote)
             layoutRecentQuotes.addView(quoteView)
-            
-            // Add divider except for last item
-            if (quote != quotes.last()) {
-                val divider = View(requireContext()).apply {
-                    layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT, 1
-                    )
-                    setBackgroundColor(android.graphics.Color.parseColor("#E0E0E0"))
-                    setPadding(0, 8, 0, 8)
-                }
-                layoutRecentQuotes.addView(divider)
-            }
         }
     }
     
     private fun createQuoteItemView(quote: FirebaseQuote): View {
-        val quoteView = LinearLayout(requireContext()).apply {
+        // Create MaterialCardView similar to view quotes page
+        val cardView = com.google.android.material.card.MaterialCardView(requireContext()).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(0, 4, 0, 4)
+            }
+            radius = 6f
+            elevation = 1f
+            setCardBackgroundColor(android.graphics.Color.WHITE)
+            isClickable = true
+            isFocusable = true
+            foreground = context.getDrawable(android.R.attr.selectableItemBackground)
+        }
+        
+        // Main content layout
+        val contentLayout = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.HORIZONTAL
-            setPadding(0, 8, 0, 8)
+            setPadding(12, 12, 12, 12)
             gravity = android.view.Gravity.CENTER_VERTICAL
         }
         
@@ -231,6 +236,8 @@ class HomeFragment : Fragment() {
             text = quote.address.ifEmpty { "Address not available" }
             textSize = 11f
             setTextColor(android.graphics.Color.parseColor("#666666"))
+            maxLines = 2
+            ellipsize = android.text.TextUtils.TruncateAt.END
         }
         
         // Date
@@ -247,19 +254,21 @@ class HomeFragment : Fragment() {
         detailsLayout.addView(referenceText)
         detailsLayout.addView(addressText)
         
-        quoteView.addView(iconView)
-        quoteView.addView(detailsLayout)
-        quoteView.addView(dateText)
+        contentLayout.addView(iconView)
+        contentLayout.addView(detailsLayout)
+        contentLayout.addView(dateText)
+        
+        cardView.addView(contentLayout)
         
         // Click listener for quote item
-        quoteView.setOnClickListener {
+        cardView.setOnClickListener {
             if (!quote.id.isNullOrBlank()) {
                 val bundle = Bundle().apply { putString("id", quote.id) }
                 findNavController().navigate(R.id.quoteDetailFragment, bundle)
             }
         }
         
-        return quoteView
+        return cardView
     }
     
     private fun displayEmptyQuotes() {
