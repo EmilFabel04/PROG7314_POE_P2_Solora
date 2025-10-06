@@ -192,6 +192,7 @@ class ClientDetailsFragment : Fragment() {
                     kotlinx.coroutines.delay(1000)
                     
                     val savedQuote = quotesViewModel.lastQuote.value
+                    android.util.Log.d("ClientDetailsFragment", "Saved quote: ${savedQuote?.id}, Selected lead: ${selectedLead?.id}")
                     if (savedQuote != null && savedQuote.id != null) {
                         if (selectedLead != null) {
                             // Validate selected lead has an ID
@@ -217,6 +218,7 @@ class ClientDetailsFragment : Fragment() {
                             }
                         } else {
                             // Create new lead with quote link
+                            android.util.Log.d("ClientDetailsFragment", "No selected lead - creating new lead")
                             try {
                                 val createResult = leadsViewModel.createLeadFromQuoteSync(
                                     quoteId = savedQuote.id!!,
