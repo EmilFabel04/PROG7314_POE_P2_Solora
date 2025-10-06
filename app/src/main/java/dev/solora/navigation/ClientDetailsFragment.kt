@@ -199,6 +199,11 @@ class ClientDetailsFragment : Fragment() {
                             if (selectedLead!!.id.isNullOrBlank()) {
                                 android.util.Log.e("ClientDetailsFragment", "Selected lead has no ID")
                                 Toast.makeText(requireContext(), "Quote saved but selected lead has no ID", Toast.LENGTH_LONG).show()
+                                // Navigate to View Quotes tab
+                                findNavController().navigate(
+                                    R.id.action_client_details_to_quotes,
+                                    Bundle().apply { putInt("show_tab", 1) }
+                                )
                             } else {
                                 // Link quote to existing lead
                                 try {
@@ -211,9 +216,19 @@ class ClientDetailsFragment : Fragment() {
                                         android.util.Log.e("ClientDetailsFragment", "Lead linking returned false")
                                         Toast.makeText(requireContext(), "Quote saved successfully!", Toast.LENGTH_LONG).show()
                                     }
+                                    // Navigate to View Quotes tab after linking to existing lead
+                                    findNavController().navigate(
+                                        R.id.action_client_details_to_quotes,
+                                        Bundle().apply { putInt("show_tab", 1) }
+                                    )
                                 } catch (e: Exception) {
                                     android.util.Log.e("ClientDetailsFragment", "Exception during lead linking: ${e.message}", e)
                                     Toast.makeText(requireContext(), "Quote saved but lead linking failed: ${e.message}", Toast.LENGTH_LONG).show()
+                                    // Navigate to View Quotes tab even if linking fails
+                                    findNavController().navigate(
+                                        R.id.action_client_details_to_quotes,
+                                        Bundle().apply { putInt("show_tab", 1) }
+                                    )
                                 }
                             }
                         } else {
@@ -237,18 +252,28 @@ class ClientDetailsFragment : Fragment() {
                                 android.util.Log.e("ClientDetailsFragment", "Error creating lead from quote: ${e.message}", e)
                                 Toast.makeText(requireContext(), "Quote saved but lead creation failed: ${e.message}", Toast.LENGTH_LONG).show()
                             }
+                            // Navigate to View Quotes tab after creating new lead
+                            findNavController().navigate(
+                                R.id.action_client_details_to_quotes,
+                                Bundle().apply { putInt("show_tab", 1) }
+                            )
                         }
-                        
-                        // Navigate back to quotes fragment - don't clear last quote so it can switch to view tab
-                        findNavController().popBackStack(R.id.quotesFragment, false)
                     } else {
                         Toast.makeText(requireContext(), "Quote saved successfully!", Toast.LENGTH_SHORT).show()
-                        findNavController().popBackStack(R.id.quotesFragment, false)
+                        // Navigate to View Quotes tab
+                        findNavController().navigate(
+                            R.id.action_client_details_to_quotes,
+                            Bundle().apply { putInt("show_tab", 1) }
+                        )
                     }
                 } catch (e: Exception) {
                     android.util.Log.e("ClientDetailsFragment", "Error linking quote to lead: ${e.message}", e)
                     Toast.makeText(requireContext(), "Quote saved successfully!", Toast.LENGTH_LONG).show()
-                    findNavController().popBackStack(R.id.quotesFragment, false)
+                    // Navigate to View Quotes tab
+                    findNavController().navigate(
+                        R.id.action_client_details_to_quotes,
+                        Bundle().apply { putInt("show_tab", 1) }
+                    )
                 }
             }
         } ?: run {

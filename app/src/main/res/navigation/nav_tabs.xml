@@ -118,6 +118,9 @@
             android:name="calculated_address"
             app:argType="string"
             android:defaultValue="" />
+        <action
+            android:id="@+id/action_client_details_to_quotes"
+            app:destination="@id/quotesFragment" />
     </fragment>
 
     <fragment

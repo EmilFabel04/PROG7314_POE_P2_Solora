@@ -39,7 +39,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/header"
-        android:padding="@dimen/content_padding"
+        android:padding="20dp"
         android:paddingBottom="120dp"
         android:fillViewport="true"
         android:scrollbars="vertical"
@@ -57,40 +57,43 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="4dp">
+                android:layout_marginBottom="20dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="6dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="24dp">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Quote Information"
                         android:textColor="@color/solora_orange"
-                        android:textSize="18sp"
+                        android:textSize="20sp"
                         android:textStyle="bold"
                         android:gravity="center"
-                        android:layout_marginBottom="16dp" />
+                        android:layout_marginBottom="24dp" />
 
                     <!-- Client Selection -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="16dp"
-                        android:hint="Select Client"
-                        app:endIconMode="dropdown_menu">
+                        android:layout_marginBottom="20dp"
+                        android:hint="Select Existing Client"
+                        app:endIconMode="dropdown_menu"
+                        app:boxStrokeColor="@color/solora_orange"
+                        app:hintTextColor="@color/solora_orange">
 
                         <AutoCompleteTextView
                             android:id="@+id/et_select_client"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="none"
-                            android:focusable="false" />
+                            android:focusable="false"
+                            android:paddingVertical="16dp" />
 
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -101,14 +104,18 @@
                         android:text="Client Details"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        android:layout_marginBottom="16dp" />
+                        android:textColor="#333333"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="20dp" />
 
                     <!-- Reference Number -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp"
-                        android:hint="Reference Number">
+                        android:layout_marginBottom="16dp"
+                        android:hint="Reference Number"
+                        app:boxStrokeColor="@color/solora_orange"
+                        app:hintTextColor="@color/solora_orange">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/et_reference_number"
@@ -116,7 +123,8 @@
                             android:layout_height="wrap_content"
                             android:inputType="text"
                             android:enabled="false"
-                            android:textColor="#666666" />
+                            android:textColor="#666666"
+                            android:paddingVertical="16dp" />
 
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -124,14 +132,17 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp"
-                        android:hint="First Name">
+                        android:layout_marginBottom="16dp"
+                        android:hint="First Name"
+                        app:boxStrokeColor="@color/solora_orange"
+                        app:hintTextColor="@color/solora_orange">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/et_first_name"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="textPersonName" />
+                            android:inputType="textPersonName"
+                            android:paddingVertical="16dp" />
 
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -139,14 +150,17 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp"
-                        android:hint="Last Name">
+                        android:layout_marginBottom="16dp"
+                        android:hint="Last Name"
+                        app:boxStrokeColor="@color/solora_orange"
+                        app:hintTextColor="@color/solora_orange">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/et_last_name"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="textPersonName" />
+                            android:inputType="textPersonName"
+                            android:paddingVertical="16dp" />
 
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -154,14 +168,17 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp"
-                        android:hint="Address">
+                        android:layout_marginBottom="16dp"
+                        android:hint="Address"
+                        app:boxStrokeColor="@color/solora_orange"
+                        app:hintTextColor="@color/solora_orange">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/et_address"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="textPostalAddress" />
+                            android:inputType="textPostalAddress"
+                            android:paddingVertical="16dp" />
 
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -169,14 +186,17 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp"
-                        android:hint="Email">
+                        android:layout_marginBottom="16dp"
+                        android:hint="Email"
+                        app:boxStrokeColor="@color/solora_orange"
+                        app:hintTextColor="@color/solora_orange">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/et_email"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="textEmailAddress" />
+                            android:inputType="textEmailAddress"
+                            android:paddingVertical="16dp" />
 
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -184,14 +204,17 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="16dp"
-                        android:hint="Contact Number">
+                        android:layout_marginBottom="0dp"
+                        android:hint="Contact Number"
+                        app:boxStrokeColor="@color/solora_orange"
+                        app:hintTextColor="@color/solora_orange">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/et_contact_number"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="phone" />
+                            android:inputType="phone"
+                            android:paddingVertical="16dp" />
 
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -203,106 +226,118 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="4dp">
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="6dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="24dp">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Quote Details"
-                        android:textSize="16sp"
+                        android:text="Quote Summary"
+                        android:textSize="18sp"
                         android:textStyle="bold"
-                        android:layout_marginBottom="16dp" />
+                        android:textColor="#333333"
+                        android:layout_marginBottom="20dp" />
 
                     <!-- Quote Details (Read-only) -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginBottom="12dp">
+                        android:layout_marginBottom="16dp"
+                        android:paddingVertical="4dp">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Number of Panels"
-                            android:textSize="14sp" />
+                            android:textSize="15sp"
+                            android:textColor="#666666" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="16"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            android:textColor="#333333" />
                     </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginBottom="12dp">
+                        android:layout_marginBottom="16dp"
+                        android:paddingVertical="4dp">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Total System Size"
-                            android:textSize="14sp" />
+                            android:textSize="15sp"
+                            android:textColor="#666666" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="4.8 kW"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            android:textColor="#333333" />
                     </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginBottom="12dp">
+                        android:layout_marginBottom="16dp"
+                        android:paddingVertical="4dp">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Recommended Inverter"
-                            android:textSize="14sp" />
+                            android:textSize="15sp"
+                            android:textColor="#666666" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="5 kW"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            android:textColor="#333333" />
                     </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginBottom="12dp">
+                        android:layout_marginBottom="0dp"
+                        android:paddingVertical="4dp">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Estimated Monthly Savings"
-                            android:textSize="14sp" />
+                            android:textSize="15sp"
+                            android:textColor="#666666" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="R 800.00"
-                            android:textSize="14sp"
+                            android:textSize="16sp"
                             android:textStyle="bold"
                             android:textColor="@color/solora_orange" />
                     </LinearLayout>
@@ -315,15 +350,15 @@
             <Button
                 android:id="@+id/btn_save_quote_final"
                 android:layout_width="match_parent"
-                android:layout_height="64dp"
+                android:layout_height="56dp"
                 android:text="Save Quote"
                 android:textColor="@android:color/white"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:background="@color/solora_orange"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="48dp"
-                android:elevation="4dp" />
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="60dp"
+                android:elevation="6dp" />
 
         </LinearLayout>
 
