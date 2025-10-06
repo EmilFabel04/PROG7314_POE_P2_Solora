@@ -234,13 +234,23 @@ class FirebaseRepository {
         return try {
             val userId = getCurrentUserId() ?: throw Exception("User not authenticated")
             
+            android.util.Log.d("FirebaseRepository", "Updating lead $leadId with quoteId: ${lead.quoteId}")
+            
+            // Use update() instead of set() to only update specific fields
+            val updateData = mapOf(
+                "quoteId" to lead.quoteId,
+                "updatedAt" to com.google.firebase.Timestamp.now()
+            )
+            
             firestore.collection("leads")
                 .document(leadId)
-                .set(lead.copy(id = leadId, userId = userId))
+                .update(updateData)
                 .await()
             
+            android.util.Log.d("FirebaseRepository", "Successfully updated lead $leadId")
             Result.success(Unit)
         } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Failed to update lead $leadId: ${e.message}", e)
             Result.failure(e)
         }
     }

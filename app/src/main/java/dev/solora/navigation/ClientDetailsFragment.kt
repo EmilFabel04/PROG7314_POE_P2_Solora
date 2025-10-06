@@ -97,6 +97,7 @@ class ClientDetailsFragment : Fragment() {
             val leads = leadsViewModel.getLeadsForSelection()
             if (position < leads.size) {
                 selectedLead = leads[position]
+                android.util.Log.d("ClientDetailsFragment", "Selected lead: ID=${selectedLead?.id}, Name=${selectedLead?.name}")
                 selectedLead?.let { lead ->
                     populateClientDetails(lead)
                     updateButtonText()
@@ -193,17 +194,26 @@ class ClientDetailsFragment : Fragment() {
                     val savedQuote = quotesViewModel.lastQuote.value
                     if (savedQuote != null && savedQuote.id != null) {
                         if (selectedLead != null) {
-                            // Link quote to existing lead
-                            try {
-                                val linkResult = leadsViewModel.linkQuoteToLeadSync(selectedLead!!.id!!, savedQuote.id!!)
-                                if (linkResult) {
-                                    Toast.makeText(requireContext(), "Quote saved and linked to existing lead!", Toast.LENGTH_LONG).show()
-                                } else {
-                                    Toast.makeText(requireContext(), "Quote saved but lead linking failed", Toast.LENGTH_SHORT).show()
+                            // Validate selected lead has an ID
+                            if (selectedLead!!.id.isNullOrBlank()) {
+                                android.util.Log.e("ClientDetailsFragment", "Selected lead has no ID")
+                                Toast.makeText(requireContext(), "Quote saved but selected lead has no ID", Toast.LENGTH_LONG).show()
+                            } else {
+                                // Link quote to existing lead
+                                try {
+                                    android.util.Log.d("ClientDetailsFragment", "Linking quote ${savedQuote.id} to lead ${selectedLead!!.id}")
+                                    val linkResult = leadsViewModel.linkQuoteToLeadSync(selectedLead!!.id!!, savedQuote.id!!)
+                                    if (linkResult) {
+                                        android.util.Log.d("ClientDetailsFragment", "Successfully linked quote to lead")
+                                        dev.solora.utils.ToastUtils.showOrangeToast(requireContext(), "Quote saved and linked to existing lead!")
+                                    } else {
+                                        android.util.Log.e("ClientDetailsFragment", "Lead linking returned false")
+                                        Toast.makeText(requireContext(), "Quote saved but lead linking failed - check logs for details", Toast.LENGTH_LONG).show()
+                                    }
+                                } catch (e: Exception) {
+                                    android.util.Log.e("ClientDetailsFragment", "Exception during lead linking: ${e.message}", e)
+                                    Toast.makeText(requireContext(), "Quote saved but lead linking failed: ${e.message}", Toast.LENGTH_LONG).show()
                                 }
-                            } catch (e: Exception) {
-                                android.util.Log.e("ClientDetailsFragment", "Error linking quote to lead: ${e.message}", e)
-                                Toast.makeText(requireContext(), "Quote saved but lead linking failed: ${e.message}", Toast.LENGTH_LONG).show()
                             }
                         } else {
                             // Create new lead with quote link
