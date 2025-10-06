@@ -64,6 +64,9 @@
         <action
             android:id="@+id/action_quote_detail_to_pdf_preview"
             app:destination="@id/quotePdfPreviewFragment" />
+        <action
+            android:id="@+id/action_quote_detail_to_quotes"
+            app:destination="@id/quotesFragment" />
     </fragment>
 
     <fragment

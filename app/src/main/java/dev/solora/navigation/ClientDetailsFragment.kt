@@ -239,10 +239,7 @@ class ClientDetailsFragment : Fragment() {
                             }
                         }
                         
-                        // Clear the last quote to prevent automatic tab switching
-                        quotesViewModel.clearLastQuote()
-                        
-                        // Navigate back to quotes fragment and switch to view tab
+                        // Navigate back to quotes fragment - don't clear last quote so it can switch to view tab
                         findNavController().popBackStack(R.id.quotesFragment, false)
                     } else {
                         Toast.makeText(requireContext(), "Quote saved but lead linking failed", Toast.LENGTH_SHORT).show()
