@@ -92,8 +92,9 @@ class QuoteResultsFragment : Fragment() {
         android.util.Log.d("QuoteResultsFragment", "Quote cleared from ViewModel")
         
         try {
-            android.util.Log.d("QuoteResultsFragment", "Attempting to navigate back")
-            findNavController().popBackStack()
+            android.util.Log.d("QuoteResultsFragment", "Attempting to navigate back to quotes")
+            // Navigate directly to quotes fragment
+            findNavController().navigate(R.id.action_quote_results_to_quotes)
             android.util.Log.d("QuoteResultsFragment", "Navigation back completed")
         } catch (e: Exception) {
             android.util.Log.e("QuoteResultsFragment", "Error navigating back: ${e.message}", e)

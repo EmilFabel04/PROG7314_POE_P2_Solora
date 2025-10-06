@@ -100,6 +100,9 @@
         <action
             android:id="@+id/action_quote_results_to_client_details"
             app:destination="@id/clientDetailsFragment" />
+        <action
+            android:id="@+id/action_quote_results_to_quotes"
+            app:destination="@id/quotesFragment" />
     </fragment>
 
     <fragment
