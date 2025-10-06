@@ -52,7 +52,7 @@
             app:destination="@id/changePasswordFragment" />
         <action
             android:id="@+id/action_logout_to_login"
-            app:destination="@id/auth_graph"
+            app:destination="@id/startFragment"
             app:popUpTo="@id/nav_root"
             app:popUpToInclusive="true" />
     </fragment>
