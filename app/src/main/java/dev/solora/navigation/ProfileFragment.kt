@@ -222,10 +222,11 @@ class ProfileFragment : Fragment() {
     
     private fun performLogout() {
         // Show loading message
-        dev.solora.utils.ToastUtils.showOrangeToast(
+        Toast.makeText(
             requireContext(), 
-            "Logging out..."
-        )
+            "Logging out...", 
+            Toast.LENGTH_SHORT
+        ).show()
         
         android.util.Log.d("ProfileFragment", "Starting logout process")
         
@@ -247,10 +248,11 @@ class ProfileFragment : Fragment() {
                         settingsViewModel.clearSettings()
                         
                         // Show success message
-                        dev.solora.utils.ToastUtils.showOrangeToast(
+                        Toast.makeText(
                             requireContext(), 
-                            "Successfully logged out"
-                        )
+                            "Successfully logged out", 
+                            Toast.LENGTH_SHORT
+                        ).show()
                         
                         // Clear the auth state to prevent further processing
                         authViewModel.clearAuthState()
