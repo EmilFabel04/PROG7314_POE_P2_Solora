@@ -3,9 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:maxHeight="600dp"
+    android:maxHeight="700dp"
     android:fillViewport="true"
-    android:background="@android:color/transparent">
+    android:background="@android:color/transparent"
+    android:scrollbars="vertical"
+    android:fadeScrollbars="false"
+    android:scrollbarStyle="outsideOverlay"
+    android:scrollbarThumbVertical="@color/solora_orange"
+    android:scrollbarTrackVertical="@android:color/transparent">
 
 <androidx.cardview.widget.CardView
     android:layout_width="match_parent"
@@ -20,7 +25,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@color/solora_orange"
-        android:padding="24dp">
+        android:padding="20dp">
 
     <!-- Header -->
     <LinearLayout
@@ -28,7 +33,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:layout_marginBottom="24dp">
+        android:layout_marginBottom="16dp">
 
         <TextView
             android:layout_width="0dp"
@@ -36,13 +41,13 @@
             android:layout_weight="1"
             android:text="Lead Details"
             android:textColor="@android:color/white"
-            android:textSize="24sp"
+            android:textSize="20sp"
             android:textStyle="bold" />
 
         <ImageButton
             android:id="@+id/btn_close_lead_details"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@android:drawable/ic_menu_close_clear_cancel"
             android:tint="@android:color/white"
@@ -54,25 +59,25 @@
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="4dp"
+        android:layout_marginBottom="12dp"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="3dp"
         app:cardBackgroundColor="@android:color/white">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:padding="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Lead Name"
                 android:textColor="@color/solora_orange"
-                android:textSize="14sp"
+                android:textSize="12sp"
                 android:textStyle="bold"
-                android:layout_marginBottom="8dp" />
+                android:layout_marginBottom="6dp" />
 
             <TextView
                 android:id="@+id/tv_lead_name"
@@ -80,7 +85,7 @@
                 android:layout_height="wrap_content"
                 android:text="John Smith"
                 android:textColor="@color/solora_on_surface"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 android:textStyle="bold" />
 
         </LinearLayout>
@@ -91,41 +96,39 @@
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="4dp"
+        android:layout_marginBottom="12dp"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="3dp"
         app:cardBackgroundColor="@android:color/white">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:padding="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Contact Information"
                 android:textColor="@color/solora_orange"
-                android:textSize="16sp"
+                android:textSize="12sp"
                 android:textStyle="bold"
-                android:layout_marginBottom="16dp"
-                android:background="@drawable/border_bottom_orange"
-                android:paddingBottom="8dp" />
+                android:layout_marginBottom="10dp" />
 
             <!-- Email -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginBottom="12dp">
+                android:layout_marginBottom="6dp">
 
                 <TextView
-                    android:layout_width="80dp"
+                    android:layout_width="60dp"
                     android:layout_height="wrap_content"
                     android:text="Email:"
                     android:textColor="@color/solora_dark_grey"
-                    android:textSize="14sp"
+                    android:textSize="12sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -135,7 +138,7 @@
                     android:layout_weight="1"
                     android:text="john.smith@email.com"
                     android:textColor="@color/solora_on_surface"
-                    android:textSize="14sp" />
+                    android:textSize="12sp" />
 
             </LinearLayout>
 
@@ -143,15 +146,14 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="12dp">
+                android:orientation="horizontal">
 
                 <TextView
-                    android:layout_width="80dp"
+                    android:layout_width="60dp"
                     android:layout_height="wrap_content"
                     android:text="Phone:"
                     android:textColor="@color/solora_dark_grey"
-                    android:textSize="14sp"
+                    android:textSize="12sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -161,7 +163,7 @@
                     android:layout_weight="1"
                     android:text="+27 82 123 4567"
                     android:textColor="@color/solora_on_surface"
-                    android:textSize="14sp" />
+                    android:textSize="12sp" />
 
             </LinearLayout>
 
@@ -173,41 +175,39 @@
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="4dp"
+        android:layout_marginBottom="12dp"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="3dp"
         app:cardBackgroundColor="@android:color/white">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:padding="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Lead Information"
                 android:textColor="@color/solora_orange"
-                android:textSize="16sp"
+                android:textSize="12sp"
                 android:textStyle="bold"
-                android:layout_marginBottom="16dp"
-                android:background="@drawable/border_bottom_orange"
-                android:paddingBottom="8dp" />
+                android:layout_marginBottom="10dp" />
 
             <!-- Lead ID -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginBottom="12dp">
+                android:layout_marginBottom="6dp">
 
                 <TextView
-                    android:layout_width="80dp"
+                    android:layout_width="60dp"
                     android:layout_height="wrap_content"
                     android:text="Lead ID:"
                     android:textColor="@color/solora_dark_grey"
-                    android:textSize="14sp"
+                    android:textSize="12sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -217,7 +217,7 @@
                     android:layout_weight="1"
                     android:text="LEAD-12345"
                     android:textColor="@color/solora_on_surface"
-                    android:textSize="14sp" />
+                    android:textSize="12sp" />
 
             </LinearLayout>
 
@@ -225,15 +225,14 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="12dp">
+                android:orientation="horizontal">
 
                 <TextView
-                    android:layout_width="80dp"
+                    android:layout_width="60dp"
                     android:layout_height="wrap_content"
                     android:text="Created:"
                     android:textColor="@color/solora_dark_grey"
-                    android:textSize="14sp"
+                    android:textSize="12sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -243,7 +242,7 @@
                     android:layout_weight="1"
                     android:text="15 Jan 2024"
                     android:textColor="@color/solora_on_surface"
-                    android:textSize="14sp" />
+                    android:textSize="12sp" />
 
             </LinearLayout>
 
@@ -252,14 +251,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginBottom="12dp">
+                android:layout_marginTop="6dp">
 
                 <TextView
-                    android:layout_width="80dp"
+                    android:layout_width="60dp"
                     android:layout_height="wrap_content"
                     android:text="Status:"
                     android:textColor="@color/solora_dark_grey"
-                    android:textSize="14sp"
+                    android:textSize="12sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -269,7 +268,7 @@
                     android:layout_weight="1"
                     android:text="ACTIVE"
                     android:textColor="@color/solora_orange"
-                    android:textSize="14sp"
+                    android:textSize="12sp"
                     android:textStyle="bold" />
 
             </LinearLayout>
@@ -283,28 +282,26 @@
         android:id="@+id/card_lead_notes"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="12dp"
         android:visibility="gone"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="4dp"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="3dp"
         app:cardBackgroundColor="@android:color/white">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:padding="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Notes"
                 android:textColor="@color/solora_orange"
-                android:textSize="16sp"
+                android:textSize="12sp"
                 android:textStyle="bold"
-                android:layout_marginBottom="12dp"
-                android:background="@drawable/border_bottom_orange"
-                android:paddingBottom="8dp" />
+                android:layout_marginBottom="8dp" />
 
             <TextView
                 android:id="@+id/tv_lead_notes"
@@ -312,8 +309,8 @@
                 android:layout_height="wrap_content"
                 android:text="This is a sample note about the lead."
                 android:textColor="@color/solora_on_surface"
-                android:textSize="14sp"
-                android:lineSpacingExtra="4dp" />
+                android:textSize="12sp"
+                android:lineSpacingExtra="2dp" />
 
         </LinearLayout>
 
@@ -324,28 +321,26 @@
         android:id="@+id/card_linked_quote"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="16dp"
         android:visibility="gone"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="4dp"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="3dp"
         app:cardBackgroundColor="@android:color/white">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:padding="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Linked Quote"
                 android:textColor="@color/solora_orange"
-                android:textSize="16sp"
+                android:textSize="12sp"
                 android:textStyle="bold"
-                android:layout_marginBottom="12dp"
-                android:background="@drawable/border_bottom_orange"
-                android:paddingBottom="8dp" />
+                android:layout_marginBottom="8dp" />
 
             <TextView
                 android:id="@+id/tv_quote_id"
@@ -353,7 +348,7 @@
                 android:layout_height="wrap_content"
                 android:text="Quote ID: QUOTE-67890"
                 android:textColor="@color/solora_on_surface"
-                android:textSize="14sp" />
+                android:textSize="12sp" />
 
         </LinearLayout>
 
@@ -365,32 +360,32 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="end"
-        android:layout_marginTop="8dp">
+        android:layout_marginTop="12dp">
 
         <Button
             android:id="@+id/btn_update_status"
             android:layout_width="wrap_content"
-            android:layout_height="48dp"
+            android:layout_height="44dp"
             android:text="Update Status"
             android:textColor="@android:color/white"
             android:backgroundTint="@android:color/transparent"
             android:layout_marginEnd="12dp"
-            android:minWidth="120dp"
-            android:textSize="16sp"
-            app:cornerRadius="24dp"
+            android:minWidth="100dp"
+            android:textSize="14sp"
+            app:cornerRadius="22dp"
             android:background="@drawable/button_outline_white" />
 
         <Button
             android:id="@+id/btn_close_lead_details_action"
             android:layout_width="wrap_content"
-            android:layout_height="48dp"
+            android:layout_height="44dp"
             android:text="Close"
             android:textColor="@color/solora_orange"
             android:backgroundTint="@android:color/white"
-            android:minWidth="100dp"
-            android:textSize="16sp"
+            android:minWidth="90dp"
+            android:textSize="14sp"
             android:textStyle="bold"
-            app:cornerRadius="24dp" />
+            app:cornerRadius="22dp" />
 
     </LinearLayout>
 
