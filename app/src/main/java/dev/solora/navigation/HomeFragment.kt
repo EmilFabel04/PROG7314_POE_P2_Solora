@@ -23,6 +23,8 @@ import dev.solora.api.FirebaseFunctionsApi
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
+import android.app.DatePickerDialog
+import android.widget.Button
 
 class HomeFragment : Fragment() {
     
@@ -41,6 +43,17 @@ class HomeFragment : Fragment() {
     private lateinit var cardCalculateQuote: MaterialCardView
     private lateinit var cardAddLeads: MaterialCardView
     private lateinit var layoutRecentQuotes: LinearLayout
+    
+    // Date Filter Elements
+    private lateinit var tvDateFrom: TextView
+    private lateinit var tvDateTo: TextView
+    private lateinit var btnClearFilter: Button
+    private lateinit var btnApplyFilter: Button
+    
+    // Date Filter Variables
+    private var fromDate: Date? = null
+    private var toDate: Date? = null
+    private val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_home, container, false)
@@ -66,6 +79,12 @@ class HomeFragment : Fragment() {
         cardCalculateQuote = view.findViewById(R.id.card_calculate_quote)
         cardAddLeads = view.findViewById(R.id.card_add_leads)
         layoutRecentQuotes = view.findViewById(R.id.layout_recent_quotes)
+        
+        // Date Filter Elements
+        tvDateFrom = view.findViewById(R.id.tv_date_from)
+        tvDateTo = view.findViewById(R.id.tv_date_to)
+        btnClearFilter = view.findViewById(R.id.btn_clear_filter)
+        btnApplyFilter = view.findViewById(R.id.btn_apply_filter)
     }
     
     private fun setupClickListeners() {
@@ -109,6 +128,29 @@ class HomeFragment : Fragment() {
                 // Fallback to direct navigation
                 findNavController().navigate(R.id.leadsFragment)
             }
+        }
+        
+        // Date Filter Click Listeners
+        tvDateFrom.setOnClickListener {
+            showDatePicker { date ->
+                fromDate = date
+                tvDateFrom.text = dateFormat.format(date)
+            }
+        }
+        
+        tvDateTo.setOnClickListener {
+            showDatePicker { date ->
+                toDate = date
+                tvDateTo.text = dateFormat.format(date)
+            }
+        }
+        
+        btnClearFilter.setOnClickListener {
+            clearDateFilter()
+        }
+        
+        btnApplyFilter.setOnClickListener {
+            applyDateFilter()
         }
     }
     
@@ -156,14 +198,71 @@ class HomeFragment : Fragment() {
     private fun loadRecentQuotes() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                // Get recent quotes (last 5) from the quotes flow
+                // Get recent quotes from the quotes flow
                 quotesViewModel.quotes.collect { quotes ->
-                    val recentQuotes = quotes.take(5) // Get the 5 most recent quotes
+                    val filteredQuotes = filterQuotesByDate(quotes)
+                    val recentQuotes = filteredQuotes.take(5) // Get the 5 most recent quotes
                     displayRecentQuotes(recentQuotes)
                 }
             } catch (e: Exception) {
                 android.util.Log.e("HomeFragment", "Error loading recent quotes: ${e.message}", e)
                 displayEmptyQuotes()
+            }
+        }
+    }
+    
+    private fun filterQuotesByDate(quotes: List<FirebaseQuote>): List<FirebaseQuote> {
+        if (fromDate == null && toDate == null) {
+            return quotes // No filter applied
+        }
+        
+        return quotes.filter { quote ->
+            try {
+                val quoteDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(quote.createdAt)
+                val isAfterFromDate = fromDate?.let { quoteDate?.after(it) ?: false } ?: true
+                val isBeforeToDate = toDate?.let { quoteDate?.before(it) ?: false } ?: true
+                isAfterFromDate && isBeforeToDate
+            } catch (e: Exception) {
+                android.util.Log.e("HomeFragment", "Error parsing quote date: ${quote.createdAt}", e)
+                true // Include quote if date parsing fails
+            }
+        }
+    }
+    
+    private fun showDatePicker(onDateSelected: (Date) -> Unit) {
+        val calendar = Calendar.getInstance()
+        val datePickerDialog = DatePickerDialog(
+            requireContext(),
+            { _, year, month, dayOfMonth ->
+                calendar.set(year, month, dayOfMonth)
+                onDateSelected(calendar.time)
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+        datePickerDialog.show()
+    }
+    
+    private fun clearDateFilter() {
+        fromDate = null
+        toDate = null
+        tvDateFrom.text = "Select Date"
+        tvDateTo.text = "Select Date"
+        applyDateFilter()
+    }
+    
+    private fun applyDateFilter() {
+        // Refresh the quotes display with the current filter
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                quotesViewModel.quotes.value.let { quotes ->
+                    val filteredQuotes = filterQuotesByDate(quotes)
+                    val recentQuotes = filteredQuotes.take(5)
+                    displayRecentQuotes(recentQuotes)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("HomeFragment", "Error applying date filter: ${e.message}", e)
             }
         }
     }
@@ -197,13 +296,13 @@ class HomeFragment : Fragment() {
     private fun createQuoteItemView(quote: FirebaseQuote): View {
         val quoteView = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.HORIZONTAL
-            setPadding(0, 12, 0, 12)
+            setPadding(0, 8, 0, 8)
             gravity = android.view.Gravity.CENTER_VERTICAL
         }
         
         // Quote icon
         val iconView = ImageView(requireContext()).apply {
-            layoutParams = LinearLayout.LayoutParams(48, 48)
+            layoutParams = LinearLayout.LayoutParams(36, 36)
             setImageResource(android.R.drawable.ic_menu_report_image)
             setColorFilter(resources.getColor(R.color.solora_orange, null))
         }
@@ -214,21 +313,21 @@ class HomeFragment : Fragment() {
             layoutParams = LinearLayout.LayoutParams(
                 0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f
             )
-            setPadding(16, 0, 0, 0)
+            setPadding(12, 0, 0, 0)
         }
         
         // Reference and address
         val referenceText = TextView(requireContext()).apply {
             val reference = if (quote.reference.isNotEmpty()) quote.reference else "REF-${quote.id?.takeLast(5) ?: "00000"}"
             text = reference
-            textSize = 14f
+            textSize = 13f
             setTextColor(android.graphics.Color.BLACK)
             setTypeface(null, android.graphics.Typeface.BOLD)
         }
         
         val addressText = TextView(requireContext()).apply {
             text = quote.address.ifEmpty { "Address not available" }
-            textSize = 12f
+            textSize = 11f
             setTextColor(android.graphics.Color.parseColor("#666666"))
         }
         
@@ -238,7 +337,7 @@ class HomeFragment : Fragment() {
                 SimpleDateFormat("dd MMM", Locale.getDefault()).format(it)
             } ?: "Unknown"
             text = dateString
-            textSize = 12f
+            textSize = 11f
             setTextColor(resources.getColor(R.color.solora_orange, null))
             setTypeface(null, android.graphics.Typeface.BOLD)
         }
