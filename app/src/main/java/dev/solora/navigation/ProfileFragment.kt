@@ -20,12 +20,14 @@ import com.google.firebase.auth.FirebaseAuth
 import dev.solora.R
 import dev.solora.profile.ProfileViewModel
 import dev.solora.settings.SettingsViewModel
+import dev.solora.auth.AuthViewModel
 import dev.solora.api.FirebaseFunctionsApi
 import kotlinx.coroutines.launch
 
 class ProfileFragment : Fragment() {
     private val profileViewModel: ProfileViewModel by viewModels()
     private val settingsViewModel: SettingsViewModel by viewModels()
+    private val authViewModel: AuthViewModel by viewModels()
     private val auth = FirebaseAuth.getInstance()
     private val firebaseApi = FirebaseFunctionsApi()
     
@@ -232,9 +234,9 @@ class ProfileFragment : Fragment() {
                 // Clear any cached data
                 clearUserData()
                 
-                // Sign out from Firebase Auth
-                auth.signOut()
-                android.util.Log.d("ProfileFragment", "User signed out from Firebase Auth")
+                // Use AuthViewModel logout method (clears DataStore and Firebase Auth)
+                authViewModel.logout()
+                android.util.Log.d("ProfileFragment", "User signed out via AuthViewModel")
                 
                 // Clear ViewModels data
                 profileViewModel.clearUserData()

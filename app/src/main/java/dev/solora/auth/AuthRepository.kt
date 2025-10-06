@@ -177,4 +177,20 @@ class AuthRepository(private val context: Context) {
             null
         }
     }
+    
+    suspend fun logout(): Result<Unit> {
+        return try {
+            // Clear local data store
+            context.dataStore.edit { prefs ->
+                prefs.clear()
+            }
+            
+            // Sign out from Firebase
+            firebaseAuth.signOut()
+            
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
