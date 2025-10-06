@@ -346,45 +346,21 @@ class QuotesFragment : Fragment() {
         rvQuotesList.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
         rvQuotesList.adapter = quotesAdapter
         
-        // Setup date filter click listeners
-        tvDateFilterFrom.setOnClickListener {
-            showDatePicker { date ->
-                fromDate = date
-                tvDateFilterFrom.text = dateFormat.format(date)
-                applyDateFilter()
-            }
-        }
-        
-        tvDateFilterTo.setOnClickListener {
-            showDatePicker { date ->
-                toDate = date
-                tvDateFilterTo.text = dateFormat.format(date)
-                applyDateFilter()
-            }
-        }
-        
-        btnClearDateFilter.setOnClickListener {
-            clearDateFilter()
-        }
-        
         // Observe quotes from ViewModel
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 quotesViewModel.quotes.collect { quotes ->
                     android.util.Log.d("QuotesFragment", "Quotes updated: ${quotes.size} quotes")
                     
-                    // Apply date filtering
-                    val filteredQuotes = filterQuotesByDate(quotes)
-                    
-                    if (filteredQuotes.isEmpty()) {
+                    if (quotes.isEmpty()) {
                         layoutEmptyQuotes.visibility = View.VISIBLE
                         rvQuotesList.visibility = View.GONE
                         android.util.Log.d("QuotesFragment", "Showing empty state")
                     } else {
                         layoutEmptyQuotes.visibility = View.GONE
                         rvQuotesList.visibility = View.VISIBLE
-                        quotesAdapter.submitList(filteredQuotes)
-                        android.util.Log.d("QuotesFragment", "Displaying ${filteredQuotes.size} filtered quotes in RecyclerView")
+                        quotesAdapter.submitList(quotes)
+                        android.util.Log.d("QuotesFragment", "Displaying ${quotes.size} quotes in RecyclerView")
                     }
                 }
             } catch (e: kotlinx.coroutines.CancellationException) {
@@ -452,6 +428,27 @@ class QuotesFragment : Fragment() {
         
         // Initialize dashboard UI elements
         initializeDashboardViews()
+        
+        // Setup date filter click listeners
+        tvDateFilterFrom.setOnClickListener {
+            showDatePicker { date ->
+                fromDate = date
+                tvDateFilterFrom.text = dateFormat.format(date)
+                applyDateFilterToDashboard()
+            }
+        }
+        
+        tvDateFilterTo.setOnClickListener {
+            showDatePicker { date ->
+                toDate = date
+                tvDateFilterTo.text = dateFormat.format(date)
+                applyDateFilterToDashboard()
+            }
+        }
+        
+        btnClearDateFilter.setOnClickListener {
+            clearDateFilterDashboard()
+        }
         
         // Load dashboard data when tab is shown
         dashboardViewModel.loadDashboardData()
@@ -908,32 +905,23 @@ class QuotesFragment : Fragment() {
         datePickerDialog.show()
     }
     
-    private fun clearDateFilter() {
+    private fun clearDateFilterDashboard() {
         fromDate = null
         toDate = null
         tvDateFilterFrom.text = "From"
         tvDateFilterTo.text = "To"
-        applyDateFilter()
+        applyDateFilterToDashboard()
     }
     
-    private fun applyDateFilter() {
-        // Refresh the quotes display with the current filter
+    private fun applyDateFilterToDashboard() {
+        // Refresh the dashboard data with the current date filter
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                quotesViewModel.quotes.value.let { quotes ->
-                    val filteredQuotes = filterQuotesByDate(quotes)
-                    
-                    if (filteredQuotes.isEmpty()) {
-                        layoutEmptyQuotes.visibility = View.VISIBLE
-                        rvQuotesList.visibility = View.GONE
-                    } else {
-                        layoutEmptyQuotes.visibility = View.GONE
-                        rvQuotesList.visibility = View.VISIBLE
-                        quotesAdapter.submitList(filteredQuotes)
-                    }
-                }
+                // Reload dashboard data with date filtering
+                dashboardViewModel.loadDashboardData()
+                android.util.Log.d("QuotesFragment", "Applied date filter to dashboard: ${fromDate?.let { dateFormat.format(it) }} - ${toDate?.let { dateFormat.format(it) }}")
             } catch (e: Exception) {
-                android.util.Log.e("QuotesFragment", "Error applying date filter: ${e.message}", e)
+                android.util.Log.e("QuotesFragment", "Error applying date filter to dashboard: ${e.message}", e)
             }
         }
     }
