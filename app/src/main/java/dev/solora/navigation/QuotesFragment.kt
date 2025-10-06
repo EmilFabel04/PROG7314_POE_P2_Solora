@@ -910,8 +910,8 @@ class QuotesFragment : Fragment() {
     private fun clearDateFilterDashboard() {
         fromDate = null
         toDate = null
-        tvDateFilterFrom.text = "From"
-        tvDateFilterTo.text = "To"
+        tvDateFilterFrom.text = "Select Date"
+        tvDateFilterTo.text = "Select Date"
         applyDateFilterToDashboard()
     }
     
