@@ -364,19 +364,7 @@ class HomeFragment : Fragment() {
             gravity = android.view.Gravity.CENTER_VERTICAL
         }
         
-        // Quote icon
-        val iconView = ImageView(requireContext()).apply {
-            layoutParams = LinearLayout.LayoutParams(36, 36)
-            try {
-                setImageResource(android.R.drawable.ic_menu_report_image)
-                setColorFilter(resources.getColor(R.color.solora_orange, null))
-            } catch (e: Exception) {
-                android.util.Log.w("HomeFragment", "Could not set icon: ${e.message}")
-                // Set a simple text icon as fallback
-                setImageResource(android.R.drawable.ic_dialog_info)
-                setColorFilter(resources.getColor(R.color.solora_orange, null))
-            }
-        }
+        // Remove quote icon - no longer needed
         
         // Quote details
         val detailsLayout = LinearLayout(requireContext()).apply {
@@ -418,7 +406,6 @@ class HomeFragment : Fragment() {
         detailsLayout.addView(referenceText)
         detailsLayout.addView(addressText)
         
-        contentLayout.addView(iconView)
         contentLayout.addView(detailsLayout)
         contentLayout.addView(dateText)
         
