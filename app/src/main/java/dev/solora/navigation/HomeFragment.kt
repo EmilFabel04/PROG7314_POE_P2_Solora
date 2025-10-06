@@ -163,15 +163,26 @@ class HomeFragment : Fragment() {
     private fun loadRecentQuotes() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
+                android.util.Log.d("HomeFragment", "Starting to load recent quotes...")
+                android.util.Log.d("HomeFragment", "Current user: ${com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid}")
+                
                 // Get quotes from the last 7 days using REST API
                 val quotesResult = apiService.getQuotes(search = null, limit = 100)
+                android.util.Log.d("HomeFragment", "API call result: ${quotesResult.isSuccess}")
+                
                 if (quotesResult.isSuccess) {
                     val quotesData = quotesResult.getOrNull() ?: emptyList()
+                    android.util.Log.d("HomeFragment", "Raw API data count: ${quotesData.size}")
+                    
+                    if (quotesData.isNotEmpty()) {
+                        android.util.Log.d("HomeFragment", "First quote data keys: ${quotesData.first().keys}")
+                        android.util.Log.d("HomeFragment", "First quote createdAt: ${quotesData.first()["createdAt"]}")
+                    }
                     
                     // Convert API response to FirebaseQuote objects
                     val allQuotes = quotesData.mapNotNull { data: Map<String, Any> ->
                         try {
-                            FirebaseQuote(
+                            val quote = FirebaseQuote(
                                 id = data["id"] as? String,
                                 reference = data["reference"] as? String ?: "",
                                 clientName = data["clientName"] as? String ?: "",
@@ -198,10 +209,68 @@ class HomeFragment : Fragment() {
                                 createdAt = data["createdAt"] as? com.google.firebase.Timestamp,
                                 updatedAt = data["updatedAt"] as? com.google.firebase.Timestamp
                             )
+                            android.util.Log.d("HomeFragment", "Parsed quote: ${quote.id}, createdAt: ${quote.createdAt}, reference: ${quote.reference}")
+                            quote
                         } catch (e: Exception) {
-                            android.util.Log.w("HomeFragment", "Failed to parse quote: ${e.message}")
+                            android.util.Log.w("HomeFragment", "Failed to parse quote: ${e.message}", e)
                             null
                         }
+                    }
+                    
+                    android.util.Log.d("HomeFragment", "Successfully parsed ${allQuotes.size} quotes")
+                    
+                    // Filter quotes from the last 7 days
+                    val sevenDaysAgo = Calendar.getInstance().apply {
+                        add(Calendar.DAY_OF_YEAR, -7)
+                        set(Calendar.HOUR_OF_DAY, 0)
+                        set(Calendar.MINUTE, 0)
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }.time
+                    
+                    android.util.Log.d("HomeFragment", "Seven days ago: $sevenDaysAgo")
+                    
+                    val recentQuotes = allQuotes.filter { quote ->
+                        val createdAt = quote.createdAt?.toDate()
+                        val isRecent = createdAt?.let { it >= sevenDaysAgo } ?: false
+                        android.util.Log.d("HomeFragment", "Quote ${quote.id}: createdAt=$createdAt, isRecent=$isRecent")
+                        isRecent
+                    }.sortedByDescending { it.createdAt?.toDate() }
+                    .take(5) // Get the 5 most recent quotes from last 7 days
+                    
+                    android.util.Log.d("HomeFragment", "Found ${recentQuotes.size} quotes from last 7 days out of ${allQuotes.size} total quotes")
+                    
+                    if (recentQuotes.isEmpty() && allQuotes.isNotEmpty()) {
+                        android.util.Log.w("HomeFragment", "No recent quotes found, but ${allQuotes.size} total quotes exist. Showing all quotes instead.")
+                        val allRecentQuotes = allQuotes.sortedByDescending { it.createdAt?.toDate() }.take(5)
+                        displayRecentQuotes(allRecentQuotes)
+                    } else {
+                        displayRecentQuotes(recentQuotes)
+                    }
+                } else {
+                    android.util.Log.e("HomeFragment", "Failed to load quotes via API: ${quotesResult.exceptionOrNull()?.message}")
+                    // Fallback to ViewModel if API fails
+                    android.util.Log.d("HomeFragment", "Falling back to ViewModel for quotes")
+                    loadRecentQuotesFromViewModel()
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("HomeFragment", "Error loading recent quotes: ${e.message}", e)
+                // Fallback to ViewModel if API fails
+                android.util.Log.d("HomeFragment", "Falling back to ViewModel for quotes due to exception")
+                loadRecentQuotesFromViewModel()
+            }
+        }
+    }
+    
+    private fun loadRecentQuotesFromViewModel() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                android.util.Log.d("HomeFragment", "Loading quotes from ViewModel...")
+                quotesViewModel.quotes.collect { quotes ->
+                    android.util.Log.d("HomeFragment", "ViewModel quotes count: ${quotes.size}")
+                    
+                    if (quotes.isNotEmpty()) {
+                        android.util.Log.d("HomeFragment", "First ViewModel quote: ${quotes.first().id}, createdAt: ${quotes.first().createdAt}")
                     }
                     
                     // Filter quotes from the last 7 days
@@ -213,38 +282,48 @@ class HomeFragment : Fragment() {
                         set(Calendar.MILLISECOND, 0)
                     }.time
                     
-                    val recentQuotes = allQuotes.filter { quote ->
-                        quote.createdAt?.toDate()?.let { createdAt ->
-                            createdAt >= sevenDaysAgo
-                        } ?: false
+                    val recentQuotes = quotes.filter { quote ->
+                        val createdAt = quote.createdAt?.toDate()
+                        val isRecent = createdAt?.let { it >= sevenDaysAgo } ?: false
+                        android.util.Log.d("HomeFragment", "ViewModel Quote ${quote.id}: createdAt=$createdAt, isRecent=$isRecent")
+                        isRecent
                     }.sortedByDescending { it.createdAt?.toDate() }
-                    .take(5) // Get the 5 most recent quotes from last 7 days
+                    .take(5)
                     
-                    android.util.Log.d("HomeFragment", "Found ${recentQuotes.size} quotes from last 7 days out of ${allQuotes.size} total quotes")
-                    displayRecentQuotes(recentQuotes)
-                } else {
-                    android.util.Log.e("HomeFragment", "Failed to load quotes via API: ${quotesResult.exceptionOrNull()?.message}")
-                    displayEmptyQuotes()
+                    android.util.Log.d("HomeFragment", "ViewModel found ${recentQuotes.size} recent quotes out of ${quotes.size} total")
+                    
+                    if (recentQuotes.isEmpty() && quotes.isNotEmpty()) {
+                        android.util.Log.w("HomeFragment", "No recent quotes in ViewModel, showing all quotes")
+                        val allRecentQuotes = quotes.sortedByDescending { it.createdAt?.toDate() }.take(5)
+                        displayRecentQuotes(allRecentQuotes)
+                    } else {
+                        displayRecentQuotes(recentQuotes)
+                    }
                 }
             } catch (e: Exception) {
-                android.util.Log.e("HomeFragment", "Error loading recent quotes: ${e.message}", e)
+                android.util.Log.e("HomeFragment", "Error loading quotes from ViewModel: ${e.message}", e)
                 displayEmptyQuotes()
             }
         }
     }
     
     private fun displayRecentQuotes(quotes: List<FirebaseQuote>) {
+        android.util.Log.d("HomeFragment", "displayRecentQuotes called with ${quotes.size} quotes")
         layoutRecentQuotes.removeAllViews()
         
         if (quotes.isEmpty()) {
+            android.util.Log.d("HomeFragment", "No quotes to display, showing empty state")
             displayEmptyQuotes()
             return
         }
         
+        android.util.Log.d("HomeFragment", "Displaying ${quotes.size} quotes")
         quotes.forEach { quote ->
+            android.util.Log.d("HomeFragment", "Creating view for quote: ${quote.id}, reference: ${quote.reference}")
             val quoteView = createQuoteItemView(quote)
             layoutRecentQuotes.addView(quoteView)
         }
+        android.util.Log.d("HomeFragment", "Finished adding ${quotes.size} quote views to layout")
     }
     
     private fun createQuoteItemView(quote: FirebaseQuote): View {
