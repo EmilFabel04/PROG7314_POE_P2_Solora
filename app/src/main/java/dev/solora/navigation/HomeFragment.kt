@@ -351,8 +351,9 @@ class HomeFragment : Fragment() {
                 foreground = context.getDrawable(android.R.drawable.list_selector_background)
             } catch (e: Exception) {
                 android.util.Log.w("HomeFragment", "Could not set foreground drawable: ${e.message}")
-                // Set a simple ripple effect instead
-                setRippleColor(android.graphics.Color.parseColor("#1A000000"))
+                // Set a simple ripple effect instead using ColorStateList
+                val rippleColor = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#1A000000"))
+                setRippleColor(rippleColor)
             }
         }
         
