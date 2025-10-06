@@ -252,13 +252,15 @@ class ProfileFragment : Fragment() {
                             "Successfully logged out"
                         )
                         
-                        // Finish the activity to trigger authentication check
-                        requireActivity().finish()
-                        
-                        android.util.Log.d("ProfileFragment", "User logged out and navigated to login screen")
-                        
                         // Clear the auth state to prevent further processing
                         authViewModel.clearAuthState()
+                        
+                        android.util.Log.d("ProfileFragment", "User logged out, restarting activity")
+                        
+                        // Restart the activity to trigger authentication check
+                        val intent = requireActivity().intent
+                        requireActivity().finish()
+                        startActivity(intent)
                     }
                     is dev.solora.auth.AuthState.Error -> {
                         android.util.Log.e("ProfileFragment", "Logout failed: ${state.message}")
