@@ -221,45 +221,60 @@ class ProfileFragment : Fragment() {
     }
     
     private fun performLogout() {
+        // Show loading message
+        dev.solora.utils.ToastUtils.showOrangeToast(
+            requireContext(), 
+            "Logging out..."
+        )
+        
+        android.util.Log.d("ProfileFragment", "Starting logout process")
+        
+        // Clear any cached data
+        clearUserData()
+        
+        // Use AuthViewModel logout method (clears DataStore and Firebase Auth)
+        authViewModel.logout()
+        
+        // Observe the auth state to know when logout is complete
         viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                // Show loading message
-                dev.solora.utils.ToastUtils.showOrangeToast(
-                    requireContext(), 
-                    "Logging out..."
-                )
-                
-                android.util.Log.d("ProfileFragment", "Starting logout process")
-                
-                // Clear any cached data
-                clearUserData()
-                
-                // Use AuthViewModel logout method (clears DataStore and Firebase Auth)
-                authViewModel.logout()
-                android.util.Log.d("ProfileFragment", "User signed out via AuthViewModel")
-                
-                // Clear ViewModels data
-                profileViewModel.clearUserData()
-                settingsViewModel.clearSettings()
-                
-                // Show success message
-                dev.solora.utils.ToastUtils.showOrangeToast(
-                    requireContext(), 
-                    "Successfully logged out"
-                )
-                
-                // Navigate to login screen with proper cleanup
-                findNavController().navigate(R.id.action_logout_to_login)
-                
-                android.util.Log.d("ProfileFragment", "User logged out and navigated to login screen")
-                
-            } catch (e: Exception) {
-                android.util.Log.e("ProfileFragment", "Logout error: ${e.message}", e)
-                Toast.makeText(
-                    requireContext(), 
-                    "Logout failed: ${e.message}", 
-                    Toast.LENGTH_LONG
-                ).show()
+            authViewModel.authState.collect { state ->
+                when (state) {
+                    is dev.solora.auth.AuthState.Success -> {
+                        android.util.Log.d("ProfileFragment", "Logout successful: ${state.message}")
+                        
+                        // Clear ViewModels data
+                        profileViewModel.clearUserData()
+                        settingsViewModel.clearSettings()
+                        
+                        // Show success message
+                        dev.solora.utils.ToastUtils.showOrangeToast(
+                            requireContext(), 
+                            "Successfully logged out"
+                        )
+                        
+                        // Navigate to login screen with proper cleanup
+                        findNavController().navigate(R.id.action_logout_to_login)
+                        
+                        android.util.Log.d("ProfileFragment", "User logged out and navigated to login screen")
+                        
+                        // Clear the auth state to prevent further processing
+                        authViewModel.clearAuthState()
+                    }
+                    is dev.solora.auth.AuthState.Error -> {
+                        android.util.Log.e("ProfileFragment", "Logout failed: ${state.message}")
+                        Toast.makeText(
+                            requireContext(), 
+                            "Logout failed: ${state.message}", 
+                            Toast.LENGTH_LONG
+                        ).show()
+                        
+                        // Clear the auth state
+                        authViewModel.clearAuthState()
+                    }
+                    else -> {
+                        // Loading or Idle state - do nothing, wait for Success or Error
+                    }
+                }
             }
         }
     }
