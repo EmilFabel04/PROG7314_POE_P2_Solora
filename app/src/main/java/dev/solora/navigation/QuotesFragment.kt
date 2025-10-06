@@ -42,6 +42,7 @@ class QuotesFragment : Fragment() {
     private lateinit var contentCalculate: View
     private lateinit var contentView: View
     private lateinit var contentDashboard: View
+    private lateinit var btnBackQuotes: ImageButton
     
     // Dashboard elements
     private lateinit var dashboardContent: View
@@ -108,6 +109,9 @@ class QuotesFragment : Fragment() {
         contentView = view.findViewById(R.id.content_view)
         contentDashboard = view.findViewById(R.id.content_dashboard)
         
+        // Back button
+        btnBackQuotes = view.findViewById(R.id.btn_back_quotes)
+        
         // Dashboard content
         dashboardContent = LayoutInflater.from(requireContext()).inflate(R.layout.dashboard_content, null)
         
@@ -135,6 +139,25 @@ class QuotesFragment : Fragment() {
     }
     
     private fun setupTabs() {
+        // Back button click listener
+        btnBackQuotes.setOnClickListener {
+            android.util.Log.d("QuotesFragment", "Back button clicked - navigating to home")
+            try {
+                val parentFragment = parentFragment
+                if (parentFragment is MainTabsFragment) {
+                    val bottomNav = parentFragment.view?.findViewById<BottomNavigationView>(R.id.bottom_nav)
+                    bottomNav?.selectedItemId = R.id.homeFragment
+                } else {
+                    // Fallback to direct navigation
+                    findNavController().navigate(R.id.homeFragment)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("QuotesFragment", "Error navigating back to home: ${e.message}")
+                // Fallback to direct navigation
+                findNavController().navigate(R.id.homeFragment)
+            }
+        }
+        
         tabCalculate.setOnClickListener { switchToTab(0) }
         tabView.setOnClickListener { switchToTab(1) }
         tabDashboard.setOnClickListener { switchToTab(2) }
