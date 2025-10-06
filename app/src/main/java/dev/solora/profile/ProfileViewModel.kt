@@ -89,4 +89,11 @@ class ProfileViewModel(app: Application) : AndroidViewModel(app) {
     fun clearError() {
         _errorMessage.value = null
     }
+    
+    fun clearUserData() {
+        _userProfile.value = null
+        _isLoading.value = false
+        _errorMessage.value = null
+        android.util.Log.d("ProfileViewModel", "User data cleared")
+    }
 }

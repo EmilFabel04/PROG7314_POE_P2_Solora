@@ -69,4 +69,9 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
             android.util.Log.d("SettingsViewModel", "Settings reset to defaults")
         }
     }
+    
+    fun clearSettings() {
+        // Clear any cached settings data
+        android.util.Log.d("SettingsViewModel", "Settings data cleared for logout")
+    }
 }

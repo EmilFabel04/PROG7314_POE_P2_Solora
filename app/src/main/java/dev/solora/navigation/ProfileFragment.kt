@@ -206,22 +206,73 @@ class ProfileFragment : Fragment() {
     }
     
     private fun logout() {
+        // Show confirmation dialog
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Logout")
+            .setMessage("Are you sure you want to logout? You will need to sign in again to access your account.")
+            .setIcon(R.drawable.ic_logout)
+            .setPositiveButton("Logout") { _, _ ->
+                performLogout()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
+    private fun performLogout() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                // Show loading message
+                dev.solora.utils.ToastUtils.showCustomToast(
+                    requireContext(), 
+                    "Logging out...", 
+                    dev.solora.utils.ToastUtils.ToastType.INFO
+                )
+                
+                android.util.Log.d("ProfileFragment", "Starting logout process")
+                
+                // Clear any cached data
+                clearUserData()
+                
+                // Sign out from Firebase Auth
+                auth.signOut()
+                android.util.Log.d("ProfileFragment", "User signed out from Firebase Auth")
+                
+                // Clear ViewModels data
+                profileViewModel.clearUserData()
+                settingsViewModel.clearSettings()
+                
+                // Show success message
+                dev.solora.utils.ToastUtils.showCustomToast(
+                    requireContext(), 
+                    "Successfully logged out", 
+                    dev.solora.utils.ToastUtils.ToastType.SUCCESS
+                )
+                
+                // Navigate to auth screen with proper cleanup
+                findNavController().navigate(R.id.action_start_to_auth)
+                
+                android.util.Log.d("ProfileFragment", "User logged out and navigated to auth screen")
+                
+            } catch (e: Exception) {
+                android.util.Log.e("ProfileFragment", "Logout error: ${e.message}", e)
+                dev.solora.utils.ToastUtils.showCustomToast(
+                    requireContext(), 
+                    "Logout failed: ${e.message}", 
+                    dev.solora.utils.ToastUtils.ToastType.ERROR
+                )
+            }
+        }
+    }
+    
+    private fun clearUserData() {
         try {
-            Toast.makeText(requireContext(), "Logging out...", Toast.LENGTH_SHORT).show()
+            // Clear any local preferences or cached data
+            val sharedPrefs = requireContext().getSharedPreferences("solora_prefs", android.content.Context.MODE_PRIVATE)
+            sharedPrefs.edit().clear().apply()
             
-            // Sign out from Firebase Auth
-            auth.signOut()
-            
-            android.util.Log.d("ProfileFragment", "User signed out from Firebase Auth")
-            
-            // Navigate to auth screen
-            findNavController().navigate(R.id.action_start_to_auth)
-            
-            android.util.Log.d("ProfileFragment", "User logged out and navigated to auth screen")
-            
+            android.util.Log.d("ProfileFragment", "Local user data cleared")
         } catch (e: Exception) {
-            android.util.Log.e("ProfileFragment", "Logout error: ${e.message}", e)
-            Toast.makeText(requireContext(), "Logout failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            android.util.Log.e("ProfileFragment", "Error clearing user data: ${e.message}", e)
         }
     }
     
