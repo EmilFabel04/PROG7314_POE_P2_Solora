@@ -25,6 +25,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import android.app.DatePickerDialog
 import android.widget.Button
+import java.util.Calendar
 
 class HomeFragment : Fragment() {
     
@@ -218,13 +219,38 @@ class HomeFragment : Fragment() {
         
         return quotes.filter { quote ->
             try {
-                val quoteDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(quote.createdAt)
-                val isAfterFromDate = fromDate?.let { quoteDate?.after(it) ?: false } ?: true
-                val isBeforeToDate = toDate?.let { quoteDate?.before(it) ?: false } ?: true
+                // Convert Firebase Timestamp to Date
+                val quoteDate = quote.createdAt?.toDate()
+                if (quoteDate == null) {
+                    return@filter true // Include quote if no date available
+                }
+                
+                val isAfterFromDate = fromDate?.let { 
+                    // Set time to start of day for comparison
+                    val calendar = Calendar.getInstance()
+                    calendar.time = it
+                    calendar.set(Calendar.HOUR_OF_DAY, 0)
+                    calendar.set(Calendar.MINUTE, 0)
+                    calendar.set(Calendar.SECOND, 0)
+                    calendar.set(Calendar.MILLISECOND, 0)
+                    quoteDate.after(calendar.time) || quoteDate == calendar.time
+                } ?: true
+                
+                val isBeforeToDate = toDate?.let { 
+                    // Set time to end of day for comparison
+                    val calendar = Calendar.getInstance()
+                    calendar.time = it
+                    calendar.set(Calendar.HOUR_OF_DAY, 23)
+                    calendar.set(Calendar.MINUTE, 59)
+                    calendar.set(Calendar.SECOND, 59)
+                    calendar.set(Calendar.MILLISECOND, 999)
+                    quoteDate.before(calendar.time) || quoteDate == calendar.time
+                } ?: true
+                
                 isAfterFromDate && isBeforeToDate
             } catch (e: Exception) {
-                android.util.Log.e("HomeFragment", "Error parsing quote date: ${quote.createdAt}", e)
-                true // Include quote if date parsing fails
+                android.util.Log.e("HomeFragment", "Error filtering quote by date: ${e.message}", e)
+                true // Include quote if date filtering fails
             }
         }
     }
