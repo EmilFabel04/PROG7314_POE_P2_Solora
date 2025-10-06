@@ -228,6 +228,15 @@ class QuotesFragment : Fragment() {
     
     override fun onResume() {
         super.onResume()
+        
+        // Check if we have a show_tab argument first
+        val showTab = arguments?.getInt("show_tab", 0) ?: 0
+        if (showTab > 0) {
+            // Don't override the tab if it was set by argument
+            android.util.Log.d("QuotesFragment", "OnResume: Tab already set by argument ($showTab), not overriding")
+            return
+        }
+        
         // Check if we should switch to view tab when returning from client details
         val savedQuote = quotesViewModel.lastQuote.value
         if (savedQuote != null && savedQuote.id != null) {
@@ -243,6 +252,15 @@ class QuotesFragment : Fragment() {
     
     override fun onStart() {
         super.onStart()
+        
+        // Check if we have a show_tab argument first
+        val showTab = arguments?.getInt("show_tab", 0) ?: 0
+        if (showTab > 0) {
+            // Don't override the tab if it was set by argument
+            android.util.Log.d("QuotesFragment", "OnStart: Tab already set by argument ($showTab), not overriding")
+            return
+        }
+        
         // Also check on start in case onResume doesn't catch it
         val savedQuote = quotesViewModel.lastQuote.value
         if (savedQuote != null && savedQuote.id != null) {
