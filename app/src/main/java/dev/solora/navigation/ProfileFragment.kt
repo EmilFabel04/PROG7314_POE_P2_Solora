@@ -252,8 +252,8 @@ class ProfileFragment : Fragment() {
                             "Successfully logged out"
                         )
                         
-                        // Navigate to login screen with proper cleanup
-                        findNavController().navigate(R.id.action_logout_to_login)
+                        // Finish the activity to trigger authentication check
+                        requireActivity().finish()
                         
                         android.util.Log.d("ProfileFragment", "User logged out and navigated to login screen")
                         
