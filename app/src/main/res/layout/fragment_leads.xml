@@ -25,7 +25,7 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@android:drawable/ic_menu_home"
+                android:src="@drawable/home_icon_orange"
                 android:tint="@android:color/white"
                 android:contentDescription="Go to Home"
                 android:layout_marginEnd="16dp" />
