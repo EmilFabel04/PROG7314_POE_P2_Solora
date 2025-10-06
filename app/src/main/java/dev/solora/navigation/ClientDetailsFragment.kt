@@ -206,7 +206,7 @@ class ClientDetailsFragment : Fragment() {
                                     val linkResult = leadsViewModel.linkQuoteToLeadSync(selectedLead!!.id!!, savedQuote.id!!)
                                     if (linkResult) {
                                         android.util.Log.d("ClientDetailsFragment", "Successfully linked quote to lead")
-                                        dev.solora.utils.ToastUtils.showOrangeToast(requireContext(), "Quote saved and linked to existing lead!")
+                                        Toast.makeText(requireContext(), "Quote saved and linked to existing lead!", Toast.LENGTH_LONG).show()
                                     } else {
                                         android.util.Log.e("ClientDetailsFragment", "Lead linking returned false")
                                         Toast.makeText(requireContext(), "Quote saved but lead linking failed - check logs for details", Toast.LENGTH_LONG).show()
