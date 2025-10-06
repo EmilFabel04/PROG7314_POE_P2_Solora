@@ -27,6 +27,12 @@ import dev.solora.settings.SettingsViewModel
 import dev.solora.dashboard.DashboardViewModel
 import dev.solora.dashboard.DashboardData
 import kotlinx.coroutines.launch
+import android.app.DatePickerDialog
+import java.text.SimpleDateFormat
+import java.util.*
+import java.util.Calendar
+import dev.solora.data.FirebaseQuote
+import androidx.recyclerview.widget.RecyclerView
 
 class QuotesFragment : Fragment() {
     private val quotesViewModel: QuotesViewModel by viewModels()
@@ -47,6 +53,17 @@ class QuotesFragment : Fragment() {
     
     // Dashboard elements
     private lateinit var dashboardContent: View
+    
+    // Date Filter Elements
+    private lateinit var tvDateFilterFrom: TextView
+    private lateinit var tvDateFilterTo: TextView
+    private lateinit var btnClearDateFilter: ImageButton
+    private lateinit var rvQuotesList: RecyclerView
+    
+    // Date Filter Variables
+    private var fromDate: Date? = null
+    private var toDate: Date? = null
+    private val dateFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
     
     // Calculate tab elements
     private lateinit var etAddress: TextInputEditText
@@ -127,6 +144,11 @@ class QuotesFragment : Fragment() {
         // View tab elements (quotes list)
         rvQuotesList = view.findViewById(R.id.rv_quotes_list)
         layoutEmptyQuotes = view.findViewById(R.id.layout_empty_quotes)
+        
+        // Date Filter Elements
+        tvDateFilterFrom = view.findViewById(R.id.tv_date_filter_from)
+        tvDateFilterTo = view.findViewById(R.id.tv_date_filter_to)
+        btnClearDateFilter = view.findViewById(R.id.btn_clear_date_filter)
         
         // Dashboard tab elements
         etReference = view.findViewById(R.id.et_reference)
@@ -325,21 +347,45 @@ class QuotesFragment : Fragment() {
         rvQuotesList.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
         rvQuotesList.adapter = quotesAdapter
         
+        // Setup date filter click listeners
+        tvDateFilterFrom.setOnClickListener {
+            showDatePicker { date ->
+                fromDate = date
+                tvDateFilterFrom.text = dateFormat.format(date)
+                applyDateFilter()
+            }
+        }
+        
+        tvDateFilterTo.setOnClickListener {
+            showDatePicker { date ->
+                toDate = date
+                tvDateFilterTo.text = dateFormat.format(date)
+                applyDateFilter()
+            }
+        }
+        
+        btnClearDateFilter.setOnClickListener {
+            clearDateFilter()
+        }
+        
         // Observe quotes from ViewModel
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 quotesViewModel.quotes.collect { quotes ->
                     android.util.Log.d("QuotesFragment", "Quotes updated: ${quotes.size} quotes")
                     
-                    if (quotes.isEmpty()) {
+                    // Apply date filtering
+                    val filteredQuotes = filterQuotesByDate(quotes)
+                    
+                    if (filteredQuotes.isEmpty()) {
                         layoutEmptyQuotes.visibility = View.VISIBLE
                         rvQuotesList.visibility = View.GONE
                         android.util.Log.d("QuotesFragment", "Showing empty state")
                     } else {
                         layoutEmptyQuotes.visibility = View.GONE
                         rvQuotesList.visibility = View.VISIBLE
-                        quotesAdapter.submitList(quotes)
-                        android.util.Log.d("QuotesFragment", "Displaying ${quotes.size} quotes in RecyclerView")
+                        quotesAdapter.submitList(filteredQuotes)
+                        android.util.Log.d("QuotesFragment", "Displaying ${filteredQuotes.size} filtered quotes in RecyclerView")
                     }
                 }
             } catch (e: kotlinx.coroutines.CancellationException) {
@@ -800,6 +846,95 @@ class QuotesFragment : Fragment() {
             } catch (e: Exception) {
                 Toast.makeText(requireContext(), "NASA API Error: ${e.message}", Toast.LENGTH_LONG).show()
                 android.util.Log.e("QuotesFragment", "NASA API Test Exception: ${e.message}", e)
+            }
+        }
+    }
+    
+    // Date Filter Helper Methods
+    private fun filterQuotesByDate(quotes: List<FirebaseQuote>): List<FirebaseQuote> {
+        if (fromDate == null && toDate == null) {
+            return quotes // No filter applied
+        }
+        
+        return quotes.filter { quote ->
+            try {
+                // Convert Firebase Timestamp to Date
+                val quoteDate = quote.createdAt?.toDate()
+                if (quoteDate == null) {
+                    return@filter true // Include quote if no date available
+                }
+                
+                val isAfterFromDate = fromDate?.let { 
+                    // Set time to start of day for comparison
+                    val calendar = Calendar.getInstance()
+                    calendar.time = it
+                    calendar.set(Calendar.HOUR_OF_DAY, 0)
+                    calendar.set(Calendar.MINUTE, 0)
+                    calendar.set(Calendar.SECOND, 0)
+                    calendar.set(Calendar.MILLISECOND, 0)
+                    quoteDate.after(calendar.time) || quoteDate == calendar.time
+                } ?: true
+                
+                val isBeforeToDate = toDate?.let { 
+                    // Set time to end of day for comparison
+                    val calendar = Calendar.getInstance()
+                    calendar.time = it
+                    calendar.set(Calendar.HOUR_OF_DAY, 23)
+                    calendar.set(Calendar.MINUTE, 59)
+                    calendar.set(Calendar.SECOND, 59)
+                    calendar.set(Calendar.MILLISECOND, 999)
+                    quoteDate.before(calendar.time) || quoteDate == calendar.time
+                } ?: true
+                
+                isAfterFromDate && isBeforeToDate
+            } catch (e: Exception) {
+                android.util.Log.e("QuotesFragment", "Error filtering quote by date: ${e.message}", e)
+                true // Include quote if date filtering fails
+            }
+        }
+    }
+    
+    private fun showDatePicker(onDateSelected: (Date) -> Unit) {
+        val calendar = Calendar.getInstance()
+        val datePickerDialog = DatePickerDialog(
+            requireContext(),
+            { _, year, month, dayOfMonth ->
+                calendar.set(year, month, dayOfMonth)
+                onDateSelected(calendar.time)
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+        datePickerDialog.show()
+    }
+    
+    private fun clearDateFilter() {
+        fromDate = null
+        toDate = null
+        tvDateFilterFrom.text = "From"
+        tvDateFilterTo.text = "To"
+        applyDateFilter()
+    }
+    
+    private fun applyDateFilter() {
+        // Refresh the quotes display with the current filter
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                quotesViewModel.quotes.value.let { quotes ->
+                    val filteredQuotes = filterQuotesByDate(quotes)
+                    
+                    if (filteredQuotes.isEmpty()) {
+                        layoutEmptyQuotes.visibility = View.VISIBLE
+                        rvQuotesList.visibility = View.GONE
+                    } else {
+                        layoutEmptyQuotes.visibility = View.GONE
+                        rvQuotesList.visibility = View.VISIBLE
+                        quotesAdapter.submitList(filteredQuotes)
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("QuotesFragment", "Error applying date filter: ${e.message}", e)
             }
         }
     }
