@@ -57,6 +57,12 @@ class HomeFragment : Fragment() {
         performApiRefresh()
     }
     
+    override fun onResume() {
+        super.onResume()
+        // Reload recent quotes when fragment becomes visible
+        loadRecentQuotes()
+    }
+    
     private fun initializeViews(view: View) {
         tvCompanyName = view.findViewById(R.id.tv_company_name)
         tvConsultantName = view.findViewById(R.id.tv_consultant_name)
@@ -157,10 +163,32 @@ class HomeFragment : Fragment() {
     private fun loadRecentQuotes() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                // Get recent quotes (last 5) from the quotes flow
-                quotesViewModel.quotes.collect { quotes ->
-                    val recentQuotes = quotes.take(5) // Get the 5 most recent quotes
+                // Get quotes from the last 7 days using REST API
+                val quotesResult = apiService.getQuotes(search = null, limit = 100)
+                if (quotesResult.isSuccess) {
+                    val allQuotes = quotesResult.getOrNull() ?: emptyList()
+                    
+                    // Filter quotes from the last 7 days
+                    val sevenDaysAgo = Calendar.getInstance().apply {
+                        add(Calendar.DAY_OF_YEAR, -7)
+                        set(Calendar.HOUR_OF_DAY, 0)
+                        set(Calendar.MINUTE, 0)
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }.time
+                    
+                    val recentQuotes = allQuotes.filter { quote ->
+                        quote.createdAt?.toDate()?.let { createdAt ->
+                            createdAt >= sevenDaysAgo
+                        } ?: false
+                    }.sortedByDescending { it.createdAt?.toDate() }
+                    .take(5) // Get the 5 most recent quotes from last 7 days
+                    
+                    android.util.Log.d("HomeFragment", "Found ${recentQuotes.size} quotes from last 7 days out of ${allQuotes.size} total quotes")
                     displayRecentQuotes(recentQuotes)
+                } else {
+                    android.util.Log.e("HomeFragment", "Failed to load quotes via API: ${quotesResult.exceptionOrNull()?.message}")
+                    displayEmptyQuotes()
                 }
             } catch (e: Exception) {
                 android.util.Log.e("HomeFragment", "Error loading recent quotes: ${e.message}", e)
@@ -281,14 +309,14 @@ class HomeFragment : Fragment() {
         }
         
         val emptyText = TextView(requireContext()).apply {
-            text = "No recent quotes"
+            text = "No quotes from last 7 days"
             textSize = 14f
             setTextColor(android.graphics.Color.parseColor("#666666"))
             gravity = android.view.Gravity.CENTER
         }
         
         val subText = TextView(requireContext()).apply {
-            text = "Create your first quote to get started"
+            text = "Create a new quote to see it here"
             textSize = 12f
             setTextColor(android.graphics.Color.parseColor("#999999"))
             gravity = android.view.Gravity.CENTER
