@@ -20,6 +20,10 @@
         android:id="@+id/quotesFragment"
         android:name="dev.solora.navigation.QuotesFragment"
         android:label="Quotes">
+        <argument
+            android:name="show_tab"
+            app:argType="integer"
+            android:defaultValue="0" />
         <action
             android:id="@+id/action_quotes_to_quote_detail"
             app:destination="@id/quoteDetailFragment" />

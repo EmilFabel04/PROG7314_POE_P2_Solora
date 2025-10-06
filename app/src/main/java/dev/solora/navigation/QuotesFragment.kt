@@ -103,15 +103,23 @@ class QuotesFragment : Fragment() {
         observeSettings()
         observeDashboard()
         
-        // Check if we're returning from client details (quote was saved)
-        checkIfReturningFromQuoteSave()
-        
-        // Also check immediately if we should show view tab
-        val savedQuote = quotesViewModel.lastQuote.value
-        if (savedQuote != null && savedQuote.id != null) {
-            // Switch to view tab immediately to show the saved quote
-            switchToTab(1)
-            android.util.Log.d("QuotesFragment", "OnViewCreated: Switching to view tab to show saved quote: ${savedQuote.reference}")
+        // Check if we have a show_tab argument
+        val showTab = arguments?.getInt("show_tab", 0) ?: 0
+        if (showTab > 0) {
+            // Switch to the specified tab
+            switchToTab(showTab)
+            android.util.Log.d("QuotesFragment", "OnViewCreated: Switching to tab $showTab from argument")
+        } else {
+            // Check if we're returning from client details (quote was saved)
+            checkIfReturningFromQuoteSave()
+            
+            // Also check immediately if we should show view tab
+            val savedQuote = quotesViewModel.lastQuote.value
+            if (savedQuote != null && savedQuote.id != null) {
+                // Switch to view tab immediately to show the saved quote
+                switchToTab(1)
+                android.util.Log.d("QuotesFragment", "OnViewCreated: Switching to view tab to show saved quote: ${savedQuote.reference}")
+            }
         }
     }
     

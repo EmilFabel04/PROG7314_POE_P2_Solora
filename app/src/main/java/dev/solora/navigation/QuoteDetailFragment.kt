@@ -85,8 +85,11 @@ class QuoteDetailFragment : Fragment() {
     
     private fun setupClickListeners() {
         btnBackDetail.setOnClickListener {
-            // Navigate back to quotes fragment (view quotes tab)
-            findNavController().navigate(R.id.action_quote_detail_to_quotes)
+            // Navigate back to quotes fragment and show view tab (tab 1)
+            val bundle = Bundle().apply {
+                putInt("show_tab", 1) // 1 = view tab
+            }
+            findNavController().navigate(R.id.action_quote_detail_to_quotes, bundle)
         }
         
         btnExportPdf.setOnClickListener {
