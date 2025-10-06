@@ -766,7 +766,17 @@ class QuotesFragment : Fragment() {
                         etClientAddress.setText(quote.address)
                     }
                 } else {
+                    // Quote was cleared (cancelled), reset to calculate tab and clear summary
                     tvQuoteSummary.text = "Complete calculation first to see quote details"
+                    
+                    // Switch back to calculate tab when quote is cleared
+                    if (currentTab == 2) { // Only switch if we're currently on dashboard tab
+                        switchToTab(0) // Switch to calculate tab
+                        android.util.Log.d("QuotesFragment", "Quote cleared - switching back to calculate tab")
+                    }
+                    
+                    // Clear the client address field
+                    etClientAddress.setText("")
                 }
             }
         }

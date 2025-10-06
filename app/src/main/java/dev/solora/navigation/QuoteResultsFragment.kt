@@ -7,12 +7,18 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import dev.solora.R
 import dev.solora.quote.QuoteOutputs
+import dev.solora.quotes.QuotesViewModel
 
 class QuoteResultsFragment : Fragment() {
+    
+    // ViewModels
+    private val quotesViewModel: QuotesViewModel by viewModels()
     
     // UI Components
     private lateinit var btnBack: ImageButton
@@ -34,6 +40,7 @@ class QuoteResultsFragment : Fragment() {
         
         initializeViews(view)
         setupClickListeners()
+        setupBackPressedCallback()
         
         // Get data from arguments
         arguments?.let { args ->
@@ -55,12 +62,36 @@ class QuoteResultsFragment : Fragment() {
     
     private fun setupClickListeners() {
         btnBack.setOnClickListener {
-            findNavController().popBackStack()
+            cancelQuoteAndGoBack()
         }
         
         btnSaveQuote.setOnClickListener {
             navigateToClientDetails()
         }
+    }
+    
+    private fun setupBackPressedCallback() {
+        // Handle system back button press
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                cancelQuoteAndGoBack()
+            }
+        }
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
+    }
+    
+    private fun cancelQuoteAndGoBack() {
+        // Clear the calculated quote when going back (cancelling the quote)
+        quotesViewModel.clearLastQuote()
+        
+        // Show a toast to confirm the quote was cancelled
+        dev.solora.utils.ToastUtils.showOrangeToast(
+            requireContext(),
+            "Quote calculation cancelled"
+        )
+        
+        android.util.Log.d("QuoteResultsFragment", "Quote cancelled and cleared - navigating back to quotes")
+        findNavController().popBackStack()
     }
     
     private fun displayResults() {
