@@ -299,65 +299,69 @@
                 android:orientation="vertical"
                 android:paddingBottom="80dp">
                 
-                <!-- Date Filter Presets -->
+                <!-- Subtle Date Filter -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
+                    android:orientation="horizontal"
                     android:padding="12dp"
                     android:background="@android:color/white"
                     android:elevation="1dp"
+                    android:gravity="center_vertical"
                     android:layout_marginBottom="16dp">
                     
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Filter by Period:"
+                        android:text="Filter:"
                         android:textSize="12sp"
                         android:textColor="#666666"
-                        android:layout_marginBottom="8dp" />
+                        android:layout_marginEnd="8dp" />
                     
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center">
-                        
-                        <Button
-                            android:id="@+id/btn_filter_7days"
-                            android:layout_width="0dp"
-                            android:layout_height="36dp"
-                            android:layout_weight="1"
-                            android:text="7 Days"
-                            android:textSize="11sp"
-                            android:textColor="@android:color/white"
-                            android:background="@drawable/authentication_button_background_orange"
-                            android:layout_marginEnd="4dp" />
-                        
-                        <Button
-                            android:id="@+id/btn_filter_30days"
-                            android:layout_width="0dp"
-                            android:layout_height="36dp"
-                            android:layout_weight="1"
-                            android:text="30 Days"
-                            android:textSize="11sp"
-                            android:textColor="#666666"
-                            android:background="@drawable/edit_text_background"
-                            android:layout_marginStart="4dp"
-                            android:layout_marginEnd="4dp" />
-                        
-                        <Button
-                            android:id="@+id/btn_filter_6months"
-                            android:layout_width="0dp"
-                            android:layout_height="36dp"
-                            android:layout_weight="1"
-                            android:text="6 Months"
-                            android:textSize="11sp"
-                            android:textColor="#666666"
-                            android:background="@drawable/edit_text_background"
-                            android:layout_marginStart="4dp" />
-                            
-                    </LinearLayout>
+                    <TextView
+                        android:id="@+id/tv_date_filter_from"
+                        android:layout_width="0dp"
+                        android:layout_height="32dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/edit_text_background"
+                        android:padding="8dp"
+                        android:text="From"
+                        android:textColor="@android:color/black"
+                        android:textSize="11sp"
+                        android:gravity="center_vertical"
+                        android:drawableEnd="@android:drawable/ic_menu_recent_history"
+                        android:drawableTint="@color/solora_orange"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:layout_marginEnd="4dp" />
+                    
+                    <TextView
+                        android:id="@+id/tv_date_filter_to"
+                        android:layout_width="0dp"
+                        android:layout_height="32dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/edit_text_background"
+                        android:padding="8dp"
+                        android:text="To"
+                        android:textColor="@android:color/black"
+                        android:textSize="11sp"
+                        android:gravity="center_vertical"
+                        android:drawableEnd="@android:drawable/ic_menu_recent_history"
+                        android:drawableTint="@color/solora_orange"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginEnd="8dp" />
+                    
+                    <ImageButton
+                        android:id="@+id/btn_clear_date_filter"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@android:drawable/ic_menu_close_clear_cancel"
+                        android:tint="#666666"
+                        android:contentDescription="Clear filter"
+                        android:layout_marginEnd="4dp" />
                     
                 </LinearLayout>
                 
