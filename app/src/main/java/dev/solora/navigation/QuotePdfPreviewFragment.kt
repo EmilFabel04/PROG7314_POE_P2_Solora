@@ -17,6 +17,7 @@ import dev.solora.pdf.FileShareUtils
 import dev.solora.pdf.PdfGenerator
 import dev.solora.settings.SettingsViewModel
 import dev.solora.settings.CompanySettings
+import dev.solora.quotes.QuotesViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -26,6 +27,7 @@ import java.util.*
 class QuotePdfPreviewFragment : Fragment() {
     
     private val settingsViewModel: SettingsViewModel by viewModels()
+    private val quotesViewModel: QuotesViewModel by viewModels()
     private var quoteId: String = ""
     private var companySettings: CompanySettings = CompanySettings()
     private lateinit var btnBack: ImageButton
@@ -175,9 +177,26 @@ class QuotePdfPreviewFragment : Fragment() {
         // Get quote data from arguments
         quoteId = arguments?.getString("quoteId") ?: ""
         if (quoteId.isNotEmpty()) {
-            // Load quote from ViewModel or Repository
-            // For now, we'll use a placeholder - in real implementation, load from database
-            displayQuoteData(createPlaceholderQuote(quoteId))
+            // Load actual quote from database
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    // Observe quotes and find the one with matching ID
+                    quotesViewModel.quotes.collect { quotes ->
+                        val quote = quotes.find { it.id == quoteId }
+                        if (quote != null) {
+                            displayQuoteData(quote)
+                        } else {
+                            // If quote not found, show error or fallback
+                            android.util.Log.e("QuotePdfPreviewFragment", "Quote with ID $quoteId not found")
+                            displayQuoteData(createPlaceholderQuote(quoteId))
+                        }
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("QuotePdfPreviewFragment", "Error loading quote: ${e.message}", e)
+                    // Fallback to placeholder if there's an error
+                    displayQuoteData(createPlaceholderQuote(quoteId))
+                }
+            }
         }
     }
     
