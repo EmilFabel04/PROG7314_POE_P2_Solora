@@ -29,6 +29,7 @@ class HomeFragment : Fragment() {
     private val quotesViewModel: QuotesViewModel by viewModels()
     private val leadsViewModel: LeadsViewModel by viewModels()
     private val settingsViewModel: SettingsViewModel by viewModels()
+    private val profileViewModel: dev.solora.profile.ProfileViewModel by viewModels()
     private val apiService = FirebaseFunctionsApi()
     
     // UI Elements
@@ -134,15 +135,22 @@ class HomeFragment : Fragment() {
             }
         }
         
-        // Observe settings to update company and consultant info
+        // Observe settings to update company name
         viewLifecycleOwner.lifecycleScope.launch {
             settingsViewModel.settings.collect { settings ->
-                updateCompanyInfo(settings.companySettings)
+                updateCompanyName(settings.companySettings)
+            }
+        }
+        
+        // Observe user profile to update consultant name
+        viewLifecycleOwner.lifecycleScope.launch {
+            profileViewModel.userProfile.collect { user ->
+                user?.let { updateConsultantName(it) }
             }
         }
     }
     
-    private fun updateCompanyInfo(companySettings: dev.solora.settings.CompanySettings) {
+    private fun updateCompanyName(companySettings: dev.solora.settings.CompanySettings) {
         // Update company name
         val companyName = if (companySettings.companyName.isNotEmpty()) {
             companySettings.companyName
@@ -150,14 +158,18 @@ class HomeFragment : Fragment() {
             "SOLORA"
         }
         tvCompanyName.text = companyName
-        
-        // Update consultant name
-        val consultantName = if (companySettings.consultantName.isNotEmpty()) {
-            "Consultant: ${companySettings.consultantName}"
+    }
+    
+    private fun updateConsultantName(user: dev.solora.data.FirebaseUser) {
+        // Update consultant name with full name and surname from user profile
+        val fullName = if (user.name.isNotEmpty() && user.surname.isNotEmpty()) {
+            "${user.name} ${user.surname}"
+        } else if (user.name.isNotEmpty()) {
+            user.name
         } else {
-            "Consultant: Not Set"
+            "Not Set"
         }
-        tvConsultantName.text = consultantName
+        tvConsultantName.text = "Welcome back, $fullName"
     }
     
     private fun loadRecentQuotes() {
@@ -476,11 +488,27 @@ class HomeFragment : Fragment() {
                     val settingsData = settingsResult.getOrNull()
                     if (settingsData != null) {
                         val companyName = settingsData["companyName"] as? String ?: "SOLORA"
-                        val consultantName = settingsData["consultantName"] as? String ?: "Not Set"
-                        
                         tvCompanyName.text = companyName
-                        tvConsultantName.text = "Consultant: $consultantName"
-                        android.util.Log.d("HomeFragment", "Refreshed company info via API: $companyName, $consultantName")
+                        android.util.Log.d("HomeFragment", "Refreshed company name via API: $companyName")
+                    }
+                }
+                
+                // Refresh user profile via API to ensure consultant name is up to date
+                val profileResult = apiService.getUserProfile()
+                if (profileResult.isSuccess) {
+                    val profileData = profileResult.getOrNull()
+                    if (profileData != null) {
+                        val name = profileData["name"] as? String ?: ""
+                        val surname = profileData["surname"] as? String ?: ""
+                        val fullName = if (name.isNotEmpty() && surname.isNotEmpty()) {
+                            "$name $surname"
+                        } else if (name.isNotEmpty()) {
+                            name
+                        } else {
+                            "Not Set"
+                        }
+                        tvConsultantName.text = "Welcome back, $fullName"
+                        android.util.Log.d("HomeFragment", "Refreshed consultant name via API: $fullName")
                     }
                 }
                 
