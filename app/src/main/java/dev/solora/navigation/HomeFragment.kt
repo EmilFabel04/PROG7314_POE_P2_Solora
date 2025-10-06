@@ -78,13 +78,37 @@ class HomeFragment : Fragment() {
         }
         
         cardCalculateQuote.setOnClickListener {
-            // Navigate to quotes tab
-            findNavController().navigate(R.id.quotesFragment)
+            // Navigate to quotes tab using bottom navigation selection
+            try {
+                val parentFragment = parentFragment
+                if (parentFragment is MainTabsFragment) {
+                    val bottomNav = parentFragment.view?.findViewById<BottomNavigationView>(R.id.bottom_nav)
+                    bottomNav?.selectedItemId = R.id.quotesFragment
+                } else {
+                    // Fallback to direct navigation if parent access fails
+                    findNavController().navigate(R.id.quotesFragment)
+                }
+            } catch (e: Exception) {
+                // Fallback to direct navigation
+                findNavController().navigate(R.id.quotesFragment)
+            }
         }
         
         cardAddLeads.setOnClickListener {
-            // Navigate to leads tab
-            findNavController().navigate(R.id.leadsFragment)
+            // Navigate to leads tab using bottom navigation selection
+            try {
+                val parentFragment = parentFragment
+                if (parentFragment is MainTabsFragment) {
+                    val bottomNav = parentFragment.view?.findViewById<BottomNavigationView>(R.id.bottom_nav)
+                    bottomNav?.selectedItemId = R.id.leadsFragment
+                } else {
+                    // Fallback to direct navigation if parent access fails
+                    findNavController().navigate(R.id.leadsFragment)
+                }
+            } catch (e: Exception) {
+                // Fallback to direct navigation
+                findNavController().navigate(R.id.leadsFragment)
+            }
         }
     }
     
