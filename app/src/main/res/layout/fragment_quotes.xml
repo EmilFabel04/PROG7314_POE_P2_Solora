@@ -25,9 +25,9 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@android:drawable/ic_menu_revert"
+                android:src="@android:drawable/ic_menu_home"
                 android:tint="@android:color/white"
-                android:contentDescription="Back to Home"
+                android:contentDescription="Go to Home"
                 android:layout_marginEnd="16dp" />
             
             <TextView
@@ -37,7 +37,9 @@
                 android:text="Solar Quotes"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/text_size_title"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_marginEnd="64dp" />
         </LinearLayout>
             
         <!-- Tab Row -->
