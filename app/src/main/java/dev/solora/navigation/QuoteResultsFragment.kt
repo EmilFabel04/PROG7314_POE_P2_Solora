@@ -84,12 +84,6 @@ class QuoteResultsFragment : Fragment() {
         // Clear the calculated quote when going back (cancelling the quote)
         quotesViewModel.clearLastQuote()
         
-        // Show a toast to confirm the quote was cancelled
-        dev.solora.utils.ToastUtils.showOrangeToast(
-            requireContext(),
-            "Quote calculation cancelled"
-        )
-        
         android.util.Log.d("QuoteResultsFragment", "Quote cancelled and cleared - navigating back to quotes")
         findNavController().popBackStack()
     }

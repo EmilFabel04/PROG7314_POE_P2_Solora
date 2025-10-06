@@ -226,6 +226,10 @@ class QuotesFragment : Fragment() {
             // Switch to view tab to show the saved quote
             switchToTab(1)
             android.util.Log.d("QuotesFragment", "OnResume: Switching to view tab to show saved quote: ${savedQuote.reference}")
+        } else {
+            // If no saved quote, ensure we're on the calculate tab
+            switchToTab(0)
+            android.util.Log.d("QuotesFragment", "OnResume: No saved quote, switching to calculate tab")
         }
     }
     
@@ -732,7 +736,6 @@ class QuotesFragment : Fragment() {
                     is CalculationState.Success -> {
                         btnCalculate.isEnabled = true
                         btnCalculate.text = "calculate"
-                        Toast.makeText(requireContext(), "Calculation complete!", Toast.LENGTH_LONG).show()
                         
                         // Update the dashboard tab with calculation results
                         updateResultsTab(state.outputs)
