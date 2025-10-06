@@ -18,6 +18,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dev.solora.R
@@ -61,12 +62,73 @@ class LeadsFragment : Fragment() {
         android.util.Log.d("LeadsFragment", "===== UPDATED LEADS FRAGMENT ONVIEWCREATED CALLED =====")
         android.util.Log.d("LeadsFragment", "View tree: ${view.javaClass.simpleName}")
         
+        // Debug bottom navigation visibility
+        debugBottomNavigation()
+        
         initializeViews(view)
         setupRecyclerView()
         setupClickListeners()
         observeLeads()
         
         android.util.Log.d("LeadsFragment", "===== LEADS FRAGMENT SETUP COMPLETED =====")
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        android.util.Log.d("LeadsFragment", "LeadsFragment onResume - ensuring bottom navigation is visible")
+        
+        // Ensure bottom navigation is visible and properly configured when fragment resumes
+        try {
+            val parentFragment = parentFragment
+            if (parentFragment is MainTabsFragment) {
+                val bottomNav = parentFragment.view?.findViewById<BottomNavigationView>(R.id.bottom_nav)
+                ensureBottomNavigationVisible(bottomNav)
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("LeadsFragment", "Error ensuring bottom navigation in onResume: ${e.message}")
+        }
+    }
+    
+    private fun debugBottomNavigation() {
+        try {
+            val parentFragment = parentFragment
+            android.util.Log.d("LeadsFragment", "Parent fragment: ${parentFragment?.javaClass?.simpleName}")
+            
+            if (parentFragment is MainTabsFragment) {
+                val bottomNav = parentFragment.view?.findViewById<BottomNavigationView>(R.id.bottom_nav)
+                android.util.Log.d("LeadsFragment", "Bottom navigation found: ${bottomNav != null}")
+                android.util.Log.d("LeadsFragment", "Bottom navigation visibility: ${bottomNav?.visibility}")
+                android.util.Log.d("LeadsFragment", "Bottom navigation selected item: ${bottomNav?.selectedItemId}")
+                
+                // Ensure bottom navigation is visible and properly configured
+                ensureBottomNavigationVisible(bottomNav)
+            } else {
+                android.util.Log.e("LeadsFragment", "Parent fragment is not MainTabsFragment: ${parentFragment?.javaClass?.simpleName}")
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("LeadsFragment", "Error debugging bottom navigation: ${e.message}")
+        }
+    }
+    
+    private fun ensureBottomNavigationVisible(bottomNav: BottomNavigationView?) {
+        bottomNav?.let { nav ->
+            android.util.Log.d("LeadsFragment", "Ensuring bottom navigation is visible")
+            
+            // Make sure it's visible
+            nav.visibility = View.VISIBLE
+            
+            // Ensure it's properly configured
+            nav.isEnabled = true
+            nav.isClickable = true
+            
+            // Set the selected item to leads if not already set
+            if (nav.selectedItemId != R.id.leadsFragment) {
+                nav.selectedItemId = R.id.leadsFragment
+                android.util.Log.d("LeadsFragment", "Set selected item to leads fragment")
+            }
+            
+            android.util.Log.d("LeadsFragment", "Bottom navigation configured - visibility: ${nav.visibility}, enabled: ${nav.isEnabled}, selected: ${nav.selectedItemId}")
+        }
     }
     
     private fun initializeViews(view: View) {
