@@ -166,7 +166,43 @@ class HomeFragment : Fragment() {
                 // Get quotes from the last 7 days using REST API
                 val quotesResult = apiService.getQuotes(search = null, limit = 100)
                 if (quotesResult.isSuccess) {
-                    val allQuotes = quotesResult.getOrNull() ?: emptyList()
+                    val quotesData = quotesResult.getOrNull() ?: emptyList()
+                    
+                    // Convert API response to FirebaseQuote objects
+                    val allQuotes = quotesData.mapNotNull { data: Map<String, Any> ->
+                        try {
+                            FirebaseQuote(
+                                id = data["id"] as? String,
+                                reference = data["reference"] as? String ?: "",
+                                clientName = data["clientName"] as? String ?: "",
+                                address = data["address"] as? String ?: "",
+                                usageKwh = (data["usageKwh"] as? Number)?.toDouble(),
+                                billRands = (data["billRands"] as? Number)?.toDouble(),
+                                tariff = (data["tariff"] as? Number)?.toDouble() ?: 0.0,
+                                panelWatt = (data["panelWatt"] as? Number)?.toInt() ?: 0,
+                                latitude = (data["latitude"] as? Number)?.toDouble(),
+                                longitude = (data["longitude"] as? Number)?.toDouble(),
+                                averageAnnualIrradiance = (data["averageAnnualIrradiance"] as? Number)?.toDouble(),
+                                averageAnnualSunHours = (data["averageAnnualSunHours"] as? Number)?.toDouble(),
+                                systemKwp = (data["systemKwp"] as? Number)?.toDouble() ?: 0.0,
+                                estimatedGeneration = (data["estimatedGeneration"] as? Number)?.toDouble() ?: 0.0,
+                                monthlySavings = (data["monthlySavings"] as? Number)?.toDouble() ?: 0.0,
+                                paybackMonths = (data["paybackMonths"] as? Number)?.toInt() ?: 0,
+                                companyName = data["companyName"] as? String ?: "",
+                                companyPhone = data["companyPhone"] as? String ?: "",
+                                companyEmail = data["companyEmail"] as? String ?: "",
+                                consultantName = data["consultantName"] as? String ?: "",
+                                consultantPhone = data["consultantPhone"] as? String ?: "",
+                                consultantEmail = data["consultantEmail"] as? String ?: "",
+                                userId = data["userId"] as? String ?: "",
+                                createdAt = data["createdAt"] as? com.google.firebase.Timestamp,
+                                updatedAt = data["updatedAt"] as? com.google.firebase.Timestamp
+                            )
+                        } catch (e: Exception) {
+                            android.util.Log.w("HomeFragment", "Failed to parse quote: ${e.message}")
+                            null
+                        }
+                    }
                     
                     // Filter quotes from the last 7 days
                     val sevenDaysAgo = Calendar.getInstance().apply {
