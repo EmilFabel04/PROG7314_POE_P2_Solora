@@ -248,10 +248,10 @@ class ProfileFragment : Fragment() {
                     dev.solora.utils.ToastUtils.ToastType.SUCCESS
                 )
                 
-                // Navigate to auth screen with proper cleanup
-                findNavController().navigate(R.id.action_start_to_auth)
+                // Navigate to login screen with proper cleanup
+                findNavController().navigate(R.id.action_logout_to_login)
                 
-                android.util.Log.d("ProfileFragment", "User logged out and navigated to auth screen")
+                android.util.Log.d("ProfileFragment", "User logged out and navigated to login screen")
                 
             } catch (e: Exception) {
                 android.util.Log.e("ProfileFragment", "Logout error: ${e.message}", e)

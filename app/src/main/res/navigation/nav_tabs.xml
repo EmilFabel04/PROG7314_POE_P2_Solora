@@ -47,7 +47,7 @@
             android:id="@+id/action_to_change_password"
             app:destination="@id/changePasswordFragment" />
         <action
-            android:id="@+id/action_start_to_auth"
+            android:id="@+id/action_logout_to_login"
             app:destination="@id/auth_graph"
             app:popUpTo="@id/nav_root"
             app:popUpToInclusive="true" />
