@@ -304,49 +304,23 @@ class FirebaseRepository {
         return try {
             val userId = getCurrentUserId() ?: throw Exception("User not authenticated")
             
-            // Try API first, fallback to direct Firestore
-            val apiResult = apiService.getLeadById(leadId)
-            if (apiResult.isSuccess) {
-                val leadData = apiResult.getOrNull()
-                if (leadData != null) {
-                    android.util.Log.d("FirebaseRepository", "Lead retrieved via API: $leadId")
-                    // Convert Map to FirebaseLead
-                    val lead = FirebaseLead(
-                        id = leadData["id"] as? String,
-                        name = leadData["name"] as? String ?: "",
-                        email = leadData["email"] as? String ?: "",
-                        phone = leadData["phone"] as? String ?: "",
-                        status = leadData["status"] as? String ?: "new",
-                        notes = leadData["notes"] as? String,
-                        quoteId = leadData["quoteId"] as? String,
-                        userId = leadData["userId"] as? String ?: "",
-                        createdAt = leadData["createdAt"] as? com.google.firebase.Timestamp,
-                        updatedAt = leadData["updatedAt"] as? com.google.firebase.Timestamp
-                    )
+            // Note: Using Firestore directly - no API endpoint exists for getLeadById
+            android.util.Log.d("FirebaseRepository", "Getting lead by ID via Firestore: $leadId")
+            val doc = firestore.collection("leads")
+                .document(leadId)
+                .get()
+                .await()
+            
+            if (doc.exists()) {
+                val lead = doc.toObject(FirebaseLead::class.java)?.copy(id = doc.id)
+                if (lead?.userId == userId) {
+                    android.util.Log.d("FirebaseRepository", "Lead retrieved via Firestore: $leadId")
                     Result.success(lead)
                 } else {
-                    Result.success(null)
+                    Result.failure(Exception("Lead not found or access denied"))
                 }
             } else {
-                android.util.Log.w("FirebaseRepository", "API failed for getLeadById, using direct Firestore: ${apiResult.exceptionOrNull()?.message}")
-                
-                // Fallback to direct Firestore
-                val doc = firestore.collection("leads")
-                    .document(leadId)
-                    .get()
-                    .await()
-                
-                if (doc.exists()) {
-                    val lead = doc.toObject(FirebaseLead::class.java)?.copy(id = doc.id)
-                    if (lead?.userId == userId) {
-                        android.util.Log.d("FirebaseRepository", "Lead retrieved via Firestore: $leadId")
-                        Result.success(lead)
-                    } else {
-                        Result.failure(Exception("Lead not found or access denied"))
-                    }
-                } else {
-                    Result.success(null)
-                }
+                Result.success(null)
             }
         } catch (e: Exception) {
             android.util.Log.e("FirebaseRepository", "Error getting lead by ID: ${e.message}", e)
