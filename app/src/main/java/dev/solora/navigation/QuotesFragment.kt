@@ -935,6 +935,7 @@ class QuotesFragment : Fragment() {
         val calendar = Calendar.getInstance()
         val datePickerDialog = DatePickerDialog(
             requireContext(),
+            R.style.CustomDatePickerDialog, // Custom theme with orange colors
             { _, year, month, dayOfMonth ->
                 calendar.set(year, month, dayOfMonth)
                 onDateSelected(calendar.time)

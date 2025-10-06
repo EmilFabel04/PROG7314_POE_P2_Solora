@@ -4,4 +4,17 @@
         <item name="android:fontFamily">@font/poppins</item>
         <item name="android:textSize">10sp</item>
     </style>
+    
+    <!-- Custom Date Picker Dialog with Orange Theme -->
+    <style name="CustomDatePickerDialog" parent="Theme.AppCompat.Light.Dialog">
+        <item name="colorAccent">@color/solora_orange</item>
+        <item name="colorPrimary">@color/solora_orange</item>
+        <item name="colorPrimaryDark">@color/solora_orange</item>
+        <item name="android:colorAccent">@color/solora_orange</item>
+        <item name="android:colorPrimary">@color/solora_orange</item>
+        <item name="android:colorPrimaryDark">@color/solora_orange</item>
+        <item name="android:textColorPrimary">@android:color/black</item>
+        <item name="android:textColorSecondary">#666666</item>
+        <item name="android:background">@android:color/white</item>
+    </style>
 </resources>
