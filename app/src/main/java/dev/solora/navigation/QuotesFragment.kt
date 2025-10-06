@@ -58,7 +58,6 @@ class QuotesFragment : Fragment() {
     private lateinit var tvDateFilterFrom: TextView
     private lateinit var tvDateFilterTo: TextView
     private lateinit var btnClearDateFilter: ImageButton
-    private lateinit var rvQuotesList: RecyclerView
     
     // Date Filter Variables
     private var fromDate: Date? = null
