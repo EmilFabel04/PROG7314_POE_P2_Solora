@@ -22,13 +22,14 @@
             
             <ImageButton
                 android:id="@+id/btn_back_quotes"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/home_icon_orange"
                 android:tint="@android:color/white"
                 android:contentDescription="Go to Home"
-                android:layout_marginEnd="16dp" />
+                android:layout_marginEnd="16dp"
+                android:scaleType="fitCenter" />
             
             <TextView
                 android:layout_width="0dp"
