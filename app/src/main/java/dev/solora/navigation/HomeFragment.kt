@@ -319,9 +319,15 @@ class HomeFragment : Fragment() {
         
         android.util.Log.d("HomeFragment", "Displaying ${quotes.size} quotes")
         quotes.forEach { quote ->
-            android.util.Log.d("HomeFragment", "Creating view for quote: ${quote.id}, reference: ${quote.reference}")
-            val quoteView = createQuoteItemView(quote)
-            layoutRecentQuotes.addView(quoteView)
+            try {
+                android.util.Log.d("HomeFragment", "Creating view for quote: ${quote.id}, reference: ${quote.reference}")
+                val quoteView = createQuoteItemView(quote)
+                layoutRecentQuotes.addView(quoteView)
+                android.util.Log.d("HomeFragment", "Successfully added view for quote: ${quote.id}")
+            } catch (e: Exception) {
+                android.util.Log.e("HomeFragment", "Error creating view for quote ${quote.id}: ${e.message}", e)
+                // Continue with other quotes even if one fails
+            }
         }
         android.util.Log.d("HomeFragment", "Finished adding ${quotes.size} quote views to layout")
     }
@@ -340,7 +346,14 @@ class HomeFragment : Fragment() {
             setCardBackgroundColor(android.graphics.Color.WHITE)
             isClickable = true
             isFocusable = true
-            foreground = context.getDrawable(android.R.attr.selectableItemBackground)
+            // Use a safe drawable resource instead of android.R.attr.selectableItemBackground
+            try {
+                foreground = context.getDrawable(android.R.drawable.list_selector_background)
+            } catch (e: Exception) {
+                android.util.Log.w("HomeFragment", "Could not set foreground drawable: ${e.message}")
+                // Set a simple ripple effect instead
+                setRippleColor(android.graphics.Color.parseColor("#1A000000"))
+            }
         }
         
         // Main content layout
@@ -353,8 +366,15 @@ class HomeFragment : Fragment() {
         // Quote icon
         val iconView = ImageView(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(36, 36)
-            setImageResource(android.R.drawable.ic_menu_report_image)
-            setColorFilter(resources.getColor(R.color.solora_orange, null))
+            try {
+                setImageResource(android.R.drawable.ic_menu_report_image)
+                setColorFilter(resources.getColor(R.color.solora_orange, null))
+            } catch (e: Exception) {
+                android.util.Log.w("HomeFragment", "Could not set icon: ${e.message}")
+                // Set a simple text icon as fallback
+                setImageResource(android.R.drawable.ic_dialog_info)
+                setColorFilter(resources.getColor(R.color.solora_orange, null))
+            }
         }
         
         // Quote details
