@@ -108,14 +108,6 @@
                         android:textSize="18sp"
                         android:textStyle="bold" />
 
-                    <!-- Consultant Role -->
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Senior Solar Consultant"
-                        android:textColor="#666666"
-                        android:textSize="14sp"
-                        android:layout_marginTop="4dp" />
 
                     <!-- Stats Row -->
                     <LinearLayout

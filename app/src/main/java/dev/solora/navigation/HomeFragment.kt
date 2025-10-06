@@ -70,7 +70,7 @@ class HomeFragment : Fragment() {
     
     private fun setupClickListeners() {
         btnNotifications.setOnClickListener {
-            Toast.makeText(requireContext(), "Push notifications coming soon!", Toast.LENGTH_SHORT).show()
+            findNavController().navigate(R.id.action_to_notifications)
         }
         
         btnSettings.setOnClickListener {
