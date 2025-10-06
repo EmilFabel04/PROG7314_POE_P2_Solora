@@ -5,8 +5,8 @@
         <item name="android:textSize">10sp</item>
     </style>
     
-    <!-- Custom Date Picker Dialog with Orange Theme -->
-    <style name="CustomDatePickerDialog" parent="Theme.AppCompat.Light.Dialog">
+    <!-- Custom Date Picker Dialog with Orange Theme and Proper Calendar -->
+    <style name="CustomDatePickerDialog" parent="android:Theme.Material.Light.Dialog">
         <item name="colorAccent">@color/solora_orange</item>
         <item name="colorPrimary">@color/solora_orange</item>
         <item name="colorPrimaryDark">@color/solora_orange</item>
@@ -15,10 +15,15 @@
         <item name="android:colorPrimaryDark">@color/solora_orange</item>
         <item name="android:textColorPrimary">@android:color/black</item>
         <item name="android:textColorSecondary">#666666</item>
-        <item name="android:background">@android:color/white</item>
-        <item name="android:padding">16dp</item>
-        <item name="android:textSize">16sp</item>
+        <item name="android:datePickerStyle">@style/CustomDatePickerStyle</item>
         <item name="android:buttonBarButtonStyle">@style/CustomDatePickerButton</item>
+    </style>
+    
+    <!-- Custom Date Picker Style for Better Calendar View -->
+    <style name="CustomDatePickerStyle" parent="android:Widget.Material.DatePicker">
+        <item name="android:headerBackground">@color/solora_orange</item>
+        <item name="android:calendarViewShown">true</item>
+        <item name="android:spinnersShown">false</item>
     </style>
     
     <!-- Custom Button Style for Date Picker -->
@@ -26,7 +31,7 @@
         <item name="android:textColor">@color/solora_orange</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:minHeight">40dp</item>
+        <item name="android:minHeight">48dp</item>
         <item name="android:paddingStart">16dp</item>
         <item name="android:paddingEnd">16dp</item>
     </style>
