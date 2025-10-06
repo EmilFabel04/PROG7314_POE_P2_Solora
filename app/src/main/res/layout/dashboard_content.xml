@@ -419,7 +419,7 @@
                             <View
                                 android:layout_width="12dp"
                                 android:layout_height="12dp"
-                                android:background="@drawable/circle_orange"
+                                android:background="@drawable/circle_black"
                                 android:layout_marginEnd="8dp" />
 
                             <TextView
@@ -443,7 +443,7 @@
                             <View
                                 android:layout_width="12dp"
                                 android:layout_height="12dp"
-                                android:background="@drawable/circle_light_orange"
+                                android:background="@drawable/circle_very_light_orange"
                                 android:layout_marginEnd="8dp" />
 
                             <TextView
@@ -467,7 +467,7 @@
                             <View
                                 android:layout_width="12dp"
                                 android:layout_height="12dp"
-                                android:background="@drawable/circle_medium_orange"
+                                android:background="@drawable/circle_orange"
                                 android:layout_marginEnd="8dp" />
 
                             <TextView
