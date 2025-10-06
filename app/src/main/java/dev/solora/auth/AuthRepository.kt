@@ -140,21 +140,6 @@ class AuthRepository(private val context: Context) {
         }
     }
 
-    suspend fun logout(): Result<Unit> {
-        return try {
-            firebaseAuth.signOut()
-            context.dataStore.edit { prefs ->
-                prefs.remove(KEY_USER_ID)
-                prefs.remove(KEY_NAME)
-                prefs.remove(KEY_SURNAME)
-                prefs.remove(KEY_EMAIL)
-            }
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
     fun getCurrentUserInfo(): Flow<UserInfo?> {
         return context.dataStore.data.catch { e -> 
             if (e is IOException) emit(emptyPreferences()) else throw e 
@@ -175,6 +160,22 @@ class AuthRepository(private val context: Context) {
             firebaseAuth.currentUser?.getIdToken(false)?.await()?.token
         } catch (e: Exception) {
             null
+        }
+    }
+    
+    suspend fun logout(): Result<Unit> {
+        return try {
+            // Clear local data store
+            context.dataStore.edit { prefs ->
+                prefs.clear()
+            }
+            
+            // Sign out from Firebase
+            firebaseAuth.signOut()
+            
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 }

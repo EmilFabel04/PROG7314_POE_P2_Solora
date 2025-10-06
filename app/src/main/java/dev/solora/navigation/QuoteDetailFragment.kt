@@ -85,7 +85,11 @@ class QuoteDetailFragment : Fragment() {
     
     private fun setupClickListeners() {
         btnBackDetail.setOnClickListener {
-            findNavController().popBackStack()
+            // Navigate back to quotes fragment and show view tab (tab 1)
+            val bundle = Bundle().apply {
+                putInt("show_tab", 1) // 1 = view tab
+            }
+            findNavController().navigate(R.id.action_quote_detail_to_quotes, bundle)
         }
         
         btnExportPdf.setOnClickListener {
@@ -178,35 +182,11 @@ class QuoteDetailFragment : Fragment() {
     
     private fun exportToPdf() {
         currentQuote?.let { quote ->
-            viewLifecycleOwner.lifecycleScope.launch {
-                try {
-                    // Show loading message
-                    Toast.makeText(requireContext(), "Generating PDF...", Toast.LENGTH_SHORT).show()
-                    
-                    // Generate PDF in background thread
-                    val pdfFile = withContext(Dispatchers.IO) {
-                        pdfGenerator.generateQuotePdf(quote)
-                    }
-                    
-                    if (pdfFile != null) {
-                        // Show success message
-                        Toast.makeText(requireContext(), "PDF generated successfully!", Toast.LENGTH_SHORT).show()
-                        
-                        // Share the PDF file
-                        val reference = if (quote.reference.isNotEmpty()) quote.reference else "REF-${quote.id?.takeLast(5) ?: "00000"}"
-                        FileShareUtils.sharePdfFile(requireContext(), pdfFile, reference)
-                        
-                        android.util.Log.d("QuoteDetailFragment", "PDF exported successfully: ${pdfFile.name}")
-                    } else {
-                        Toast.makeText(requireContext(), "Failed to generate PDF", Toast.LENGTH_SHORT).show()
-                        android.util.Log.e("QuoteDetailFragment", "PDF generation failed for quote: ${quote.reference}")
-                    }
-                    
-                } catch (e: Exception) {
-                    Toast.makeText(requireContext(), "Error generating PDF: ${e.message}", Toast.LENGTH_SHORT).show()
-                    android.util.Log.e("QuoteDetailFragment", "PDF export error: ${e.message}", e)
-                }
+            // Navigate to PDF preview page instead of directly exporting
+            val bundle = Bundle().apply {
+                putString("quoteId", quote.id ?: "")
             }
+            findNavController().navigate(R.id.quotePdfPreviewFragment, bundle)
         } ?: run {
             Toast.makeText(requireContext(), "No quote data available", Toast.LENGTH_SHORT).show()
         }

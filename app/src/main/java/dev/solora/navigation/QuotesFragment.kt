@@ -13,6 +13,7 @@ import android.widget.ImageButton
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -26,6 +27,12 @@ import dev.solora.settings.SettingsViewModel
 import dev.solora.dashboard.DashboardViewModel
 import dev.solora.dashboard.DashboardData
 import kotlinx.coroutines.launch
+import android.app.DatePickerDialog
+import java.text.SimpleDateFormat
+import java.util.*
+import java.util.Calendar
+import dev.solora.data.FirebaseQuote
+import androidx.recyclerview.widget.RecyclerView
 
 class QuotesFragment : Fragment() {
     private val quotesViewModel: QuotesViewModel by viewModels()
@@ -42,9 +49,20 @@ class QuotesFragment : Fragment() {
     private lateinit var contentCalculate: View
     private lateinit var contentView: View
     private lateinit var contentDashboard: View
+    private lateinit var btnBackQuotes: ImageButton
     
     // Dashboard elements
     private lateinit var dashboardContent: View
+    
+    // Date Filter Elements
+    private lateinit var tvDateFilterFrom: TextView
+    private lateinit var tvDateFilterTo: TextView
+    private lateinit var btnClearDateFilter: ImageButton
+    
+    // Date Filter Variables
+    private var fromDate: Date? = null
+    private var toDate: Date? = null
+    private val dateFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
     
     // Calculate tab elements
     private lateinit var etAddress: TextInputEditText
@@ -84,6 +102,25 @@ class QuotesFragment : Fragment() {
         observeViewModel()
         observeSettings()
         observeDashboard()
+        
+        // Check if we have a show_tab argument
+        val showTab = arguments?.getInt("show_tab", 0) ?: 0
+        if (showTab > 0) {
+            // Switch to the specified tab
+            switchToTab(showTab)
+            android.util.Log.d("QuotesFragment", "OnViewCreated: Switching to tab $showTab from argument")
+        } else {
+            // Check if we're returning from client details (quote was saved)
+            checkIfReturningFromQuoteSave()
+            
+            // Also check immediately if we should show view tab
+            val savedQuote = quotesViewModel.lastQuote.value
+            if (savedQuote != null && savedQuote.id != null) {
+                // Switch to view tab immediately to show the saved quote
+                switchToTab(1)
+                android.util.Log.d("QuotesFragment", "OnViewCreated: Switching to view tab to show saved quote: ${savedQuote.reference}")
+            }
+        }
     }
     
     private fun initializeViews(view: View) {
@@ -96,6 +133,9 @@ class QuotesFragment : Fragment() {
         contentCalculate = view.findViewById(R.id.content_calculate)
         contentView = view.findViewById(R.id.content_view)
         contentDashboard = view.findViewById(R.id.content_dashboard)
+        
+        // Back button
+        btnBackQuotes = view.findViewById(R.id.btn_back_quotes)
         
         // Dashboard content
         dashboardContent = LayoutInflater.from(requireContext()).inflate(R.layout.dashboard_content, null)
@@ -112,6 +152,8 @@ class QuotesFragment : Fragment() {
         rvQuotesList = view.findViewById(R.id.rv_quotes_list)
         layoutEmptyQuotes = view.findViewById(R.id.layout_empty_quotes)
         
+        // Date Filter Elements (will be initialized in setupDashboardTab after dashboard content is loaded)
+        
         // Dashboard tab elements
         etReference = view.findViewById(R.id.et_reference)
         etFirstName = view.findViewById(R.id.et_first_name)
@@ -124,6 +166,25 @@ class QuotesFragment : Fragment() {
     }
     
     private fun setupTabs() {
+        // Back button click listener
+        btnBackQuotes.setOnClickListener {
+            android.util.Log.d("QuotesFragment", "Back button clicked - navigating to home")
+            try {
+                val parentFragment = parentFragment
+                if (parentFragment is MainTabsFragment) {
+                    val bottomNav = parentFragment.view?.findViewById<BottomNavigationView>(R.id.bottom_nav)
+                    bottomNav?.selectedItemId = R.id.homeFragment
+                } else {
+                    // Fallback to direct navigation
+                    findNavController().navigate(R.id.homeFragment)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("QuotesFragment", "Error navigating back to home: ${e.message}")
+                // Fallback to direct navigation
+                findNavController().navigate(R.id.homeFragment)
+            }
+        }
+        
         tabCalculate.setOnClickListener { switchToTab(0) }
         tabView.setOnClickListener { switchToTab(1) }
         tabDashboard.setOnClickListener { switchToTab(2) }
@@ -142,6 +203,71 @@ class QuotesFragment : Fragment() {
         contentCalculate.visibility = if (tab == 0) View.VISIBLE else View.GONE
         contentView.visibility = if (tab == 1) View.VISIBLE else View.GONE
         contentDashboard.visibility = if (tab == 2) View.VISIBLE else View.GONE
+    }
+    
+    private fun navigateToQuoteResults(outputs: dev.solora.quote.QuoteOutputs, address: String) {
+        val bundle = Bundle().apply {
+            putSerializable("calculation_outputs", outputs)
+            putString("calculated_address", address)
+        }
+        findNavController().navigate(R.id.quoteResultsFragment, bundle)
+    }
+    
+    private fun checkIfReturningFromQuoteSave() {
+        // Check if we have a saved quote (indicates we just returned from saving a quote)
+        viewLifecycleOwner.lifecycleScope.launch {
+            quotesViewModel.lastQuote.collect { quote ->
+                if (quote != null && quote.id != null) {
+                    // We have a saved quote, switch to view tab to show it
+                    switchToTab(1)
+                    android.util.Log.d("QuotesFragment", "Switching to view tab to show saved quote: ${quote.reference}")
+                }
+            }
+        }
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        
+        // Check if we have a show_tab argument first
+        val showTab = arguments?.getInt("show_tab", 0) ?: 0
+        if (showTab > 0) {
+            // Don't override the tab if it was set by argument
+            android.util.Log.d("QuotesFragment", "OnResume: Tab already set by argument ($showTab), not overriding")
+            return
+        }
+        
+        // Check if we should switch to view tab when returning from client details
+        val savedQuote = quotesViewModel.lastQuote.value
+        if (savedQuote != null && savedQuote.id != null) {
+            // Switch to view tab to show the saved quote
+            switchToTab(1)
+            android.util.Log.d("QuotesFragment", "OnResume: Switching to view tab to show saved quote: ${savedQuote.reference}")
+        } else {
+            // If no saved quote, ensure we're on the calculate tab
+            switchToTab(0)
+            android.util.Log.d("QuotesFragment", "OnResume: No saved quote, switching to calculate tab")
+        }
+    }
+    
+    override fun onStart() {
+        super.onStart()
+        
+        // Check if we have a show_tab argument first
+        val showTab = arguments?.getInt("show_tab", 0) ?: 0
+        if (showTab > 0) {
+            // Don't override the tab if it was set by argument
+            android.util.Log.d("QuotesFragment", "OnStart: Tab already set by argument ($showTab), not overriding")
+            return
+        }
+        
+        // Also check on start in case onResume doesn't catch it
+        val savedQuote = quotesViewModel.lastQuote.value
+        if (savedQuote != null && savedQuote.id != null) {
+            // Switch to view tab to show the saved quote
+            switchToTab(1)
+            android.util.Log.d("QuotesFragment", "OnStart: Switching to view tab to show saved quote: ${savedQuote.reference}")
+        }
     }
     
     private fun updateTabAppearance() {
@@ -329,6 +455,32 @@ class QuotesFragment : Fragment() {
         
         // Initialize dashboard UI elements
         initializeDashboardViews()
+        
+        // Initialize date filter elements from dashboard content
+        tvDateFilterFrom = dashboardContent.findViewById(R.id.tv_date_filter_from)
+        tvDateFilterTo = dashboardContent.findViewById(R.id.tv_date_filter_to)
+        btnClearDateFilter = dashboardContent.findViewById(R.id.btn_clear_date_filter)
+        
+        // Setup date filter click listeners
+        tvDateFilterFrom.setOnClickListener {
+            showDatePicker { date ->
+                fromDate = date
+                tvDateFilterFrom.text = dateFormat.format(date)
+                applyDateFilterToDashboard()
+            }
+        }
+        
+        tvDateFilterTo.setOnClickListener {
+            showDatePicker { date ->
+                toDate = date
+                tvDateFilterTo.text = dateFormat.format(date)
+                applyDateFilterToDashboard()
+            }
+        }
+        
+        btnClearDateFilter.setOnClickListener {
+            clearDateFilterDashboard()
+        }
         
         // Load dashboard data when tab is shown
         dashboardViewModel.loadDashboardData()
@@ -541,7 +693,6 @@ class QuotesFragment : Fragment() {
             val address = etClientAddress.text.toString().trim().ifEmpty { "Unknown Address" }
             val email = etEmail.text.toString().trim()
             val contact = etContact.text.toString().trim()
-            val contactInfo = if (email.isNotEmpty() && contact.isNotEmpty()) "$email | $contact" else email.ifEmpty { contact }
             
             android.util.Log.d("QuotesFragment", "Quote details - Ref: $reference, Client: $clientName, Address: $address")
             
@@ -570,7 +721,8 @@ class QuotesFragment : Fragment() {
                             quoteId = savedQuote.id!!,
                             clientName = clientName,
                             address = address,
-                            contactInfo = contactInfo,
+                            email = email,
+                            phone = contact,
                             notes = "Lead created from quote $reference. System: ${String.format("%.2f", calculation.systemKw)}kW, Monthly savings: R${String.format("%.2f", calculation.monthlySavingsRands)}"
                         )
                         
@@ -610,13 +762,12 @@ class QuotesFragment : Fragment() {
                     is CalculationState.Success -> {
                         btnCalculate.isEnabled = true
                         btnCalculate.text = "calculate"
-                        Toast.makeText(requireContext(), "Calculation complete! Enter client details to save.", Toast.LENGTH_LONG).show()
                         
                         // Update the dashboard tab with calculation results
                         updateResultsTab(state.outputs)
                         
-                        // Automatically switch to dashboard tab to show results and save
-                        switchToTab(2)
+                        // Navigate to quote results fragment
+                        navigateToQuoteResults(state.outputs, etAddress.text.toString().trim())
                     }
                     is CalculationState.Error -> {
                         btnCalculate.isEnabled = true
@@ -644,7 +795,17 @@ class QuotesFragment : Fragment() {
                         etClientAddress.setText(quote.address)
                     }
                 } else {
+                    // Quote was cleared (cancelled), reset to calculate tab and clear summary
                     tvQuoteSummary.text = "Complete calculation first to see quote details"
+                    
+                    // Switch back to calculate tab when quote is cleared
+                    if (currentTab == 2) { // Only switch if we're currently on dashboard tab
+                        switchToTab(0) // Switch to calculate tab
+                        android.util.Log.d("QuotesFragment", "Quote cleared - switching back to calculate tab")
+                    }
+                    
+                    // Clear the client address field
+                    etClientAddress.setText("")
                 }
             }
         }
@@ -722,6 +883,87 @@ class QuotesFragment : Fragment() {
             } catch (e: Exception) {
                 Toast.makeText(requireContext(), "NASA API Error: ${e.message}", Toast.LENGTH_LONG).show()
                 android.util.Log.e("QuotesFragment", "NASA API Test Exception: ${e.message}", e)
+            }
+        }
+    }
+    
+    // Date Filter Helper Methods
+    private fun filterQuotesByDate(quotes: List<FirebaseQuote>): List<FirebaseQuote> {
+        if (fromDate == null && toDate == null) {
+            return quotes // No filter applied
+        }
+        
+        return quotes.filter { quote ->
+            try {
+                // Convert Firebase Timestamp to Date
+                val quoteDate = quote.createdAt?.toDate()
+                if (quoteDate == null) {
+                    return@filter true // Include quote if no date available
+                }
+                
+                val isAfterFromDate = fromDate?.let { 
+                    // Set time to start of day for comparison
+                    val calendar = Calendar.getInstance()
+                    calendar.time = it
+                    calendar.set(Calendar.HOUR_OF_DAY, 0)
+                    calendar.set(Calendar.MINUTE, 0)
+                    calendar.set(Calendar.SECOND, 0)
+                    calendar.set(Calendar.MILLISECOND, 0)
+                    quoteDate.after(calendar.time) || quoteDate == calendar.time
+                } ?: true
+                
+                val isBeforeToDate = toDate?.let { 
+                    // Set time to end of day for comparison
+                    val calendar = Calendar.getInstance()
+                    calendar.time = it
+                    calendar.set(Calendar.HOUR_OF_DAY, 23)
+                    calendar.set(Calendar.MINUTE, 59)
+                    calendar.set(Calendar.SECOND, 59)
+                    calendar.set(Calendar.MILLISECOND, 999)
+                    quoteDate.before(calendar.time) || quoteDate == calendar.time
+                } ?: true
+                
+                isAfterFromDate && isBeforeToDate
+            } catch (e: Exception) {
+                android.util.Log.e("QuotesFragment", "Error filtering quote by date: ${e.message}", e)
+                true // Include quote if date filtering fails
+            }
+        }
+    }
+    
+    private fun showDatePicker(onDateSelected: (Date) -> Unit) {
+        val calendar = Calendar.getInstance()
+        val datePickerDialog = DatePickerDialog(
+            requireContext(),
+            R.style.CustomDatePickerDialog, // Custom theme with orange colors
+            { _, year, month, dayOfMonth ->
+                calendar.set(year, month, dayOfMonth)
+                onDateSelected(calendar.time)
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+        datePickerDialog.show()
+    }
+    
+    private fun clearDateFilterDashboard() {
+        fromDate = null
+        toDate = null
+        tvDateFilterFrom.text = "Select Date"
+        tvDateFilterTo.text = "Select Date"
+        applyDateFilterToDashboard()
+    }
+    
+    private fun applyDateFilterToDashboard() {
+        // Refresh the dashboard data with the current date filter
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                // Reload dashboard data with date filtering
+                dashboardViewModel.loadDashboardDataWithDateFilter(fromDate, toDate)
+                android.util.Log.d("QuotesFragment", "Applied date filter to dashboard: ${fromDate?.let { dateFormat.format(it) }} - ${toDate?.let { dateFormat.format(it) }}")
+            } catch (e: Exception) {
+                android.util.Log.e("QuotesFragment", "Error applying date filter to dashboard: ${e.message}", e)
             }
         }
     }

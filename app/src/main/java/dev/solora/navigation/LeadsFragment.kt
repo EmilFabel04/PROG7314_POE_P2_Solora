@@ -5,6 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
+import android.widget.TextView
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.EditText
@@ -13,8 +15,11 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dev.solora.R
 import dev.solora.leads.LeadsViewModel
@@ -33,6 +38,7 @@ class LeadsFragment : Fragment() {
     private lateinit var btnAddLeadFallback: Button
     private lateinit var btnAddLeadEmpty: Button
     private lateinit var overlayAddLead: View
+    private lateinit var btnBackLeads: ImageButton
     
     // Form elements
     private lateinit var etFirstName: EditText
@@ -57,12 +63,73 @@ class LeadsFragment : Fragment() {
         android.util.Log.d("LeadsFragment", "===== UPDATED LEADS FRAGMENT ONVIEWCREATED CALLED =====")
         android.util.Log.d("LeadsFragment", "View tree: ${view.javaClass.simpleName}")
         
+        // Debug bottom navigation visibility
+        debugBottomNavigation()
+        
         initializeViews(view)
         setupRecyclerView()
         setupClickListeners()
         observeLeads()
         
         android.util.Log.d("LeadsFragment", "===== LEADS FRAGMENT SETUP COMPLETED =====")
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        android.util.Log.d("LeadsFragment", "LeadsFragment onResume - ensuring bottom navigation is visible")
+        
+        // Ensure bottom navigation is visible and properly configured when fragment resumes
+        try {
+            val parentFragment = parentFragment
+            if (parentFragment is MainTabsFragment) {
+                val bottomNav = parentFragment.view?.findViewById<BottomNavigationView>(R.id.bottom_nav)
+                ensureBottomNavigationVisible(bottomNav)
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("LeadsFragment", "Error ensuring bottom navigation in onResume: ${e.message}")
+        }
+    }
+    
+    private fun debugBottomNavigation() {
+        try {
+            val parentFragment = parentFragment
+            android.util.Log.d("LeadsFragment", "Parent fragment: ${parentFragment?.javaClass?.simpleName}")
+            
+            if (parentFragment is MainTabsFragment) {
+                val bottomNav = parentFragment.view?.findViewById<BottomNavigationView>(R.id.bottom_nav)
+                android.util.Log.d("LeadsFragment", "Bottom navigation found: ${bottomNav != null}")
+                android.util.Log.d("LeadsFragment", "Bottom navigation visibility: ${bottomNav?.visibility}")
+                android.util.Log.d("LeadsFragment", "Bottom navigation selected item: ${bottomNav?.selectedItemId}")
+                
+                // Ensure bottom navigation is visible and properly configured
+                ensureBottomNavigationVisible(bottomNav)
+            } else {
+                android.util.Log.e("LeadsFragment", "Parent fragment is not MainTabsFragment: ${parentFragment?.javaClass?.simpleName}")
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("LeadsFragment", "Error debugging bottom navigation: ${e.message}")
+        }
+    }
+    
+    private fun ensureBottomNavigationVisible(bottomNav: BottomNavigationView?) {
+        bottomNav?.let { nav ->
+            android.util.Log.d("LeadsFragment", "Ensuring bottom navigation is visible")
+            
+            // Make sure it's visible
+            nav.visibility = View.VISIBLE
+            
+            // Ensure it's properly configured
+            nav.isEnabled = true
+            nav.isClickable = true
+            
+            // Set the selected item to leads if not already set
+            if (nav.selectedItemId != R.id.leadsFragment) {
+                nav.selectedItemId = R.id.leadsFragment
+                android.util.Log.d("LeadsFragment", "Set selected item to leads fragment")
+            }
+            
+            android.util.Log.d("LeadsFragment", "Bottom navigation configured - visibility: ${nav.visibility}, enabled: ${nav.isEnabled}, selected: ${nav.selectedItemId}")
+        }
     }
     
     private fun initializeViews(view: View) {
@@ -72,6 +139,7 @@ class LeadsFragment : Fragment() {
         btnAddLeadFallback = view.findViewById(R.id.btn_add_lead_fallback)
         btnAddLeadEmpty = view.findViewById(R.id.btn_add_lead_empty)
         overlayAddLead = view.findViewById(R.id.overlay_add_lead)
+        btnBackLeads = view.findViewById(R.id.btn_back_leads)
         
         android.util.Log.d("LeadsFragment", "Views initialized. FAB found: ${fabAddLead != null}")
         if (fabAddLead != null) {
@@ -107,63 +175,93 @@ class LeadsFragment : Fragment() {
     }
     
     private fun showLeadDetails(lead: FirebaseLead) {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_lead_details, null)
+        
+        // Initialize views
+        val tvLeadName = dialogView.findViewById<TextView>(R.id.tv_lead_name)
+        val tvLeadEmail = dialogView.findViewById<TextView>(R.id.tv_lead_email)
+        val tvLeadPhone = dialogView.findViewById<TextView>(R.id.tv_lead_phone)
+        val tvLeadId = dialogView.findViewById<TextView>(R.id.tv_lead_id)
+        val tvLeadDate = dialogView.findViewById<TextView>(R.id.tv_lead_date)
+        val tvLeadStatus = dialogView.findViewById<TextView>(R.id.tv_lead_status)
+        val tvLeadNotes = dialogView.findViewById<TextView>(R.id.tv_lead_notes)
+        val tvQuoteId = dialogView.findViewById<TextView>(R.id.tv_quote_id)
+        val cardLeadNotes = dialogView.findViewById<androidx.cardview.widget.CardView>(R.id.card_lead_notes)
+        val cardLinkedQuote = dialogView.findViewById<androidx.cardview.widget.CardView>(R.id.card_linked_quote)
+        
         // Format date
         val dateText = lead.createdAt?.toDate()?.let {
             java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale.getDefault()).format(it)
         } ?: "Unknown date"
         
-        // Build detailed message
-        val details = buildString {
-            appendLine("═══════════════════════════")
-            appendLine("LEAD DETAILS")
-            appendLine("═══════════════════════════")
-            appendLine()
-            appendLine("ID: ${lead.id ?: "N/A"}")
-            appendLine("Date: $dateText")
-            appendLine()
-            appendLine("CONTACT INFORMATION")
-            appendLine("───────────────────────────")
-            appendLine("Name: ${lead.name}")
-            if (lead.email.isNotEmpty()) {
-                appendLine("Email: ${lead.email}")
-            }
-            if (lead.phone.isNotEmpty()) {
-                appendLine("Phone: ${lead.phone}")
-            }
-            appendLine()
-            appendLine("STATUS")
-            appendLine("───────────────────────────")
-            appendLine(lead.status.uppercase())
-            appendLine()
-            if (!lead.notes.isNullOrEmpty()) {
-                appendLine("NOTES")
-                appendLine("───────────────────────────")
-                appendLine(lead.notes)
-                appendLine()
-            }
-            if (lead.quoteId != null) {
-                appendLine("LINKED QUOTE")
-                appendLine("───────────────────────────")
-                appendLine("Quote ID: ${lead.quoteId}")
-                appendLine()
-            }
-            appendLine("═══════════════════════════")
+        // Populate data
+        tvLeadName.text = lead.name
+        tvLeadEmail.text = if (lead.email.isNotEmpty()) lead.email else "Not provided"
+        tvLeadPhone.text = if (lead.phone.isNotEmpty()) lead.phone else "Not provided"
+        tvLeadId.text = lead.id ?: "N/A"
+        tvLeadDate.text = dateText
+        tvLeadStatus.text = lead.status.uppercase()
+        
+        // Show/hide notes card
+        if (!lead.notes.isNullOrEmpty()) {
+            tvLeadNotes.text = lead.notes
+            cardLeadNotes.visibility = View.VISIBLE
+        } else {
+            cardLeadNotes.visibility = View.GONE
         }
         
-        // Show in dialog
-        android.app.AlertDialog.Builder(requireContext())
-            .setTitle("Lead: ${lead.name}")
-            .setMessage(details)
-            .setPositiveButton("Close", null)
-            .setNeutralButton("Update Status") { _, _ ->
-                // TODO: Show status update dialog
-                Toast.makeText(requireContext(), "Status update coming soon", Toast.LENGTH_SHORT).show()
-            }
-            .show()
+        // Show/hide linked quote card
+        if (lead.quoteId != null) {
+            tvQuoteId.text = "Quote ID: ${lead.quoteId}"
+            cardLinkedQuote.visibility = View.VISIBLE
+        } else {
+            cardLinkedQuote.visibility = View.GONE
+        }
+        
+        // Create dialog
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+        
+        // Set up button click listeners
+        dialogView.findViewById<ImageButton>(R.id.btn_close_lead_details).setOnClickListener {
+            dialog.dismiss()
+        }
+        
+        dialogView.findViewById<Button>(R.id.btn_close_lead_details_action).setOnClickListener {
+            dialog.dismiss()
+        }
+        
+        dialogView.findViewById<Button>(R.id.btn_update_status).setOnClickListener {
+            // TODO: Show status update dialog
+            Toast.makeText(requireContext(), "Status update coming soon", Toast.LENGTH_SHORT).show()
+        }
+        
+        dialog.show()
     }
     
     private fun setupClickListeners() {
         android.util.Log.d("LeadsFragment", "Setting up click listeners. FAB found: ${::fabAddLead.isInitialized}")
+        
+        // Back button click listener
+        btnBackLeads.setOnClickListener {
+            android.util.Log.d("LeadsFragment", "Back button clicked - navigating to home")
+            try {
+                val parentFragment = parentFragment
+                if (parentFragment is MainTabsFragment) {
+                    val bottomNav = parentFragment.view?.findViewById<BottomNavigationView>(R.id.bottom_nav)
+                    bottomNav?.selectedItemId = R.id.homeFragment
+                } else {
+                    // Fallback to direct navigation
+                    findNavController().navigate(R.id.homeFragment)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("LeadsFragment", "Error navigating back to home: ${e.message}")
+                // Fallback to direct navigation
+                findNavController().navigate(R.id.homeFragment)
+            }
+        }
         
         if (::fabAddLead.isInitialized) {
             fabAddLead.setOnClickListener {
@@ -288,11 +386,10 @@ class LeadsFragment : Fragment() {
         // Generate reference number
         val reference = generateFirebaseLeadReference()
         val fullName = "$firstName $lastName"
-        val contactInfo = if (email.isNotEmpty()) "$email | $contact" else contact
         
-        // Add lead
-        android.util.Log.d("LeadsFragment", "Adding lead: $fullName, $address, $contactInfo, $source")
-        leadsViewModel.addLead(fullName, contactInfo, contactInfo, "")
+        // Add lead with separate email and phone fields
+        android.util.Log.d("LeadsFragment", "Adding lead: $fullName, email: $email, phone: $contact")
+        leadsViewModel.addLead(fullName, email, contact, "")
         
         // Clear form and hide modal
         clearForm()

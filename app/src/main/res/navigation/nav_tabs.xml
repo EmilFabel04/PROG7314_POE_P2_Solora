@@ -4,79 +4,74 @@
     android:id="@+id/nav_tabs"
     app:startDestination="@id/homeFragment">
 
-    <!-- Main Tab Fragments -->
     <fragment
         android:id="@+id/homeFragment"
         android:name="dev.solora.navigation.HomeFragment"
         android:label="Home">
         <action
-            android:id="@+id/action_home_to_settings"
+            android:id="@+id/action_to_settings"
             app:destination="@id/settingsFragment" />
         <action
-            android:id="@+id/action_home_to_notifications"
+            android:id="@+id/action_to_notifications"
             app:destination="@id/notificationsFragment" />
-        <action
-            android:id="@+id/action_home_to_quotes"
-            app:destination="@id/quotesFragment" />
-        <action
-            android:id="@+id/action_home_to_leads"
-            app:destination="@id/leadsFragment" />
-        <action
-            android:id="@+id/action_home_to_quote_detail"
-            app:destination="@id/quoteDetailFragment" />
     </fragment>
 
     <fragment
         android:id="@+id/quotesFragment"
         android:name="dev.solora.navigation.QuotesFragment"
         android:label="Quotes">
+        <argument
+            android:name="show_tab"
+            app:argType="integer"
+            android:defaultValue="0" />
         <action
             android:id="@+id/action_quotes_to_quote_detail"
             app:destination="@id/quoteDetailFragment" />
         <action
-            android:id="@+id/action_quotes_to_home"
-            app:destination="@id/homeFragment" />
+            android:id="@+id/action_quotes_to_quote_results"
+            app:destination="@id/quoteResultsFragment" />
     </fragment>
 
     <fragment
         android:id="@+id/leadsFragment"
         android:name="dev.solora.navigation.LeadsFragment"
-        android:label="Leads">
-        <action
-            android:id="@+id/action_leads_to_home"
-            app:destination="@id/homeFragment" />
-    </fragment>
+        android:label="Leads" />
 
     <fragment
         android:id="@+id/profileFragment"
         android:name="dev.solora.navigation.ProfileFragment"
         android:label="Profile">
         <action
-            android:id="@+id/action_profile_to_settings"
+            android:id="@+id/action_to_settings"
             app:destination="@id/settingsFragment" />
         <action
-            android:id="@+id/action_profile_to_edit_profile"
+            android:id="@+id/action_to_edit_profile"
             app:destination="@id/editProfileFragment" />
         <action
-            android:id="@+id/action_profile_to_change_password"
+            android:id="@+id/action_to_change_password"
             app:destination="@id/changePasswordFragment" />
-        <action
-            android:id="@+id/action_profile_to_auth"
-            app:destination="@id/auth_graph"
-            app:popUpTo="@id/nav_root"
-            app:popUpToInclusive="true" />
     </fragment>
 
-    <!-- Secondary Fragments -->
+    <fragment
+        android:id="@+id/quoteDetailFragment"
+        android:name="dev.solora.navigation.QuoteDetailFragment"
+        android:label="Quote Details">
+        <argument
+            android:name="id"
+            app:argType="string"
+            android:defaultValue="" />
+        <action
+            android:id="@+id/action_quote_detail_to_pdf_preview"
+            app:destination="@id/quotePdfPreviewFragment" />
+        <action
+            android:id="@+id/action_quote_detail_to_quotes"
+            app:destination="@id/quotesFragment" />
+    </fragment>
+
     <fragment
         android:id="@+id/settingsFragment"
         android:name="dev.solora.navigation.SettingsFragment"
         android:label="Settings" />
-
-    <fragment
-        android:id="@+id/notificationsFragment"
-        android:name="dev.solora.navigation.NotificationsFragment"
-        android:label="Notifications" />
 
     <fragment
         android:id="@+id/editProfileFragment"
@@ -89,19 +84,55 @@
         android:label="Change Password" />
 
     <fragment
-        android:id="@+id/quoteDetailFragment"
-        android:name="dev.solora.navigation.QuoteDetailFragment"
-        android:label="Quote Details">
+        android:id="@+id/notificationsFragment"
+        android:name="dev.solora.navigation.NotificationsFragment"
+        android:label="Notifications" />
+
+    <fragment
+        android:id="@+id/quoteResultsFragment"
+        android:name="dev.solora.navigation.QuoteResultsFragment"
+        android:label="Quote Results">
         <argument
-            android:name="id"
+            android:name="calculation_outputs"
+            app:argType="dev.solora.quote.QuoteOutputs" />
+        <argument
+            android:name="calculated_address"
             app:argType="string"
             android:defaultValue="" />
         <action
-            android:id="@+id/action_quote_detail_to_quotes"
-            app:destination="@id/quotesFragment" />
+            android:id="@+id/action_quote_results_to_client_details"
+            app:destination="@id/clientDetailsFragment" />
         <action
-            android:id="@+id/action_quote_detail_to_home"
-            app:destination="@id/homeFragment" />
+            android:id="@+id/action_quote_results_to_quotes"
+            app:destination="@id/quotesFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/clientDetailsFragment"
+        android:name="dev.solora.navigation.ClientDetailsFragment"
+        android:label="Client Details">
+        <argument
+            android:name="calculation_outputs"
+            app:argType="dev.solora.quote.QuoteOutputs" />
+        <argument
+            android:name="calculated_address"
+            app:argType="string"
+            android:defaultValue="" />
+        <action
+            android:id="@+id/action_client_details_to_quotes"
+            app:destination="@id/quotesFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/quotePdfPreviewFragment"
+        android:name="dev.solora.navigation.QuotePdfPreviewFragment"
+        android:label="Quote Preview">
+        <argument
+            android:name="quoteId"
+            app:argType="string"
+            android:defaultValue="" />
     </fragment>
 
 </navigation>
+
+

@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="@dimen/content_padding">
 
         <!-- Header -->
         <LinearLayout
@@ -18,8 +18,8 @@
             android:layout_height="wrap_content"
             android:background="@color/solora_orange"
             android:orientation="vertical"
-            android:padding="20dp"
-            android:layout_marginBottom="16dp">
+            android:padding="@dimen/content_padding"
+            android:layout_marginBottom="@dimen/content_padding">
 
             <!-- Back button and title row -->
             <LinearLayout
@@ -30,8 +30,8 @@
                 
                 <ImageButton
                     android:id="@+id/btn_back"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_width="@dimen/icon_size"
+                    android:layout_height="@dimen/icon_size"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@android:drawable/ic_menu_close_clear_cancel"
                     android:tint="@android:color/white"
@@ -44,7 +44,7 @@
                     android:layout_weight="1"
                     android:text="Settings"
                     android:textColor="@android:color/white"
-                    android:textSize="24sp"
+                    android:textSize="@dimen/text_size_title"
                     android:textStyle="bold" />
             </LinearLayout>
                 

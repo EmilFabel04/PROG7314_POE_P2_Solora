@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tablet dimensions (7" tablets and up) -->
+    <dimen name="header_height">64dp</dimen>
+    <dimen name="header_padding">24dp</dimen>
+    <dimen name="content_padding">24dp</dimen>
+    <dimen name="card_margin">12dp</dimen>
+    <dimen name="card_padding">20dp</dimen>
+    <dimen name="button_height">56dp</dimen>
+    <dimen name="text_size_title">24sp</dimen>
+    <dimen name="text_size_body">16sp</dimen>
+    <dimen name="text_size_small">14sp</dimen>
+    <dimen name="icon_size">28dp</dimen>
+    <dimen name="fab_margin">24dp</dimen>
+    <dimen name="dialog_padding">32dp</dimen>
+    <dimen name="form_field_spacing">16dp</dimen>
+</resources>

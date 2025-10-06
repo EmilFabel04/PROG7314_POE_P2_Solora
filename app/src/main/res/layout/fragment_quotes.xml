@@ -12,15 +12,36 @@
         android:layout_height="wrap_content"
         android:background="@color/solora_orange"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:padding="@dimen/content_padding">
         
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Solar Quotes"
-            android:textColor="@android:color/white"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            
+            <ImageButton
+                android:id="@+id/btn_back_quotes"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/home_icon_orange"
+                android:tint="@android:color/white"
+                android:contentDescription="Go to Home"
+                android:layout_marginEnd="16dp"
+                android:scaleType="fitCenter" />
+            
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Solar Quotes"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/text_size_title"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_marginEnd="64dp" />
+        </LinearLayout>
             
         <!-- Tab Row -->
         <LinearLayout
@@ -34,9 +55,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="calculate quote"
+                android:text="Calculate"
                 android:textColor="@android:color/white"
                 android:textStyle="bold"
+                android:textSize="14sp"
                 android:padding="12dp"
                 android:gravity="center"
                 android:background="@drawable/tab_selected"
@@ -48,9 +70,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="view quote"
+                android:text="View Quotes"
                 android:textColor="@android:color/white"
                 android:alpha="0.7"
+                android:textSize="14sp"
                 android:padding="12dp"
                 android:gravity="center"
                 android:background="@drawable/tab_unselected"
@@ -62,9 +85,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="dashboard"
+                android:text="Dashboard"
                 android:textColor="@android:color/white"
                 android:alpha="0.7"
+                android:textSize="14sp"
                 android:padding="12dp"
                 android:gravity="center"
                 android:background="@drawable/tab_unselected"
@@ -250,7 +274,8 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_quotes_list"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
                 android:paddingTop="8dp"
                 android:paddingBottom="80dp"
                 android:clipToPadding="false"

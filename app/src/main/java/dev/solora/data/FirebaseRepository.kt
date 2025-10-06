@@ -26,10 +26,17 @@ class FirebaseRepository {
             
             val quoteWithUser = quote.copy(userId = userId)
             
-            val docRef = firestore.collection("quotes").add(quoteWithUser).await()
-            android.util.Log.d("FirebaseRepository", "Quote saved successfully with ID: ${docRef.id}")
-            
-            Result.success(docRef.id)
+            // Try API first, fallback to direct Firestore
+            val apiResult = saveQuoteViaApi(quoteWithUser)
+            if (apiResult.isSuccess) {
+                android.util.Log.d("FirebaseRepository", "Quote saved via API: ${apiResult.getOrNull()}")
+                apiResult
+            } else {
+                android.util.Log.w("FirebaseRepository", "API failed, using direct Firestore: ${apiResult.exceptionOrNull()?.message}")
+                val docRef = firestore.collection("quotes").add(quoteWithUser).await()
+                android.util.Log.d("FirebaseRepository", "Quote saved via Firestore with ID: ${docRef.id}")
+                Result.success(docRef.id)
+            }
         } catch (e: Exception) {
             android.util.Log.e("FirebaseRepository", "Failed to save quote: ${e.message}", e)
             Result.failure(e)
@@ -93,22 +100,67 @@ class FirebaseRepository {
         return try {
             val userId = getCurrentUserId() ?: throw Exception("User not authenticated")
             
-            val doc = firestore.collection("quotes")
-                .document(quoteId)
-                .get()
-                .await()
-            
-            if (doc.exists()) {
-                val quote = doc.toObject(FirebaseQuote::class.java)?.copy(id = doc.id)
-                if (quote?.userId == userId) {
+            // Try API first, fallback to direct Firestore
+            val apiResult = apiService.getQuoteById(quoteId)
+            if (apiResult.isSuccess) {
+                val quoteData = apiResult.getOrNull()
+                if (quoteData != null) {
+                    android.util.Log.d("FirebaseRepository", "Quote retrieved via API: $quoteId")
+                    // Convert Map to FirebaseQuote
+                    val quote = FirebaseQuote(
+                        id = quoteData["id"] as? String,
+                        reference = quoteData["reference"] as? String ?: "",
+                        clientName = quoteData["clientName"] as? String ?: "",
+                        address = quoteData["address"] as? String ?: "",
+                        usageKwh = (quoteData["usageKwh"] as? Number)?.toDouble(),
+                        billRands = (quoteData["billRands"] as? Number)?.toDouble(),
+                        tariff = (quoteData["tariff"] as? Number)?.toDouble() ?: 0.0,
+                        panelWatt = (quoteData["panelWatt"] as? Number)?.toInt() ?: 0,
+                        latitude = (quoteData["latitude"] as? Number)?.toDouble(),
+                        longitude = (quoteData["longitude"] as? Number)?.toDouble(),
+                        averageAnnualIrradiance = (quoteData["averageAnnualIrradiance"] as? Number)?.toDouble(),
+                        averageAnnualSunHours = (quoteData["averageAnnualSunHours"] as? Number)?.toDouble(),
+                        systemKwp = (quoteData["systemKwp"] as? Number)?.toDouble() ?: 0.0,
+                        estimatedGeneration = (quoteData["estimatedGeneration"] as? Number)?.toDouble() ?: 0.0,
+                        monthlySavings = (quoteData["monthlySavings"] as? Number)?.toDouble() ?: 0.0,
+                        paybackMonths = (quoteData["paybackMonths"] as? Number)?.toInt() ?: 0,
+                        companyName = quoteData["companyName"] as? String ?: "",
+                        companyPhone = quoteData["companyPhone"] as? String ?: "",
+                        companyEmail = quoteData["companyEmail"] as? String ?: "",
+                        consultantName = quoteData["consultantName"] as? String ?: "",
+                        consultantPhone = quoteData["consultantPhone"] as? String ?: "",
+                        consultantEmail = quoteData["consultantEmail"] as? String ?: "",
+                        userId = quoteData["userId"] as? String ?: "",
+                        createdAt = quoteData["createdAt"] as? com.google.firebase.Timestamp,
+                        updatedAt = quoteData["updatedAt"] as? com.google.firebase.Timestamp
+                    )
                     Result.success(quote)
                 } else {
-                    Result.failure(Exception("Quote not found or access denied"))
+                    Result.success(null)
                 }
             } else {
-                Result.success(null)
+                android.util.Log.w("FirebaseRepository", "API failed for getQuoteById, using direct Firestore: ${apiResult.exceptionOrNull()?.message}")
+                
+                // Fallback to direct Firestore
+                val doc = firestore.collection("quotes")
+                    .document(quoteId)
+                    .get()
+                    .await()
+                
+                if (doc.exists()) {
+                    val quote = doc.toObject(FirebaseQuote::class.java)?.copy(id = doc.id)
+                    if (quote?.userId == userId) {
+                        android.util.Log.d("FirebaseRepository", "Quote retrieved via Firestore: $quoteId")
+                        Result.success(quote)
+                    } else {
+                        Result.failure(Exception("Quote not found or access denied"))
+                    }
+                } else {
+                    Result.success(null)
+                }
             }
         } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Error getting quote by ID: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -153,9 +205,19 @@ class FirebaseRepository {
             val userId = getCurrentUserId() ?: throw Exception("User not authenticated")
             val leadWithUser = lead.copy(userId = userId)
             
-            val docRef = firestore.collection("leads").add(leadWithUser).await()
-            Result.success(docRef.id)
+            // Try API first, fallback to direct Firestore
+            val apiResult = saveLeadViaApi(leadWithUser)
+            if (apiResult.isSuccess) {
+                android.util.Log.d("FirebaseRepository", "Lead saved via API: ${apiResult.getOrNull()}")
+                apiResult
+            } else {
+                android.util.Log.w("FirebaseRepository", "API failed, using direct Firestore: ${apiResult.exceptionOrNull()?.message}")
+                val docRef = firestore.collection("leads").add(leadWithUser).await()
+                android.util.Log.d("FirebaseRepository", "Lead saved via Firestore with ID: ${docRef.id}")
+                Result.success(docRef.id)
+            }
         } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Failed to save lead: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -217,13 +279,23 @@ class FirebaseRepository {
         return try {
             val userId = getCurrentUserId() ?: throw Exception("User not authenticated")
             
+            android.util.Log.d("FirebaseRepository", "Updating lead $leadId with quoteId: ${lead.quoteId}")
+            
+            // Use update() instead of set() to only update specific fields
+            val updateData = mapOf(
+                "quoteId" to lead.quoteId,
+                "updatedAt" to com.google.firebase.Timestamp.now()
+            )
+            
             firestore.collection("leads")
                 .document(leadId)
-                .set(lead.copy(id = leadId, userId = userId))
+                .update(updateData)
                 .await()
             
+            android.util.Log.d("FirebaseRepository", "Successfully updated lead $leadId")
             Result.success(Unit)
         } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Failed to update lead $leadId: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -232,6 +304,8 @@ class FirebaseRepository {
         return try {
             val userId = getCurrentUserId() ?: throw Exception("User not authenticated")
             
+            // Note: Using Firestore directly - no API endpoint exists for getLeadById
+            android.util.Log.d("FirebaseRepository", "Getting lead by ID via Firestore: $leadId")
             val doc = firestore.collection("leads")
                 .document(leadId)
                 .get()
@@ -240,6 +314,7 @@ class FirebaseRepository {
             if (doc.exists()) {
                 val lead = doc.toObject(FirebaseLead::class.java)?.copy(id = doc.id)
                 if (lead?.userId == userId) {
+                    android.util.Log.d("FirebaseRepository", "Lead retrieved via Firestore: $leadId")
                     Result.success(lead)
                 } else {
                     Result.failure(Exception("Lead not found or access denied"))
@@ -248,6 +323,7 @@ class FirebaseRepository {
                 Result.success(null)
             }
         } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Error getting lead by ID: ${e.message}", e)
             Result.failure(e)
         }
     }

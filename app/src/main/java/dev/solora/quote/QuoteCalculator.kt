@@ -46,7 +46,7 @@ data class QuoteOutputs(
     val estimatedMonthlyGeneration: Double = 0.0,
     val paybackMonths: Int = 0,
     val monthlySavingsRands: Double = 0.0
-)
+) : java.io.Serializable
 
 data class DetailedAnalysis(
     val monthlyGeneration: Map<Int, Double>, // kWh per month
@@ -61,7 +61,7 @@ data class DetailedAnalysis(
     val averageTemperature: Double? = null,
     val averageWindSpeed: Double? = null,
     val averageHumidity: Double? = null
-)
+) : java.io.Serializable
 
 data class FinancialProjection(
     val installationCost: Double,
@@ -69,26 +69,26 @@ data class FinancialProjection(
     val paybackPeriodYears: Double,
     val totalLifetimeSavings: Double, // 25 years
     val yearlyProjections: List<YearlyProjection>
-)
+) : java.io.Serializable
 
 data class YearlyProjection(
     val year: Int,
     val generation: Double,
     val savings: Double,
     val cumulativeSavings: Double
-)
+) : java.io.Serializable
 
 data class EnvironmentalImpact(
     val co2ReductionKgPerYear: Double,
     val treesEquivalent: Int,
     val coalEquivalentKg: Double
-)
+) : java.io.Serializable
 
 data class SystemOptimization(
     val efficiencyRating: String, // A+, A, B+, B, C
     val performanceRatio: Double, // 0-1
     val recommendations: List<String>
-)
+) : java.io.Serializable
 
 object QuoteCalculator {
     

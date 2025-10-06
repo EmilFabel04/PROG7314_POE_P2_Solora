@@ -9,10 +9,10 @@
     <!-- Orange Header with Icons -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/header_height"
         android:orientation="horizontal"
         android:background="@color/solora_orange"
-        android:padding="16dp"
+        android:padding="@dimen/header_padding"
         android:gravity="center_vertical">
 
         <TextView
@@ -21,13 +21,13 @@
             android:layout_weight="1"
             android:text="Solora"
             android:textColor="@android:color/white"
-            android:textSize="24sp"
+            android:textSize="@dimen/text_size_title"
             android:textStyle="bold" />
 
         <ImageView
             android:id="@+id/btn_notifications"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
             android:src="@android:drawable/ic_popup_reminder"
             android:tint="@android:color/white"
             android:background="?attr/selectableItemBackgroundBorderless"
@@ -38,8 +38,8 @@
 
         <ImageView
             android:id="@+id/btn_settings"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
             android:src="@android:drawable/ic_menu_preferences"
             android:tint="@android:color/white"
             android:background="?attr/selectableItemBackgroundBorderless"
@@ -54,7 +54,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:padding="16dp"
+        android:padding="@dimen/content_padding"
         android:fillViewport="true">
 
         <LinearLayout
@@ -75,7 +75,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="32dp"
+                    android:padding="20dp"
                     android:gravity="center">
 
                     <!-- Company Name -->
@@ -85,9 +85,9 @@
                         android:layout_height="wrap_content"
                         android:text="SOLORA"
                         android:textColor="@color/solora_orange"
-                        android:textSize="32sp"
+                        android:textSize="24sp"
                         android:textStyle="bold"
-                        android:layout_marginBottom="8dp" />
+                        android:layout_marginBottom="6dp" />
 
                     <!-- Company Subtitle -->
                     <TextView
@@ -95,8 +95,8 @@
                         android:layout_height="wrap_content"
                         android:text="Solar Solutions"
                         android:textColor="#666666"
-                        android:textSize="16sp"
-                        android:layout_marginBottom="24dp" />
+                        android:textSize="14sp"
+                        android:layout_marginBottom="16dp" />
 
                     <!-- Consultant Name -->
                     <TextView
@@ -105,24 +105,16 @@
                         android:layout_height="wrap_content"
                         android:text="Welcome back, John Smith"
                         android:textColor="@android:color/black"
-                        android:textSize="18sp"
+                        android:textSize="16sp"
                         android:textStyle="bold" />
 
-                    <!-- Consultant Role -->
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Senior Solar Consultant"
-                        android:textColor="#666666"
-                        android:textSize="14sp"
-                        android:layout_marginTop="4dp" />
 
                     <!-- Stats Row -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginTop="24dp"
+                        android:layout_marginTop="16dp"
                         android:gravity="center">
 
                         <LinearLayout
@@ -138,7 +130,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="0"
                                 android:textColor="@color/solora_orange"
-                                android:textSize="24sp"
+                                android:textSize="20sp"
                                 android:textStyle="bold" />
 
                             <TextView
@@ -146,15 +138,15 @@
                                 android:layout_height="wrap_content"
                                 android:text="Total Leads"
                                 android:textColor="#666666"
-                                android:textSize="12sp" />
+                                android:textSize="11sp" />
 
                         </LinearLayout>
 
                         <View
                             android:layout_width="1dp"
-                            android:layout_height="40dp"
+                            android:layout_height="32dp"
                             android:background="#E0E0E0"
-                            android:layout_marginHorizontal="16dp" />
+                            android:layout_marginHorizontal="12dp" />
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -169,7 +161,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="0"
                                 android:textColor="@color/solora_orange"
-                                android:textSize="24sp"
+                                android:textSize="20sp"
                                 android:textStyle="bold" />
 
                             <TextView
@@ -177,7 +169,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="Total Quotes"
                                 android:textColor="#666666"
-                                android:textSize="12sp" />
+                                android:textSize="11sp" />
 
                         </LinearLayout>
 
@@ -211,32 +203,32 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="20dp"
+                        android:padding="16dp"
                         android:gravity="center">
 
                         <ImageView
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:src="@android:drawable/ic_menu_edit"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:src="@drawable/ic_add"
                             android:tint="@color/solora_orange"
-                            android:layout_marginBottom="12dp" />
+                            android:layout_marginBottom="10dp" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Calculate Quote"
                             android:textColor="@android:color/black"
-                            android:textSize="16sp"
+                            android:textSize="14sp"
                             android:textStyle="bold"
                             android:gravity="center"
-                            android:layout_marginBottom="8dp" />
+                            android:layout_marginBottom="6dp" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Create new solar quotes"
                             android:textColor="#666666"
-                            android:textSize="12sp"
+                            android:textSize="11sp"
                             android:gravity="center" />
 
                     </LinearLayout>
@@ -260,32 +252,32 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="20dp"
+                        android:padding="16dp"
                         android:gravity="center">
 
                         <ImageView
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:src="@android:drawable/ic_menu_add"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:src="@drawable/ic_add"
                             android:tint="@color/solora_orange"
-                            android:layout_marginBottom="12dp" />
+                            android:layout_marginBottom="10dp" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Add Leads"
                             android:textColor="@android:color/black"
-                            android:textSize="16sp"
+                            android:textSize="14sp"
                             android:textStyle="bold"
                             android:gravity="center"
-                            android:layout_marginBottom="8dp" />
+                            android:layout_marginBottom="6dp" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Manage potential clients"
                             android:textColor="#666666"
-                            android:textSize="12sp"
+                            android:textSize="11sp"
                             android:gravity="center" />
 
                     </LinearLayout>
@@ -306,16 +298,16 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="16dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Recent Quotes"
                         android:textColor="@android:color/black"
-                        android:textSize="18sp"
+                        android:textSize="16sp"
                         android:textStyle="bold"
-                        android:layout_marginBottom="16dp" />
+                        android:layout_marginBottom="12dp" />
 
                     <!-- Recent Quotes List -->
                     <LinearLayout

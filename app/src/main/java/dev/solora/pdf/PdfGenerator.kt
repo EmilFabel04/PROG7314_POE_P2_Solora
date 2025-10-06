@@ -6,6 +6,7 @@ import com.itextpdf.html2pdf.HtmlConverter
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
 import dev.solora.data.FirebaseQuote
+import dev.solora.settings.CompanySettings
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
@@ -14,6 +15,10 @@ import java.util.*
 class PdfGenerator(private val context: Context) {
     
     fun generateQuotePdf(quote: FirebaseQuote): File? {
+        return generateQuotePdf(quote, CompanySettings())
+    }
+    
+    fun generateQuotePdf(quote: FirebaseQuote, companySettings: CompanySettings): File? {
         return try {
             // Create PDF directory if it doesn't exist
             val pdfDir = File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "Quotes")
@@ -28,7 +33,7 @@ class PdfGenerator(private val context: Context) {
             val pdfFile = File(pdfDir, filename)
             
             // Generate HTML content
-            val htmlContent = generateQuoteHtml(quote)
+            val htmlContent = generateQuoteHtml(quote, companySettings)
             
             // Convert HTML to PDF
             val outputStream = FileOutputStream(pdfFile)
@@ -44,7 +49,7 @@ class PdfGenerator(private val context: Context) {
         }
     }
     
-    private fun generateQuoteHtml(quote: FirebaseQuote): String {
+    private fun generateQuoteHtml(quote: FirebaseQuote, companySettings: CompanySettings = CompanySettings()): String {
         val reference = if (quote.reference.isNotEmpty()) quote.reference else "REF-${quote.id?.takeLast(5) ?: "00000"}"
         val dateText = quote.createdAt?.toDate()?.let {
             SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(it)
@@ -178,12 +183,65 @@ class PdfGenerator(private val context: Context) {
             color: #FF6B35;
         }
         .footer {
-            margin-top: 40px;
+            margin-top: 50px;
+            border-top: 3px solid #FF6B35;
+            padding-top: 40px;
+            background-color: #fafafa;
+            padding: 40px 30px;
+            border-radius: 8px;
+        }
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            gap: 40px;
+        }
+        .company-details {
+            flex: 1;
+        }
+        .company-details h3 {
+            color: #FF6B35;
+            font-size: 18px;
+            margin: 0 0 15px 0;
+            font-weight: bold;
+            border-bottom: 1px solid #FF6B35;
+            padding-bottom: 5px;
+        }
+        .company-details p {
+            margin: 8px 0;
+            color: #333;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .company-details strong {
+            color: #555;
+            font-weight: 600;
+        }
+        .quote-info {
+            flex: 1;
+            text-align: right;
+        }
+        .quote-info p {
+            margin: 8px 0;
+            color: #666;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .quote-info strong {
+            color: #555;
+            font-weight: 600;
+        }
+        .footer-bottom {
             text-align: center;
             color: #666;
             font-size: 12px;
-            border-top: 1px solid #eee;
+            border-top: 1px solid #ddd;
             padding-top: 20px;
+            margin-top: 25px;
+            line-height: 1.6;
+        }
+        .footer-bottom p {
+            margin: 5px 0;
         }
     </style>
 </head>
@@ -191,7 +249,7 @@ class PdfGenerator(private val context: Context) {
     <div class="container">
         <div class="header">
             <div class="company-info">
-                <h1>SOLORA</h1>
+                <h1>${if (companySettings.companyName.isNotEmpty()) companySettings.companyName else "SOLORA"}</h1>
                 <p>Solar Solutions</p>
             </div>
             <div class="quote-ref">
@@ -256,9 +314,28 @@ class PdfGenerator(private val context: Context) {
         </div>
         
         <div class="footer">
-            <p>This quote is valid for 30 days from the date of issue.</p>
-            <p>For any questions, please contact us at info@solora.co.za</p>
-            <p>Generated on ${SimpleDateFormat("dd MMMM yyyy 'at' HH:mm", Locale.getDefault()).format(Date())}</p>
+            <div class="footer-content">
+                <div class="company-details">
+                    <h3>${if (companySettings.companyName.isNotEmpty()) companySettings.companyName else "SOLORA"}</h3>
+                    ${if (companySettings.companyAddress.isNotEmpty()) "<p><strong>Address:</strong><br>${companySettings.companyAddress}</p>" else ""}
+                    ${if (companySettings.companyPhone.isNotEmpty()) "<p><strong>Phone:</strong> ${companySettings.companyPhone}</p>" else ""}
+                    ${if (companySettings.companyEmail.isNotEmpty()) "<p><strong>Email:</strong> ${companySettings.companyEmail}</p>" else ""}
+                    ${if (companySettings.companyWebsite.isNotEmpty()) "<p><strong>Website:</strong> ${companySettings.companyWebsite}</p>" else ""}
+                    ${if (companySettings.consultantName.isNotEmpty()) "<p><strong>Consultant:</strong> ${companySettings.consultantName}</p>" else ""}
+                    ${if (companySettings.consultantLicense.isNotEmpty()) "<p><strong>License:</strong> ${companySettings.consultantLicense}</p>" else ""}
+                </div>
+                <div class="quote-info">
+                    <p><strong>Quote Reference:</strong><br>$reference</p>
+                    <p><strong>Date Issued:</strong><br>$dateText</p>
+                    <p><strong>Valid Until:</strong><br>${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 30) }.time)}</p>
+                    <p><strong>Generated:</strong><br>${SimpleDateFormat("dd MMM yyyy 'at' HH:mm", Locale.getDefault()).format(Date())}</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p><strong>Quote Validity:</strong> This quote is valid for 30 days from the date of issue.</p>
+                ${if (companySettings.quoteFooter.isNotEmpty()) "<p>${companySettings.quoteFooter}</p>" else ""}
+                <p><em>Thank you for choosing ${if (companySettings.companyName.isNotEmpty()) companySettings.companyName else "SOLORA"} for your solar energy needs.</em></p>
+            </div>
         </div>
     </div>
 </body>
