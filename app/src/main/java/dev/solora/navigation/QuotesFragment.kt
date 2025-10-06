@@ -13,6 +13,7 @@ import android.widget.ImageButton
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
