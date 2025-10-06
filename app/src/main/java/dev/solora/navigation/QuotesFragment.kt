@@ -144,10 +144,7 @@ class QuotesFragment : Fragment() {
         rvQuotesList = view.findViewById(R.id.rv_quotes_list)
         layoutEmptyQuotes = view.findViewById(R.id.layout_empty_quotes)
         
-        // Date Filter Elements
-        tvDateFilterFrom = view.findViewById(R.id.tv_date_filter_from)
-        tvDateFilterTo = view.findViewById(R.id.tv_date_filter_to)
-        btnClearDateFilter = view.findViewById(R.id.btn_clear_date_filter)
+        // Date Filter Elements (will be initialized in setupDashboardTab after dashboard content is loaded)
         
         // Dashboard tab elements
         etReference = view.findViewById(R.id.et_reference)
@@ -428,6 +425,11 @@ class QuotesFragment : Fragment() {
         
         // Initialize dashboard UI elements
         initializeDashboardViews()
+        
+        // Initialize date filter elements from dashboard content
+        tvDateFilterFrom = dashboardContent.findViewById(R.id.tv_date_filter_from)
+        tvDateFilterTo = dashboardContent.findViewById(R.id.tv_date_filter_to)
+        btnClearDateFilter = dashboardContent.findViewById(R.id.btn_clear_date_filter)
         
         // Setup date filter click listeners
         tvDateFilterFrom.setOnClickListener {
@@ -918,7 +920,7 @@ class QuotesFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 // Reload dashboard data with date filtering
-                dashboardViewModel.loadDashboardData()
+                dashboardViewModel.loadDashboardDataWithDateFilter(fromDate, toDate)
                 android.util.Log.d("QuotesFragment", "Applied date filter to dashboard: ${fromDate?.let { dateFormat.format(it) }} - ${toDate?.let { dateFormat.format(it) }}")
             } catch (e: Exception) {
                 android.util.Log.e("QuotesFragment", "Error applying date filter to dashboard: ${e.message}", e)
