@@ -222,10 +222,9 @@ class ProfileFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 // Show loading message
-                dev.solora.utils.ToastUtils.showCustomToast(
+                dev.solora.utils.ToastUtils.showOrangeToast(
                     requireContext(), 
-                    "Logging out...", 
-                    dev.solora.utils.ToastUtils.ToastType.INFO
+                    "Logging out..."
                 )
                 
                 android.util.Log.d("ProfileFragment", "Starting logout process")
@@ -242,10 +241,9 @@ class ProfileFragment : Fragment() {
                 settingsViewModel.clearSettings()
                 
                 // Show success message
-                dev.solora.utils.ToastUtils.showCustomToast(
+                dev.solora.utils.ToastUtils.showOrangeToast(
                     requireContext(), 
-                    "Successfully logged out", 
-                    dev.solora.utils.ToastUtils.ToastType.SUCCESS
+                    "Successfully logged out"
                 )
                 
                 // Navigate to login screen with proper cleanup
@@ -255,11 +253,11 @@ class ProfileFragment : Fragment() {
                 
             } catch (e: Exception) {
                 android.util.Log.e("ProfileFragment", "Logout error: ${e.message}", e)
-                dev.solora.utils.ToastUtils.showCustomToast(
+                Toast.makeText(
                     requireContext(), 
                     "Logout failed: ${e.message}", 
-                    dev.solora.utils.ToastUtils.ToastType.ERROR
-                )
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
