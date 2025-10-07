@@ -5,17 +5,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import dev.solora.R
-import dev.solora.auth.AuthViewModel
-import kotlinx.coroutines.delay
+import dev.solora.auth.AuthRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class StartFragment : Fragment() {
-    private val authViewModel: AuthViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -29,11 +26,9 @@ class StartFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         
         viewLifecycleOwner.lifecycleScope.launch {
-            // Give DataStore a moment to load from disk
-            delay(100)
-            
-            // Now get the value - DataStore should have loaded by now
-            val hasSeenOnboarding = authViewModel.hasSeenOnboarding.first()
+            // Read DIRECTLY from DataStore to avoid ViewModel's cached default value
+            val authRepository = AuthRepository(requireContext().applicationContext)
+            val hasSeenOnboarding = authRepository.hasSeenOnboarding.first()
             
             if (!hasSeenOnboarding) {
                 // First time -> Show onboarding
