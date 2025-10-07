@@ -89,12 +89,12 @@ class LoginFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         
         // Check if this is a first-time user who should see onboarding
-        androidx.lifecycle.lifecycleScope.launchWhenStarted {
+        viewLifecycleOwner.lifecycleScope.launch {
             val hasAppData = authViewModel.hasAppData.value
             if (!hasAppData) {
                 // First-time user, redirect to onboarding
                 findNavController().navigate(R.id.action_login_to_onboarding)
-                return@launchWhenStarted
+                return@launch
             }
         }
 
