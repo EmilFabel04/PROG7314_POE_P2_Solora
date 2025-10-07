@@ -18,6 +18,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 import dev.solora.R
+import kotlinx.coroutines.tasks.await
 import dev.solora.profile.ProfileViewModel
 import dev.solora.settings.SettingsViewModel
 import dev.solora.auth.AuthViewModel
