@@ -221,18 +221,6 @@ class ProfileFragment : Fragment() {
     }
     
     private fun performLogout() {
-        // Show loading message
-        Toast.makeText(
-            requireContext(), 
-            "Logging out...", 
-            Toast.LENGTH_SHORT
-        ).show()
-        
-        android.util.Log.d("ProfileFragment", "Starting logout process")
-        
-        // Clear any cached data
-        clearUserData()
-        
         // Use AuthViewModel logout method (clears DataStore and Firebase Auth)
         authViewModel.logout()
         
@@ -241,25 +229,11 @@ class ProfileFragment : Fragment() {
             authViewModel.authState.collect { state ->
                 when (state) {
                     is dev.solora.auth.AuthState.Success -> {
-                        android.util.Log.d("ProfileFragment", "Logout successful: ${state.message}")
-                        
-                        // Clear ViewModels data
-                        profileViewModel.clearUserData()
-                        settingsViewModel.clearSettings()
-                        
-                        // Show success message
-                        Toast.makeText(
-                            requireContext(), 
-                            "Successfully logged out", 
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        
-                        // Clear the auth state to prevent further processing
+                        // Clear the auth state
                         authViewModel.clearAuthState()
                         
-                        android.util.Log.d("ProfileFragment", "User logged out, restarting activity")
-                        
-                        // Restart the activity to trigger authentication check
+                        // Restart the activity - it will start at StartFragment which will see
+                        // hasSeenOnboarding=true and navigate to login
                         val intent = requireActivity().intent
                         requireActivity().finish()
                         startActivity(intent)

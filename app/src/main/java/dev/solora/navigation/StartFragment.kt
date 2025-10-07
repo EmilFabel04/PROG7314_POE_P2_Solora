@@ -4,13 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import dev.solora.auth.AuthViewModel
 import dev.solora.R
+import dev.solora.auth.AuthViewModel
+import kotlinx.coroutines.launch
 
 class StartFragment : Fragment() {
     private val authViewModel: AuthViewModel by viewModels()
@@ -25,19 +25,18 @@ class StartFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            // Check if user is logged in
-            val isLoggedIn = authViewModel.isLoggedIn.value
+        
+        viewLifecycleOwner.lifecycleScope.launch {
+            // Check if this is first time opening the app
+            val hasSeenOnboarding = authViewModel.hasSeenOnboarding.value
             
-            if (isLoggedIn) {
-                // User is logged in -> Go to main app
-                findNavController().navigate(R.id.action_start_to_main)
+            if (!hasSeenOnboarding) {
+                // First time -> Show onboarding
+                findNavController().navigate(R.id.action_start_to_onboarding)
             } else {
-                // Not logged in -> Go to auth (LoginFragment will check hasAppData)
-                findNavController().navigate(R.id.action_start_to_auth)
+                // Already seen onboarding -> Show login
+                findNavController().navigate(R.id.action_start_to_login)
             }
         }
     }
 }
-
-

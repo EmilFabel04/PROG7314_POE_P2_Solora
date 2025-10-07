@@ -9,20 +9,20 @@
         android:name="dev.solora.navigation.StartFragment"
         android:label="Start" >
         <action
-            android:id="@+id/action_start_to_auth"
-            app:destination="@id/auth_graph"/>
+            android:id="@+id/action_start_to_onboarding"
+            app:destination="@id/onboardingFragment"
+            app:popUpTo="@id/startFragment"
+            app:popUpToInclusive="true"/>
         <action
-            android:id="@+id/action_start_to_main"
-            app:destination="@id/main_graph"/>
+            android:id="@+id/action_start_to_login"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/startFragment"
+            app:popUpToInclusive="true"/>
     </fragment>
 
     <navigation
         android:id="@+id/auth_graph"
         app:startDestination="@id/loginFragment">
-        <argument
-            android:name="show_onboarding"
-            app:argType="boolean"
-            android:defaultValue="false" />
         <fragment
             android:id="@+id/onboardingFragment"
             android:name="dev.solora.navigation.OnboardingFragment"

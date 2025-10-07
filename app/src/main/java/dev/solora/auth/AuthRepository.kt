@@ -26,35 +26,21 @@ class AuthRepository(private val context: Context) {
     private val KEY_NAME = stringPreferencesKey("name")
     private val KEY_SURNAME = stringPreferencesKey("surname")
     private val KEY_EMAIL = stringPreferencesKey("email")
-    private val KEY_HAS_APP_DATA = booleanPreferencesKey("has_app_data")
+    private val KEY_HAS_SEEN_ONBOARDING = booleanPreferencesKey("has_seen_onboarding")
 
     val currentUser: FirebaseUser? get() = firebaseAuth.currentUser
     
-    val isLoggedIn: Flow<Boolean> = context.dataStore.data.catch { e -> 
-        if (e is IOException) emit(emptyPreferences()) else throw e 
-    }.map { prefs ->
-        val userId = prefs[KEY_USER_ID]
-        !userId.isNullOrEmpty() && firebaseAuth.currentUser != null
-    }
-    
-    // Check if the app has ever been used (has app data/cache)
-    // Also consider if Firebase has a current user as a sign of previous use
-    val hasAppData: Flow<Boolean> = context.dataStore.data.catch { e ->
+    // Simple check: has the user ever seen the onboarding screen?
+    val hasSeenOnboarding: Flow<Boolean> = context.dataStore.data.catch { e ->
         if (e is IOException) emit(emptyPreferences()) else throw e
     }.map { prefs ->
-        val flagValue = prefs[KEY_HAS_APP_DATA] ?: false
-        // If flag is false but Firebase has user data, set the flag
-        if (!flagValue && firebaseAuth.currentUser != null) {
-            true
-        } else {
-            flagValue
-        }
+        prefs[KEY_HAS_SEEN_ONBOARDING] ?: false
     }
     
-    // Mark that the app now has data (user has registered/logged in)
-    private suspend fun markHasAppData() {
+    // Mark that onboarding has been seen
+    suspend fun markOnboardingComplete() {
         context.dataStore.edit { prefs ->
-            prefs[KEY_HAS_APP_DATA] = true
+            prefs[KEY_HAS_SEEN_ONBOARDING] = true
         }
     }
 
@@ -192,12 +178,12 @@ class AuthRepository(private val context: Context) {
     
     suspend fun logout(): Result<Unit> {
         return try {
-            // Clear local data store but preserve HAS_APP_DATA flag
+            // Clear local data store but preserve HAS_SEEN_ONBOARDING flag
             context.dataStore.edit { prefs ->
-                val hasData = prefs[KEY_HAS_APP_DATA] ?: false
+                val hasSeenOnboarding = prefs[KEY_HAS_SEEN_ONBOARDING] ?: false
                 prefs.clear()
-                // Keep the flag so returning users see login page, not onboarding
-                prefs[KEY_HAS_APP_DATA] = hasData
+                // Keep the onboarding flag so returning users see login page, not onboarding
+                prefs[KEY_HAS_SEEN_ONBOARDING] = hasSeenOnboarding
             }
             
             // Sign out from Firebase
