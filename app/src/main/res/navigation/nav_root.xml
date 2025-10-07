@@ -4,6 +4,7 @@
     android:id="@+id/nav_root"
     app:startDestination="@id/startFragment">
 
+    <!-- Start fragment decides where to go -->
     <fragment
         android:id="@+id/startFragment"
         android:name="dev.solora.navigation.StartFragment"
@@ -20,51 +21,50 @@
             app:popUpToInclusive="true"/>
     </fragment>
 
-    <navigation
-        android:id="@+id/auth_graph"
-        app:startDestination="@id/loginFragment">
-        <fragment
-            android:id="@+id/onboardingFragment"
-            android:name="dev.solora.navigation.OnboardingFragment"
-            android:label="Onboarding">
-            <action
-                android:id="@+id/action_onboarding_to_login"
-                app:destination="@id/loginFragment" />
-            <action
-                android:id="@+id/action_onboarding_to_register"
-                app:destination="@id/registerFragment" />
-        </fragment>
-        <fragment
-            android:id="@+id/loginFragment"
-            android:name="dev.solora.navigation.LoginFragment"
-            android:label="Login">
-            <action
-                android:id="@+id/action_login_to_main"
-                app:destination="@id/main_graph"
-                app:popUpTo="@id/auth_graph"
-                app:popUpToInclusive="true" />
-            <action
-                android:id="@+id/action_login_to_register"
-                app:destination="@id/registerFragment" />
-            <action
-                android:id="@+id/action_login_to_onboarding"
-                app:destination="@id/onboardingFragment" />
-        </fragment>
-        <fragment
-            android:id="@+id/registerFragment"
-            android:name="dev.solora.navigation.RegisterFragment"
-            android:label="Register">
-            <action
-                android:id="@+id/action_register_to_main"
-                app:destination="@id/main_graph"
-                app:popUpTo="@id/auth_graph"
-                app:popUpToInclusive="true" />
-            <action
-                android:id="@+id/action_register_to_login"
-                app:destination="@id/loginFragment" />
-        </fragment>
-    </navigation>
+    <!-- Onboarding (first time only) -->
+    <fragment
+        android:id="@+id/onboardingFragment"
+        android:name="dev.solora.navigation.OnboardingFragment"
+        android:label="Onboarding">
+        <action
+            android:id="@+id/action_onboarding_to_login"
+            app:destination="@id/loginFragment" />
+        <action
+            android:id="@+id/action_onboarding_to_register"
+            app:destination="@id/registerFragment" />
+    </fragment>
 
+    <!-- Login -->
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="dev.solora.navigation.LoginFragment"
+        android:label="Login">
+        <action
+            android:id="@+id/action_login_to_main"
+            app:destination="@id/main_graph"
+            app:popUpTo="@id/nav_root"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_login_to_register"
+            app:destination="@id/registerFragment" />
+    </fragment>
+
+    <!-- Register -->
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="dev.solora.navigation.RegisterFragment"
+        android:label="Register">
+        <action
+            android:id="@+id/action_register_to_main"
+            app:destination="@id/main_graph"
+            app:popUpTo="@id/nav_root"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_register_to_login"
+            app:destination="@id/loginFragment" />
+    </fragment>
+
+    <!-- Main app -->
     <navigation
         android:id="@+id/main_graph"
         app:startDestination="@id/mainTabsFragment">

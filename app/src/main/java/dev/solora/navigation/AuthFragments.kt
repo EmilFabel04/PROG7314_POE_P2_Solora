@@ -40,8 +40,8 @@ class OnboardingFragment : Fragment() {
             // Mark onboarding as complete
             authViewModel.markOnboardingComplete()
             
-            // Navigate to login
-            findNavController().navigate(R.id.action_onboarding_to_login)
+            // Navigate to register (first time users should register)
+            findNavController().navigate(R.id.action_onboarding_to_register)
         }
     }
 }
