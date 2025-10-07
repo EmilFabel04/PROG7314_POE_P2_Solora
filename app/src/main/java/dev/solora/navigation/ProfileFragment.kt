@@ -232,6 +232,9 @@ class ProfileFragment : Fragment() {
                         // Clear the auth state
                         authViewModel.clearAuthState()
                         
+                        // CRITICAL: Wait a bit for DataStore to finish writing
+                        kotlinx.coroutines.delay(200)
+                        
                         // Restart the activity - it will start at StartFragment which will see
                         // hasSeenOnboarding=true and navigate to login
                         val intent = requireActivity().intent

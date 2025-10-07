@@ -10,6 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import dev.solora.R
 import dev.solora.auth.AuthViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -28,7 +29,10 @@ class StartFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         
         viewLifecycleOwner.lifecycleScope.launch {
-            // Wait for the DataStore to load and get the first value
+            // Give DataStore a moment to load from disk
+            delay(100)
+            
+            // Now get the value - DataStore should have loaded by now
             val hasSeenOnboarding = authViewModel.hasSeenOnboarding.first()
             
             if (!hasSeenOnboarding) {

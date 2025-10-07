@@ -14,7 +14,7 @@ import dev.solora.data.FirebaseUser as UserInfo
 class AuthViewModel(app: Application) : AndroidViewModel(app) {
     private val repo = AuthRepository(app.applicationContext)
     
-    val hasSeenOnboarding = repo.hasSeenOnboarding.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+    val hasSeenOnboarding = repo.hasSeenOnboarding.stateIn(viewModelScope, SharingStarted.Eagerly, false)
     val userInfo = repo.getCurrentUserInfo().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null as UserInfo?)
     
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
