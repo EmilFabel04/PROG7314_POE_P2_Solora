@@ -213,7 +213,7 @@
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
                 android:fontFamily="@font/poppins"
-                android:text="or sign up with"
+                android:text="or sign up with Google"
                 android:textColor="@color/solora_night_gray"
                 android:textSize="13sp" />
 
@@ -232,22 +232,10 @@
             android:orientation="horizontal">
 
             <ImageButton
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:background="@drawable/twitter_icon" />
-
-            <ImageButton
                 android:id="@+id/btn_google_register"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:layout_marginLeft="30dp"
-                android:layout_marginRight="30dp"
                 android:background="@drawable/google_icon" />
-
-            <ImageButton
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:background="@drawable/apple_icon" />
         </LinearLayout>
 
         <LinearLayout
