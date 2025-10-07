@@ -1,31 +1,63 @@
-# Solora Release Keystore Setup
+# Solora Build and Testing Guide
 
-## For Team Members
+## For Lecturers and Evaluators
 
-### 1. Get the Release Keystore
-- Contact Emil or Zimkhitha to get the `solora-release-key.keystore` file
-- Place it in `app/keystore/solora-release-key.keystore`
+This document provides instructions to build and test the Solora Android application.
 
-### 2. Keystore Details
-- **File**: `app/keystore/solora-release-key.keystore`
-- **Alias**: `solora`
-- **Password**: `SoloraPOE2025`
-- **Key Password**: `SoloraPOE2025`
+### 1. Building the Application
 
-### 3. Build Release APK
+**Debug Build (Recommended for Testing):**
 ```bash
-./gradlew assembleRelease
+./gradlew assembleDebug
+```
+The debug APK will be generated at: `app/build/outputs/apk/debug/app-debug.apk`
+
+**Note**: Debug builds don't require a keystore and are perfect for testing and evaluation.
+
+### 2. Pre-built APK
+A pre-built debug APK is available at: `app/debug/app-debug.apk`
+
+### 3. Installation
+Install the APK on an Android device or emulator:
+```bash
+adb install app/debug/app-debug.apk
 ```
 
-### 4. Google SSO
-- The release keystore SHA-1 is already added to Firebase
-- Google Sign-In will work for all team members using this keystore
+### 4. Authentication Setup
+- **Email/Password**: Can be used immediately for testing
+- **Google Sign-In**: Works with debug keystore (configured in Firebase)
+- **Firebase Project**: Uses the included `google-services.json` configuration
 
-## Security Notes
-- Never commit the keystore file to Git
-- Share the keystore file securely (encrypted file sharing)
-- Keep passwords secure and share separately from the keystore file
+### 5. Testing the Application
+1. Install the APK on an Android device (API level 24+)
+2. Create a test account using Email/Password authentication
+3. Test core features:
+   - Quote calculation with NASA solar data integration
+   - Lead management and search functionality
+   - PDF generation and sharing
+   - Dashboard analytics with date filtering
+   - User profile and settings management
 
-## Firebase Configuration
-- SHA-1 fingerprint from release keystore is configured in Firebase Console
-- No need to add individual developer SHA-1 fingerprints
+### 6. Firebase Configuration
+- The project uses Firebase for authentication, database, and cloud functions
+- All necessary configurations are included in the repository
+- No additional setup required for basic functionality testing
+- Cloud Functions provide server-side logic for calculations and data processing
+
+### 7. Key Features to Test
+- **Onboarding Flow**: First-time user experience
+- **Authentication**: Email/password and Google Sign-In
+- **Quote Calculator**: Solar system sizing with real-time calculations
+- **Lead Management**: CRUD operations with search and filtering
+- **PDF Generation**: Professional quote documents
+- **Dashboard**: Analytics and performance metrics
+- **Offline Support**: App functionality without internet connection
+
+## Notes for Academic Evaluation
+- All source code is available for review
+- The application demonstrates modern Android development practices
+- Firebase integration showcases cloud-based architecture
+- REST API integration with fallback mechanisms
+- Comprehensive error handling and user feedback
+- Material Design implementation
+- MVVM architecture pattern
