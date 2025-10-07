@@ -98,22 +98,58 @@ class QuoteDetailFragment : Fragment() {
     }
     
     private fun loadQuoteDetails(quoteId: String) {
+        // Hide content initially to prevent showing demo data
+        hideContent()
+        
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val quote = quotesViewModel.getQuoteById(quoteId)
                 if (quote != null) {
                     currentQuote = quote
                     displayQuoteDetails(quote)
+                    showContent() // Show content only after real data is loaded
                 } else {
                     Toast.makeText(requireContext(), "Quote not found", Toast.LENGTH_SHORT).show()
                     findNavController().popBackStack()
                 }
             } catch (e: Exception) {
-                android.util.Log.e("QuoteDetailFragment", "Error loading quote: ${e.message}", e)
+                // ("QuoteDetailFragment", "Error loading quote: ${e.message}", e)
                 Toast.makeText(requireContext(), "Error loading quote details", Toast.LENGTH_SHORT).show()
                 findNavController().popBackStack()
             }
         }
+    }
+    
+    private fun hideContent() {
+        // Hide all content TextViews to prevent showing demo data
+        tvQuoteReference.visibility = View.INVISIBLE
+        tvClientName.visibility = View.INVISIBLE
+        tvClientAddress.visibility = View.INVISIBLE
+        tvQuoteDate.visibility = View.INVISIBLE
+        tvMonthlySavings.visibility = View.INVISIBLE
+        tvRecommendedPanels.visibility = View.INVISIBLE
+        tvSystemSize.visibility = View.INVISIBLE
+        tvRecommendedInverter.visibility = View.INVISIBLE
+        tvCoverage.visibility = View.INVISIBLE
+        tvSystemCost.visibility = View.INVISIBLE
+        tvTax.visibility = View.INVISIBLE
+        tvTotalCost.visibility = View.INVISIBLE
+    }
+    
+    private fun showContent() {
+        // Show all content TextViews after real data is loaded
+        tvQuoteReference.visibility = View.VISIBLE
+        tvClientName.visibility = View.VISIBLE
+        tvClientAddress.visibility = View.VISIBLE
+        tvQuoteDate.visibility = View.VISIBLE
+        tvMonthlySavings.visibility = View.VISIBLE
+        tvRecommendedPanels.visibility = View.VISIBLE
+        tvSystemSize.visibility = View.VISIBLE
+        tvRecommendedInverter.visibility = View.VISIBLE
+        tvCoverage.visibility = View.VISIBLE
+        tvSystemCost.visibility = View.VISIBLE
+        tvTax.visibility = View.VISIBLE
+        tvTotalCost.visibility = View.VISIBLE
     }
     
     private fun displayQuoteDetails(quote: dev.solora.data.FirebaseQuote) {
@@ -177,7 +213,7 @@ class QuoteDetailFragment : Fragment() {
         tvTax.text = "R ${String.format("%.2f", tax)}"
         tvTotalCost.text = "R ${String.format("%.2f", totalCost)}"
         
-        android.util.Log.d("QuoteDetailFragment", "Quote details displayed for: $reference")
+        // Quote details displayed for: $reference
     }
     
     private fun exportToPdf() {
