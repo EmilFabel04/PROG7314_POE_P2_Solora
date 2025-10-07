@@ -69,22 +69,23 @@ class PdfGenerator(private val context: Context) {
         }
         
         val systemSizeText = if (systemSize > 0) "${String.format("%.1f", systemSize)}KW" else "0.0KW"
-        val inverterSizeText = if (quote.inverterKw > 0) "${String.format("%.1f", quote.inverterKw)}KW" else if (systemSize > 0) "${String.format("%.1f", systemSize * 0.8)}KW" else "0.0KW"
+        val inverterSizeText = if (systemSize > 0) "${String.format("%.1f", systemSize * 0.8)}KW" else "0.0KW"
         
-        val coverage = if (systemSize > 0 && quote.monthlyUsageKwh > 0) {
-            val monthlyGeneration = systemSize * quote.sunHoursPerDay * 30
-            ((monthlyGeneration / quote.monthlyUsageKwh) * 100).toInt().coerceAtMost(100)
+        val coverage = if (systemSize > 0 && quote.usageKwh != null && quote.usageKwh > 0) {
+            val monthlyGeneration = systemSize * (quote.averageAnnualSunHours ?: 5.0) * 30
+            ((monthlyGeneration / quote.usageKwh) * 100).toInt().coerceAtMost(100)
         } else {
             0
         }
         
         val systemCost = if (systemSize > 0) {
-            systemSize * 15000 // Use standard installation cost per kW
+            // Use standard installation cost per kW (R15,000 per kW is industry standard)
+            systemSize * 15000
         } else {
             0.0
         }
         
-        val tax = systemCost * 0.15
+        val tax = systemCost * 0.15 // Standard VAT rate
         val totalCost = systemCost + tax
         
         return """
@@ -275,6 +276,26 @@ class PdfGenerator(private val context: Context) {
         </div>
         
         <div class="section">
+            <div class="section-title">Customer Requirements</div>
+            ${if (quote.usageKwh != null) """
+            <div class="detail-row">
+                <div class="detail-label">Monthly Usage:</div>
+                <div class="detail-value">${String.format("%.1f", quote.usageKwh)} kWh</div>
+            </div>
+            """ else ""}
+            ${if (quote.billRands != null) """
+            <div class="detail-row">
+                <div class="detail-label">Monthly Bill:</div>
+                <div class="detail-value">R ${String.format("%.2f", quote.billRands)}</div>
+            </div>
+            """ else ""}
+            <div class="detail-row">
+                <div class="detail-label">Electricity Tariff:</div>
+                <div class="detail-value">R ${String.format("%.2f", quote.tariff)} per kWh</div>
+            </div>
+        </div>
+        
+        <div class="section">
             <div class="section-title">System Specifications</div>
             <div class="detail-row">
                 <div class="detail-label">Estimated Monthly Savings:</div>
@@ -282,7 +303,7 @@ class PdfGenerator(private val context: Context) {
             </div>
             <div class="detail-row">
                 <div class="detail-label">Recommended Panels:</div>
-                <div class="detail-value">$panelCount x 550W</div>
+                <div class="detail-value">$panelCount x ${quote.panelWatt}W</div>
             </div>
             <div class="detail-row">
                 <div class="detail-label">Total System Size:</div>
@@ -296,6 +317,12 @@ class PdfGenerator(private val context: Context) {
                 <div class="detail-label">Coverage of monthly usage:</div>
                 <div class="detail-value">${coverage}%</div>
             </div>
+            ${if (quote.paybackMonths > 0) """
+            <div class="detail-row">
+                <div class="detail-label">Payback Period:</div>
+                <div class="detail-value">${quote.paybackMonths} months (${String.format("%.1f", quote.paybackMonths / 12.0)} years)</div>
+            </div>
+            """ else ""}
         </div>
         
         <div class="section cost-section">
