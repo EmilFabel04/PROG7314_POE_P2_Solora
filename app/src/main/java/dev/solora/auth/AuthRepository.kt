@@ -49,11 +49,12 @@ class AuthRepository(private val context: Context) {
             val result = firebaseAuth.signInWithEmailAndPassword(email, password).await()
             val user = result.user ?: throw Exception("Login failed: No user returned")
             
-            // Store user info locally
+            // Store user info locally and mark that user has logged in before
             context.dataStore.edit { prefs ->
                 prefs[KEY_USER_ID] = user.uid
                 prefs[KEY_EMAIL] = user.email ?: email
                 prefs[KEY_NAME] = user.displayName ?: email.substringBefore('@')
+                prefs[KEY_HAS_SEEN_ONBOARDING] = true  // User has logged in, skip onboarding next time
             }
             
             Result.success(user)
@@ -74,6 +75,7 @@ class AuthRepository(private val context: Context) {
                 prefs[KEY_USER_ID] = user.uid
                 prefs[KEY_NAME] = user.displayName ?: ""
                 prefs[KEY_EMAIL] = user.email ?: ""
+                prefs[KEY_HAS_SEEN_ONBOARDING] = true  // User has logged in, skip onboarding next time
             }
 
             Result.success(user)
@@ -102,12 +104,13 @@ class AuthRepository(private val context: Context) {
             )
             firestore.collection("users").document(user.uid).set(userDoc).await()
             
-            // Store user info locally
+            // Store user info locally and mark that user has registered
             context.dataStore.edit { prefs ->
                 prefs[KEY_USER_ID] = user.uid
                 prefs[KEY_NAME] = name
                 prefs[KEY_SURNAME] = surname
                 prefs[KEY_EMAIL] = email
+                prefs[KEY_HAS_SEEN_ONBOARDING] = true  // User has registered, skip onboarding next time
             }
             
             Result.success(user)
@@ -135,12 +138,13 @@ class AuthRepository(private val context: Context) {
 
             firestore.collection("users").document(user.uid).set(userDoc).await()
 
-            // Store user info locally
+            // Store user info locally and mark that user has registered
             context.dataStore.edit { prefs ->
                 prefs[KEY_USER_ID] = user.uid
                 prefs[KEY_NAME] = user.displayName ?: ""
                 prefs[KEY_SURNAME] = "" // no surname from Google
                 prefs[KEY_EMAIL] = user.email ?: ""
+                prefs[KEY_HAS_SEEN_ONBOARDING] = true  // User has registered, skip onboarding next time
             }
 
             Result.success(user)
