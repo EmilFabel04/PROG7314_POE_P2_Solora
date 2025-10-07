@@ -7,7 +7,7 @@
 
 Solora is a Kotlin Android app for solar sales consultants to calculate system sizes, generate quotes, and manage leads. It integrates with Firebase (Auth, Firestore, Analytics, Callable Functions) and a lightweight backend implemented as Firebase Cloud Functions. The app supports offline Firestore persistence, PDF generation, and Google Sign-In.
 
-###YouTube video showcasing the Solora app:
+### YouTube video showcasing the Solora app:
 https://youtu.be/wNVhsIj4Qn4?si=T80afQpQ41UrxHtV
 
 ### Key Highlights
