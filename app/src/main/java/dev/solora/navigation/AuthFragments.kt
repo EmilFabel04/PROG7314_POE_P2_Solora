@@ -22,6 +22,8 @@ import com.google.android.gms.common.api.ApiException
 import dev.solora.R
 import dev.solora.auth.AuthViewModel
 
+// This is the welcome screen that shows when someone opens the app for the first time
+// It explains what the app does and lets them get started
 class OnboardingFragment : Fragment() {
 
     private val authViewModel: AuthViewModel by viewModels()
@@ -46,6 +48,8 @@ class OnboardingFragment : Fragment() {
     }
 }
 
+// This is the login screen where users can sign in with email/password or Google
+// It checks if they have an account and lets them log in
 class LoginFragment : Fragment() {
 
     private val authViewModel: AuthViewModel by viewModels()
@@ -138,6 +142,8 @@ class LoginFragment : Fragment() {
     }
 }
 
+// This is the registration screen where new users can create an account
+// They can sign up with email/password or Google
 class RegisterFragment : Fragment() {
 
     private val authViewModel: AuthViewModel by viewModels()

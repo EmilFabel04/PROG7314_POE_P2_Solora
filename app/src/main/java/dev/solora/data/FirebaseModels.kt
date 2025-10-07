@@ -4,7 +4,10 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentId
 import com.google.firebase.firestore.ServerTimestamp
 
-// Firebase Firestore data models for Part 2
+// These are the data models that store information in Firebase
+// They define what data we save for quotes, leads, and users
+
+// This stores all the information about a solar quote
 data class FirebaseQuote(
     @DocumentId
     val id: String? = null,
@@ -42,6 +45,7 @@ data class FirebaseQuote(
     val updatedAt: Timestamp? = null
 )
 
+// This stores information about potential customers (leads)
 data class FirebaseLead(
     @DocumentId
     val id: String? = null,
@@ -58,6 +62,7 @@ data class FirebaseLead(
     val updatedAt: Timestamp? = null
 )
 
+// This stores information about the app users (consultants)
 data class FirebaseUser(
     @DocumentId
     val id: String? = null,

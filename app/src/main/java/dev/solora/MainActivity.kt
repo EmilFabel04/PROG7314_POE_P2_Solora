@@ -8,6 +8,8 @@ import dev.solora.data.FirebaseRepository
 import kotlinx.coroutines.launch
 import android.util.Log
 
+// This is the main activity that starts when the app opens
+// It checks if everything is working and then shows the main app
 class MainActivity : FragmentActivity() {
     
     private val firebaseRepository = FirebaseRepository()
@@ -17,7 +19,8 @@ class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         
-        // Perform health check and API connectivity test on app startup
+        // Check if our API is working when the app starts
+        // This makes sure everything is connected properly
         performStartupChecks()
     }
     

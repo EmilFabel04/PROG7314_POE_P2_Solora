@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.tasks.await
 
+// This class handles all the data operations
+// It talks to Firebase and our API to save and get quotes, leads, and settings
 class FirebaseRepository {
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
@@ -17,7 +19,8 @@ class FirebaseRepository {
     
     private fun getCurrentUserId(): String? = auth.currentUser?.uid
 
-    // Quote Operations
+    // Quote Operations - saving and getting quotes
+    // This saves a quote to the database
     suspend fun saveQuote(quote: FirebaseQuote): Result<String> {
         return try {
             val userId = getCurrentUserId() ?: throw Exception("User not authenticated")
@@ -37,6 +40,8 @@ class FirebaseRepository {
         }
     }
 
+    // This gets all quotes for the current user
+    // It updates in real-time when quotes change
     suspend fun getQuotes(): Flow<List<FirebaseQuote>> = callbackFlow {
         val userId = getCurrentUserId()
         if (userId == null) {

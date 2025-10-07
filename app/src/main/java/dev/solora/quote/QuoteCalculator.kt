@@ -90,6 +90,8 @@ data class SystemOptimization(
     val recommendations: List<String>
 ) : java.io.Serializable
 
+// This class handles all the solar system calculations
+// It figures out how many panels you need, how much it will cost, and how long it takes to pay back
 object QuoteCalculator {
     
     private const val PANEL_DEGRADATION_RATE = 0.005 // 0.5% per year
@@ -97,6 +99,8 @@ object QuoteCalculator {
     private const val CO2_PER_KWH = 0.928 // kg CO2 per kWh in South Africa
     private const val INSTALLATION_COST_PER_KW = 15000.0 // R15,000 per kW estimated
     
+    // This is the main calculation function that does everything
+    // It can use NASA data to get accurate sun hours for the location
     suspend fun calculateAdvanced(
         inputs: QuoteInputs,
         nasaClient: NasaPowerClient? = null,
@@ -123,6 +127,8 @@ object QuoteCalculator {
         }
     }
     
+    // This does the basic calculation without NASA data
+    // It just uses the sun hours you provide
     fun calculateBasic(inputs: QuoteInputs, settings: dev.solora.settings.CalculationSettings? = null): QuoteOutputs {
         val usageKwh = inputs.monthlyUsageKwh ?: run {
             val bill = inputs.monthlyBillRands ?: 0.0

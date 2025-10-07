@@ -34,6 +34,10 @@ import java.util.Calendar
 import dev.solora.data.FirebaseQuote
 import androidx.recyclerview.widget.RecyclerView
 
+// This is the main quotes screen where users can:
+// 1. Calculate new quotes
+// 2. View their existing quotes
+// 3. See dashboard with statistics
 class QuotesFragment : Fragment() {
     private val quotesViewModel: QuotesViewModel by viewModels()
     private val leadsViewModel: LeadsViewModel by viewModels()
@@ -41,6 +45,7 @@ class QuotesFragment : Fragment() {
     private val dashboardViewModel: DashboardViewModel by viewModels()
     private var isFirebaseTest = false
     private var currentTab = 0 // 0: calculate, 1: view, 2: dashboard
+    // This keeps track of which tab the user is on
     
     // UI Elements
     private lateinit var tabCalculate: TextView

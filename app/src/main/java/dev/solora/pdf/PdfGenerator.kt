@@ -12,8 +12,12 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
+// This class creates PDF files from quotes
+// It takes a quote and makes a nice-looking PDF that can be shared with customers
 class PdfGenerator(private val context: Context) {
     
+    // This creates a PDF file from a quote
+    // It saves the PDF to the device and returns the file
     fun generateQuotePdf(quote: FirebaseQuote): File? {
         return generateQuotePdf(quote, CompanySettings())
     }
