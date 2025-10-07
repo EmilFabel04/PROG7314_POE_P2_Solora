@@ -182,18 +182,16 @@ class ClientDetailsFragment : Fragment() {
         val clientName = "$firstName $lastName"
         
         calculationOutputs?.let { outputs ->
-            // Save the quote first
-            quotesViewModel.saveQuoteFromCalculation(reference, clientName, address, outputs)
-            
-            // Wait for quote to be saved, then link to lead
+            // Save the quote first and wait for completion
             viewLifecycleOwner.lifecycleScope.launch {
                 try {
-                    // Wait a bit for the quote to be saved
-                    kotlinx.coroutines.delay(1000)
+                    // Save the quote synchronously and wait for result
+                    val saveResult = quotesViewModel.saveQuoteFromCalculationSync(reference, clientName, address, outputs)
                     
-                    val savedQuote = quotesViewModel.lastQuote.value
-                    // Saved quote: ${savedQuote?.id}, Selected lead: ${selectedLead?.id}
-                    if (savedQuote != null && savedQuote.id != null) {
+                    if (saveResult.isSuccess) {
+                        val savedQuote = saveResult.getOrNull()
+                        // Saved quote: ${savedQuote?.id}, Selected lead: ${selectedLead?.id}
+                        if (savedQuote != null && savedQuote.id != null) {
                         if (selectedLead != null) {
                             // Validate selected lead has an ID
                             if (selectedLead!!.id.isNullOrBlank()) {
@@ -258,13 +256,18 @@ class ClientDetailsFragment : Fragment() {
                                 Bundle().apply { putInt("show_tab", 1) }
                             )
                         }
+                        } else {
+                            Toast.makeText(requireContext(), "Quote saved but no quote ID received. Please try again.", Toast.LENGTH_LONG).show()
+                            // Navigate to View Quotes tab
+                            findNavController().navigate(
+                                R.id.action_client_details_to_quotes,
+                                Bundle().apply { putInt("show_tab", 1) }
+                            )
+                        }
                     } else {
-                        Toast.makeText(requireContext(), "Quote saved successfully!", Toast.LENGTH_SHORT).show()
-                        // Navigate to View Quotes tab
-                        findNavController().navigate(
-                            R.id.action_client_details_to_quotes,
-                            Bundle().apply { putInt("show_tab", 1) }
-                        )
+                        // Quote saving failed
+                        val error = saveResult.exceptionOrNull()
+                        Toast.makeText(requireContext(), "Failed to save quote: ${error?.message ?: "Unknown error"}", Toast.LENGTH_LONG).show()
                     }
                 } catch (e: Exception) {
                     // ("ClientDetailsFragment", "Error linking quote to lead: ${e.message}", e)

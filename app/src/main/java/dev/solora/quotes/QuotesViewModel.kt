@@ -356,6 +356,65 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     fun clearLastCalculation() {
         _lastCalculation.value = null
     }
+    
+    // Synchronous version for immediate feedback
+    suspend fun saveQuoteFromCalculationSync(
+        reference: String,
+        clientName: String,
+        address: String,
+        calculation: QuoteOutputs
+    ): Result<FirebaseQuote> {
+        return try {
+            // Get company settings snapshot
+            val companySettings = settingsRepository.settings.stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(5000),
+                dev.solora.settings.AppSettings()
+            ).value.companySettings
+            
+            val quote = FirebaseQuote(
+                reference = reference,
+                clientName = clientName,
+                address = address,
+                // Input data
+                usageKwh = calculation.monthlyUsageKwh,
+                billRands = calculation.monthlyBillRands,
+                tariff = calculation.tariffRPerKwh,
+                panelWatt = calculation.panelWatt,
+                // Location data
+                latitude = calculation.detailedAnalysis?.locationData?.latitude,
+                longitude = calculation.detailedAnalysis?.locationData?.longitude,
+                // NASA API solar data
+                averageAnnualIrradiance = calculation.detailedAnalysis?.locationData?.averageAnnualIrradiance,
+                averageAnnualSunHours = calculation.detailedAnalysis?.locationData?.averageAnnualSunHours,
+                // Calculation results
+                systemKwp = calculation.systemKw,
+                estimatedGeneration = calculation.estimatedMonthlyGeneration,
+                monthlySavings = calculation.monthlySavingsRands,
+                paybackMonths = calculation.paybackMonths,
+                // Company information (snapshot at time of quote)
+                companyName = companySettings.companyName,
+                companyPhone = companySettings.companyPhone,
+                companyEmail = companySettings.companyEmail,
+                consultantName = companySettings.consultantName,
+                consultantPhone = companySettings.consultantPhone,
+                consultantEmail = companySettings.consultantEmail,
+                // Metadata
+                userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+            )
+
+            val result = firebaseRepository.saveQuote(quote)
+            if (result.isSuccess) {
+                val savedQuote = quote.copy(id = result.getOrNull())
+                _lastQuote.value = savedQuote
+                Result.success(savedQuote)
+            } else {
+                Result.failure(result.exceptionOrNull() ?: Exception("Failed to save quote"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
 
 sealed class CalculationState {
