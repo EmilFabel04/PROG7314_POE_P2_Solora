@@ -270,7 +270,52 @@ functions/             # Firebase Cloud Functions (Node.js)
 ```
 
 
+## References
+
+### AI Tools and Development Assistance
+- **Claude AI** - Used for debugging, code suggestions, and development guidance throughout the project
+- **GitHub Copilot** - AI-powered code completion and suggestions during development
+
+### Android Development
+- **Android Developer Documentation** - https://developer.android.com/
+- **Kotlin Programming Language** - https://kotlinlang.org/
+- **Android Jetpack Components** - https://developer.android.com/jetpack
+- **Material Design Guidelines** - https://material.io/design
+- **Android Navigation Component** - https://developer.android.com/guide/navigation
+- **Android ViewModel and LiveData** - https://developer.android.com/topic/libraries/architecture/viewmodel
+- **Kotlin Coroutines** - https://kotlinlang.org/docs/coroutines-overview.html
+- **Android DataStore** - https://developer.android.com/topic/libraries/architecture/datastore
+
+### Firebase and Backend Services
+- **Firebase Documentation** - https://firebase.google.com/docs
+- **Firebase Authentication** - https://firebase.google.com/docs/auth
+- **Cloud Firestore** - https://firebase.google.com/docs/firestore
+- **Firebase Cloud Functions** - https://firebase.google.com/docs/functions
+- **Firebase Analytics** - https://firebase.google.com/docs/analytics
+- **Google Sign-In for Android** - https://developers.google.com/identity/sign-in/android
+
+### Third-Party Libraries
+- **iText PDF Library** - https://itextpdf.com/
+- **Ktor HTTP Client** - https://ktor.io/docs/http-client.html
+- **Material Components for Android** - https://github.com/material-components/material-components-android
+- **Accompanist Permissions** - https://google.github.io/accompanist/permissions/
+
+### External APIs
+- **NASA POWER API** - https://power.larc.nasa.gov/
+- **Google Geocoding API** - https://developers.google.com/maps/documentation/geocoding
+
+### Development Tools and Resources
+- **Android Studio** - https://developer.android.com/studio
+- **Git Version Control** - https://git-scm.com/
+- **GitHub** - https://github.com/
+- **Gradle Build System** - https://gradle.org/
+- **JUnit Testing Framework** - https://junit.org/junit5/
+- **Mockito Testing Framework** - https://site.mockito.org/
+
+### Project Repository
+- **Solora GitHub Repository** - https://github.com/ST10359034/PROG7314_POE_P2_Solora
+
 ## License
-This project is for educational purposes. Review any third-party libraries’ licenses (e.g., iText) before production use.
+This project is for educational purposes. Review any third-party libraries' licenses (e.g., iText) before production use.
 
 
