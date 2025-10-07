@@ -108,12 +108,12 @@ object QuoteCalculator {
             
             // Enhanced calculation with NASA data if location provided
             val detailedAnalysis = if (inputs.location != null && nasaClient != null) {
-                android.util.Log.d("QuoteCalculator", "Calling calculateDetailedAnalysis for location: ${inputs.location.latitude}, ${inputs.location.longitude}")
+                // Calling calculateDetailedAnalysis for location: ${inputs.location.latitude}, ${inputs.location.longitude}
                 val result = calculateDetailedAnalysis(inputs, basicOutputs, nasaClient, settings)
-                android.util.Log.d("QuoteCalculator", "calculateDetailedAnalysis result: ${result != null}")
+                // calculateDetailedAnalysis result: ${result != null}
                 result
             } else {
-                android.util.Log.w("QuoteCalculator", "Skipping calculateDetailedAnalysis: location=${inputs.location != null}, nasaClient=${nasaClient != null}")
+                // Skipping calculateDetailedAnalysis: location=${inputs.location != null}, nasaClient=${nasaClient != null}
                 null
             }
             
@@ -138,8 +138,7 @@ object QuoteCalculator {
         val performanceRatio = settings?.performanceRatio ?: 0.8
         val savings = usageKwh * inputs.tariffRPerKwh * performanceRatio
         
-        android.util.Log.d("QuoteCalculator", "Basic calculation: usageKwh=$usageKwh, averageDailyKwh=$averageDailyKwh, sunHours=${inputs.sunHoursPerDay}")
-        android.util.Log.d("QuoteCalculator", "System calculation: systemKw=$systemKw, panels=$panels, inverterKw=$inverterKw, savings=$savings")
+        // Logging removed for unit test compatibility
         
         // Calculate additional metrics
         val estimatedMonthlyGeneration = systemKw * inputs.sunHoursPerDay * 30
@@ -172,17 +171,17 @@ object QuoteCalculator {
     ): DetailedAnalysis? {
         val location = inputs.location ?: return null
         
-        android.util.Log.d("QuoteCalculator", "Getting NASA data for lat=${location.latitude}, lon=${location.longitude}")
+        // Getting NASA data for lat=${location.latitude}, lon=${location.longitude}
         
         // Get NASA solar data with fallback
         val nasaDataResult = nasaClient.getSolarDataWithFallback(location.latitude, location.longitude)
         if (nasaDataResult.isFailure) {
-            android.util.Log.e("QuoteCalculator", "NASA API failed even with fallback: ${nasaDataResult.exceptionOrNull()?.message}")
+            // NASA API failed even with fallback: ${nasaDataResult.exceptionOrNull()?.message}
             return null
         }
         
         val nasaData = nasaDataResult.getOrNull() ?: return null
-        android.util.Log.d("QuoteCalculator", "NASA data retrieved: irradiance=${nasaData.averageAnnualIrradiance}, sunHours=${nasaData.averageAnnualSunHours}")
+        // NASA data retrieved: irradiance=${nasaData.averageAnnualIrradiance}, sunHours=${nasaData.averageAnnualSunHours}
         
         // Calculate monthly generation
         val monthlyGeneration = mutableMapOf<Int, Double>()
