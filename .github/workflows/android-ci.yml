@@ -41,27 +41,8 @@ jobs:
           echo ${{ secrets.GOOGLE_SERVICES_JSON }} | base64 --decode > app/google-services.json
           echo "Firebase config decoded successfully"
         else
-          echo "Warning: GOOGLE_SERVICES_JSON secret not found"
-          echo "Creating minimal Firebase config for testing..."
-          cat > app/google-services.json << 'EOF'
-        {
-          "project_info": {
-            "project_id": "solora-test",
-            "project_number": "123456789"
-          },
-          "client": [
-            {
-              "client_info": {
-                "mobilesdk_app_id": "1:123456789:android:abcdef123456",
-                "android_client_info": {
-                  "package_name": "dev.solora"
-                }
-              }
-            }
-          ]
-        }
-        EOF
-          echo "Minimal Firebase config created"
+          echo "Error: GOOGLE_SERVICES_JSON secret not found"
+          exit 1
         fi
       
     - name: Build with Gradle
@@ -135,27 +116,8 @@ jobs:
           echo ${{ secrets.GOOGLE_SERVICES_JSON }} | base64 --decode > app/google-services.json
           echo "Firebase config decoded successfully"
         else
-          echo "Warning: GOOGLE_SERVICES_JSON secret not found"
-          echo "Creating minimal Firebase config for testing..."
-          cat > app/google-services.json << 'EOF'
-        {
-          "project_info": {
-            "project_id": "solora-test",
-            "project_number": "123456789"
-          },
-          "client": [
-            {
-              "client_info": {
-                "mobilesdk_app_id": "1:123456789:android:abcdef123456",
-                "android_client_info": {
-                  "package_name": "dev.solora"
-                }
-              }
-            }
-          ]
-        }
-        EOF
-          echo "Minimal Firebase config created"
+          echo "Error: GOOGLE_SERVICES_JSON secret not found"
+          exit 1
         fi
         
     - name: Enable KVM group perms
@@ -171,11 +133,7 @@ jobs:
         target: default
         arch: x86_64
         profile: Nexus 6
-        emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu swiftshader_indirect -no-metrics-collection
-        disable-animations: true
-        script: |
-          adb wait-for-device
-          ./gradlew connectedDebugAndroidTest --stacktrace
+        script: ./gradlew connectedDebugAndroidTest --stacktrace
         
     - name: Upload instrumented test results
       uses: actions/upload-artifact@v4
