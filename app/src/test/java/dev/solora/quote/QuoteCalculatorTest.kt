@@ -69,7 +69,7 @@ class QuoteCalculatorTest {
         assertNotNull(result)
         assertTrue(result.panels > 0)
         assertTrue(result.systemKw > 0.0)
-        assertEquals(500.0, result.monthlyUsageKwh, 0.1) // 1250 / 2.5 = 500 kWh
+        assertEquals(500.0, result.monthlyUsageKwh ?: 0.0, 0.1) // 1250 / 2.5 = 500 kWh
     }
 
     @Test
@@ -121,7 +121,7 @@ class QuoteCalculatorTest {
         // Then
         // Verify panel count matches system size
         val expectedPanels = (result.systemKw * 1000) / 550
-        assertEquals(expectedPanels.toInt(), result.panels, 1) // Allow 1 panel tolerance
+        assertEquals(expectedPanels.toInt(), result.panels) // Panel count should match
     }
 
     @Test
