@@ -33,7 +33,7 @@
             android:layout_weight="1"
             android:text="Edit Profile"
             android:textColor="@android:color/white"
-            android:textSize="20sp"
+            android:textSize="16sp"
             android:textStyle="bold" />
 
     </LinearLayout>
@@ -65,7 +65,8 @@
                     android:layout_height="wrap_content"
                     android:hint="First Name"
                     android:textColor="@android:color/black"
-                    android:paddingVertical="16dp" />
+                    android:textSize="14sp"
+                    android:paddingVertical="12dp" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -84,7 +85,8 @@
                     android:layout_height="wrap_content"
                     android:hint="Last Name"
                     android:textColor="@android:color/black"
-                    android:paddingVertical="16dp" />
+                    android:textSize="14sp"
+                    android:paddingVertical="12dp" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -104,7 +106,8 @@
                     android:hint="Email"
                     android:inputType="textEmailAddress"
                     android:textColor="@android:color/black"
-                    android:paddingVertical="16dp" />
+                    android:textSize="14sp"
+                    android:paddingVertical="12dp" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -124,7 +127,8 @@
                     android:hint="Phone Number"
                     android:inputType="phone"
                     android:textColor="@android:color/black"
-                    android:paddingVertical="16dp" />
+                    android:textSize="14sp"
+                    android:paddingVertical="12dp" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -143,7 +147,8 @@
                     android:layout_height="wrap_content"
                     android:hint="Company"
                     android:textColor="@android:color/black"
-                    android:paddingVertical="16dp" />
+                    android:textSize="14sp"
+                    android:paddingVertical="12dp" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -161,6 +166,7 @@
                     android:layout_weight="1"
                     android:text="Cancel"
                     android:textColor="@color/solora_orange_light"
+                    android:textSize="14sp"
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     app:strokeColor="@color/solora_orange_light"
                     android:layout_marginEnd="8dp" />
@@ -172,6 +178,7 @@
                     android:layout_weight="1"
                     android:text="Save Changes"
                     android:textColor="@android:color/white"
+                    android:textSize="14sp"
                     android:backgroundTint="@color/solora_orange_light"
                     android:layout_marginStart="8dp" />
 

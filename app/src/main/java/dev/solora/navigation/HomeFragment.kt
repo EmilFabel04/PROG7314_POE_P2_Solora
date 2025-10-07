@@ -162,7 +162,7 @@ class HomeFragment : Fragment() {
     
     private fun updateConsultantName(user: dev.solora.data.FirebaseUser) {
         // Update consultant name with full name and surname from user profile
-        val fullName = if (user.name.isNotEmpty() && user.surname.isNotEmpty()) {
+        val fullName = if (user.surname.isNotEmpty() && user.surname != user.name) {
             "${user.name} ${user.surname}"
         } else if (user.name.isNotEmpty()) {
             user.name
@@ -465,7 +465,7 @@ class HomeFragment : Fragment() {
                     if (profileData != null) {
                         val name = profileData["name"] as? String ?: ""
                         val surname = profileData["surname"] as? String ?: ""
-                        val fullName = if (name.isNotEmpty() && surname.isNotEmpty()) {
+                        val fullName = if (surname.isNotEmpty() && surname != name) {
                             "$name $surname"
                         } else if (name.isNotEmpty()) {
                             name

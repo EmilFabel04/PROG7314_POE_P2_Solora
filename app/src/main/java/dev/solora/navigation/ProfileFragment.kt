@@ -139,8 +139,13 @@ class ProfileFragment : Fragment() {
             val initials = "${user.name.take(1)}${user.surname.take(1)}"
             tvAvatar.text = initials.uppercase()
             
-            // Update name and title
-            tvName.text = "${user.name} ${user.surname}"
+            // Update name and title - prevent duplicate names
+            val displayName = if (user.surname.isNotEmpty() && user.surname != user.name) {
+                "${user.name} ${user.surname}"
+            } else {
+                user.name
+            }
+            tvName.text = displayName
             tvTitle.text = when (user.role) {
                 "admin" -> "Administrator"
                 "sales_consultant" -> "Sales Representative"
