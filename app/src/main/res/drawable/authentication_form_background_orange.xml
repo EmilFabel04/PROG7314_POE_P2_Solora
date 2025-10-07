@@ -5,10 +5,10 @@
     <!-- Semi-transparent color -->
     <solid android:color="#CCFC8224" />
 
-    <!-- Top corners curved -->
+    <!-- All corners rounded -->
     <corners
         android:topLeftRadius="24dp"
         android:topRightRadius="24dp"
-        android:bottomLeftRadius="0dp"
-        android:bottomRightRadius="0dp" />
+        android:bottomLeftRadius="24dp"
+        android:bottomRightRadius="24dp" />
 </shape>
