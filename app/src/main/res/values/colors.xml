@@ -1,7 +1,9 @@
 <resources>
     <!-- Primary Solora Colors -->
-    <color name="solora_orange">#FF5D00</color>
+    <color name="solora_orange">#F2762E</color>
     <color name="solora_orange_dark">#FC8224</color>
+    <color name="solora_orange_light">#FFA666</color>
+    <color name="solora_orange_very_light">#FFD4B3</color>
     <color name="solora_gray">#F7F7F7</color>
     <color name="solora_on_primary">#FFFFFF</color>
     <color name="solora_on_surface">#1E1E1E</color>
