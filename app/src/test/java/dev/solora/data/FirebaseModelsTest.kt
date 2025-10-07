@@ -32,7 +32,7 @@ class FirebaseModelsTest {
         assertEquals("test-quote-123", quote.id)
         assertEquals("QUOTE-12345", quote.reference)
         assertEquals("John Doe", quote.clientName)
-        assertEquals(500.0, quote.usageKwh, 0.001)
+        assertEquals(500.0, quote.usageKwh ?: 0.0, 0.001)
         assertEquals(3.3, quote.systemKwp, 0.001)
     }
 
