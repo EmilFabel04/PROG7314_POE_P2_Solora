@@ -33,7 +33,7 @@ class MainTabsFragment : Fragment() {
         
         // Apply orange theming to bottom navigation
         bottomNav.itemIconTintList = null // Disable default tinting
-        bottomNav.itemTextColor = ContextCompat.getColorStateList(requireContext(), R.drawable.bottom_nav_text_color)
+        bottomNav.itemTextColor = ContextCompat.getColorStateList(requireContext(), R.color.bottom_nav_text_color)
     }
 }
 
