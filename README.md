@@ -471,7 +471,10 @@ This comprehensive approach ensures that Solora is not just a functional applica
 
 ### AI Tools and Development Assistance
 - **Claude AI** - Used for debugging, code suggestions, and development guidance throughout the project
-- **GitHub Copilot** - AI-powered code completion and suggestions during development
+- **ChatGPT** - Used for debugging, code suggestions, and development guidance throughout the project
+- **Cursor IDE** - AI-powered code completion and suggestions during development
+- **Quillbot AI** - AI-powered Grammar checker and paraphrasing tool
+- 
 
 ### Android Development
 - **Android Developer Documentation** - https://developer.android.com/
@@ -510,7 +513,7 @@ This comprehensive approach ensures that Solora is not just a functional applica
 - **Mockito Testing Framework** - https://site.mockito.org/
 
 ### Project Repository
-- **Solora GitHub Repository** - https://github.com/ST10359034/PROG7314_POE_P2_Solora
+- **Solora GitHub Repository** - https://github.com/VCCT-PROG7314-2025-G2/PROG7314_POE_P2_Solora
 
 ## License
 This project is for educational purposes. Review any third-party libraries' licenses (e.g., iText) before production use.
