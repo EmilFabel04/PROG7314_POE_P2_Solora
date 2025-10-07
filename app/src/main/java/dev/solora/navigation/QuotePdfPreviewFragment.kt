@@ -187,12 +187,10 @@ class QuotePdfPreviewFragment : Fragment() {
                             displayQuoteData(quote)
                         } else {
                             // If quote not found, show error or fallback
-                            android.util.Log.e("QuotePdfPreviewFragment", "Quote with ID $quoteId not found")
                             displayQuoteData(createPlaceholderQuote(quoteId))
                         }
                     }
                 } catch (e: Exception) {
-                    android.util.Log.e("QuotePdfPreviewFragment", "Error loading quote: ${e.message}", e)
                     // Fallback to placeholder if there's an error
                     displayQuoteData(createPlaceholderQuote(quoteId))
                 }
@@ -296,15 +294,12 @@ class QuotePdfPreviewFragment : Fragment() {
                         val reference = if (quote.reference.isNotEmpty()) quote.reference else "REF-${quote.id?.takeLast(5) ?: "00000"}"
                         FileShareUtils.sharePdfFile(requireContext(), pdfFile, reference)
                         
-                        android.util.Log.d("QuotePdfPreviewFragment", "PDF exported successfully: ${pdfFile.name}")
                     } else {
                         android.widget.Toast.makeText(requireContext(), "Failed to generate PDF", android.widget.Toast.LENGTH_SHORT).show()
-                        android.util.Log.e("QuotePdfPreviewFragment", "PDF generation failed for quote: ${quote.reference}")
                     }
                     
                 } catch (e: Exception) {
                     android.widget.Toast.makeText(requireContext(), "Error generating PDF: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
-                    android.util.Log.e("QuotePdfPreviewFragment", "PDF export error: ${e.message}", e)
                 }
             }
         } ?: run {

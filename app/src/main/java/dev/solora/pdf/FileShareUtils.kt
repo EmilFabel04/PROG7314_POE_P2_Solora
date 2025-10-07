@@ -25,10 +25,8 @@ object FileShareUtils {
             }
             
             context.startActivity(Intent.createChooser(shareIntent, "Share Quote PDF"))
-            android.util.Log.d("FileShareUtils", "PDF shared successfully: ${pdfFile.name}")
             
         } catch (e: Exception) {
-            android.util.Log.e("FileShareUtils", "Error sharing PDF: ${e.message}", e)
         }
     }
     
@@ -47,10 +45,8 @@ object FileShareUtils {
             }
             
             context.startActivity(intent)
-            android.util.Log.d("FileShareUtils", "PDF opened successfully: ${pdfFile.name}")
             
         } catch (e: Exception) {
-            android.util.Log.e("FileShareUtils", "Error opening PDF: ${e.message}", e)
         }
     }
 }

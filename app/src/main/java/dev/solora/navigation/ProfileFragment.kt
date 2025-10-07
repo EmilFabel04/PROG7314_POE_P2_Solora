@@ -110,7 +110,6 @@ class ProfileFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             profileViewModel.isLoading.collect { isLoading ->
                 if (isLoading) {
-                    android.util.Log.d("ProfileFragment", "Loading profile...")
                 }
             }
         }
@@ -127,7 +126,6 @@ class ProfileFragment : Fragment() {
         // Observe settings to ensure they're loaded and update profile display
         viewLifecycleOwner.lifecycleScope.launch {
             settingsViewModel.settings.collect { settings ->
-                android.util.Log.d("ProfileFragment", "Settings observed: consultantName=${settings.companySettings.consultantName}")
                 // Update profile display with consultant name from settings
                 updateProfileWithSettings(settings.companySettings)
             }
@@ -149,10 +147,8 @@ class ProfileFragment : Fragment() {
                 else -> "Team Member"
             }
             
-            android.util.Log.d("ProfileFragment", "Profile UI updated for user: ${user.name} ${user.surname}")
             
         } catch (e: Exception) {
-            android.util.Log.e("ProfileFragment", "Error updating UI: ${e.message}", e)
             Toast.makeText(requireContext(), "Error displaying profile", Toast.LENGTH_SHORT).show()
         }
     }
@@ -174,12 +170,9 @@ class ProfileFragment : Fragment() {
                 }
                 tvAvatar.text = initials.uppercase()
                 
-                android.util.Log.d("ProfileFragment", "Profile updated with consultant name: $consultantName")
             } else {
-                android.util.Log.d("ProfileFragment", "No consultant name set in settings")
             }
         } catch (e: Exception) {
-            android.util.Log.e("ProfileFragment", "Error updating profile with settings: ${e.message}", e)
         }
     }
     
@@ -200,10 +193,8 @@ class ProfileFragment : Fragment() {
     private fun handleNotificationToggle(isEnabled: Boolean) {
         if (isEnabled) {
             Toast.makeText(requireContext(), "Push notifications enabled", Toast.LENGTH_SHORT).show()
-            android.util.Log.d("ProfileFragment", "Notifications enabled")
         } else {
             Toast.makeText(requireContext(), "Push notifications disabled", Toast.LENGTH_SHORT).show()
-            android.util.Log.d("ProfileFragment", "Notifications disabled")
         }
     }
     
@@ -242,7 +233,6 @@ class ProfileFragment : Fragment() {
                         startActivity(intent)
                     }
                     is dev.solora.auth.AuthState.Error -> {
-                        android.util.Log.e("ProfileFragment", "Logout failed: ${state.message}")
                         Toast.makeText(
                             requireContext(), 
                             "Logout failed: ${state.message}", 
@@ -266,9 +256,7 @@ class ProfileFragment : Fragment() {
             val sharedPrefs = requireContext().getSharedPreferences("solora_prefs", android.content.Context.MODE_PRIVATE)
             sharedPrefs.edit().clear().apply()
             
-            android.util.Log.d("ProfileFragment", "Local user data cleared")
         } catch (e: Exception) {
-            android.util.Log.e("ProfileFragment", "Error clearing user data: ${e.message}", e)
         }
     }
     
@@ -326,28 +314,22 @@ class ProfileFragment : Fragment() {
     ) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                android.util.Log.d("ProfileFragment", "Starting to load user settings...")
                 
                 // Try to get settings from SettingsViewModel first
                 val currentSettings = settingsViewModel.settings.value
-                android.util.Log.d("ProfileFragment", "SettingsViewModel value: $currentSettings")
                 
                 if (currentSettings != null && currentSettings.companySettings.consultantName.isNotEmpty()) {
-                    android.util.Log.d("ProfileFragment", "Using SettingsViewModel data: ${currentSettings.companySettings.consultantName}")
                     // Populate with settings data
                     populateFormFromSettings(currentSettings, etName, etSurname, etEmail, etPhone, etCompany, etCompanyName, etCompanyAddress, etCompanyPhone, etCompanyEmail, etCompanyWebsite)
                 } else {
-                    android.util.Log.d("ProfileFragment", "SettingsViewModel empty, trying REST API...")
                     
                     // Fallback: Use REST API to get user settings
                     val firebaseApi = FirebaseFunctionsApi()
                     val result = firebaseApi.getSettings()
                     
-                    android.util.Log.d("ProfileFragment", "REST API result: $result")
                     
                     if (result.isSuccess) {
                         val settingsData = result.getOrNull()
-                        android.util.Log.d("ProfileFragment", "API settings data: $settingsData")
                         
                         if (settingsData != null) {
                             // Create CompanySettings from the API response
@@ -363,50 +345,40 @@ class ProfileFragment : Fragment() {
                                 consultantLicense = settingsData["consultantLicense"] as? String ?: ""
                             )
                             
-                            android.util.Log.d("ProfileFragment", "Created CompanySettings: consultantName=${companySettings.consultantName}, consultantEmail=${companySettings.consultantEmail}")
                             
                             // Create AppSettings with the company settings
                             val appSettings = dev.solora.settings.AppSettings(companySettings = companySettings)
                             populateFormFromSettings(appSettings, etName, etSurname, etEmail, etPhone, etCompany, etCompanyName, etCompanyAddress, etCompanyPhone, etCompanyEmail, etCompanyWebsite)
                         } else {
-                            android.util.Log.d("ProfileFragment", "API returned null data, trying getUserProfile API")
                             // Try getUserProfile API endpoint
                             val userProfileResult = firebaseApi.getUserProfile()
                             if (userProfileResult.isSuccess) {
                                 val userProfileData = userProfileResult.getOrNull()
                                 if (userProfileData != null) {
-                                    android.util.Log.d("ProfileFragment", "Got user profile data from API: $userProfileData")
                                     populateFormFromApiUserProfile(userProfileData, etName, etSurname, etEmail, etPhone, etCompany, etCompanyName, etCompanyAddress, etCompanyPhone, etCompanyEmail, etCompanyWebsite)
                                 } else {
-                                    android.util.Log.d("ProfileFragment", "No user profile data from API, using ViewModel fallback")
                                     populateFormFromUserProfile(etName, etSurname, etEmail, etPhone, etCompany, etCompanyName, etCompanyAddress, etCompanyPhone, etCompanyEmail, etCompanyWebsite)
                                 }
                             } else {
-                                android.util.Log.d("ProfileFragment", "getUserProfile API failed: ${userProfileResult.exceptionOrNull()?.message}, using ViewModel fallback")
                                 populateFormFromUserProfile(etName, etSurname, etEmail, etPhone, etCompany, etCompanyName, etCompanyAddress, etCompanyPhone, etCompanyEmail, etCompanyWebsite)
                             }
                         }
                     } else {
-                        android.util.Log.d("ProfileFragment", "getSettings API call failed: ${result.exceptionOrNull()?.message}, trying getUserProfile API")
                         // Try getUserProfile API as fallback
                         val userProfileResult = firebaseApi.getUserProfile()
                         if (userProfileResult.isSuccess) {
                             val userProfileData = userProfileResult.getOrNull()
                             if (userProfileData != null) {
-                                android.util.Log.d("ProfileFragment", "Got user profile data from API fallback: $userProfileData")
                                 populateFormFromApiUserProfile(userProfileData, etName, etSurname, etEmail, etPhone, etCompany, etCompanyName, etCompanyAddress, etCompanyPhone, etCompanyEmail, etCompanyWebsite)
                             } else {
-                                android.util.Log.d("ProfileFragment", "No user profile data from API fallback, using ViewModel fallback")
                                 populateFormFromUserProfile(etName, etSurname, etEmail, etPhone, etCompany, etCompanyName, etCompanyAddress, etCompanyPhone, etCompanyEmail, etCompanyWebsite)
                             }
                         } else {
-                            android.util.Log.d("ProfileFragment", "getUserProfile API fallback failed: ${userProfileResult.exceptionOrNull()?.message}, using ViewModel fallback")
                             populateFormFromUserProfile(etName, etSurname, etEmail, etPhone, etCompany, etCompanyName, etCompanyAddress, etCompanyPhone, etCompanyEmail, etCompanyWebsite)
                         }
                     }
                 }
             } catch (e: Exception) {
-                android.util.Log.e("ProfileFragment", "Error loading user settings: ${e.message}", e)
                 // Fallback to user profile data
                 populateFormFromUserProfile(etName, etSurname, etEmail, etPhone, etCompany, etCompanyName, etCompanyAddress, etCompanyPhone, etCompanyEmail, etCompanyWebsite)
             }
@@ -426,7 +398,6 @@ class ProfileFragment : Fragment() {
         etCompanyEmail: TextInputEditText,
         etCompanyWebsite: TextInputEditText
     ) {
-        android.util.Log.d("ProfileFragment", "populateFormFromSettings called with consultantName: ${settings.companySettings.consultantName}")
         
         // Populate consultant information from settings
         val consultantName = settings.companySettings.consultantName
@@ -434,7 +405,6 @@ class ProfileFragment : Fragment() {
         val consultantPhone = settings.companySettings.consultantPhone
         val companyName = settings.companySettings.companyName
         
-        android.util.Log.d("ProfileFragment", "Setting form fields - Name: '$consultantName', Email: '$consultantEmail', Phone: '$consultantPhone', Company: '$companyName'")
         
         etName.setText(consultantName)
         etSurname.setText("") // Surname not stored in settings
@@ -449,7 +419,6 @@ class ProfileFragment : Fragment() {
         etCompanyEmail.setText(settings.companySettings.companyEmail)
         etCompanyWebsite.setText(settings.companySettings.companyWebsite)
         
-        android.util.Log.d("ProfileFragment", "Form fields set successfully")
     }
     
     private fun populateFormFromUserProfile(
@@ -464,14 +433,11 @@ class ProfileFragment : Fragment() {
         etCompanyEmail: TextInputEditText,
         etCompanyWebsite: TextInputEditText
     ) {
-        android.util.Log.d("ProfileFragment", "populateFormFromUserProfile called - fallback to user profile data")
         
         // Fallback to user profile data
         val currentUser = profileViewModel.userProfile.value
-        android.util.Log.d("ProfileFragment", "Current user profile: $currentUser")
         
         currentUser?.let { user ->
-            android.util.Log.d("ProfileFragment", "Setting form fields from user profile - Name: '${user.name}', Email: '${user.email}', Phone: '${user.phone}', Company: '${user.company}'")
             
             etName.setText(user.name)
             etSurname.setText(user.surname)
@@ -482,7 +448,6 @@ class ProfileFragment : Fragment() {
             // Leave other company fields empty
         }
         
-        android.util.Log.d("ProfileFragment", "Form populated from user profile fallback")
     }
     
     private fun populateFormFromApiUserProfile(
@@ -498,7 +463,6 @@ class ProfileFragment : Fragment() {
         etCompanyEmail: TextInputEditText,
         etCompanyWebsite: TextInputEditText
     ) {
-        android.util.Log.d("ProfileFragment", "populateFormFromApiUserProfile called with data: $userProfileData")
         
         // Extract user profile data from API response
         val name = userProfileData["name"] as? String ?: ""
@@ -514,7 +478,6 @@ class ProfileFragment : Fragment() {
         val companyEmail = userProfileData["companyEmail"] as? String ?: ""
         val companyWebsite = userProfileData["companyWebsite"] as? String ?: ""
         
-        android.util.Log.d("ProfileFragment", "Setting form fields from API user profile - Name: '$name', Email: '$email', Phone: '$phone', Company: '$company'")
         
         // Populate form fields
         etName.setText(name)
@@ -528,7 +491,6 @@ class ProfileFragment : Fragment() {
         etCompanyEmail.setText(companyEmail)
         etCompanyWebsite.setText(companyWebsite)
         
-        android.util.Log.d("ProfileFragment", "Form populated from API user profile data")
     }
     
     private fun showChangePasswordDialog() {
@@ -642,9 +604,7 @@ class ProfileFragment : Fragment() {
                     
                     val apiResult = firebaseApi.updateUserProfile(userProfile)
                     if (apiResult.isSuccess) {
-                        android.util.Log.d("ProfileFragment", "User profile updated via API successfully")
                     } else {
-                        android.util.Log.w("ProfileFragment", "API user profile update failed: ${apiResult.exceptionOrNull()?.message}")
                         // Fallback to ViewModel
                         profileViewModel.updateUserProfile(
                             name = name,
@@ -655,7 +615,6 @@ class ProfileFragment : Fragment() {
                         )
                     }
                 } catch (e: Exception) {
-                    android.util.Log.e("ProfileFragment", "Error updating user profile via API: ${e.message}", e)
                     // Fallback to ViewModel
                     profileViewModel.updateUserProfile(
                         name = name,
@@ -671,7 +630,6 @@ class ProfileFragment : Fragment() {
             dialog.dismiss()
             
         } catch (e: Exception) {
-            android.util.Log.e("ProfileFragment", "Error saving profile: ${e.message}", e)
             Toast.makeText(requireContext(), "Error saving profile", Toast.LENGTH_SHORT).show()
         }
     }
@@ -706,16 +664,38 @@ class ProfileFragment : Fragment() {
             // Change password using Firebase Auth
             val user = auth.currentUser
             if (user != null) {
-                // For now, just show success message
-                // In a real implementation, you would re-authenticate and update password
-                Toast.makeText(requireContext(), "Password change feature coming soon!", Toast.LENGTH_SHORT).show()
-                dialog.dismiss()
+                // Re-authenticate user first, then update password
+                lifecycleScope.launch {
+                    try {
+                        val credential = com.google.firebase.auth.EmailAuthProvider.getCredential(
+                            user.email ?: "", currentPassword
+                        )
+                        
+                        user.reauthenticate(credential).await()
+                        user.updatePassword(newPassword).await()
+                        
+                        Toast.makeText(requireContext(), "Password changed successfully", Toast.LENGTH_SHORT).show()
+                        dialog.dismiss()
+                        
+                    } catch (e: Exception) {
+                        when {
+                            e.message?.contains("wrong-password") == true -> {
+                                Toast.makeText(requireContext(), "Current password is incorrect", Toast.LENGTH_LONG).show()
+                            }
+                            e.message?.contains("weak-password") == true -> {
+                                Toast.makeText(requireContext(), "Password is too weak", Toast.LENGTH_LONG).show()
+                            }
+                            else -> {
+                                Toast.makeText(requireContext(), "Failed to change password: ${e.message}", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                    }
+                }
             } else {
                 Toast.makeText(requireContext(), "No user logged in", Toast.LENGTH_SHORT).show()
             }
             
         } catch (e: Exception) {
-            android.util.Log.e("ProfileFragment", "Error changing password: ${e.message}", e)
             Toast.makeText(requireContext(), "Error changing password", Toast.LENGTH_SHORT).show()
         }
     }

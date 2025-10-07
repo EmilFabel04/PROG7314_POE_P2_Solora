@@ -50,18 +50,13 @@ class LeadsFragment : Fragment() {
     private lateinit var btnCancel: Button
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        android.util.Log.d("LeadsFragment", "===== UPDATED LEADS FRAGMENT ONCREATEVIEW CALLED =====")
-        android.util.Log.d("LeadsFragment", "Inflating layout: R.layout.fragment_leads")
         val view = inflater.inflate(R.layout.fragment_leads, container, false)
-        android.util.Log.d("LeadsFragment", "Layout inflated successfully. View type: ${view.javaClass.simpleName}")
         return view
     }
     
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        android.util.Log.d("LeadsFragment", "===== UPDATED LEADS FRAGMENT ONVIEWCREATED CALLED =====")
-        android.util.Log.d("LeadsFragment", "View tree: ${view.javaClass.simpleName}")
         
         // Debug bottom navigation visibility
         debugBottomNavigation()
@@ -71,12 +66,10 @@ class LeadsFragment : Fragment() {
         setupClickListeners()
         observeLeads()
         
-        android.util.Log.d("LeadsFragment", "===== LEADS FRAGMENT SETUP COMPLETED =====")
     }
     
     override fun onResume() {
         super.onResume()
-        android.util.Log.d("LeadsFragment", "LeadsFragment onResume - ensuring bottom navigation is visible")
         
         // Ensure bottom navigation is visible and properly configured when fragment resumes
         try {
@@ -86,34 +79,26 @@ class LeadsFragment : Fragment() {
                 ensureBottomNavigationVisible(bottomNav)
             }
         } catch (e: Exception) {
-            android.util.Log.e("LeadsFragment", "Error ensuring bottom navigation in onResume: ${e.message}")
         }
     }
     
     private fun debugBottomNavigation() {
         try {
             val parentFragment = parentFragment
-            android.util.Log.d("LeadsFragment", "Parent fragment: ${parentFragment?.javaClass?.simpleName}")
             
             if (parentFragment is MainTabsFragment) {
                 val bottomNav = parentFragment.view?.findViewById<BottomNavigationView>(R.id.bottom_nav)
-                android.util.Log.d("LeadsFragment", "Bottom navigation found: ${bottomNav != null}")
-                android.util.Log.d("LeadsFragment", "Bottom navigation visibility: ${bottomNav?.visibility}")
-                android.util.Log.d("LeadsFragment", "Bottom navigation selected item: ${bottomNav?.selectedItemId}")
                 
                 // Ensure bottom navigation is visible and properly configured
                 ensureBottomNavigationVisible(bottomNav)
             } else {
-                android.util.Log.e("LeadsFragment", "Parent fragment is not MainTabsFragment: ${parentFragment?.javaClass?.simpleName}")
             }
         } catch (e: Exception) {
-            android.util.Log.e("LeadsFragment", "Error debugging bottom navigation: ${e.message}")
         }
     }
     
     private fun ensureBottomNavigationVisible(bottomNav: BottomNavigationView?) {
         bottomNav?.let { nav ->
-            android.util.Log.d("LeadsFragment", "Ensuring bottom navigation is visible")
             
             // Make sure it's visible
             nav.visibility = View.VISIBLE
@@ -125,10 +110,8 @@ class LeadsFragment : Fragment() {
             // Set the selected item to leads if not already set
             if (nav.selectedItemId != R.id.leadsFragment) {
                 nav.selectedItemId = R.id.leadsFragment
-                android.util.Log.d("LeadsFragment", "Set selected item to leads fragment")
             }
             
-            android.util.Log.d("LeadsFragment", "Bottom navigation configured - visibility: ${nav.visibility}, enabled: ${nav.isEnabled}, selected: ${nav.selectedItemId}")
         }
     }
     
@@ -141,14 +124,10 @@ class LeadsFragment : Fragment() {
         overlayAddLead = view.findViewById(R.id.overlay_add_lead)
         btnBackLeads = view.findViewById(R.id.btn_back_leads)
         
-        android.util.Log.d("LeadsFragment", "Views initialized. FAB found: ${fabAddLead != null}")
         if (fabAddLead != null) {
-            android.util.Log.d("LeadsFragment", "FAB initialized - visibility will be controlled by observeLeads()")
-            android.util.Log.d("LeadsFragment", "FAB initial visibility: ${fabAddLead.visibility}")
             fabAddLead.isClickable = true
             fabAddLead.isFocusable = true
         } else {
-            android.util.Log.e("LeadsFragment", "FAB not found in layout!")
             // Show fallback button if FAB doesn't work
             btnAddLeadFallback.visibility = View.VISIBLE
         }
@@ -242,11 +221,9 @@ class LeadsFragment : Fragment() {
     }
     
     private fun setupClickListeners() {
-        android.util.Log.d("LeadsFragment", "Setting up click listeners. FAB found: ${::fabAddLead.isInitialized}")
         
         // Back button click listener
         btnBackLeads.setOnClickListener {
-            android.util.Log.d("LeadsFragment", "Back button clicked - navigating to home")
             try {
                 val parentFragment = parentFragment
                 if (parentFragment is MainTabsFragment) {
@@ -257,7 +234,6 @@ class LeadsFragment : Fragment() {
                     findNavController().navigate(R.id.homeFragment)
                 }
             } catch (e: Exception) {
-                android.util.Log.e("LeadsFragment", "Error navigating back to home: ${e.message}")
                 // Fallback to direct navigation
                 findNavController().navigate(R.id.homeFragment)
             }
@@ -265,24 +241,19 @@ class LeadsFragment : Fragment() {
         
         if (::fabAddLead.isInitialized) {
             fabAddLead.setOnClickListener {
-                android.util.Log.d("LeadsFragment", "FAB clicked - showing add lead modal")
                 showAddLeadModal()
             }
-            android.util.Log.d("LeadsFragment", "FAB click listener set up successfully")
         } else {
-            android.util.Log.e("LeadsFragment", "FAB not initialized - cannot set click listener")
         }
 
         // Also setup fallback button click listener
         btnAddLeadFallback.setOnClickListener {
-            android.util.Log.d("LeadsFragment", "Fallback button clicked - showing add lead modal")
             showAddLeadModal()
         }
 
 
         // Setup empty state button click listener
         btnAddLeadEmpty.setOnClickListener {
-            android.util.Log.d("LeadsFragment", "Empty state button clicked - showing add lead modal")
             showAddLeadModal()
         }
         
@@ -291,7 +262,6 @@ class LeadsFragment : Fragment() {
         }
         
         btnCancel.setOnClickListener {
-            android.util.Log.d("LeadsFragment", "Cancel button clicked - hiding add lead modal")
             hideAddLeadModal()
         }
         
@@ -304,9 +274,7 @@ class LeadsFragment : Fragment() {
     private fun observeLeads() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                android.util.Log.d("LeadsFragment", "Starting to observe leads")
                 leadsViewModel.leads.collect { leads ->
-                    android.util.Log.d("LeadsFragment", "Leads updated: ${leads.size} leads received")
                     leadsAdapter.submitList(leads)
                     
                     // Show/hide empty state and FAB
@@ -315,26 +283,18 @@ class LeadsFragment : Fragment() {
                         layoutEmptyLeads.visibility = View.VISIBLE
                         if (::fabAddLead.isInitialized) {
                             fabAddLead.visibility = View.GONE
-                            android.util.Log.d("LeadsFragment", "FAB visibility set to GONE")
                         }
-                        android.util.Log.d("LeadsFragment", "Showing empty state (no leads) - hiding FAB")
                     } else {
                         rvLeads.visibility = View.VISIBLE
                         layoutEmptyLeads.visibility = View.GONE
                         if (::fabAddLead.isInitialized) {
                             fabAddLead.visibility = View.VISIBLE
-                            android.util.Log.d("LeadsFragment", "FAB visibility set to VISIBLE")
-                            android.util.Log.d("LeadsFragment", "FAB actual visibility after setting: ${fabAddLead.visibility}")
                         } else {
-                            android.util.Log.e("LeadsFragment", "FAB not initialized when trying to show it!")
                         }
-                        android.util.Log.d("LeadsFragment", "Displaying ${leads.size} leads in RecyclerView - showing FAB")
                     }
                 }
             } catch (e: kotlinx.coroutines.CancellationException) {
-                android.util.Log.d("LeadsFragment", "Leads observation cancelled")
             } catch (e: Exception) {
-                android.util.Log.e("LeadsFragment", "Error observing leads", e)
                 Toast.makeText(requireContext(), "Error loading leads: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
@@ -388,7 +348,6 @@ class LeadsFragment : Fragment() {
         val fullName = "$firstName $lastName"
         
         // Add lead with separate email and phone fields
-        android.util.Log.d("LeadsFragment", "Adding lead: $fullName, email: $email, phone: $contact")
         leadsViewModel.addLead(fullName, email, contact, "")
         
         // Clear form and hide modal

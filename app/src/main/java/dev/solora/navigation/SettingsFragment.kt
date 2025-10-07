@@ -70,19 +70,12 @@ class SettingsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         
         try {
-            android.util.Log.d("SettingsFragment", "Starting SettingsFragment initialization")
             initializeViews(view)
-            android.util.Log.d("SettingsFragment", "Views initialized successfully")
             setupTabs()
-            android.util.Log.d("SettingsFragment", "Tabs setup successfully")
             setupButtons()
-            android.util.Log.d("SettingsFragment", "Buttons setup successfully")
             observeSettings()
-            android.util.Log.d("SettingsFragment", "Settings observer setup successfully")
             
-            android.util.Log.d("SettingsFragment", "Settings fragment initialized successfully")
         } catch (e: Exception) {
-            android.util.Log.e("SettingsFragment", "Error initializing SettingsFragment", e)
             Toast.makeText(requireContext(), "Error initializing settings: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
@@ -175,7 +168,6 @@ class SettingsFragment : Fragment() {
             try {
                 findNavController().navigateUp()
             } catch (e: Exception) {
-                android.util.Log.e("SettingsFragment", "Error navigating back", e)
                 Toast.makeText(requireContext(), "Error navigating back", Toast.LENGTH_SHORT).show()
             }
         }
@@ -196,28 +188,22 @@ class SettingsFragment : Fragment() {
         try {
             viewLifecycleOwner.lifecycleScope.launch {
                 try {
-                    android.util.Log.d("SettingsFragment", "Starting to observe settings")
                     settingsViewModel.settings.collect { settings ->
-                        android.util.Log.d("SettingsFragment", "Settings received: $settings")
                         populateForms(settings)
                     }
                 } catch (e: kotlinx.coroutines.CancellationException) {
                     // Expected when fragment is destroyed, don't show error
-                    android.util.Log.d("SettingsFragment", "Settings observation cancelled (fragment lifecycle ended)")
                 } catch (e: Exception) {
-                    android.util.Log.e("SettingsFragment", "Error observing settings", e)
                     Toast.makeText(requireContext(), "Error loading settings: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         } catch (e: Exception) {
-            android.util.Log.e("SettingsFragment", "Error setting up settings observer", e)
             Toast.makeText(requireContext(), "Error setting up settings: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
     
     private fun populateForms(settings: dev.solora.settings.AppSettings) {
         try {
-            android.util.Log.d("SettingsFragment", "Populating forms with settings")
             
             // Calculation settings
             etDefaultTariff.setText(settings.calculationSettings.defaultTariff.toString())
@@ -242,16 +228,13 @@ class SettingsFragment : Fragment() {
             etConsultantEmail.setText(settings.companySettings.consultantEmail)
             etConsultantLicense.setText(settings.companySettings.consultantLicense)
             
-            android.util.Log.d("SettingsFragment", "Forms populated successfully")
         } catch (e: Exception) {
-            android.util.Log.e("SettingsFragment", "Error populating forms", e)
             Toast.makeText(requireContext(), "Error loading form data: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
     
     private fun saveSettings() {
         try {
-            android.util.Log.d("SettingsFragment", "Starting to save settings")
             
             // Validate inputs first
             val validationResult = validateInputs()
@@ -296,21 +279,17 @@ class SettingsFragment : Fragment() {
                 termsAndConditions = "" // Keep empty for now
             )
             
-            android.util.Log.d("SettingsFragment", "Settings data prepared, saving...")
             
             // Save settings to Firebase
             try {
                 settingsViewModel.updateCalculationSettings(calculationSettings)
                 settingsViewModel.updateCompanySettings(companySettings)
-                android.util.Log.d("SettingsFragment", "Settings saved to Firebase successfully")
                 
                 // Reset button state after successful save
                 btnSaveSettings.isEnabled = true
                 btnSaveSettings.text = "Save Settings"
                 Toast.makeText(requireContext(), "Settings saved successfully!", Toast.LENGTH_SHORT).show()
-                android.util.Log.d("SettingsFragment", "Settings saved successfully")
             } catch (e: Exception) {
-                android.util.Log.e("SettingsFragment", "Error saving to Firebase", e)
                 // Reset button state on error
                 btnSaveSettings.isEnabled = true
                 btnSaveSettings.text = "Save Settings"
@@ -322,13 +301,11 @@ class SettingsFragment : Fragment() {
             btnSaveSettings.isEnabled = true
             btnSaveSettings.text = "Save Settings"
             Toast.makeText(requireContext(), "Error saving settings: ${e.message}", Toast.LENGTH_LONG).show()
-            android.util.Log.e("SettingsFragment", "Error saving settings", e)
         }
     }
     
     private fun resetToDefaults() {
         try {
-            android.util.Log.d("SettingsFragment", "Resetting settings to defaults")
             
             // Show loading state
             btnResetSettings.isEnabled = false
@@ -337,15 +314,12 @@ class SettingsFragment : Fragment() {
             // Reset settings in Firebase
             try {
                 settingsViewModel.resetToDefaults()
-                android.util.Log.d("SettingsFragment", "Settings reset in Firebase successfully")
                 
                 // Reset button state after successful reset
                 btnResetSettings.isEnabled = true
                 btnResetSettings.text = "Reset to Defaults"
                 Toast.makeText(requireContext(), "Settings reset to defaults", Toast.LENGTH_SHORT).show()
-                android.util.Log.d("SettingsFragment", "Settings reset to defaults")
             } catch (e: Exception) {
-                android.util.Log.e("SettingsFragment", "Error resetting settings in Firebase", e)
                 // Reset button state on error
                 btnResetSettings.isEnabled = true
                 btnResetSettings.text = "Reset to Defaults"
@@ -357,7 +331,6 @@ class SettingsFragment : Fragment() {
             btnResetSettings.isEnabled = true
             btnResetSettings.text = "Reset to Defaults"
             Toast.makeText(requireContext(), "Error resetting settings: ${e.message}", Toast.LENGTH_LONG).show()
-            android.util.Log.e("SettingsFragment", "Error resetting settings", e)
         }
     }
     
@@ -417,7 +390,6 @@ class SettingsFragment : Fragment() {
             return ValidationResult(true, "")
             
         } catch (e: Exception) {
-            android.util.Log.e("SettingsFragment", "Validation error", e)
             return ValidationResult(false, "Validation error: ${e.message}")
         }
     }
@@ -428,7 +400,6 @@ class SettingsFragment : Fragment() {
             btnSaveSettings.isEnabled = true
             btnSaveSettings.text = "Save Settings"
         } catch (e: Exception) {
-            android.util.Log.e("SettingsFragment", "Error updating save button state", e)
         }
     }
     

@@ -21,24 +21,18 @@ class FirebaseRepository {
     suspend fun saveQuote(quote: FirebaseQuote): Result<String> {
         return try {
             val userId = getCurrentUserId() ?: throw Exception("User not authenticated")
-            android.util.Log.d("FirebaseRepository", "Saving quote for user: $userId")
-            android.util.Log.d("FirebaseRepository", "Quote data: ref=${quote.reference}, client=${quote.clientName}, panelWatt=${quote.panelWatt}")
             
             val quoteWithUser = quote.copy(userId = userId)
             
             // Try API first, fallback to direct Firestore
             val apiResult = saveQuoteViaApi(quoteWithUser)
             if (apiResult.isSuccess) {
-                android.util.Log.d("FirebaseRepository", "Quote saved via API: ${apiResult.getOrNull()}")
                 apiResult
             } else {
-                android.util.Log.w("FirebaseRepository", "API failed, using direct Firestore: ${apiResult.exceptionOrNull()?.message}")
                 val docRef = firestore.collection("quotes").add(quoteWithUser).await()
-                android.util.Log.d("FirebaseRepository", "Quote saved via Firestore with ID: ${docRef.id}")
                 Result.success(docRef.id)
             }
         } catch (e: Exception) {
-            android.util.Log.e("FirebaseRepository", "Failed to save quote: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -46,26 +40,20 @@ class FirebaseRepository {
     suspend fun getQuotes(): Flow<List<FirebaseQuote>> = callbackFlow {
         val userId = getCurrentUserId()
         if (userId == null) {
-            android.util.Log.w("FirebaseRepository", "No authenticated user for quotes")
             if (!isClosedForSend) {
                 trySend(emptyList())
             }
             awaitClose { }
         } else {
-            android.util.Log.d("FirebaseRepository", "Setting up real-time listener for quotes (user: $userId)")
             
             val listener = firestore.collection("quotes")
                 .whereEqualTo("userId", userId)
                 .orderBy("createdAt", Query.Direction.DESCENDING)
                 .addSnapshotListener { snapshot, error ->
                     if (error != null) {
-                        android.util.Log.e("FirebaseRepository", "Error listening to quotes: ${error.message}", error)
                         
                         // Check for index requirement error
                         if (error.message?.contains("index", ignoreCase = true) == true) {
-                            android.util.Log.e("FirebaseRepository", "⚠️ FIREBASE INDEX REQUIRED!")
-                            android.util.Log.e("FirebaseRepository", "Create index at: https://console.firebase.google.com/project/solora-e00a4/firestore/indexes")
-                            android.util.Log.e("FirebaseRepository", "Index needed: quotes collection with userId (Ascending) + createdAt (Descending)")
                         }
                         
                         if (!isClosedForSend) {
@@ -78,7 +66,6 @@ class FirebaseRepository {
                         val quotes = snapshot.documents.mapNotNull { doc ->
                             doc.toObject(FirebaseQuote::class.java)?.copy(id = doc.id)
                         }
-                        android.util.Log.d("FirebaseRepository", "Real-time update: ${quotes.size} quotes for user")
                         if (!isClosedForSend) {
                             trySend(quotes)
                         }
@@ -90,7 +77,6 @@ class FirebaseRepository {
                 }
             
             awaitClose {
-                android.util.Log.d("FirebaseRepository", "Removing quotes listener")
                 listener.remove()
             }
         }
@@ -105,7 +91,6 @@ class FirebaseRepository {
             if (apiResult.isSuccess) {
                 val quoteData = apiResult.getOrNull()
                 if (quoteData != null) {
-                    android.util.Log.d("FirebaseRepository", "Quote retrieved via API: $quoteId")
                     // Convert Map to FirebaseQuote
                     val quote = FirebaseQuote(
                         id = quoteData["id"] as? String,
@@ -139,7 +124,6 @@ class FirebaseRepository {
                     Result.success(null)
                 }
             } else {
-                android.util.Log.w("FirebaseRepository", "API failed for getQuoteById, using direct Firestore: ${apiResult.exceptionOrNull()?.message}")
                 
                 // Fallback to direct Firestore
                 val doc = firestore.collection("quotes")
@@ -150,7 +134,6 @@ class FirebaseRepository {
                 if (doc.exists()) {
                     val quote = doc.toObject(FirebaseQuote::class.java)?.copy(id = doc.id)
                     if (quote?.userId == userId) {
-                        android.util.Log.d("FirebaseRepository", "Quote retrieved via Firestore: $quoteId")
                         Result.success(quote)
                     } else {
                         Result.failure(Exception("Quote not found or access denied"))
@@ -160,7 +143,6 @@ class FirebaseRepository {
                 }
             }
         } catch (e: Exception) {
-            android.util.Log.e("FirebaseRepository", "Error getting quote by ID: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -208,16 +190,12 @@ class FirebaseRepository {
             // Try API first, fallback to direct Firestore
             val apiResult = saveLeadViaApi(leadWithUser)
             if (apiResult.isSuccess) {
-                android.util.Log.d("FirebaseRepository", "Lead saved via API: ${apiResult.getOrNull()}")
                 apiResult
             } else {
-                android.util.Log.w("FirebaseRepository", "API failed, using direct Firestore: ${apiResult.exceptionOrNull()?.message}")
                 val docRef = firestore.collection("leads").add(leadWithUser).await()
-                android.util.Log.d("FirebaseRepository", "Lead saved via Firestore with ID: ${docRef.id}")
                 Result.success(docRef.id)
             }
         } catch (e: Exception) {
-            android.util.Log.e("FirebaseRepository", "Failed to save lead: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -225,26 +203,20 @@ class FirebaseRepository {
     suspend fun getLeads(): Flow<List<FirebaseLead>> = callbackFlow {
         val userId = getCurrentUserId()
         if (userId == null) {
-            android.util.Log.w("FirebaseRepository", "No authenticated user for leads")
             if (!isClosedForSend) {
                 trySend(emptyList())
             }
             awaitClose { }
         } else {
-            android.util.Log.d("FirebaseRepository", "Setting up real-time listener for leads (user: $userId)")
             
             val listener = firestore.collection("leads")
                 .whereEqualTo("userId", userId)
                 .orderBy("createdAt", Query.Direction.DESCENDING)
                 .addSnapshotListener { snapshot, error ->
                     if (error != null) {
-                        android.util.Log.e("FirebaseRepository", "Error listening to leads: ${error.message}", error)
                         
                         // Check for index requirement error
                         if (error.message?.contains("index", ignoreCase = true) == true) {
-                            android.util.Log.e("FirebaseRepository", "⚠️ FIREBASE INDEX REQUIRED!")
-                            android.util.Log.e("FirebaseRepository", "Create index at: https://console.firebase.google.com/project/solora-e00a4/firestore/indexes")
-                            android.util.Log.e("FirebaseRepository", "Index needed: leads collection with userId (Ascending) + createdAt (Descending)")
                         }
                         
                         if (!isClosedForSend) {
@@ -257,7 +229,6 @@ class FirebaseRepository {
                         val leads = snapshot.documents.mapNotNull { doc ->
                             doc.toObject(FirebaseLead::class.java)?.copy(id = doc.id)
                         }
-                        android.util.Log.d("FirebaseRepository", "Real-time update: ${leads.size} leads for user")
                         if (!isClosedForSend) {
                             trySend(leads)
                         }
@@ -269,7 +240,6 @@ class FirebaseRepository {
                 }
             
             awaitClose {
-                android.util.Log.d("FirebaseRepository", "Removing leads listener")
                 listener.remove()
             }
         }
@@ -279,7 +249,6 @@ class FirebaseRepository {
         return try {
             val userId = getCurrentUserId() ?: throw Exception("User not authenticated")
             
-            android.util.Log.d("FirebaseRepository", "Updating lead $leadId with quoteId: ${lead.quoteId}")
             
             // Use update() instead of set() to only update specific fields
             val updateData = mapOf(
@@ -292,10 +261,8 @@ class FirebaseRepository {
                 .update(updateData)
                 .await()
             
-            android.util.Log.d("FirebaseRepository", "Successfully updated lead $leadId")
             Result.success(Unit)
         } catch (e: Exception) {
-            android.util.Log.e("FirebaseRepository", "Failed to update lead $leadId: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -305,7 +272,6 @@ class FirebaseRepository {
             val userId = getCurrentUserId() ?: throw Exception("User not authenticated")
             
             // Note: Using Firestore directly - no API endpoint exists for getLeadById
-            android.util.Log.d("FirebaseRepository", "Getting lead by ID via Firestore: $leadId")
             val doc = firestore.collection("leads")
                 .document(leadId)
                 .get()
@@ -314,7 +280,6 @@ class FirebaseRepository {
             if (doc.exists()) {
                 val lead = doc.toObject(FirebaseLead::class.java)?.copy(id = doc.id)
                 if (lead?.userId == userId) {
-                    android.util.Log.d("FirebaseRepository", "Lead retrieved via Firestore: $leadId")
                     Result.success(lead)
                 } else {
                     Result.failure(Exception("Lead not found or access denied"))
@@ -323,7 +288,6 @@ class FirebaseRepository {
                 Result.success(null)
             }
         } catch (e: Exception) {
-            android.util.Log.e("FirebaseRepository", "Error getting lead by ID: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -355,10 +319,8 @@ class FirebaseRepository {
             // Try API first, fallback to direct Firestore
             val apiResult = apiService.updateUserProfile(user.copy(id = userId))
             if (apiResult.isSuccess) {
-                android.util.Log.d("FirebaseRepository", "User profile saved via API")
                 Result.success(userId)
             } else {
-                android.util.Log.w("FirebaseRepository", "API failed, using direct Firestore: ${apiResult.exceptionOrNull()?.message}")
                 
                 // Fallback to direct Firestore
                 firestore.collection("users")
@@ -369,7 +331,6 @@ class FirebaseRepository {
                 Result.success(userId)
             }
         } catch (e: Exception) {
-            android.util.Log.e("FirebaseRepository", "Save user profile error: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -384,13 +345,11 @@ class FirebaseRepository {
                 val userData = apiResult.getOrNull()
                 if (userData != null) {
                     val user = convertMapToFirebaseUser(userData)
-                    android.util.Log.d("FirebaseRepository", "User profile retrieved via API")
                     Result.success(user)
                 } else {
                     Result.success(null)
                 }
             } else {
-                android.util.Log.w("FirebaseRepository", "API failed, using direct Firestore: ${apiResult.exceptionOrNull()?.message}")
                 
                 // Fallback to direct Firestore
                 val doc = firestore.collection("users")
@@ -406,7 +365,6 @@ class FirebaseRepository {
                 }
             }
         } catch (e: Exception) {
-            android.util.Log.e("FirebaseRepository", "Get user profile error: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -425,7 +383,6 @@ class FirebaseRepository {
                 updatedAt = data["updatedAt"] as? com.google.firebase.Timestamp
             )
         } catch (e: Exception) {
-            android.util.Log.e("FirebaseRepository", "Error converting map to FirebaseUser: ${e.message}", e)
             null
         }
     }
@@ -493,17 +450,14 @@ class FirebaseRepository {
                             updatedAt = data["updatedAt"] as? Timestamp
                         )
                     } catch (e: Exception) {
-                        android.util.Log.w("FirebaseRepository", "Failed to parse lead: ${e.message}")
                         null
                     }
                 }
-                android.util.Log.d("FirebaseRepository", "Retrieved ${leads.size} leads via API")
                 Result.success(leads)
             } else {
                 Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
             }
         } catch (e: Exception) {
-            android.util.Log.e("FirebaseRepository", "Get leads via API error: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -549,17 +503,14 @@ class FirebaseRepository {
                             updatedAt = data["updatedAt"] as? Timestamp
                         )
                     } catch (e: Exception) {
-                        android.util.Log.w("FirebaseRepository", "Failed to parse quote: ${e.message}")
                         null
                     }
                 }
-                android.util.Log.d("FirebaseRepository", "Retrieved ${quotes.size} quotes via API")
                 Result.success(quotes)
             } else {
                 Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
             }
         } catch (e: Exception) {
-            android.util.Log.e("FirebaseRepository", "Get quotes via API error: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -571,13 +522,11 @@ class FirebaseRepository {
         return try {
             val result = apiService.updateSettings(settings)
             if (result.isSuccess) {
-                android.util.Log.d("FirebaseRepository", "Settings updated via API: ${result.getOrNull()}")
                 Result.success(result.getOrNull() ?: "Settings updated")
             } else {
                 Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
             }
         } catch (e: Exception) {
-            android.util.Log.e("FirebaseRepository", "Update settings via API error: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -589,13 +538,11 @@ class FirebaseRepository {
         return try {
             val result = apiService.syncData(offlineData)
             if (result.isSuccess) {
-                android.util.Log.d("FirebaseRepository", "Data synced via API: ${result.getOrNull()}")
                 Result.success(result.getOrNull() ?: emptyMap())
             } else {
                 Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
             }
         } catch (e: Exception) {
-            android.util.Log.e("FirebaseRepository", "Sync data via API error: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -607,13 +554,11 @@ class FirebaseRepository {
         return try {
             val result = apiService.healthCheck()
             if (result.isSuccess) {
-                android.util.Log.d("FirebaseRepository", "Health check via API: ${result.getOrNull()}")
                 Result.success(result.getOrNull() ?: emptyMap())
             } else {
                 Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
             }
         } catch (e: Exception) {
-            android.util.Log.e("FirebaseRepository", "Health check via API error: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -650,7 +595,6 @@ class FirebaseRepository {
                         paybackMonths = calculationData.paybackMonths,
                         detailedAnalysis = null // API doesn't return detailed analysis
                     )
-                    android.util.Log.d("FirebaseRepository", "Quote calculated via API: ${quoteOutputs.systemKw}kW system")
                     Result.success(quoteOutputs)
                 } else {
                     Result.failure(Exception("No calculation data returned from API"))
@@ -659,7 +603,6 @@ class FirebaseRepository {
                 Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
             }
         } catch (e: Exception) {
-            android.util.Log.e("FirebaseRepository", "Calculate quote via API error: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -697,13 +640,11 @@ class FirebaseRepository {
             val result = apiService.saveQuote(quoteData)
             if (result.isSuccess) {
                 val quoteId = result.getOrNull()
-                android.util.Log.d("FirebaseRepository", "Quote saved via API: $quoteId")
                 Result.success(quoteId ?: "")
             } else {
                 Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
             }
         } catch (e: Exception) {
-            android.util.Log.e("FirebaseRepository", "Save quote via API error: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -744,7 +685,6 @@ class FirebaseRepository {
                         createdAt = quoteData.get("createdAt") as? Timestamp,
                         updatedAt = quoteData.get("updatedAt") as? Timestamp
                     )
-                    android.util.Log.d("FirebaseRepository", "Quote retrieved via API: ${quote.reference}")
                     Result.success(quote)
                 } else {
                     Result.success(null)
@@ -753,7 +693,6 @@ class FirebaseRepository {
                 Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
             }
         } catch (e: Exception) {
-            android.util.Log.e("FirebaseRepository", "Get quote by ID via API error: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -776,13 +715,11 @@ class FirebaseRepository {
             val result = apiService.saveLead(leadData)
             if (result.isSuccess) {
                 val leadId = result.getOrNull()
-                android.util.Log.d("FirebaseRepository", "Lead saved via API: $leadId")
                 Result.success(leadId ?: "")
             } else {
                 Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
             }
         } catch (e: Exception) {
-            android.util.Log.e("FirebaseRepository", "Save lead via API error: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -795,13 +732,11 @@ class FirebaseRepository {
             val result = apiService.getSettings()
             if (result.isSuccess) {
                 val settings = result.getOrNull()
-                android.util.Log.d("FirebaseRepository", "Settings retrieved via API")
                 Result.success(settings)
             } else {
                 Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
             }
         } catch (e: Exception) {
-            android.util.Log.e("FirebaseRepository", "Get settings via API error: ${e.message}", e)
             Result.failure(e)
         }
     }

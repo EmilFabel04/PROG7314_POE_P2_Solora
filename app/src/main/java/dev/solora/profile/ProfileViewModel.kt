@@ -94,6 +94,5 @@ class ProfileViewModel(app: Application) : AndroidViewModel(app) {
         _userProfile.value = null
         _isLoading.value = false
         _errorMessage.value = null
-        android.util.Log.d("ProfileViewModel", "User data cleared")
     }
 }

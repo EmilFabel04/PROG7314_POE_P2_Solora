@@ -107,7 +107,6 @@ class ChangePasswordFragment : Fragment() {
                 }
                 
             } catch (e: Exception) {
-                android.util.Log.e("ChangePasswordFragment", "Error changing password: ${e.message}", e)
                 
                 when {
                     e.message?.contains("wrong-password") == true -> {

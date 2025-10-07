@@ -102,7 +102,6 @@ class EditProfileFragment : Fragment() {
             etPhone.setText(user.phone ?: "")
             etCompany.setText(user.company ?: "")
         } catch (e: Exception) {
-            android.util.Log.e("EditProfileFragment", "Error populating fields: ${e.message}", e)
             Toast.makeText(requireContext(), "Error loading profile data", Toast.LENGTH_SHORT).show()
         }
     }
@@ -148,7 +147,6 @@ class EditProfileFragment : Fragment() {
             }
             
         } catch (e: Exception) {
-            android.util.Log.e("EditProfileFragment", "Error saving profile: ${e.message}", e)
             Toast.makeText(requireContext(), "Error saving profile", Toast.LENGTH_SHORT).show()
         }
     }

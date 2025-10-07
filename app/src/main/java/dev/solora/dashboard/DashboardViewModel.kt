@@ -34,21 +34,17 @@ class DashboardViewModel(app: Application) : AndroidViewModel(app) {
             _error.value = null
 
             try {
-                android.util.Log.d("DashboardViewModel", "Loading dashboard data...")
                 
                 // Try API first, fallback to direct Firestore
                 val apiResult = firebaseRepository.getQuotesViaApi()
                 val quotes = if (apiResult.isSuccess) {
-                    android.util.Log.d("DashboardViewModel", "Using API for dashboard data")
                     apiResult.getOrNull() ?: emptyList()
                 } else {
-                    android.util.Log.w("DashboardViewModel", "API failed, using direct Firestore: ${apiResult.exceptionOrNull()?.message}")
                     // Fallback to direct Firestore - collect the flow
                     val directFlow = firebaseRepository.getQuotes()
                     directFlow.first() // Get the first emission from the flow
                 }
 
-                android.util.Log.d("DashboardViewModel", "Loaded ${quotes.size} quotes for dashboard")
                 
                 // Convert API response to FirebaseQuote objects if needed
                 val firebaseQuotes = if (quotes.isNotEmpty() && quotes.first() is Map<*, *>) {
@@ -84,7 +80,6 @@ class DashboardViewModel(app: Application) : AndroidViewModel(app) {
                                 updatedAt = map["updatedAt"] as? com.google.firebase.Timestamp
                             )
                         } catch (e: Exception) {
-                            android.util.Log.e("DashboardViewModel", "Error converting quote: ${e.message}")
                             null
                         }
                     }
@@ -96,10 +91,8 @@ class DashboardViewModel(app: Application) : AndroidViewModel(app) {
                 val dashboardData = calculateDashboardData(firebaseQuotes)
                 _dashboardData.value = dashboardData
                 
-                android.util.Log.d("DashboardViewModel", "Dashboard data calculated: ${dashboardData.totalQuotes} quotes, avg system: ${dashboardData.averageSystemSize}kW")
 
             } catch (e: Exception) {
-                android.util.Log.e("DashboardViewModel", "Error loading dashboard data: ${e.message}", e)
                 _error.value = "Failed to load dashboard data: ${e.message}"
             } finally {
                 _isLoading.value = false
@@ -117,15 +110,12 @@ class DashboardViewModel(app: Application) : AndroidViewModel(app) {
             _error.value = null
 
             try {
-                android.util.Log.d("DashboardViewModel", "Loading dashboard data with date filter: ${fromDate} to ${toDate}")
                 
                 // Try API first, fallback to direct Firestore
                 val apiResult = firebaseRepository.getQuotesViaApi()
                 val allQuotes = if (apiResult.isSuccess) {
-                    android.util.Log.d("DashboardViewModel", "Using API for dashboard data")
                     apiResult.getOrNull() ?: emptyList()
                 } else {
-                    android.util.Log.w("DashboardViewModel", "API failed, using direct Firestore: ${apiResult.exceptionOrNull()?.message}")
                     // Fallback to direct Firestore - collect the flow
                     val directFlow = firebaseRepository.getQuotes()
                     directFlow.first() // Get the first emission from the flow
@@ -164,7 +154,6 @@ class DashboardViewModel(app: Application) : AndroidViewModel(app) {
                                 updatedAt = map["updatedAt"] as? com.google.firebase.Timestamp
                             )
                         } catch (e: Exception) {
-                            android.util.Log.e("DashboardViewModel", "Error converting quote: ${e.message}")
                             null
                         }
                     }
@@ -203,7 +192,6 @@ class DashboardViewModel(app: Application) : AndroidViewModel(app) {
 
                             isAfterFromDate && isBeforeToDate
                         } catch (e: Exception) {
-                            android.util.Log.e("DashboardViewModel", "Error filtering quote by date: ${e.message}", e)
                             true // Include quote if date filtering fails
                         }
                     }
@@ -211,16 +199,13 @@ class DashboardViewModel(app: Application) : AndroidViewModel(app) {
                     firebaseQuotes
                 }
 
-                android.util.Log.d("DashboardViewModel", "Filtered ${filteredQuotes.size} quotes from ${firebaseQuotes.size} total quotes")
                 
                 // Calculate dashboard data with filtered quotes
                 val dashboardData = calculateDashboardData(filteredQuotes)
                 _dashboardData.value = dashboardData
                 
-                android.util.Log.d("DashboardViewModel", "Dashboard data calculated with filter: ${dashboardData.totalQuotes} quotes, avg system: ${dashboardData.averageSystemSize}kW")
 
             } catch (e: Exception) {
-                android.util.Log.e("DashboardViewModel", "Error loading filtered dashboard data: ${e.message}", e)
                 _error.value = "Failed to load dashboard data: ${e.message}"
             } finally {
                 _isLoading.value = false

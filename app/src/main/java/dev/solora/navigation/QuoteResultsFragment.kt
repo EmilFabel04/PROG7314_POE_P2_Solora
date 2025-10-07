@@ -59,17 +59,14 @@ class QuoteResultsFragment : Fragment() {
         tvEstimatedSavings = view.findViewById(R.id.tv_estimated_savings)
         btnSaveQuote = view.findViewById(R.id.btn_save_quote)
         
-        android.util.Log.d("QuoteResultsFragment", "Views initialized - btnBack: ${btnBack != null}")
     }
     
     private fun setupClickListeners() {
         btnBack.setOnClickListener {
-            android.util.Log.d("QuoteResultsFragment", "Back button clicked")
             cancelQuoteAndGoBack()
         }
         
         btnSaveQuote.setOnClickListener {
-            android.util.Log.d("QuoteResultsFragment", "Save quote button clicked")
             navigateToClientDetails()
         }
     }
@@ -85,19 +82,14 @@ class QuoteResultsFragment : Fragment() {
     }
     
     private fun cancelQuoteAndGoBack() {
-        android.util.Log.d("QuoteResultsFragment", "cancelQuoteAndGoBack called")
         
         // Clear the calculated quote when going back (cancelling the quote)
         quotesViewModel.clearLastQuote()
-        android.util.Log.d("QuoteResultsFragment", "Quote cleared from ViewModel")
         
         try {
-            android.util.Log.d("QuoteResultsFragment", "Attempting to navigate back to quotes")
             // Navigate directly to quotes fragment
             findNavController().navigate(R.id.action_quote_results_to_quotes)
-            android.util.Log.d("QuoteResultsFragment", "Navigation back completed")
         } catch (e: Exception) {
-            android.util.Log.e("QuoteResultsFragment", "Error navigating back: ${e.message}", e)
         }
     }
     

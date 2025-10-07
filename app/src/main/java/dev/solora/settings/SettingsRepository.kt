@@ -16,18 +16,15 @@ class SettingsRepository {
     private val apiService = dev.solora.api.FirebaseFunctionsApi()
     
     val settings: Flow<AppSettings> = callbackFlow {
-        android.util.Log.d("SettingsRepository", "Initializing Firebase settings")
         
         val currentUser = auth.currentUser
         if (currentUser == null) {
-            android.util.Log.w("SettingsRepository", "No authenticated user, using default settings")
             if (!isClosedForSend) {
                 trySend(AppSettings())
             }
             awaitClose { } // Empty awaitClose for no-user case
         } else {
             val userId = currentUser.uid
-            android.util.Log.d("SettingsRepository", "Loading settings for user: $userId")
             
             val settingsDoc = firestore.collection("user_settings").document(userId)
             
@@ -35,7 +32,6 @@ class SettingsRepository {
             val listener = settingsDoc.addSnapshotListener { snapshot, error ->
                 try {
                     if (error != null) {
-                        android.util.Log.e("SettingsRepository", "Firebase settings error", error)
                         if (!isClosedForSend) {
                             trySend(AppSettings()) // Send default settings on error
                         }
@@ -78,29 +74,24 @@ class SettingsRepository {
                                 language = (data?.get("language") as? String) ?: "en",
                                 theme = (data?.get("theme") as? String) ?: "light"
                             )
-                            android.util.Log.d("SettingsRepository", "Settings loaded from Firebase: $appSettings")
                             if (!isClosedForSend) {
                                 trySend(appSettings)
                             }
                         } catch (e: Exception) {
-                            android.util.Log.e("SettingsRepository", "Error parsing settings data", e)
                             if (!isClosedForSend) {
                                 trySend(AppSettings())
                             }
                         }
                     } else {
-                        android.util.Log.d("SettingsRepository", "No settings found, using defaults")
                         if (!isClosedForSend) {
                             trySend(AppSettings())
                         }
                     }
                 } catch (e: Exception) {
-                    android.util.Log.e("SettingsRepository", "Error in snapshot listener", e)
                 }
             }
             
             awaitClose { 
-                android.util.Log.d("SettingsRepository", "Removing Firebase listener")
                 listener.remove() 
             }
         }
@@ -110,12 +101,10 @@ class SettingsRepository {
         try {
             val currentUser = auth.currentUser
             if (currentUser == null) {
-                android.util.Log.e("SettingsRepository", "No authenticated user for saving calculation settings")
                 return
             }
             
             val userId = currentUser.uid
-            android.util.Log.d("SettingsRepository", "Saving calculation settings for user: $userId")
             
             val settingsData = mapOf(
                 "defaultTariff" to settings.defaultTariff,
@@ -134,10 +123,8 @@ class SettingsRepository {
             )
             
             firestore.collection("user_settings").document(userId).set(settingsData, com.google.firebase.firestore.SetOptions.merge()).await()
-            android.util.Log.d("SettingsRepository", "Calculation settings saved successfully")
             
         } catch (e: Exception) {
-            android.util.Log.e("SettingsRepository", "Error saving calculation settings", e)
             throw e
         }
     }
@@ -146,12 +133,10 @@ class SettingsRepository {
         try {
             val currentUser = auth.currentUser
             if (currentUser == null) {
-                android.util.Log.e("SettingsRepository", "No authenticated user for saving company settings")
                 return
             }
             
             val userId = currentUser.uid
-            android.util.Log.d("SettingsRepository", "Saving company settings for user: $userId")
             
             val settingsData = mapOf(
                 "companyName" to settings.companyName,
@@ -170,10 +155,8 @@ class SettingsRepository {
             )
             
             firestore.collection("user_settings").document(userId).set(settingsData, com.google.firebase.firestore.SetOptions.merge()).await()
-            android.util.Log.d("SettingsRepository", "Company settings saved successfully")
             
         } catch (e: Exception) {
-            android.util.Log.e("SettingsRepository", "Error saving company settings", e)
             throw e
         }
     }
@@ -182,12 +165,10 @@ class SettingsRepository {
         try {
             val currentUser = auth.currentUser
             if (currentUser == null) {
-                android.util.Log.e("SettingsRepository", "No authenticated user for saving app settings")
                 return
             }
             
             val userId = currentUser.uid
-            android.util.Log.d("SettingsRepository", "Saving app settings for user: $userId")
             
             val settingsData = mapOf(
                 "currency" to settings.currency,
@@ -197,10 +178,8 @@ class SettingsRepository {
             )
             
             firestore.collection("user_settings").document(userId).set(settingsData, com.google.firebase.firestore.SetOptions.merge()).await()
-            android.util.Log.d("SettingsRepository", "App settings saved successfully")
             
         } catch (e: Exception) {
-            android.util.Log.e("SettingsRepository", "Error saving app settings", e)
             throw e
         }
     }
@@ -209,19 +188,15 @@ class SettingsRepository {
         try {
             val currentUser = auth.currentUser
             if (currentUser == null) {
-                android.util.Log.e("SettingsRepository", "No authenticated user for resetting settings")
                 return
             }
             
             val userId = currentUser.uid
-            android.util.Log.d("SettingsRepository", "Resetting settings to defaults for user: $userId")
             
             // Delete the user's settings document to reset to defaults
             firestore.collection("user_settings").document(userId).delete().await()
-            android.util.Log.d("SettingsRepository", "Settings reset to defaults successfully")
             
         } catch (e: Exception) {
-            android.util.Log.e("SettingsRepository", "Error resetting settings", e)
             throw e
         }
     }
@@ -235,7 +210,6 @@ class SettingsRepository {
      */
     suspend fun updateSettingsViaApi(settings: AppSettings): Result<String> {
         return try {
-            android.util.Log.d("SettingsRepository", "Updating settings via API")
             
             val settingsMap = mapOf(
                 "calculationSettings" to mapOf(
@@ -273,13 +247,11 @@ class SettingsRepository {
             
             val result = apiService.updateSettings(settingsMap)
             if (result.isSuccess) {
-                android.util.Log.d("SettingsRepository", "Settings updated via API: ${result.getOrNull()}")
                 Result.success(result.getOrNull() ?: "Settings updated")
             } else {
                 Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
             }
         } catch (e: Exception) {
-            android.util.Log.e("SettingsRepository", "Update settings via API error: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -289,24 +261,20 @@ class SettingsRepository {
      */
     suspend fun getSettingsViaApi(): Result<AppSettings?> {
         return try {
-            android.util.Log.d("SettingsRepository", "Getting settings via API")
             
             val result = apiService.getSettings()
             if (result.isSuccess) {
                 val settingsData = result.getOrNull()
                 if (settingsData != null) {
                     val appSettings = parseSettingsFromMap(settingsData)
-                    android.util.Log.d("SettingsRepository", "Settings retrieved via API")
                     Result.success(appSettings)
                 } else {
-                    android.util.Log.d("SettingsRepository", "No settings found via API")
                     Result.success(null)
                 }
             } else {
                 Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
             }
         } catch (e: Exception) {
-            android.util.Log.e("SettingsRepository", "Get settings via API error: ${e.message}", e)
             Result.failure(e)
         }
     }

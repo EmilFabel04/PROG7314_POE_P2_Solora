@@ -175,20 +175,14 @@ class HomeFragment : Fragment() {
     private fun loadRecentQuotes() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                android.util.Log.d("HomeFragment", "Starting to load recent quotes...")
-                android.util.Log.d("HomeFragment", "Current user: ${com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid}")
                 
                 // Get quotes from the last 7 days using REST API
                 val quotesResult = apiService.getQuotes(search = null, limit = 100)
-                android.util.Log.d("HomeFragment", "API call result: ${quotesResult.isSuccess}")
                 
                 if (quotesResult.isSuccess) {
                     val quotesData = quotesResult.getOrNull() ?: emptyList()
-                    android.util.Log.d("HomeFragment", "Raw API data count: ${quotesData.size}")
                     
                     if (quotesData.isNotEmpty()) {
-                        android.util.Log.d("HomeFragment", "First quote data keys: ${quotesData.first().keys}")
-                        android.util.Log.d("HomeFragment", "First quote createdAt: ${quotesData.first()["createdAt"]}")
                     }
                     
                     // Convert API response to FirebaseQuote objects
@@ -221,15 +215,12 @@ class HomeFragment : Fragment() {
                                 createdAt = data["createdAt"] as? com.google.firebase.Timestamp,
                                 updatedAt = data["updatedAt"] as? com.google.firebase.Timestamp
                             )
-                            android.util.Log.d("HomeFragment", "Parsed quote: ${quote.id}, createdAt: ${quote.createdAt}, reference: ${quote.reference}")
                             quote
                         } catch (e: Exception) {
-                            android.util.Log.w("HomeFragment", "Failed to parse quote: ${e.message}", e)
                             null
                         }
                     }
                     
-                    android.util.Log.d("HomeFragment", "Successfully parsed ${allQuotes.size} quotes")
                     
                     // Filter quotes from the last 7 days
                     val sevenDaysAgo = Calendar.getInstance().apply {
@@ -240,35 +231,27 @@ class HomeFragment : Fragment() {
                         set(Calendar.MILLISECOND, 0)
                     }.time
                     
-                    android.util.Log.d("HomeFragment", "Seven days ago: $sevenDaysAgo")
                     
                     val recentQuotes = allQuotes.filter { quote ->
                         val createdAt = quote.createdAt?.toDate()
                         val isRecent = createdAt?.let { it >= sevenDaysAgo } ?: false
-                        android.util.Log.d("HomeFragment", "Quote ${quote.id}: createdAt=$createdAt, isRecent=$isRecent")
                         isRecent
                     }.sortedByDescending { it.createdAt?.toDate() }
                     .take(5) // Get the 5 most recent quotes from last 7 days
                     
-                    android.util.Log.d("HomeFragment", "Found ${recentQuotes.size} quotes from last 7 days out of ${allQuotes.size} total quotes")
                     
                     if (recentQuotes.isEmpty() && allQuotes.isNotEmpty()) {
-                        android.util.Log.w("HomeFragment", "No recent quotes found, but ${allQuotes.size} total quotes exist. Showing all quotes instead.")
                         val allRecentQuotes = allQuotes.sortedByDescending { it.createdAt?.toDate() }.take(5)
                         displayRecentQuotes(allRecentQuotes)
                     } else {
                         displayRecentQuotes(recentQuotes)
                     }
                 } else {
-                    android.util.Log.e("HomeFragment", "Failed to load quotes via API: ${quotesResult.exceptionOrNull()?.message}")
                     // Fallback to ViewModel if API fails
-                    android.util.Log.d("HomeFragment", "Falling back to ViewModel for quotes")
                     loadRecentQuotesFromViewModel()
                 }
             } catch (e: Exception) {
-                android.util.Log.e("HomeFragment", "Error loading recent quotes: ${e.message}", e)
                 // Fallback to ViewModel if API fails
-                android.util.Log.d("HomeFragment", "Falling back to ViewModel for quotes due to exception")
                 loadRecentQuotesFromViewModel()
             }
         }
@@ -277,12 +260,9 @@ class HomeFragment : Fragment() {
     private fun loadRecentQuotesFromViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                android.util.Log.d("HomeFragment", "Loading quotes from ViewModel...")
                 quotesViewModel.quotes.collect { quotes ->
-                    android.util.Log.d("HomeFragment", "ViewModel quotes count: ${quotes.size}")
                     
                     if (quotes.isNotEmpty()) {
-                        android.util.Log.d("HomeFragment", "First ViewModel quote: ${quotes.first().id}, createdAt: ${quotes.first().createdAt}")
                     }
                     
                     // Filter quotes from the last 7 days
@@ -297,15 +277,12 @@ class HomeFragment : Fragment() {
                     val recentQuotes = quotes.filter { quote ->
                         val createdAt = quote.createdAt?.toDate()
                         val isRecent = createdAt?.let { it >= sevenDaysAgo } ?: false
-                        android.util.Log.d("HomeFragment", "ViewModel Quote ${quote.id}: createdAt=$createdAt, isRecent=$isRecent")
                         isRecent
                     }.sortedByDescending { it.createdAt?.toDate() }
                     .take(5)
                     
-                    android.util.Log.d("HomeFragment", "ViewModel found ${recentQuotes.size} recent quotes out of ${quotes.size} total")
                     
                     if (recentQuotes.isEmpty() && quotes.isNotEmpty()) {
-                        android.util.Log.w("HomeFragment", "No recent quotes in ViewModel, showing all quotes")
                         val allRecentQuotes = quotes.sortedByDescending { it.createdAt?.toDate() }.take(5)
                         displayRecentQuotes(allRecentQuotes)
                     } else {
@@ -313,35 +290,27 @@ class HomeFragment : Fragment() {
                     }
                 }
             } catch (e: Exception) {
-                android.util.Log.e("HomeFragment", "Error loading quotes from ViewModel: ${e.message}", e)
                 displayEmptyQuotes()
             }
         }
     }
     
     private fun displayRecentQuotes(quotes: List<FirebaseQuote>) {
-        android.util.Log.d("HomeFragment", "displayRecentQuotes called with ${quotes.size} quotes")
         layoutRecentQuotes.removeAllViews()
         
         if (quotes.isEmpty()) {
-            android.util.Log.d("HomeFragment", "No quotes to display, showing empty state")
             displayEmptyQuotes()
             return
         }
         
-        android.util.Log.d("HomeFragment", "Displaying ${quotes.size} quotes")
         quotes.forEach { quote ->
             try {
-                android.util.Log.d("HomeFragment", "Creating view for quote: ${quote.id}, reference: ${quote.reference}")
                 val quoteView = createQuoteItemView(quote)
                 layoutRecentQuotes.addView(quoteView)
-                android.util.Log.d("HomeFragment", "Successfully added view for quote: ${quote.id}")
             } catch (e: Exception) {
-                android.util.Log.e("HomeFragment", "Error creating view for quote ${quote.id}: ${e.message}", e)
                 // Continue with other quotes even if one fails
             }
         }
-        android.util.Log.d("HomeFragment", "Finished adding ${quotes.size} quote views to layout")
     }
     
     private fun createQuoteItemView(quote: FirebaseQuote): View {
@@ -362,7 +331,6 @@ class HomeFragment : Fragment() {
             try {
                 foreground = context.getDrawable(android.R.drawable.list_selector_background)
             } catch (e: Exception) {
-                android.util.Log.w("HomeFragment", "Could not set foreground drawable: ${e.message}")
                 // Set a simple ripple effect instead using ColorStateList
                 val rippleColor = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#1A000000"))
                 setRippleColor(rippleColor)
@@ -471,7 +439,6 @@ class HomeFragment : Fragment() {
                 if (quotesResult.isSuccess) {
                     val quotes = quotesResult.getOrNull() ?: emptyList()
                     tvQuotesCount.text = quotes.size.toString()
-                    android.util.Log.d("HomeFragment", "Refreshed quotes count via API: ${quotes.size}")
                 }
                 
                 // Refresh leads count via API
@@ -479,7 +446,6 @@ class HomeFragment : Fragment() {
                 if (leadsResult.isSuccess) {
                     val leads = leadsResult.getOrNull() ?: emptyList()
                     tvLeadsCount.text = leads.size.toString()
-                    android.util.Log.d("HomeFragment", "Refreshed leads count via API: ${leads.size}")
                 }
                 
                 // Refresh settings via API to ensure company info is up to date
@@ -489,7 +455,6 @@ class HomeFragment : Fragment() {
                     if (settingsData != null) {
                         val companyName = settingsData["companyName"] as? String ?: "SOLORA"
                         tvCompanyName.text = companyName
-                        android.util.Log.d("HomeFragment", "Refreshed company name via API: $companyName")
                     }
                 }
                 
@@ -508,7 +473,6 @@ class HomeFragment : Fragment() {
                             "Not Set"
                         }
                         tvConsultantName.text = "Welcome back, $fullName"
-                        android.util.Log.d("HomeFragment", "Refreshed consultant name via API: $fullName")
                     }
                 }
                 
@@ -519,11 +483,9 @@ class HomeFragment : Fragment() {
                 )
                 val syncResult = apiService.syncData(syncData)
                 if (syncResult.isSuccess) {
-                    android.util.Log.d("HomeFragment", "Data sync completed via API")
                 }
                 
             } catch (e: Exception) {
-                android.util.Log.e("HomeFragment", "Error during API refresh: ${e.message}", e)
             }
         }
     }

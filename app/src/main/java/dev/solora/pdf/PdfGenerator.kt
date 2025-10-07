@@ -40,11 +40,9 @@ class PdfGenerator(private val context: Context) {
             HtmlConverter.convertToPdf(htmlContent, outputStream)
             outputStream.close()
             
-            android.util.Log.d("PdfGenerator", "PDF generated successfully: ${pdfFile.absolutePath}")
             pdfFile
             
         } catch (e: Exception) {
-            android.util.Log.e("PdfGenerator", "Error generating PDF: ${e.message}", e)
             null
         }
     }
