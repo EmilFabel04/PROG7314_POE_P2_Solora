@@ -24,6 +24,8 @@ import dev.solora.auth.AuthViewModel
 
 class OnboardingFragment : Fragment() {
 
+    private val authViewModel: AuthViewModel by viewModels()
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_onboarding, container, false)
     }

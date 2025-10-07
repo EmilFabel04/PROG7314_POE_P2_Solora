@@ -54,7 +54,6 @@ class AuthRepository(private val context: Context) {
                 prefs[KEY_USER_ID] = user.uid
                 prefs[KEY_EMAIL] = user.email ?: email
                 prefs[KEY_NAME] = user.displayName ?: email.substringBefore('@')
-                prefs[KEY_HAS_APP_DATA] = true
             }
             
             Result.success(user)
@@ -75,7 +74,6 @@ class AuthRepository(private val context: Context) {
                 prefs[KEY_USER_ID] = user.uid
                 prefs[KEY_NAME] = user.displayName ?: ""
                 prefs[KEY_EMAIL] = user.email ?: ""
-                prefs[KEY_HAS_APP_DATA] = true
             }
 
             Result.success(user)
@@ -110,7 +108,6 @@ class AuthRepository(private val context: Context) {
                 prefs[KEY_NAME] = name
                 prefs[KEY_SURNAME] = surname
                 prefs[KEY_EMAIL] = email
-                prefs[KEY_HAS_APP_DATA] = true
             }
             
             Result.success(user)
@@ -144,7 +141,6 @@ class AuthRepository(private val context: Context) {
                 prefs[KEY_NAME] = user.displayName ?: ""
                 prefs[KEY_SURNAME] = "" // no surname from Google
                 prefs[KEY_EMAIL] = user.email ?: ""
-                prefs[KEY_HAS_APP_DATA] = true
             }
 
             Result.success(user)
