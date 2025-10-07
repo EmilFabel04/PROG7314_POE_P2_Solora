@@ -185,6 +185,14 @@ Release signing: `app/build.gradle.kts` references a release keystore at `app/ke
 2) Enable Auth providers (Email/Password, Google) in Authentication settings.
 3) Enable Firestore (Native mode). For production queries with compound ordering/filters, you may need indexes. The app logs when an index is required; create the suggested index in the Firebase Console if you see those logs.
 4) Download and place `google-services.json` into `app/`.
+<p align="center">
+  <img src="READMEAsset/DatabasePic4.png" alt="App Logo" width="300">
+  <img src="READMEAsset/DatabasePic5.png" alt="App Logo" width="300">
+  <img src="READMEAsset/DatabasePic6.png" alt="App Logo" width="300">
+  <img src="READMEAsset/DatabasePic7.png" alt="App Logo" width="300">
+  <img src="READMEAsset/DatabasePic8.png" alt="App Logo" width="300">
+  <img src="READMEAsset/DatabasePic9.png" alt="App Logo" width="300">
+</p>
 
 ### Cloud Functions: Develop, Emulate, Deploy
 From the repo root:
