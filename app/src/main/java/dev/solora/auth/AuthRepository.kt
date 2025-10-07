@@ -38,10 +38,17 @@ class AuthRepository(private val context: Context) {
     }
     
     // Check if the app has ever been used (has app data/cache)
+    // Also consider if Firebase has a current user as a sign of previous use
     val hasAppData: Flow<Boolean> = context.dataStore.data.catch { e ->
         if (e is IOException) emit(emptyPreferences()) else throw e
     }.map { prefs ->
-        prefs[KEY_HAS_APP_DATA] ?: false
+        val flagValue = prefs[KEY_HAS_APP_DATA] ?: false
+        // If flag is false but Firebase has user data, set the flag
+        if (!flagValue && firebaseAuth.currentUser != null) {
+            true
+        } else {
+            flagValue
+        }
     }
     
     // Mark that the app now has data (user has registered/logged in)

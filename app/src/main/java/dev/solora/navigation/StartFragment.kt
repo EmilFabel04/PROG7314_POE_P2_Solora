@@ -26,20 +26,15 @@ class StartFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            // Wait for both flows to emit their values
+            // Check if user is logged in
             val isLoggedIn = authViewModel.isLoggedIn.value
-            val hasAppData = authViewModel.hasAppData.value
             
-            when {
-                // Case 1: User is logged in -> Go to main app
-                isLoggedIn -> {
-                    findNavController().navigate(R.id.action_start_to_main)
-                }
-                // Case 2 & 3: Not logged in -> Go to auth with flag indicating first-time
-                else -> {
-                    val bundle = bundleOf("show_onboarding" to !hasAppData)
-                    findNavController().navigate(R.id.action_start_to_auth, bundle)
-                }
+            if (isLoggedIn) {
+                // User is logged in -> Go to main app
+                findNavController().navigate(R.id.action_start_to_main)
+            } else {
+                // Not logged in -> Go to auth (LoginFragment will check hasAppData)
+                findNavController().navigate(R.id.action_start_to_auth)
             }
         }
     }

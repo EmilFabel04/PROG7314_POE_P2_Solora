@@ -86,12 +86,14 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        // Check if we should show onboarding instead (first-time user)
-        val showOnboarding = arguments?.getBoolean("show_onboarding", false) ?: false
-        if (showOnboarding) {
-            // Navigate to onboarding for first-time users
-            findNavController().navigate(R.id.action_login_to_onboarding)
-            return
+        // Check if this is a first-time user who should see onboarding
+        androidx.lifecycle.lifecycleScope.launchWhenStarted {
+            val hasAppData = authViewModel.hasAppData.value
+            if (!hasAppData) {
+                // First-time user, redirect to onboarding
+                findNavController().navigate(R.id.action_login_to_onboarding)
+                return@launchWhenStarted
+            }
         }
 
         val emailInput = view.findViewById<android.widget.EditText>(R.id.et_email)
