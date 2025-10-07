@@ -97,7 +97,23 @@ class LoginFragment : Fragment() {
             startActivityForResult(signInIntent, RC_SIGN_IN)
         }
 
-        observeAuthStateAndNavigate(authViewModel)
+        // Observe auth state for navigation
+        viewLifecycleOwner.lifecycleScope.launch {
+            authViewModel.authState.collect { state ->
+                when (state) {
+                    is dev.solora.auth.AuthState.Success -> {
+                        Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+                        authViewModel.clearAuthState()
+                        findNavController().navigate(R.id.action_login_to_main)
+                    }
+                    is dev.solora.auth.AuthState.Error -> {
+                        Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+                        authViewModel.clearAuthState()
+                    }
+                    else -> Unit
+                }
+            }
+        }
 
         view.findViewById<View>(R.id.btn_to_register).setOnClickListener {
             findNavController().navigate(R.id.action_login_to_register)
@@ -186,7 +202,23 @@ class RegisterFragment : Fragment() {
             startActivityForResult(signInIntent, RC_SIGN_IN)
         }
 
-        observeAuthStateAndNavigate(authViewModel)
+        // Observe auth state for navigation
+        viewLifecycleOwner.lifecycleScope.launch {
+            authViewModel.authState.collect { state ->
+                when (state) {
+                    is dev.solora.auth.AuthState.Success -> {
+                        Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+                        authViewModel.clearAuthState()
+                        findNavController().navigate(R.id.action_register_to_main)
+                    }
+                    is dev.solora.auth.AuthState.Error -> {
+                        Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+                        authViewModel.clearAuthState()
+                    }
+                    else -> Unit
+                }
+            }
+        }
 
         view.findViewById<View>(R.id.btn_back_login).setOnClickListener {
             Log.d("RegisterFragment", "Back to login clicked!")
