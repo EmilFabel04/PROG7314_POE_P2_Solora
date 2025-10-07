@@ -1,4 +1,3 @@
-# Solora\nKotlin Android app (Jetpack Compose).
 # Solora
 
 <p align="center">
@@ -21,20 +20,23 @@ https://youtu.be/wNVhsIj4Qn4?si=T80afQpQ41UrxHtV
 
 
 ## Table of Contents
-- Features
-- Architecture Overview
-- Tech Stack and Libraries
-- Cloud Functions API (Callable Endpoints)
-- Data Models
-- App Navigation and Screens
-- Permissions
-- Setup and Installation
-  - Prerequisites
-  - Android App Setup and Run
-  - Firebase Project Setup
-  - Cloud Functions: Develop, Emulate, Deploy
-- Troubleshooting
-- Project Structure
+- [Features](#features)
+- [Architecture Overview](#architecture-overview)
+- [Tech Stack and Libraries](#tech-stack-and-libraries)
+- [Cloud Functions API (Callable Endpoints)](#cloud-functions-api-callable-endpoints)
+- [Data Models](#data-models-firestore)
+- [App Navigation and Screens](#app-navigation-and-screens)
+- [Permissions](#permissions)
+- [Setup and Installation](#setup-and-installation)
+  - [Prerequisites](#prerequisites)
+  - [Android App Setup and Run](#android-app-setup-and-run)
+  - [Firebase Project Setup](#firebase-project-setup)
+  - [Cloud Functions: Develop, Emulate, Deploy](#cloud-functions-develop-emulate-deploy)
+  - [Testing and CI/CD](#testing-and-cicd)
+- [Troubleshooting](#troubleshooting)
+- [Project Structure](#project-structure-high-level)
+- [References](#references)
+- [License](#license)
 
 
 ## Features
@@ -77,9 +79,18 @@ https://youtu.be/wNVhsIj4Qn4?si=T80afQpQ41UrxHtV
   <img src="READMEAsset/AppPic12.jpg" alt="App Images" width="197">
 </p>
 
+- **Dashboard & Analytics**
+  - Visual dashboard with quote statistics and performance metrics.
+  - Date range filtering for quotes (7 days, 30 days, 6 months).
+  - Circle chart visualization of quote status distribution.
+
 - **Offline & Sync**
   - Firestore offline persistence for quotes and leads.
   - Optional "sync" Cloud Function to merge offline data to cloud.
+  - Automatic data synchronization when connectivity is restored.
+
+- **Notifications**
+  - Coming soon notification system for quote updates and reminders.
 
 
 ## Architecture Overview
@@ -244,6 +255,26 @@ npm run shell  # interactive function shell
 
 Functions runtime: Node 22 (see `functions/package.json`). Ensure your Firebase CLI is up to date and that your project is selected (`firebase use`).
 
+### Testing and CI/CD
+
+The project includes automated testing and continuous integration:
+
+**Unit Tests**
+- Quote calculation tests (`QuoteCalculatorTest.kt`)
+- Data model validation tests (`FirebaseModelsTest.kt`)
+- Run tests: `./gradlew test`
+
+**GitHub Actions CI/CD**
+- Automated build and testing on pull requests
+- APK generation and artifact upload
+- Firebase deployment automation
+- See `.github/workflows/android-ci.yml` for configuration
+
+**Linting and Code Quality**
+- Android Lint checks for code quality
+- ESLint for Cloud Functions
+- Automated code formatting
+
 
 ## Troubleshooting
 - **Auth errors calling Functions**: Ensure you’re signed in before invoking callable functions. All callable endpoints require authentication.
@@ -260,10 +291,17 @@ app/
     api/               # FirebaseFunctionsApi wrapper
     auth/              # AuthRepository and auth flows
     data/              # FirebaseRepository, models
-    leads/, quotes/    # Feature ViewModels & UI controllers
+    dashboard/         # Dashboard data and ViewModel
+    leads/             # Leads ViewModel
     navigation/        # Fragments and navigation glue
-    settings/, i18n/   # Settings, language store
-    SoloraApp.kt       # App initialization (Firebase, Firestore offline, i18n)
+    pdf/               # PDF generation and file sharing
+    profile/           # Profile ViewModel
+    quote/             # Quote calculation and NASA API
+    quotes/            # Quotes ViewModel
+    settings/          # Settings repository and ViewModel
+    ui/views/          # Custom UI components (CircleChartView)
+    utils/             # Utility classes (ToastUtils)
+    SoloraApp.kt       # App initialization (Firebase, Firestore offline)
     MainActivity.kt    # Activity host
   src/main/res/        # layouts, drawables, nav graphs, values
 functions/             # Firebase Cloud Functions (Node.js)
