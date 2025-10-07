@@ -35,6 +35,10 @@ https://youtu.be/wNVhsIj4Qn4?si=T80afQpQ41UrxHtV
   - [Testing and CI/CD](#testing-and-cicd)
 - [Troubleshooting](#troubleshooting)
 - [Project Structure](#project-structure-high-level)
+- [Comprehensive Project Report](#comprehensive-project-report)
+  - [Purpose of the Application](#purpose-of-the-application)
+  - [Design Considerations](#design-considerations)
+  - [GitHub and GitHub Actions Utilization](#github-and-github-actions-utilization)
 - [References](#references)
 - [License](#license)
 
@@ -195,9 +199,12 @@ Declared in `AndroidManifest.xml`:
 ## Setup and Installation
 
 ### Prerequisites
-- Android Studio (Hedgehog / Jellyfish or newer)
-- Java 17 (bundled with recent Android Studio)
-- Android SDK 35
+- **Android Studio** (Hedgehog / Jellyfish or newer)
+- **Java 17** (bundled with recent Android Studio)
+- **Android SDK 35** (compile and target SDK)
+- **Gradle 8.9** (included in project)
+- **Node.js 22** (for Cloud Functions)
+- **Firebase CLI** (latest version)
 - A Firebase project with:
   - Email/Password Auth enabled
   - Google Sign-In enabled (OAuth client configured)
@@ -205,16 +212,41 @@ Declared in `AndroidManifest.xml`:
   - Firebase Functions enabled
 
 ### Android App Setup and Run
-1) Clone the repo and open the project root in Android Studio.
-2) Ensure `google-services.json` is present at `app/google-services.json` (already included here for the target project). If using your own Firebase project, download a new `google-services.json` from the Firebase Console and replace it.
-3) Sync Gradle. The app targets SDK 35 and uses Kotlin 2.0.20.
-4) Run on a device/emulator:
-   - Use the Run button in Android Studio, or
-   - CLI: `./gradlew :app:assembleDebug` then install the APK.
-5) Sign in:
-   - Use Email/Password or Google Sign-In, depending on what you enabled.
 
-Release signing: `app/build.gradle.kts` references a release keystore at `app/keystore/solora-release-key.keystore`. Adjust or remove this block if you use your own signing configuration.
+1) **Clone the repository:**
+   ```bash
+   git clone https://github.com/ST10359034/PROG7314_POE_P2_Solora.git
+   cd PROG7314_POE_P2_Solora
+   ```
+
+2) **Open in Android Studio:**
+   - Launch Android Studio
+   - Select "Open an existing project"
+   - Navigate to the cloned repository folder
+   - Click "OK"
+
+3) **Configure Firebase:**
+   - Ensure `google-services.json` is present at `app/google-services.json`
+   - If using your own Firebase project, download a new `google-services.json` from the Firebase Console and replace the existing file
+
+4) **Sync Gradle:**
+   - Click "Sync Now" when prompted, or
+   - Go to File → Sync Project with Gradle Files
+   - The app targets SDK 35 and uses Kotlin 2.0.20
+
+5) **Run the application:**
+   - **Option A (Android Studio):** Click the Run button (green play icon) or press Shift+F10
+   - **Option B (Command Line):**
+     ```bash
+     ./gradlew :app:assembleDebug
+     # Then install the generated APK from app/build/outputs/apk/debug/
+     ```
+
+6) **Sign in to the app:**
+   - Use Email/Password authentication, or
+   - Use Google Sign-In (if configured in your Firebase project)
+
+**Note:** Release signing is configured in `app/build.gradle.kts` with a keystore at `app/keystore/solora-release-key.keystore`. Adjust or remove this configuration if you use your own signing setup.
 
 ### Firebase Project Setup
 1) In Firebase Console, create a project (or reuse an existing one) and add an Android app with the correct `applicationId` (`dev.solora` by default).
@@ -307,6 +339,133 @@ app/
 functions/             # Firebase Cloud Functions (Node.js)
 ```
 
+
+## Comprehensive Project Report
+
+### Purpose of the Application
+
+**Solora** is a comprehensive Android application designed specifically for solar sales consultants to streamline their workflow and enhance their sales process. The application serves as a complete business solution that addresses the critical needs of solar energy professionals in the South African market.
+
+**Primary Objectives:**
+- **Quote Generation**: Provide accurate solar system calculations based on client requirements, location-specific solar irradiance data, and current electricity tariffs
+- **Lead Management**: Enable consultants to efficiently track, manage, and follow up with potential clients throughout the sales pipeline
+- **Professional Documentation**: Generate high-quality PDF quotes that can be shared with clients, containing detailed system specifications and cost breakdowns
+- **Data Analytics**: Offer insights into sales performance through dashboard analytics and quote statistics
+- **Offline Capability**: Ensure consultants can work effectively even in areas with poor internet connectivity
+
+**Target Users:**
+- Solar sales consultants and installers
+- Solar energy companies and their sales teams
+- Independent solar energy advisors
+- Renewable energy professionals
+
+### Design Considerations
+
+#### **1. User Experience (UX) Design**
+- **Intuitive Navigation**: Implemented bottom navigation with clear icons and labels for easy access to core features
+- **Material Design**: Adopted Google's Material Design principles for consistent, modern UI components
+- **Responsive Layout**: Designed to work seamlessly across different Android device sizes and orientations
+- **Accessibility**: Ensured proper contrast ratios, touch targets, and screen reader compatibility
+
+#### **2. Architecture Design**
+- **MVVM Pattern**: Implemented Model-View-ViewModel architecture for clean separation of concerns
+- **Repository Pattern**: Centralized data access through `FirebaseRepository` with API-first approach and Firestore fallback
+- **Dependency Injection**: Used Android's built-in dependency management for loose coupling
+- **Offline-First**: Designed with offline capabilities using Firestore's offline persistence
+
+#### **3. Performance Considerations**
+- **Lazy Loading**: Implemented efficient data loading with pagination and lazy initialization
+- **Caching Strategy**: Used Firebase's built-in caching and local DataStore for user preferences
+- **Background Processing**: Leveraged WorkManager for data synchronization tasks
+- **Memory Management**: Proper lifecycle management and memory leak prevention
+
+#### **4. Security Design**
+- **Authentication**: Multi-factor authentication with Firebase Auth (Email/Password + Google SSO)
+- **Data Protection**: User data isolation with proper Firebase Security Rules
+- **API Security**: All Cloud Functions require authentication and implement proper authorization
+- **Local Storage**: Secure storage of sensitive data using Android's encrypted preferences
+
+#### **5. Scalability Considerations**
+- **Cloud Functions**: Serverless backend that automatically scales with demand
+- **Firestore**: NoSQL database that scales horizontally
+- **Modular Architecture**: Feature-based package structure for easy maintenance and expansion
+- **API Design**: RESTful API design with proper versioning and error handling
+
+### GitHub and GitHub Actions Utilization
+
+#### **1. Version Control Strategy**
+- **Branch Management**: Implemented feature branch workflow with main branch protection
+- **Commit Standards**: Used conventional commit messages for clear change tracking
+- **Code Review Process**: Required pull request reviews before merging to main branch
+- **Release Management**: Tagged releases for version tracking and deployment
+
+#### **2. GitHub Actions CI/CD Pipeline**
+
+**Automated Build Process:**
+```yaml
+# .github/workflows/android-ci.yml
+name: Android CI/CD
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+```
+
+**Key Workflow Components:**
+- **Environment Setup**: Automated Android SDK, Java 17, and Node.js 22 setup
+- **Dependency Management**: Automatic Gradle dependency resolution and npm package installation
+- **Code Quality Checks**: Automated linting, formatting, and static analysis
+- **Testing**: Unit test execution with coverage reporting
+- **Build Verification**: APK generation and artifact upload
+- **Security Scanning**: Dependency vulnerability checks
+
+**Benefits of GitHub Actions:**
+- **Continuous Integration**: Every commit triggers automated testing and validation
+- **Early Error Detection**: Issues are caught before they reach production
+- **Consistent Builds**: Standardized build environment across all developers
+- **Automated Deployment**: Streamlined deployment process to Firebase
+- **Quality Assurance**: Automated code quality checks and security scanning
+
+#### **3. Project Management Integration**
+- **Issue Tracking**: Used GitHub Issues for bug reports and feature requests
+- **Project Boards**: Organized development tasks using GitHub Projects
+- **Milestone Tracking**: Set up milestones for major releases and feature completion
+- **Documentation**: Maintained comprehensive documentation in the repository
+
+#### **4. Collaboration Features**
+- **Pull Request Reviews**: Mandatory code reviews for all changes
+- **Discussion Forums**: Used GitHub Discussions for technical discussions
+- **Wiki Documentation**: Maintained project wiki for detailed technical documentation
+- **Release Notes**: Automated release note generation from commit messages
+
+#### **5. Security and Compliance**
+- **Secret Management**: Used GitHub Secrets for sensitive configuration data
+- **Branch Protection**: Enforced branch protection rules for main branch
+- **Dependency Updates**: Automated dependency update notifications
+- **Security Alerts**: Integrated Dependabot for security vulnerability monitoring
+
+### Technical Implementation Highlights
+
+#### **1. Modern Android Development**
+- **Kotlin 2.0.20**: Latest Kotlin features for improved developer experience
+- **Android SDK 35**: Latest Android APIs and features
+- **Jetpack Components**: ViewModel, LiveData, Navigation, and DataStore
+- **Material Design 3**: Latest Material Design components and theming
+
+#### **2. Cloud Integration**
+- **Firebase Ecosystem**: Comprehensive use of Firebase services
+- **REST API Design**: Well-structured API endpoints with proper error handling
+- **Real-time Data**: Live updates using Firestore listeners
+- **Offline Synchronization**: Automatic data sync when connectivity is restored
+
+#### **3. Testing Strategy**
+- **Unit Testing**: Comprehensive test coverage for business logic
+- **Integration Testing**: API and database integration tests
+- **UI Testing**: Automated UI testing with Espresso
+- **Performance Testing**: Load testing for Cloud Functions
+
+This comprehensive approach ensures that Solora is not just a functional application, but a robust, scalable, and maintainable solution that follows industry best practices and modern development standards.
 
 ## References
 
