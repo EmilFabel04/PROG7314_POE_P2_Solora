@@ -1,7 +1,7 @@
 # Solora\nKotlin Android app (Jetpack Compose).
 # Solora
 
-![Logo](READMEasset/SoloraLogo.jpg)
+![App Logo](READMEAsset/SoloraLogo.jpg)
 
 Solora is a Kotlin Android app for solar sales consultants to calculate system sizes, generate quotes, and manage leads. It integrates with Firebase (Auth, Firestore, Analytics, Callable Functions) and a lightweight backend implemented as Firebase Cloud Functions. The app supports offline Firestore persistence, PDF generation, and Google Sign-In.
 
