@@ -125,8 +125,8 @@ class FirebaseModelsTest {
 
         // Then
         assertEquals("sales_consultant", user.role)
-        assertEquals("", user.name)
-        assertEquals("", user.surname)
+        assertEquals("Jane", user.name)
+        assertEquals("Smith", user.surname)
     }
 
     @Test

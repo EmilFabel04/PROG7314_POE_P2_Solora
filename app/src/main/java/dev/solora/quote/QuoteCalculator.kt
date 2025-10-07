@@ -152,7 +152,7 @@ object QuoteCalculator {
             inverterKw = round2(inverterKw), 
             estimatedMonthlySavingsR = round2(savings),
             // Additional properties for Firebase storage
-            monthlyUsageKwh = inputs.monthlyUsageKwh,
+            monthlyUsageKwh = usageKwh,
             monthlyBillRands = inputs.monthlyBillRands,
             tariffRPerKwh = inputs.tariffRPerKwh,
             panelWatt = inputs.panelWatt,
