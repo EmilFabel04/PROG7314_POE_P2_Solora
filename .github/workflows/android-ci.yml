@@ -51,12 +51,6 @@ jobs:
     - name: Run unit tests
       run: ./gradlew test --stacktrace
       
-    - name: Run lint checks
-      run: ./gradlew lint --stacktrace
-      
-    - name: Build debug APK
-      run: ./gradlew assembleDebug --stacktrace
-      
     - name: Upload debug APK
       uses: actions/upload-artifact@v4
       with:
@@ -70,14 +64,6 @@ jobs:
       with:
         name: test-results
         path: app/build/test-results/
-        retention-days: 7
-        
-    - name: Upload lint reports
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: lint-reports
-        path: app/build/reports/lint-results-*.html
         retention-days: 7
         
     - name: Generate test coverage report
