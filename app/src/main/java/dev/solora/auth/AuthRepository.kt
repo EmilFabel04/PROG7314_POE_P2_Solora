@@ -178,12 +178,12 @@ class AuthRepository(private val context: Context) {
     
     suspend fun logout(): Result<Unit> {
         return try {
-            // Clear local data store but preserve HAS_SEEN_ONBOARDING flag
+            // Clear local data store but ALWAYS keep HAS_SEEN_ONBOARDING as true
+            // If user has logged in before, they should NEVER see onboarding again
             context.dataStore.edit { prefs ->
-                val hasSeenOnboarding = prefs[KEY_HAS_SEEN_ONBOARDING] ?: false
                 prefs.clear()
-                // Keep the onboarding flag so returning users see login page, not onboarding
-                prefs[KEY_HAS_SEEN_ONBOARDING] = hasSeenOnboarding
+                // Always set to true - if they're logging out, they've used the app before
+                prefs[KEY_HAS_SEEN_ONBOARDING] = true
             }
             
             // Sign out from Firebase
