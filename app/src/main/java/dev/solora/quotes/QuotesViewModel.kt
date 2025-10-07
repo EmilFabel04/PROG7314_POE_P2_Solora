@@ -31,27 +31,27 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
 
     init {
         val currentUser = FirebaseAuth.getInstance().currentUser
-        android.util.Log.d("QuotesViewModel", "QuotesViewModel initialized for user: ${currentUser?.uid ?: "NOT LOGGED IN"}")
+        // QuotesViewModel initialized for user: ${currentUser?.uid ?: "NOT LOGGED IN"}
         if (currentUser == null) {
-            android.util.Log.e("QuotesViewModel", "WARNING: No user logged in! Quotes will be empty.")
+            // WARNING: No user logged in! Quotes will be empty.
         }
     }
 
     // Firebase quotes flow - filtered by logged-in user's ID
     val quotes = flow {
-        android.util.Log.d("QuotesViewModel", "Starting quotes flow for user: ${FirebaseAuth.getInstance().currentUser?.uid}")
+        // Starting quotes flow for user: ${FirebaseAuth.getInstance().currentUser?.uid}
         // Try API first, fallback to direct Firestore
         try {
             val apiResult = firebaseRepository.getQuotesViaApi()
             if (apiResult.isSuccess) {
-                android.util.Log.d("QuotesViewModel", "Using API for quotes")
+                // Using API for quotes
                 emitAll(flowOf(apiResult.getOrNull() ?: emptyList()))
             } else {
-                android.util.Log.w("QuotesViewModel", "API failed, using direct Firestore: ${apiResult.exceptionOrNull()?.message}")
+                // API failed, using direct Firestore: ${apiResult.exceptionOrNull()?.message}
                 emitAll(firebaseRepository.getQuotes())
             }
         } catch (e: Exception) {
-            android.util.Log.w("QuotesViewModel", "API error, using direct Firestore: ${e.message}")
+            // API error, using direct Firestore: ${e.message}
             emitAll(firebaseRepository.getQuotes())
         }
     }.stateIn(
@@ -93,16 +93,16 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                 
                 // If coordinates not provided, try to geocode the address
                 if (finalLatitude == null || finalLongitude == null) {
-                    android.util.Log.d("QuotesViewModel", "Geocoding address: $address")
+                    // Geocoding address: $address
                     val geocodeResult = geocodingService.getCoordinatesFromAddress(address)
                     
                     if (geocodeResult.success) {
                         finalLatitude = geocodeResult.latitude
                         finalLongitude = geocodeResult.longitude
                         finalAddress = geocodeResult.address
-                        android.util.Log.d("QuotesViewModel", "Geocoding successful: $finalLatitude, $finalLongitude")
+                        // Geocoding successful: $finalLatitude, $finalLongitude
                     } else {
-                        android.util.Log.w("QuotesViewModel", "Geocoding failed: ${geocodeResult.error}")
+                        // Geocoding failed: ${geocodeResult.error}
                         // Continue with calculation without location data
                     }
                 }
@@ -115,13 +115,13 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                             val nasaData = nasaDataResult.getOrNull()
                             if (nasaData != null) {
                                 finalSunHours = nasaData.averageAnnualSunHours
-                                android.util.Log.d("QuotesViewModel", "NASA sun hours: $finalSunHours")
+                                // NASA sun hours: $finalSunHours
                             }
                         } else {
-                            android.util.Log.w("QuotesViewModel", "NASA API failed: ${nasaDataResult.exceptionOrNull()?.message}")
+                            // NASA API failed: ${nasaDataResult.exceptionOrNull()?.message}
                         }
                     } catch (e: Exception) {
-                        android.util.Log.w("QuotesViewModel", "NASA API error: ${e.message}")
+                        // NASA API error: ${e.message}
                     }
                 }
                 
@@ -140,8 +140,8 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                     } else null
                 )
 
-                android.util.Log.d("QuotesViewModel", "Starting calculation with NASA API integration")
-                android.util.Log.d("QuotesViewModel", "Input values: usageKwh=$usageKwh, billRands=$billRands, tariff=$tariff, panelWatt=$panelWatt, sunHours=$finalSunHours")
+                // Starting calculation with NASA API integration
+                // Input values: usageKwh=$usageKwh, billRands=$billRands, tariff=$tariff, panelWatt=$panelWatt, sunHours=$finalSunHours
                 
                 // Get current settings
                 val settings = settingsRepository.settings.stateIn(
@@ -162,35 +162,35 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                 )
                 
                 val result = if (apiResult.isSuccess) {
-                    android.util.Log.d("QuotesViewModel", "Using API calculation result")
+                    // Using API calculation result
                     apiResult
                 } else {
-                    android.util.Log.w("QuotesViewModel", "API calculation failed, using local calculation: ${apiResult.exceptionOrNull()?.message}")
+                    // API calculation failed, using local calculation: ${apiResult.exceptionOrNull()?.message}
                     calculator.calculateAdvanced(inputs, nasa, settings)
                 }
                 result.fold(
                     onSuccess = { outputs ->
-                        android.util.Log.d("QuotesViewModel", "Calculation successful: ${outputs.systemKw}kW system, ${outputs.panels} panels, R${outputs.monthlySavingsRands} savings")
+                        // Calculation successful: ${outputs.systemKw}kW system, ${outputs.panels} panels, R${outputs.monthlySavingsRands} savings
                         
                         // Debug NASA data
                         if (outputs.detailedAnalysis?.locationData != null) {
                             val nasaData = outputs.detailedAnalysis.locationData
-                            android.util.Log.d("QuotesViewModel", "NASA data in calculation: irradiance=${nasaData.averageAnnualIrradiance}, sunHours=${nasaData.averageAnnualSunHours}")
+                            // NASA data in calculation: irradiance=${nasaData.averageAnnualIrradiance}, sunHours=${nasaData.averageAnnualSunHours}
                         } else {
-                            android.util.Log.w("QuotesViewModel", "WARNING: No NASA data in detailedAnalysis!")
+                            // WARNING: No NASA data in detailedAnalysis!
                         }
                         
                         _lastCalculation.value = outputs
                         _calculationState.value = CalculationState.Success(outputs)
                     },
                     onFailure = { error ->
-                        android.util.Log.e("QuotesViewModel", "Calculation failed: ${error.message}")
+                        // Calculation failed: ${error.message}
                         _calculationState.value = CalculationState.Error(error.message ?: "Calculation failed")
                     }
                 )
                 
             } catch (e: Exception) {
-                android.util.Log.e("QuotesViewModel", "Exception during calculation: ${e.message}", e)
+                // ("QuotesViewModel", "Exception during calculation: ${e.message}", e)
                 _calculationState.value = CalculationState.Error(e.message ?: "Calculation failed")
             }
         }
@@ -232,7 +232,7 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                     _lastQuote.value = quote.copy(id = result.getOrNull())
                 }
             } catch (e: Exception) {
-                android.util.Log.e("QuotesViewModel", "Error saving quote: ${e.message}", e)
+                // ("QuotesViewModel", "Error saving quote: ${e.message}", e)
             }
         }
     }
@@ -253,13 +253,13 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                     dev.solora.settings.AppSettings()
                 ).value.companySettings
                 
-                android.util.Log.d("QuotesViewModel", "Saving quote with panelWatt=${calculation.panelWatt}W (from calculation)")
+                // Saving quote with panelWatt=${calculation.panelWatt}W (from calculation)
                 
                 // Debug NASA data before saving
                 val nasaData = calculation.detailedAnalysis?.locationData
-                android.util.Log.d("QuotesViewModel", "NASA data for saving: irradiance=${nasaData?.averageAnnualIrradiance}, sunHours=${nasaData?.averageAnnualSunHours}")
-                android.util.Log.d("QuotesViewModel", "detailedAnalysis is null: ${calculation.detailedAnalysis == null}")
-                android.util.Log.d("QuotesViewModel", "locationData is null: ${nasaData == null}")
+                // NASA data for saving: irradiance=${nasaData?.averageAnnualIrradiance}, sunHours=${nasaData?.averageAnnualSunHours}
+                // detailedAnalysis is null: ${calculation.detailedAnalysis == null}
+                // locationData is null: ${nasaData == null}
                 
                 val quote = FirebaseQuote(
             reference = reference,
@@ -296,12 +296,12 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                 if (result.isSuccess) {
                     val savedQuote = quote.copy(id = result.getOrNull())
                     _lastQuote.value = savedQuote
-                    android.util.Log.d("QuotesViewModel", "Quote saved successfully with ID: ${savedQuote.id}")
+                    // Quote saved successfully with ID: ${savedQuote.id}
                 } else {
-                    android.util.Log.e("QuotesViewModel", "Failed to save quote: ${result.exceptionOrNull()?.message}")
+                    // Failed to save quote: ${result.exceptionOrNull()?.message}
                 }
             } catch (e: Exception) {
-                android.util.Log.e("QuotesViewModel", "Exception saving quote: ${e.message}", e)
+                // ("QuotesViewModel", "Exception saving quote: ${e.message}", e)
             }
         }
     }
@@ -312,14 +312,14 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
             val result = firebaseRepository.getQuoteById(quoteId)
             if (result.isSuccess) {
                 val quote = result.getOrNull()
-        _lastQuote.value = quote
+                _lastQuote.value = quote
                 quote
             } else {
-                android.util.Log.e("QuotesViewModel", "Error getting quote by ID: ${result.exceptionOrNull()?.message}")
+                // Error getting quote by ID: ${result.exceptionOrNull()?.message}
                 null
             }
         } catch (e: Exception) {
-            android.util.Log.e("QuotesViewModel", "Exception getting quote by ID: ${e.message}", e)
+            // ("QuotesViewModel", "Exception getting quote by ID: ${e.message}", e)
             null
         }
     }
