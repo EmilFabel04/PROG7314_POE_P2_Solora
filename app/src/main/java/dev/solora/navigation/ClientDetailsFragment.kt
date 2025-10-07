@@ -192,70 +192,70 @@ class ClientDetailsFragment : Fragment() {
                         val savedQuote = saveResult.getOrNull()
                         // Saved quote: ${savedQuote?.id}, Selected lead: ${selectedLead?.id}
                         if (savedQuote != null && savedQuote.id != null) {
-                        if (selectedLead != null) {
-                            // Validate selected lead has an ID
-                            if (selectedLead!!.id.isNullOrBlank()) {
-                                // Selected lead has no ID
-                                Toast.makeText(requireContext(), "Quote saved but selected lead has no ID", Toast.LENGTH_LONG).show()
-                                // Navigate to View Quotes tab
+                            if (selectedLead != null) {
+                                // Validate selected lead has an ID
+                                if (selectedLead!!.id.isNullOrBlank()) {
+                                    // Selected lead has no ID
+                                    Toast.makeText(requireContext(), "Quote saved but selected lead has no ID", Toast.LENGTH_LONG).show()
+                                    // Navigate to View Quotes tab
+                                    findNavController().navigate(
+                                        R.id.action_client_details_to_quotes,
+                                        Bundle().apply { putInt("show_tab", 1) }
+                                    )
+                                } else {
+                                    // Link quote to existing lead
+                                    try {
+                                        // Linking quote ${savedQuote.id} to lead ${selectedLead!!.id}
+                                        val linkResult = leadsViewModel.linkQuoteToLeadSync(selectedLead!!.id!!, savedQuote.id!!)
+                                        if (linkResult) {
+                                            // Successfully linked quote to lead
+                                            Toast.makeText(requireContext(), "Quote saved successfully!", Toast.LENGTH_LONG).show()
+                                        } else {
+                                            // Lead linking returned false
+                                            Toast.makeText(requireContext(), "Quote saved successfully!", Toast.LENGTH_LONG).show()
+                                        }
+                                        // Navigate to View Quotes tab after linking to existing lead
+                                        findNavController().navigate(
+                                            R.id.action_client_details_to_quotes,
+                                            Bundle().apply { putInt("show_tab", 1) }
+                                        )
+                                    } catch (e: Exception) {
+                                        // ("ClientDetailsFragment", "Exception during lead linking: ${e.message}", e)
+                                        Toast.makeText(requireContext(), "Quote saved but lead linking failed: ${e.message}", Toast.LENGTH_LONG).show()
+                                        // Navigate to View Quotes tab even if linking fails
+                                        findNavController().navigate(
+                                            R.id.action_client_details_to_quotes,
+                                            Bundle().apply { putInt("show_tab", 1) }
+                                        )
+                                    }
+                                }
+                            } else {
+                                // Create new lead with quote link
+                                // No selected lead - creating new lead
+                                try {
+                                    val createResult = leadsViewModel.createLeadFromQuoteSync(
+                                        quoteId = savedQuote.id!!,
+                                        clientName = clientName,
+                                        address = address,
+                                        email = email,
+                                        phone = contact,
+                                        notes = "Lead created from quote: $reference"
+                                    )
+                                    if (createResult) {
+                                        Toast.makeText(requireContext(), "Quote saved and new lead created successfully!", Toast.LENGTH_LONG).show()
+                                    } else {
+                                        Toast.makeText(requireContext(), "Quote saved but lead creation failed. Please try again.", Toast.LENGTH_LONG).show()
+                                    }
+                                } catch (e: Exception) {
+                                    // ("ClientDetailsFragment", "Error creating lead from quote: ${e.message}", e)
+                                    Toast.makeText(requireContext(), "Quote saved but lead creation failed: ${e.message}", Toast.LENGTH_LONG).show()
+                                }
+                                // Navigate to View Quotes tab after creating new lead
                                 findNavController().navigate(
                                     R.id.action_client_details_to_quotes,
                                     Bundle().apply { putInt("show_tab", 1) }
                                 )
-                            } else {
-                                // Link quote to existing lead
-                                try {
-                                    // Linking quote ${savedQuote.id} to lead ${selectedLead!!.id}
-                                    val linkResult = leadsViewModel.linkQuoteToLeadSync(selectedLead!!.id!!, savedQuote.id!!)
-                                    if (linkResult) {
-                                        // Successfully linked quote to lead
-                                        Toast.makeText(requireContext(), "Quote saved successfully!", Toast.LENGTH_LONG).show()
-                                    } else {
-                                        // Lead linking returned false
-                                        Toast.makeText(requireContext(), "Quote saved successfully!", Toast.LENGTH_LONG).show()
-                                    }
-                                    // Navigate to View Quotes tab after linking to existing lead
-                                    findNavController().navigate(
-                                        R.id.action_client_details_to_quotes,
-                                        Bundle().apply { putInt("show_tab", 1) }
-                                    )
-                                } catch (e: Exception) {
-                                    // ("ClientDetailsFragment", "Exception during lead linking: ${e.message}", e)
-                                    Toast.makeText(requireContext(), "Quote saved but lead linking failed: ${e.message}", Toast.LENGTH_LONG).show()
-                                    // Navigate to View Quotes tab even if linking fails
-                                    findNavController().navigate(
-                                        R.id.action_client_details_to_quotes,
-                                        Bundle().apply { putInt("show_tab", 1) }
-                                    )
-                                }
                             }
-                        } else {
-                            // Create new lead with quote link
-                            // No selected lead - creating new lead
-                            try {
-                                val createResult = leadsViewModel.createLeadFromQuoteSync(
-                                    quoteId = savedQuote.id!!,
-                                    clientName = clientName,
-                                    address = address,
-                                    email = email,
-                                    phone = contact,
-                                    notes = "Lead created from quote: $reference"
-                                )
-                                if (createResult) {
-                                    Toast.makeText(requireContext(), "Quote saved and new lead created successfully!", Toast.LENGTH_LONG).show()
-                                } else {
-                                    Toast.makeText(requireContext(), "Quote saved but lead creation failed. Please try again.", Toast.LENGTH_LONG).show()
-                                }
-                            } catch (e: Exception) {
-                                // ("ClientDetailsFragment", "Error creating lead from quote: ${e.message}", e)
-                                Toast.makeText(requireContext(), "Quote saved but lead creation failed: ${e.message}", Toast.LENGTH_LONG).show()
-                            }
-                            // Navigate to View Quotes tab after creating new lead
-                            findNavController().navigate(
-                                R.id.action_client_details_to_quotes,
-                                Bundle().apply { putInt("show_tab", 1) }
-                            )
-                        }
                         } else {
                             Toast.makeText(requireContext(), "Quote saved but no quote ID received. Please try again.", Toast.LENGTH_LONG).show()
                             // Navigate to View Quotes tab
