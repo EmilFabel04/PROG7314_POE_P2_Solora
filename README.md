@@ -40,17 +40,36 @@ Solora is a Kotlin Android app for solar sales consultants to calculate system s
   - Calculate system size, estimated generation, monthly savings, and payback period.
   - Optionally fetch NASA solar irradiance and derive average sun-hours.
   - List/search previous quotes; open quote details.
+<p align="center">
+  <img src="READMEAsset/AppPic3.jpg" alt="App Logo" width="300">
+  <img src="READMEAsset/AppPic4.jpg" alt="App Logo" width="300">
+  <img src="READMEAsset/AppPic5.jpg" alt="App Logo" width="300">
+  <img src="READMEAsset/AppPic6.jpg" alt="App Logo" width="300">
+  <img src="READMEAsset/AppPic7.jpg" alt="App Logo" width="300">
+</p>
 
 - **Leads**
   - Create, update, and list leads linked to the authenticated consultant.
   - Search by name/email/phone and filter by status.
+<p align="center">
+  <img src="READMEAsset/AppPic9.jpg" alt="App Logo" width="300">
+  <img src="READMEAsset/AppPic10.jpg" alt="App Logo" width="300">
+  <img src="READMEAsset/AppPic11.jpg" alt="App Logo" width="300">
+</p>
 
 - **User Profile & Settings**
   - Register/login (email/password and Google Sign-In).
   - Store and sync user/company info used to enrich saved quotes.
+<p align="center">
+  <img src="READMEAsset/AppPic1.jpg" alt="App Logo" width="300">
+  <img src="READMEAsset/AppPic2.jpg" alt="App Logo" width="300">
+</p>
 
 - **PDF Generation & Sharing**
   - Generate quote PDFs (iText) and share via Android `FileProvider`.
+<p align="center">
+  <img src="READMEAsset/AppPic8.jpg" alt="App Logo" width="300">
+</p>
 
 - **Offline & Sync**
   - Firestore offline persistence for quotes and leads.
