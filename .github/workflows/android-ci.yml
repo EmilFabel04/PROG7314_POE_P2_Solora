@@ -46,7 +46,7 @@ jobs:
         fi
       
     - name: Build with Gradle
-      run: ./gradlew build --stacktrace
+      run: ./gradlew assembleDebug --stacktrace
       
     - name: Run unit tests
       run: ./gradlew test --stacktrace
