@@ -244,6 +244,11 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
         address: String,
         calculation: QuoteOutputs
     ) {
+        // Prevent duplicate saves
+        if (_lastQuote.value != null) {
+            return
+        }
+        
         viewModelScope.launch {
             try {
                 // Get company settings snapshot
@@ -346,6 +351,10 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     // Clear last quote
     fun clearLastQuote() {
         _lastQuote.value = null
+    }
+    
+    fun clearLastCalculation() {
+        _lastCalculation.value = null
     }
 }
 

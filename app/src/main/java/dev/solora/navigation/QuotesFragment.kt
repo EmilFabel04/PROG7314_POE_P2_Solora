@@ -701,44 +701,12 @@ class QuotesFragment : Fragment() {
                 return
             }
             
-            // Calling saveQuoteFromCalculation...
-            
-            // Save the quote with all details
-            quotesViewModel.saveQuoteFromCalculation(reference, clientName, address, calculation)
-            
-            // Wait for quote to be saved, then create lead
-            viewLifecycleOwner.lifecycleScope.launch {
-                try {
-                    // Wait a bit for the quote to be saved
-                    kotlinx.coroutines.delay(1000)
-                    
-                    val savedQuote = quotesViewModel.lastQuote.value
-                    if (savedQuote != null && savedQuote.id != null) {
-                        // Create a lead from this quote using sync method
-                        val leadCreated = leadsViewModel.createLeadFromQuoteSync(
-                            quoteId = savedQuote.id!!,
-                            clientName = clientName,
-                            address = address,
-                            email = email,
-                            phone = contact,
-                            notes = "Lead created from quote $reference. System: ${String.format("%.2f", calculation.systemKw)}kW, Monthly savings: R${String.format("%.2f", calculation.monthlySavingsRands)}"
-                        )
-                        
-                        if (leadCreated) {
-                            Toast.makeText(requireContext(), "Quote saved and lead created successfully!", Toast.LENGTH_LONG).show()
-                        } else {
-                            Toast.makeText(requireContext(), "Quote saved but lead creation failed", Toast.LENGTH_SHORT).show()
-                        }
-                        
-                        // Switch to view tab to show the saved quote in the list
-                        switchToTab(1)
-                    } else {
-                        Toast.makeText(requireContext(), "Quote saved but lead creation failed", Toast.LENGTH_SHORT).show()
-                    }
-                } catch (e: Exception) {
-                    Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG).show()
-                }
+            // Navigate to ClientDetailsFragment to save quote and create lead
+            val bundle = Bundle().apply {
+                putSerializable("calculation_outputs", calculation)
+                putString("calculated_address", address)
             }
+            findNavController().navigate(R.id.clientDetailsFragment, bundle)
         } ?: run {
             Toast.makeText(requireContext(), "No calculation to save", Toast.LENGTH_SHORT).show()
         }
