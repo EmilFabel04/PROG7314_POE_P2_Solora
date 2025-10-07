@@ -69,6 +69,7 @@ Solora is a Kotlin Android app for solar sales consultants to calculate system s
   - Generate quote PDFs (iText) and share via Android `FileProvider`.
 <p align="center">
   <img src="READMEAsset/AppPic8.jpg" alt="App Images" width="230">
+  <img src="READMEAsset/AppPic12.jpg" alt="App Images" width="230">
 </p>
 
 - **Offline & Sync**
