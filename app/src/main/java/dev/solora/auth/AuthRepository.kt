@@ -3,6 +3,7 @@ package dev.solora.auth
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.google.firebase.auth.FirebaseAuth
@@ -25,6 +26,7 @@ class AuthRepository(private val context: Context) {
     private val KEY_NAME = stringPreferencesKey("name")
     private val KEY_SURNAME = stringPreferencesKey("surname")
     private val KEY_EMAIL = stringPreferencesKey("email")
+    private val KEY_HAS_APP_DATA = booleanPreferencesKey("has_app_data")
 
     val currentUser: FirebaseUser? get() = firebaseAuth.currentUser
     
@@ -33,6 +35,20 @@ class AuthRepository(private val context: Context) {
     }.map { prefs ->
         val userId = prefs[KEY_USER_ID]
         !userId.isNullOrEmpty() && firebaseAuth.currentUser != null
+    }
+    
+    // Check if the app has ever been used (has app data/cache)
+    val hasAppData: Flow<Boolean> = context.dataStore.data.catch { e ->
+        if (e is IOException) emit(emptyPreferences()) else throw e
+    }.map { prefs ->
+        prefs[KEY_HAS_APP_DATA] ?: false
+    }
+    
+    // Mark that the app now has data (user has registered/logged in)
+    private suspend fun markHasAppData() {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_HAS_APP_DATA] = true
+        }
     }
 
     suspend fun login(email: String, password: String): Result<FirebaseUser> {
@@ -45,6 +61,7 @@ class AuthRepository(private val context: Context) {
                 prefs[KEY_USER_ID] = user.uid
                 prefs[KEY_EMAIL] = user.email ?: email
                 prefs[KEY_NAME] = user.displayName ?: email.substringBefore('@')
+                prefs[KEY_HAS_APP_DATA] = true
             }
             
             Result.success(user)
@@ -65,6 +82,7 @@ class AuthRepository(private val context: Context) {
                 prefs[KEY_USER_ID] = user.uid
                 prefs[KEY_NAME] = user.displayName ?: ""
                 prefs[KEY_EMAIL] = user.email ?: ""
+                prefs[KEY_HAS_APP_DATA] = true
             }
 
             Result.success(user)
@@ -99,6 +117,7 @@ class AuthRepository(private val context: Context) {
                 prefs[KEY_NAME] = name
                 prefs[KEY_SURNAME] = surname
                 prefs[KEY_EMAIL] = email
+                prefs[KEY_HAS_APP_DATA] = true
             }
             
             Result.success(user)
@@ -132,6 +151,7 @@ class AuthRepository(private val context: Context) {
                 prefs[KEY_NAME] = user.displayName ?: ""
                 prefs[KEY_SURNAME] = "" // no surname from Google
                 prefs[KEY_EMAIL] = user.email ?: ""
+                prefs[KEY_HAS_APP_DATA] = true
             }
 
             Result.success(user)
@@ -165,9 +185,12 @@ class AuthRepository(private val context: Context) {
     
     suspend fun logout(): Result<Unit> {
         return try {
-            // Clear local data store
+            // Clear local data store but preserve HAS_APP_DATA flag
             context.dataStore.edit { prefs ->
+                val hasData = prefs[KEY_HAS_APP_DATA] ?: false
                 prefs.clear()
+                // Keep the flag so returning users see login page, not onboarding
+                prefs[KEY_HAS_APP_DATA] = hasData
             }
             
             // Sign out from Firebase

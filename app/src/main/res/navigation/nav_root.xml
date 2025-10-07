@@ -9,8 +9,11 @@
         android:name="dev.solora.navigation.StartFragment"
         android:label="Start" >
         <action
-            android:id="@+id/action_start_to_auth"
-            app:destination="@id/auth_graph"/>
+            android:id="@+id/action_start_to_onboarding"
+            app:destination="@id/onboardingFragment"/>
+        <action
+            android:id="@+id/action_start_to_login"
+            app:destination="@id/loginFragment"/>
         <action
             android:id="@+id/action_start_to_main"
             app:destination="@id/main_graph"/>
