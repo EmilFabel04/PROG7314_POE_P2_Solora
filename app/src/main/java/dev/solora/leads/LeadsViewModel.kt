@@ -240,6 +240,11 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
         notes: String = ""
     ): Boolean {
         return try {
+            // Validate inputs
+            if (quoteId.isBlank() || clientName.isBlank()) {
+                return false
+            }
+            
             val lead = FirebaseLead(
                 name = clientName,
                 email = email,
@@ -251,14 +256,17 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
             
             val result = firebaseRepository.saveLead(lead)
             if (result.isSuccess) {
-                // Lead from quote saved to Firebase: ${result.getOrNull()}
-                true
+                val leadId = result.getOrNull()
+                if (!leadId.isNullOrBlank()) {
+                    true
+                } else {
+                    false
+                }
             } else {
-                // Failed to save lead from quote to Firebase: ${result.exceptionOrNull()?.message}
+                val error = result.exceptionOrNull()
                 false
             }
         } catch (e: Exception) {
-            // Error creating lead from quote: ${e.message}
             false
         }
     }

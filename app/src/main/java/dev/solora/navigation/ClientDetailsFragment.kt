@@ -244,9 +244,9 @@ class ClientDetailsFragment : Fragment() {
                                     notes = "Lead created from quote: $reference"
                                 )
                                 if (createResult) {
-                                    Toast.makeText(requireContext(), "Quote saved and new lead created!", Toast.LENGTH_LONG).show()
+                                    Toast.makeText(requireContext(), "Quote saved and new lead created successfully!", Toast.LENGTH_LONG).show()
                                 } else {
-                                    Toast.makeText(requireContext(), "Quote saved but lead creation failed", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(requireContext(), "Quote saved but lead creation failed. Please try again.", Toast.LENGTH_LONG).show()
                                 }
                             } catch (e: Exception) {
                                 // ("ClientDetailsFragment", "Error creating lead from quote: ${e.message}", e)

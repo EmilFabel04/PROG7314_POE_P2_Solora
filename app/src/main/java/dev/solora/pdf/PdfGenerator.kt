@@ -56,29 +56,32 @@ class PdfGenerator(private val context: Context) {
         val monthlySavings = if (quote.monthlySavings > 0) {
             "R ${String.format("%.2f", quote.monthlySavings)}"
         } else {
-            "R 1,170.00"
+            "R 0.00"
         }
         
         val systemSize = quote.systemKwp
-        val panelCount = if (systemSize > 0) {
-            (systemSize * 1000 / 550).toInt()
+        val panelCount = if (systemSize > 0 && quote.panelWatt > 0) {
+            (systemSize * 1000 / quote.panelWatt).toInt()
+        } else if (systemSize > 0) {
+            (systemSize * 1000 / 420).toInt() // Default 420W panels
         } else {
-            12
+            0
         }
         
-        val systemSizeText = if (systemSize > 0) "${String.format("%.1f", systemSize)}KW" else "6.6KW"
-        val inverterSizeText = if (systemSize > 0) "${String.format("%.0f", systemSize)}KW" else "6KW"
+        val systemSizeText = if (systemSize > 0) "${String.format("%.1f", systemSize)}KW" else "0.0KW"
+        val inverterSizeText = if (quote.inverterKw > 0) "${String.format("%.1f", quote.inverterKw)}KW" else if (systemSize > 0) "${String.format("%.1f", systemSize * 0.8)}KW" else "0.0KW"
         
-        val coverage = if (systemSize > 0) {
-            ((systemSize * 150) / 1000 * 100).toInt()
+        val coverage = if (systemSize > 0 && quote.monthlyUsageKwh > 0) {
+            val monthlyGeneration = systemSize * quote.sunHoursPerDay * 30
+            ((monthlyGeneration / quote.monthlyUsageKwh) * 100).toInt().coerceAtMost(100)
         } else {
-            95
+            0
         }
         
         val systemCost = if (systemSize > 0) {
-            systemSize * 8500
+            systemSize * 15000 // Use standard installation cost per kW
         } else {
-            56700.0
+            0.0
         }
         
         val tax = systemCost * 0.15
