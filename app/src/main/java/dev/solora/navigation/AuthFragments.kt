@@ -85,6 +85,14 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        
+        // Check if we should show onboarding instead (first-time user)
+        val showOnboarding = arguments?.getBoolean("show_onboarding", false) ?: false
+        if (showOnboarding) {
+            // Navigate to onboarding for first-time users
+            findNavController().navigate(R.id.action_login_to_onboarding)
+            return
+        }
 
         val emailInput = view.findViewById<android.widget.EditText>(R.id.et_email)
         val passwordInput = view.findViewById<android.widget.EditText>(R.id.et_password)
