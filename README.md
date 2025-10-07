@@ -41,7 +41,7 @@ Solora is a Kotlin Android app for solar sales consultants to calculate system s
   - Optionally fetch NASA solar irradiance and derive average sun-hours.
   - List/search previous quotes; open quote details.
 <p align="center">
-  <img src="READMEAsset/AppPic3.jpg" alt="App Logo" width="300">
+  <img src="READMEAsset/AppPic3.jpg" alt="App Logo" width="230">
   <img src="READMEAsset/AppPic4.jpg" alt="App Logo" width="300">
   <img src="READMEAsset/AppPic5.jpg" alt="App Logo" width="300">
   <img src="READMEAsset/AppPic6.jpg" alt="App Logo" width="300">
