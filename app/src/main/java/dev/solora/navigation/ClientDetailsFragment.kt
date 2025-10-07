@@ -97,7 +97,7 @@ class ClientDetailsFragment : Fragment() {
             val leads = leadsViewModel.getLeadsForSelection()
             if (position < leads.size) {
                 selectedLead = leads[position]
-                android.util.Log.d("ClientDetailsFragment", "Selected lead: ID=${selectedLead?.id}, Name=${selectedLead?.name}")
+                // Selected lead: ID=${selectedLead?.id}, Name=${selectedLead?.name}
                 selectedLead?.let { lead ->
                     populateClientDetails(lead)
                     updateButtonText()
@@ -192,12 +192,12 @@ class ClientDetailsFragment : Fragment() {
                     kotlinx.coroutines.delay(1000)
                     
                     val savedQuote = quotesViewModel.lastQuote.value
-                    android.util.Log.d("ClientDetailsFragment", "Saved quote: ${savedQuote?.id}, Selected lead: ${selectedLead?.id}")
+                    // Saved quote: ${savedQuote?.id}, Selected lead: ${selectedLead?.id}
                     if (savedQuote != null && savedQuote.id != null) {
                         if (selectedLead != null) {
                             // Validate selected lead has an ID
                             if (selectedLead!!.id.isNullOrBlank()) {
-                                android.util.Log.e("ClientDetailsFragment", "Selected lead has no ID")
+                                // Selected lead has no ID
                                 Toast.makeText(requireContext(), "Quote saved but selected lead has no ID", Toast.LENGTH_LONG).show()
                                 // Navigate to View Quotes tab
                                 findNavController().navigate(
@@ -207,13 +207,13 @@ class ClientDetailsFragment : Fragment() {
                             } else {
                                 // Link quote to existing lead
                                 try {
-                                    android.util.Log.d("ClientDetailsFragment", "Linking quote ${savedQuote.id} to lead ${selectedLead!!.id}")
+                                    // Linking quote ${savedQuote.id} to lead ${selectedLead!!.id}
                                     val linkResult = leadsViewModel.linkQuoteToLeadSync(selectedLead!!.id!!, savedQuote.id!!)
                                     if (linkResult) {
-                                        android.util.Log.d("ClientDetailsFragment", "Successfully linked quote to lead")
+                                        // Successfully linked quote to lead
                                         Toast.makeText(requireContext(), "Quote saved successfully!", Toast.LENGTH_LONG).show()
                                     } else {
-                                        android.util.Log.e("ClientDetailsFragment", "Lead linking returned false")
+                                        // Lead linking returned false
                                         Toast.makeText(requireContext(), "Quote saved successfully!", Toast.LENGTH_LONG).show()
                                     }
                                     // Navigate to View Quotes tab after linking to existing lead
@@ -222,7 +222,7 @@ class ClientDetailsFragment : Fragment() {
                                         Bundle().apply { putInt("show_tab", 1) }
                                     )
                                 } catch (e: Exception) {
-                                    android.util.Log.e("ClientDetailsFragment", "Exception during lead linking: ${e.message}", e)
+                                    // ("ClientDetailsFragment", "Exception during lead linking: ${e.message}", e)
                                     Toast.makeText(requireContext(), "Quote saved but lead linking failed: ${e.message}", Toast.LENGTH_LONG).show()
                                     // Navigate to View Quotes tab even if linking fails
                                     findNavController().navigate(
@@ -233,7 +233,7 @@ class ClientDetailsFragment : Fragment() {
                             }
                         } else {
                             // Create new lead with quote link
-                            android.util.Log.d("ClientDetailsFragment", "No selected lead - creating new lead")
+                            // No selected lead - creating new lead
                             try {
                                 val createResult = leadsViewModel.createLeadFromQuoteSync(
                                     quoteId = savedQuote.id!!,
@@ -249,7 +249,7 @@ class ClientDetailsFragment : Fragment() {
                                     Toast.makeText(requireContext(), "Quote saved but lead creation failed", Toast.LENGTH_SHORT).show()
                                 }
                             } catch (e: Exception) {
-                                android.util.Log.e("ClientDetailsFragment", "Error creating lead from quote: ${e.message}", e)
+                                // ("ClientDetailsFragment", "Error creating lead from quote: ${e.message}", e)
                                 Toast.makeText(requireContext(), "Quote saved but lead creation failed: ${e.message}", Toast.LENGTH_LONG).show()
                             }
                             // Navigate to View Quotes tab after creating new lead
@@ -267,7 +267,7 @@ class ClientDetailsFragment : Fragment() {
                         )
                     }
                 } catch (e: Exception) {
-                    android.util.Log.e("ClientDetailsFragment", "Error linking quote to lead: ${e.message}", e)
+                    // ("ClientDetailsFragment", "Error linking quote to lead: ${e.message}", e)
                     Toast.makeText(requireContext(), "Quote saved successfully!", Toast.LENGTH_LONG).show()
                     // Navigate to View Quotes tab
                     findNavController().navigate(

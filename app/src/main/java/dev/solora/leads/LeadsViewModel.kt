@@ -19,27 +19,27 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
 
     init {
         val currentUser = FirebaseAuth.getInstance().currentUser
-        android.util.Log.d("LeadsViewModel", "LeadsViewModel initialized for user: ${currentUser?.uid ?: "NOT LOGGED IN"}")
+        // LeadsViewModel initialized for user: ${currentUser?.uid ?: "NOT LOGGED IN"}
         if (currentUser == null) {
-            android.util.Log.e("LeadsViewModel", "WARNING: No user logged in! Leads will be empty.")
+            // WARNING: No user logged in! Leads will be empty.
         }
     }
 
     // Firebase leads flow - filtered by logged-in user's ID
     val leads = flow {
-        android.util.Log.d("LeadsViewModel", "Starting leads flow for user: ${FirebaseAuth.getInstance().currentUser?.uid}")
+        // Starting leads flow for user: ${FirebaseAuth.getInstance().currentUser?.uid}
         // Try API first, fallback to direct Firestore
         try {
             val apiResult = firebaseRepository.getLeadsViaApi()
             if (apiResult.isSuccess) {
-                android.util.Log.d("LeadsViewModel", "Using API for leads")
+                // Using API for leads
                 emitAll(flowOf(apiResult.getOrNull() ?: emptyList()))
             } else {
-                android.util.Log.w("LeadsViewModel", "API failed, using direct Firestore: ${apiResult.exceptionOrNull()?.message}")
+                // API failed, using direct Firestore: ${apiResult.exceptionOrNull()?.message}
                 emitAll(firebaseRepository.getLeads())
             }
         } catch (e: Exception) {
-            android.util.Log.w("LeadsViewModel", "API error, using direct Firestore: ${e.message}")
+            // API error, using direct Firestore: ${e.message}
             emitAll(firebaseRepository.getLeads())
         }
     }.stateIn(
@@ -60,9 +60,9 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
             
             val result = firebaseRepository.saveLead(lead)
             if (result.isSuccess) {
-                android.util.Log.d("LeadsViewModel", "Lead saved to Firebase: ${result.getOrNull()}")
+                // Lead saved to Firebase: ${result.getOrNull()}
             } else {
-                android.util.Log.e("LeadsViewModel", "Failed to save lead to Firebase: ${result.exceptionOrNull()?.message}")
+                // Failed to save lead to Firebase: ${result.exceptionOrNull()?.message}
             }
         }
     }
@@ -82,16 +82,16 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
                         
                         val updateResult = firebaseRepository.updateLead(leadId, updatedLead)
                         if (updateResult.isSuccess) {
-                            android.util.Log.d("LeadsViewModel", "Lead status updated in Firebase")
+                            // Lead status updated in Firebase
                         } else {
-                            android.util.Log.e("LeadsViewModel", "Failed to update lead status in Firebase: ${updateResult.exceptionOrNull()?.message}")
+                            // Failed to update lead status in Firebase: ${updateResult.exceptionOrNull()?.message}
                         }
                     }
                 } else {
-                    android.util.Log.e("LeadsViewModel", "Failed to get lead: ${result.exceptionOrNull()?.message}")
+                    // Failed to get lead: ${result.exceptionOrNull()?.message}
                 }
             } catch (e: Exception) {
-                android.util.Log.e("LeadsViewModel", "Error updating lead status: ${e.message}")
+                // Error updating lead status: ${e.message}
             }
         }
     }
@@ -101,12 +101,12 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
             try {
                 val result = firebaseRepository.deleteLead(leadId)
                 if (result.isSuccess) {
-                    android.util.Log.d("LeadsViewModel", "Lead deleted from Firebase")
+                    // Lead deleted from Firebase
                 } else {
-                    android.util.Log.e("LeadsViewModel", "Failed to delete lead from Firebase: ${result.exceptionOrNull()?.message}")
+                    // Failed to delete lead from Firebase: ${result.exceptionOrNull()?.message}
                 }
             } catch (e: Exception) {
-                android.util.Log.e("LeadsViewModel", "Error deleting lead: ${e.message}")
+                // Error deleting lead: ${e.message}
             }
         }
     }
@@ -133,12 +133,12 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
                 
                 val result = firebaseRepository.saveLead(lead)
                 if (result.isSuccess) {
-                    android.util.Log.d("LeadsViewModel", "Lead from quote saved to Firebase: ${result.getOrNull()}")
+                    // Lead from quote saved to Firebase: ${result.getOrNull()}
                 } else {
-                    android.util.Log.e("LeadsViewModel", "Failed to save lead from quote to Firebase: ${result.exceptionOrNull()?.message}")
+                    // Failed to save lead from quote to Firebase: ${result.exceptionOrNull()?.message}
                 }
             } catch (e: Exception) {
-                android.util.Log.e("LeadsViewModel", "Error creating lead from quote: ${e.message}")
+                // Error creating lead from quote: ${e.message}
             }
         }
     }
@@ -165,18 +165,18 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
                         val updateResult = firebaseRepository.updateLead(leadId, updatedLead)
                         
                         if (updateResult.isSuccess) {
-                            android.util.Log.d("LeadsViewModel", "Quote $quoteId linked to lead $leadId")
+                            // Quote $quoteId linked to lead $leadId
                         } else {
-                            android.util.Log.e("LeadsViewModel", "Failed to link quote to lead: ${updateResult.exceptionOrNull()?.message}")
+                            // Failed to link quote to lead: ${updateResult.exceptionOrNull()?.message}
                         }
                     } else {
-                        android.util.Log.e("LeadsViewModel", "Lead not found: $leadId")
+                        // Lead not found: $leadId
                     }
                 } else {
-                    android.util.Log.e("LeadsViewModel", "Error getting lead: ${result.exceptionOrNull()?.message}")
+                    // Error getting lead: ${result.exceptionOrNull()?.message}
                 }
             } catch (e: Exception) {
-                android.util.Log.e("LeadsViewModel", "Error linking quote to lead: ${e.message}", e)
+                // ("LeadsViewModel", "Error linking quote to lead: ${e.message}", e)
             }
         }
     }
@@ -184,48 +184,48 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
     // Synchronous version for immediate feedback
     suspend fun linkQuoteToLeadSync(leadId: String, quoteId: String): Boolean {
         return try {
-            android.util.Log.d("LeadsViewModel", "Starting linkQuoteToLeadSync - LeadId: $leadId, QuoteId: $quoteId")
+            // Starting linkQuoteToLeadSync - LeadId: $leadId, QuoteId: $quoteId
             
             // Validate inputs
             if (leadId.isBlank() || quoteId.isBlank()) {
-                android.util.Log.e("LeadsViewModel", "Invalid IDs - LeadId: '$leadId', QuoteId: '$quoteId'")
+                // Invalid IDs - LeadId: '$leadId', QuoteId: '$quoteId'
                 return false
             }
             
             // Get the current lead
-            android.util.Log.d("LeadsViewModel", "Getting lead by ID: $leadId")
+            // Getting lead by ID: $leadId
             val result = firebaseRepository.getLeadById(leadId)
             
             if (result.isSuccess) {
                 val currentLead = result.getOrNull()
-                android.util.Log.d("LeadsViewModel", "Lead retrieved: ${currentLead?.id}, Name: ${currentLead?.name}")
+                // Lead retrieved: ${currentLead?.id}, Name: ${currentLead?.name}
                 
                 if (currentLead != null) {
                     // Update the lead with the quote ID
                     val updatedLead = currentLead.copy(quoteId = quoteId)
-                    android.util.Log.d("LeadsViewModel", "Updating lead with quote ID: $quoteId")
+                    // Updating lead with quote ID: $quoteId
                     
                     val updateResult = firebaseRepository.updateLead(leadId, updatedLead)
                     
                     if (updateResult.isSuccess) {
-                        android.util.Log.d("LeadsViewModel", "Successfully linked quote $quoteId to lead $leadId")
+                        // Successfully linked quote $quoteId to lead $leadId
                         return true
                     } else {
                         val error = updateResult.exceptionOrNull()
-                        android.util.Log.e("LeadsViewModel", "Failed to update lead in Firebase: ${error?.message}", error)
+                        // ("LeadsViewModel", "Failed to update lead in Firebase: ${error?.message}", error)
                         return false
                     }
                 } else {
-                    android.util.Log.e("LeadsViewModel", "Lead not found in database: $leadId")
+                    // Lead not found in database: $leadId
                     return false
                 }
             } else {
                 val error = result.exceptionOrNull()
-                android.util.Log.e("LeadsViewModel", "Error getting lead from Firebase: ${error?.message}", error)
+                // ("LeadsViewModel", "Error getting lead from Firebase: ${error?.message}", error)
                 return false
             }
         } catch (e: Exception) {
-            android.util.Log.e("LeadsViewModel", "Unexpected error linking quote to lead: ${e.message}", e)
+            // ("LeadsViewModel", "Unexpected error linking quote to lead: ${e.message}", e)
             return false
         }
     }
@@ -251,14 +251,14 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
             
             val result = firebaseRepository.saveLead(lead)
             if (result.isSuccess) {
-                android.util.Log.d("LeadsViewModel", "Lead from quote saved to Firebase: ${result.getOrNull()}")
+                // Lead from quote saved to Firebase: ${result.getOrNull()}
                 true
             } else {
-                android.util.Log.e("LeadsViewModel", "Failed to save lead from quote to Firebase: ${result.exceptionOrNull()?.message}")
+                // Failed to save lead from quote to Firebase: ${result.exceptionOrNull()?.message}
                 false
             }
         } catch (e: Exception) {
-            android.util.Log.e("LeadsViewModel", "Error creating lead from quote: ${e.message}")
+            // Error creating lead from quote: ${e.message}
             false
         }
     }

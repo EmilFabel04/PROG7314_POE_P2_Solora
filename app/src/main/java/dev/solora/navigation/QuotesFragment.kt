@@ -108,7 +108,7 @@ class QuotesFragment : Fragment() {
         if (showTab > 0) {
             // Switch to the specified tab
             switchToTab(showTab)
-            android.util.Log.d("QuotesFragment", "OnViewCreated: Switching to tab $showTab from argument")
+            // OnViewCreated: Switching to tab $showTab from argument
         } else {
             // Check if we're returning from client details (quote was saved)
             checkIfReturningFromQuoteSave()
@@ -118,7 +118,7 @@ class QuotesFragment : Fragment() {
             if (savedQuote != null && savedQuote.id != null) {
                 // Switch to view tab immediately to show the saved quote
                 switchToTab(1)
-                android.util.Log.d("QuotesFragment", "OnViewCreated: Switching to view tab to show saved quote: ${savedQuote.reference}")
+                // OnViewCreated: Switching to view tab to show saved quote: ${savedQuote.reference}
             }
         }
     }
@@ -168,7 +168,7 @@ class QuotesFragment : Fragment() {
     private fun setupTabs() {
         // Back button click listener
         btnBackQuotes.setOnClickListener {
-            android.util.Log.d("QuotesFragment", "Back button clicked - navigating to home")
+            // Back button clicked - navigating to home
             try {
                 val parentFragment = parentFragment
                 if (parentFragment is MainTabsFragment) {
@@ -179,7 +179,7 @@ class QuotesFragment : Fragment() {
                     findNavController().navigate(R.id.homeFragment)
                 }
             } catch (e: Exception) {
-                android.util.Log.e("QuotesFragment", "Error navigating back to home: ${e.message}")
+                // Error navigating back to home: ${e.message}
                 // Fallback to direct navigation
                 findNavController().navigate(R.id.homeFragment)
             }
@@ -220,7 +220,7 @@ class QuotesFragment : Fragment() {
                 if (quote != null && quote.id != null) {
                     // We have a saved quote, switch to view tab to show it
                     switchToTab(1)
-                    android.util.Log.d("QuotesFragment", "Switching to view tab to show saved quote: ${quote.reference}")
+                    // Switching to view tab to show saved quote: ${quote.reference}
                 }
             }
         }
@@ -233,7 +233,7 @@ class QuotesFragment : Fragment() {
         val showTab = arguments?.getInt("show_tab", 0) ?: 0
         if (showTab > 0) {
             // Don't override the tab if it was set by argument
-            android.util.Log.d("QuotesFragment", "OnResume: Tab already set by argument ($showTab), not overriding")
+            // OnResume: Tab already set by argument ($showTab), not overriding
             return
         }
         
@@ -242,11 +242,11 @@ class QuotesFragment : Fragment() {
         if (savedQuote != null && savedQuote.id != null) {
             // Switch to view tab to show the saved quote
             switchToTab(1)
-            android.util.Log.d("QuotesFragment", "OnResume: Switching to view tab to show saved quote: ${savedQuote.reference}")
+            // OnResume: Switching to view tab to show saved quote: ${savedQuote.reference}
         } else {
             // If no saved quote, ensure we're on the calculate tab
             switchToTab(0)
-            android.util.Log.d("QuotesFragment", "OnResume: No saved quote, switching to calculate tab")
+            // OnResume: No saved quote, switching to calculate tab
         }
     }
     
@@ -257,7 +257,7 @@ class QuotesFragment : Fragment() {
         val showTab = arguments?.getInt("show_tab", 0) ?: 0
         if (showTab > 0) {
             // Don't override the tab if it was set by argument
-            android.util.Log.d("QuotesFragment", "OnStart: Tab already set by argument ($showTab), not overriding")
+            // OnStart: Tab already set by argument ($showTab), not overriding
             return
         }
         
@@ -266,7 +266,7 @@ class QuotesFragment : Fragment() {
         if (savedQuote != null && savedQuote.id != null) {
             // Switch to view tab to show the saved quote
             switchToTab(1)
-            android.util.Log.d("QuotesFragment", "OnStart: Switching to view tab to show saved quote: ${savedQuote.reference}")
+            // OnStart: Switching to view tab to show saved quote: ${savedQuote.reference}
         }
     }
     
@@ -324,14 +324,14 @@ class QuotesFragment : Fragment() {
             try {
                 // Get current settings for defaults
                 val currentSettings = settingsViewModel.settings.value
-                android.util.Log.d("QuotesFragment", "Calculate clicked - Using settings: Tariff=${currentSettings.calculationSettings.defaultTariff}, Panel=${currentSettings.calculationSettings.defaultPanelWatt}W")
+                // Calculate clicked - Using settings: Tariff=${currentSettings.calculationSettings.defaultTariff}, Panel=${currentSettings.calculationSettings.defaultPanelWatt}W
                 
                 val usage = if (usageText.isNotEmpty()) usageText.toDouble() else null
                 val bill = if (billText.isNotEmpty()) billText.toDouble() else null
                 val tariff = if (tariffText.isNotEmpty()) tariffText.toDouble() else currentSettings.calculationSettings.defaultTariff
                 val panelWatt = if (panelText.isNotEmpty()) panelText.toInt() else currentSettings.calculationSettings.defaultPanelWatt
                 
-                android.util.Log.d("QuotesFragment", "Final calculation values: Tariff=$tariff, PanelWatt=$panelWatt")
+                // Final calculation values: Tariff=$tariff, PanelWatt=$panelWatt
                 
                 // Use temporary values for reference and client name during calculation
                 quotesViewModel.calculateAdvanced(
@@ -354,10 +354,10 @@ class QuotesFragment : Fragment() {
         quotesAdapter = QuotesListAdapter(
             onQuoteClick = { quote ->
                 // Navigate to quote detail page
-                android.util.Log.d("QuotesFragment", "Quote clicked: ID=${quote.id}, Reference=${quote.reference}")
+                // Quote clicked: ID=${quote.id}, Reference=${quote.reference}
                 
                 if (quote.id.isNullOrBlank()) {
-                    android.util.Log.e("QuotesFragment", "ERROR: Quote ID is null or blank!")
+                    // ERROR: Quote ID is null or blank!
                     Toast.makeText(requireContext(), "Error: Quote ID is missing", Toast.LENGTH_SHORT).show()
                     return@QuotesListAdapter
                 }
@@ -377,23 +377,23 @@ class QuotesFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 quotesViewModel.quotes.collect { quotes ->
-                    android.util.Log.d("QuotesFragment", "Quotes updated: ${quotes.size} quotes")
+                    // Quotes updated: ${quotes.size} quotes
                     
                     if (quotes.isEmpty()) {
                         layoutEmptyQuotes.visibility = View.VISIBLE
                         rvQuotesList.visibility = View.GONE
-                        android.util.Log.d("QuotesFragment", "Showing empty state")
+                        // Showing empty state
                     } else {
                         layoutEmptyQuotes.visibility = View.GONE
                         rvQuotesList.visibility = View.VISIBLE
                         quotesAdapter.submitList(quotes)
-                        android.util.Log.d("QuotesFragment", "Displaying ${quotes.size} quotes in RecyclerView")
+                        // Displaying ${quotes.size} quotes in RecyclerView
                     }
                 }
             } catch (e: kotlinx.coroutines.CancellationException) {
-                android.util.Log.d("QuotesFragment", "Quotes observation cancelled")
+                // Quotes observation cancelled
             } catch (e: Exception) {
-                android.util.Log.e("QuotesFragment", "Error observing quotes", e)
+                // ("QuotesFragment", "Error observing quotes", e)
             }
         }
     }
@@ -442,7 +442,7 @@ class QuotesFragment : Fragment() {
         }
         
         dialog.show()
-        android.util.Log.d("QuotesFragment", "Quote preview dialog shown for: $address")
+        // Quote preview dialog shown for: $address
     }
     
     private fun setupDashboardTab() {
@@ -502,7 +502,7 @@ class QuotesFragment : Fragment() {
             dashboardViewModel.isLoading.collect { isLoading ->
                 // Show/hide loading indicator if needed
                 if (isLoading) {
-                    android.util.Log.d("QuotesFragment", "Dashboard loading...")
+                    // Dashboard loading...
                 }
             }
         }
@@ -511,7 +511,7 @@ class QuotesFragment : Fragment() {
             dashboardViewModel.error.collect { error ->
                 if (error != null) {
                     Toast.makeText(requireContext(), "Dashboard Error: $error", Toast.LENGTH_LONG).show()
-                    android.util.Log.e("QuotesFragment", "Dashboard error: $error")
+                    // Dashboard error: $error
                 }
             }
         }
@@ -550,10 +550,10 @@ class QuotesFragment : Fragment() {
             // Update top locations
             updateTopLocations(dashboardData.topLocations)
             
-            android.util.Log.d("QuotesFragment", "Dashboard UI updated successfully")
+            // Dashboard UI updated successfully
             
         } catch (e: Exception) {
-            android.util.Log.e("QuotesFragment", "Error updating dashboard UI: ${e.message}", e)
+            // ("QuotesFragment", "Error updating dashboard UI: ${e.message}", e)
             Toast.makeText(requireContext(), "Error updating dashboard: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
@@ -650,7 +650,7 @@ class QuotesFragment : Fragment() {
             }
         }
         
-        android.util.Log.d("QuotesFragment", "Results updated: ${calculation.systemKw}kW system, R${calculation.monthlySavingsRands} savings")
+        // Results updated: ${calculation.systemKw}kW system, R${calculation.monthlySavingsRands} savings
     }
     
     private fun getMonthName(month: Int): String {
@@ -672,10 +672,10 @@ class QuotesFragment : Fragment() {
     }
 
     private fun saveQuoteWithClientDetails() {
-        android.util.Log.d("QuotesFragment", "saveQuoteWithClientDetails called")
+        // saveQuoteWithClientDetails called
         
         quotesViewModel.lastCalculation.value?.let { calculation ->
-            android.util.Log.d("QuotesFragment", "Found calculation to save: ${calculation.systemKw}kW system")
+            // Found calculation to save: ${calculation.systemKw}kW system
             
             // Get client details from the form
             val reference = etReference.text.toString().trim().ifEmpty { "QUOTE-${System.currentTimeMillis()}" }
@@ -694,14 +694,14 @@ class QuotesFragment : Fragment() {
             val email = etEmail.text.toString().trim()
             val contact = etContact.text.toString().trim()
             
-            android.util.Log.d("QuotesFragment", "Quote details - Ref: $reference, Client: $clientName, Address: $address")
+            // Quote details - Ref: $reference, Client: $clientName, Address: $address
             
             if (clientName == "Unknown Client") {
                 Toast.makeText(requireContext(), "Please enter client name", Toast.LENGTH_SHORT).show()
                 return
             }
             
-            android.util.Log.d("QuotesFragment", "Calling saveQuoteFromCalculation...")
+            // Calling saveQuoteFromCalculation...
             
             // Save the quote with all details
             quotesViewModel.saveQuoteFromCalculation(reference, clientName, address, calculation)
@@ -714,10 +714,8 @@ class QuotesFragment : Fragment() {
                     
                     val savedQuote = quotesViewModel.lastQuote.value
                     if (savedQuote != null && savedQuote.id != null) {
-                        android.util.Log.d("QuotesFragment", "Creating lead for quote ID: ${savedQuote.id}")
-                        
-                        // Create a lead from this quote
-                        leadsViewModel.createLeadFromQuote(
+                        // Create a lead from this quote using sync method
+                        val leadCreated = leadsViewModel.createLeadFromQuoteSync(
                             quoteId = savedQuote.id!!,
                             clientName = clientName,
                             address = address,
@@ -726,18 +724,18 @@ class QuotesFragment : Fragment() {
                             notes = "Lead created from quote $reference. System: ${String.format("%.2f", calculation.systemKw)}kW, Monthly savings: R${String.format("%.2f", calculation.monthlySavingsRands)}"
                         )
                         
-                        android.util.Log.d("QuotesFragment", "Lead created, showing success message")
-                        Toast.makeText(requireContext(), "Quote saved and lead created successfully!", Toast.LENGTH_LONG).show()
+                        if (leadCreated) {
+                            Toast.makeText(requireContext(), "Quote saved and lead created successfully!", Toast.LENGTH_LONG).show()
+                        } else {
+                            Toast.makeText(requireContext(), "Quote saved but lead creation failed", Toast.LENGTH_SHORT).show()
+                        }
                         
                         // Switch to view tab to show the saved quote in the list
-                        android.util.Log.d("QuotesFragment", "Switching to view tab")
                         switchToTab(1)
                     } else {
-                        android.util.Log.e("QuotesFragment", "savedQuote is null or has no ID")
                         Toast.makeText(requireContext(), "Quote saved but lead creation failed", Toast.LENGTH_SHORT).show()
                     }
                 } catch (e: Exception) {
-                    android.util.Log.e("QuotesFragment", "Error during quote save/lead creation", e)
                     Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
@@ -801,7 +799,7 @@ class QuotesFragment : Fragment() {
                     // Switch back to calculate tab when quote is cleared
                     if (currentTab == 2) { // Only switch if we're currently on dashboard tab
                         switchToTab(0) // Switch to calculate tab
-                        android.util.Log.d("QuotesFragment", "Quote cleared - switching back to calculate tab")
+                        // Quote cleared - switching back to calculate tab
                     }
                     
                     // Clear the client address field
@@ -815,7 +813,7 @@ class QuotesFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 settingsViewModel.settings.collect { settings ->
-                    android.util.Log.d("QuotesFragment", "Settings received: Tariff=${settings.calculationSettings.defaultTariff}, Panel=${settings.calculationSettings.defaultPanelWatt}W")
+                    // Settings received: Tariff=${settings.calculationSettings.defaultTariff}, Panel=${settings.calculationSettings.defaultPanelWatt}W
                     
                     // ALWAYS update fields with latest settings values
                     etTariff.setText(settings.calculationSettings.defaultTariff.toString())
@@ -825,14 +823,14 @@ class QuotesFragment : Fragment() {
                     etTariff.hint = "Tariff (R/kWh)"
                     etPanel.hint = "Panel Wattage"
                     
-                    android.util.Log.d("QuotesFragment", "Form fields updated with settings values")
+                    // Form fields updated with settings values
                 }
             } catch (e: kotlinx.coroutines.CancellationException) {
                 // Expected when fragment is destroyed, don't show error
-                android.util.Log.d("QuotesFragment", "Settings observation cancelled (fragment lifecycle ended)")
+                // Settings observation cancelled (fragment lifecycle ended)
             } catch (e: Exception) {
                 // Only show error for unexpected exceptions
-                android.util.Log.e("QuotesFragment", "Error observing settings", e)
+                // ("QuotesFragment", "Error observing settings", e)
                 Toast.makeText(requireContext(), "Error loading settings: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
@@ -851,7 +849,7 @@ class QuotesFragment : Fragment() {
                     return@launch
                 }
                 
-                android.util.Log.d("QuotesFragment", "Testing NASA API for address: $address")
+                // Testing NASA API for address: $address
                 
                 // Convert address to coordinates
                 val geocodingService = dev.solora.quote.GeocodingService(requireContext())
@@ -862,7 +860,7 @@ class QuotesFragment : Fragment() {
                     return@launch
                 }
                 
-                android.util.Log.d("QuotesFragment", "Address converted to: lat=${locationResult.latitude}, lon=${locationResult.longitude}")
+                // Address converted to: lat=${locationResult.latitude}, lon=${locationResult.longitude}
                 
                 // Test NASA API with actual coordinates
                 val nasaClient = dev.solora.quote.NasaPowerClient()
@@ -872,17 +870,17 @@ class QuotesFragment : Fragment() {
                     val data = result.getOrNull()
                     val message = "NASA API Success!\nIrradiance: ${String.format("%.2f", data?.averageAnnualIrradiance ?: 0.0)}\nSun Hours: ${String.format("%.2f", data?.averageAnnualSunHours ?: 0.0)}"
                     Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
-                    android.util.Log.d("QuotesFragment", "NASA API Test Success: $message")
+                    // NASA API Test Success: $message
                 } else {
                     val error = result.exceptionOrNull()?.message ?: "Unknown error"
                     Toast.makeText(requireContext(), "NASA API Failed: $error", Toast.LENGTH_LONG).show()
-                    android.util.Log.e("QuotesFragment", "NASA API Test Failed: $error")
+                    // NASA API Test Failed: $error
                 }
                 
                 nasaClient.close()
             } catch (e: Exception) {
                 Toast.makeText(requireContext(), "NASA API Error: ${e.message}", Toast.LENGTH_LONG).show()
-                android.util.Log.e("QuotesFragment", "NASA API Test Exception: ${e.message}", e)
+                // ("QuotesFragment", "NASA API Test Exception: ${e.message}", e)
             }
         }
     }
@@ -925,7 +923,7 @@ class QuotesFragment : Fragment() {
                 
                 isAfterFromDate && isBeforeToDate
             } catch (e: Exception) {
-                android.util.Log.e("QuotesFragment", "Error filtering quote by date: ${e.message}", e)
+                // ("QuotesFragment", "Error filtering quote by date: ${e.message}", e)
                 true // Include quote if date filtering fails
             }
         }
@@ -961,9 +959,9 @@ class QuotesFragment : Fragment() {
             try {
                 // Reload dashboard data with date filtering
                 dashboardViewModel.loadDashboardDataWithDateFilter(fromDate, toDate)
-                android.util.Log.d("QuotesFragment", "Applied date filter to dashboard: ${fromDate?.let { dateFormat.format(it) }} - ${toDate?.let { dateFormat.format(it) }}")
+                // Applied date filter to dashboard: ${fromDate?.let { dateFormat.format(it) }} - ${toDate?.let { dateFormat.format(it) }}
             } catch (e: Exception) {
-                android.util.Log.e("QuotesFragment", "Error applying date filter to dashboard: ${e.message}", e)
+                // ("QuotesFragment", "Error applying date filter to dashboard: ${e.message}", e)
             }
         }
     }
