@@ -135,7 +135,14 @@ class LoginFragment : Fragment() {
                     is BiometricState.Success -> {
                         Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
                         authViewModel.clearBiometricState()
-                        findNavController().navigate(R.id.action_login_to_main)
+                        // Only navigate if we're actually on the login screen and user is not already logged in
+                        if (isAdded && !isDetached && !authViewModel.isUserLoggedIn()) {
+                            try {
+                                findNavController().navigate(R.id.action_login_to_main)
+                            } catch (e: IllegalArgumentException) {
+                                // Navigation action doesn't exist from current destination
+                            }
+                        }
                     }
                     is BiometricState.Error -> {
                         Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()

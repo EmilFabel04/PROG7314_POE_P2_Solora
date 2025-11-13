@@ -218,6 +218,10 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
             callback(stayLoggedIn)
         }
     }
+    
+    fun isUserLoggedIn(): Boolean {
+        return repo.isUserLoggedIn()
+    }
 }
 
 sealed class AuthState {

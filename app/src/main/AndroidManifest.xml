@@ -12,7 +12,8 @@
         android:label="Solora"
         android:roundIcon="@drawable/solora_logo"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Solora">
+        android:theme="@style/Theme.Solora"
+        android:enableOnBackInvokedCallback="true">
         <activity
             android:name=".MainActivity"
             android:exported="true">
