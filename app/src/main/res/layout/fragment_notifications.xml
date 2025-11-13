@@ -36,140 +36,97 @@
             android:layout_marginEnd="56dp" />
     </LinearLayout>
 
-    <!-- Coming Soon Content -->
-    <ScrollView
+    <!-- Simple Notification Settings -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:fillViewport="true">
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center">
 
-        <LinearLayout
+        <!-- Simple Settings Card -->
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:padding="24dp">
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@android:color/white">
 
-            <!-- Notification Icon -->
-            <ImageView
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:src="@drawable/notification_icon_orange_outline"
-                android:layout_marginBottom="20dp"
-                android:alpha="0.8" />
-
-            <!-- Coming Soon Title -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Notifications Coming Soon!"
-                android:textColor="@color/solora_orange"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:layout_marginBottom="12dp" />
-
-            <!-- Description -->
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="We're working hard to bring you real-time notifications for your quotes, leads, and important updates."
-                android:textColor="#666666"
-                android:textSize="14sp"
-                android:gravity="center"
-                android:lineSpacingExtra="2dp"
-                android:layout_marginBottom="24dp" />
+                android:orientation="vertical"
+                android:padding="24dp">
 
-            <!-- Features Card -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
-                app:cardBackgroundColor="@android:color/white">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Push Notifications"
+                    android:textColor="@color/solora_orange"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="16dp" />
 
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Get motivational messages when you create quotes"
+                    android:textColor="#666666"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="20dp" />
+
+                <!-- Toggle Switch -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
                     <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Enable Notifications"
+                        android:textColor="#333333"
+                        android:textSize="16sp" />
+
+                    <Switch
+                        android:id="@+id/switch_notifications"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Coming Features:"
-                        android:textColor="@color/solora_orange"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="12dp" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="• Quote status updates"
-                        android:textColor="#666666"
-                        android:textSize="13sp"
-                        android:layout_marginBottom="6dp"
-                        android:drawableStart="@drawable/tick_icon_white"
-                        android:drawableTint="@color/solora_orange"
-                        android:drawablePadding="10dp"
-                        android:gravity="center_vertical" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="• New lead notifications"
-                        android:textColor="#666666"
-                        android:textSize="13sp"
-                        android:layout_marginBottom="6dp"
-                        android:drawableStart="@drawable/tick_icon_white"
-                        android:drawableTint="@color/solora_orange"
-                        android:drawablePadding="10dp"
-                        android:gravity="center_vertical" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="• Appointment reminders"
-                        android:textColor="#666666"
-                        android:textSize="13sp"
-                        android:layout_marginBottom="6dp"
-                        android:drawableStart="@drawable/tick_icon_white"
-                        android:drawableTint="@color/solora_orange"
-                        android:drawablePadding="10dp"
-                        android:gravity="center_vertical" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="• System updates"
-                        android:textColor="#666666"
-                        android:textSize="13sp"
-                        android:drawableStart="@drawable/tick_icon_white"
-                        android:drawableTint="@color/solora_orange"
-                        android:drawablePadding="10dp"
-                        android:gravity="center_vertical" />
+                        android:checked="true" />
 
                 </LinearLayout>
 
-            </androidx.cardview.widget.CardView>
+                <!-- Status -->
+                <TextView
+                    android:id="@+id/tv_notification_status"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Notifications enabled"
+                    android:textColor="@color/solora_orange"
+                    android:textSize="14sp"
+                    android:layout_marginTop="12dp" />
 
-            <!-- Back Button -->
-            <Button
-                android:id="@+id/btn_back_to_home"
-                android:layout_width="wrap_content"
-                android:layout_height="44dp"
-                android:text="Back to Home"
-                android:textColor="@android:color/white"
-                android:backgroundTint="@color/solora_orange"
-                android:minWidth="140dp"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                app:cornerRadius="22dp" />
+            </LinearLayout>
 
-        </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
-    </ScrollView>
+        <!-- Back Button -->
+        <Button
+            android:id="@+id/btn_back_to_home"
+            android:layout_width="wrap_content"
+            android:layout_height="44dp"
+            android:text="Back to Home"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@color/solora_orange"
+            android:minWidth="140dp"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:cornerRadius="22dp" />
+
+    </LinearLayout>
 
 </LinearLayout>

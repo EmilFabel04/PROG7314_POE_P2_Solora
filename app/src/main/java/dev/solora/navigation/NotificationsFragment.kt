@@ -1,5 +1,8 @@
 package dev.solora.navigation
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +12,8 @@ import android.widget.ImageButton
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -20,11 +25,22 @@ class NotificationsFragment : Fragment() {
 
     private lateinit var btnBackNotifications: ImageButton
     private lateinit var btnBackToHome: Button
-    private lateinit var switchNotifications: Switch
-    private lateinit var tvNotificationStatus: TextView
-    private lateinit var btnTestNotification: Button
+    private var switchNotifications: Switch? = null
+    private var tvNotificationStatus: TextView? = null
     
     private lateinit var notificationManager: MotivationalNotificationManager
+    
+    // Permission launcher for notifications (Android 13+)
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            enableNotificationsAfterPermission()
+        } else {
+            switchNotifications?.isChecked = false
+            Toast.makeText(requireContext(), "Notification permission denied", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,9 +63,8 @@ class NotificationsFragment : Fragment() {
     private fun initializeViews(view: View) {
         btnBackNotifications = view.findViewById(R.id.btn_back_notifications)
         btnBackToHome = view.findViewById(R.id.btn_back_to_home)
-        switchNotifications = view.findViewById(R.id.switch_notifications) ?: return
-        tvNotificationStatus = view.findViewById(R.id.tv_notification_status) ?: return
-        btnTestNotification = view.findViewById(R.id.btn_test_notification) ?: return
+        switchNotifications = view.findViewById(R.id.switch_notifications)
+        tvNotificationStatus = view.findViewById(R.id.tv_notification_status)
     }
 
     private fun setupClickListeners() {
@@ -61,49 +76,63 @@ class NotificationsFragment : Fragment() {
             findNavController().popBackStack()
         }
         
-        switchNotifications.setOnCheckedChangeListener { _, isChecked ->
+        switchNotifications?.setOnCheckedChangeListener { _, isChecked ->
             handleNotificationToggle(isChecked)
-        }
-        
-        btnTestNotification.setOnClickListener {
-            sendTestNotification()
         }
     }
     
     private fun loadNotificationSettings() {
         viewLifecycleOwner.lifecycleScope.launch {
             val isEnabled = notificationManager.isNotificationsEnabled()
-            switchNotifications.isChecked = isEnabled
+            switchNotifications?.isChecked = isEnabled
             updateNotificationStatus(isEnabled)
         }
     }
     
     private fun handleNotificationToggle(isEnabled: Boolean) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            notificationManager.enableMotivationalNotifications(isEnabled)
-            updateNotificationStatus(isEnabled)
-            
-            val message = if (isEnabled) {
-                "Motivational notifications enabled!"
+        if (isEnabled) {
+            // Check permission for Android 13+ (API 33+)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                when {
+                    ContextCompat.checkSelfPermission(
+                        requireContext(),
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) == PackageManager.PERMISSION_GRANTED -> {
+                        enableNotificationsAfterPermission()
+                    }
+                    else -> {
+                        // Request permission
+                        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                }
             } else {
-                "Motivational notifications disabled"
+                // No permission needed for Android 12 and below
+                enableNotificationsAfterPermission()
             }
-            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+        } else {
+            // Disable notifications
+            viewLifecycleOwner.lifecycleScope.launch {
+                notificationManager.enableMotivationalNotifications(false)
+                updateNotificationStatus(false)
+                Toast.makeText(requireContext(), "Push notifications disabled", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+    
+    private fun enableNotificationsAfterPermission() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            notificationManager.enableMotivationalNotifications(true)
+            updateNotificationStatus(true)
+            Toast.makeText(requireContext(), "Push notifications enabled", Toast.LENGTH_SHORT).show()
         }
     }
     
     private fun updateNotificationStatus(isEnabled: Boolean) {
-        tvNotificationStatus.text = if (isEnabled) {
-            "Notifications are enabled - you'll receive motivational messages!"
+        tvNotificationStatus?.text = if (isEnabled) {
+            "Notifications enabled"
         } else {
-            "Notifications are disabled"
+            "Notifications disabled"
         }
     }
     
-    private fun sendTestNotification() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            notificationManager.checkAndSendMotivationalMessage()
-            Toast.makeText(requireContext(), "Test notification sent!", Toast.LENGTH_SHORT).show()
-        }
-    }
 }
