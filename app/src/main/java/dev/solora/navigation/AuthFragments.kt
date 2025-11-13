@@ -79,12 +79,16 @@ class LoginFragment : Fragment() {
         
         val testFingerprintButton = view.findViewById<LinearLayout>(R.id.btn_test_fingerprint)
         testFingerprintButton.setOnClickListener {
-            if (authViewModel.canUseBiometrics()) {
-                authViewModel.authenticateWithBiometrics(requireActivity() as FragmentActivity)
-            } else {
-                Toast.makeText(requireContext(), 
-                    "Fingerprint not available: ${authViewModel.getBiometricAvailabilityMessage()}", 
-                    Toast.LENGTH_LONG).show()
+            if (isAdded && !isDetached) {
+                if (authViewModel.canUseBiometrics()) {
+                    activity?.let { fragmentActivity ->
+                        authViewModel.authenticateWithBiometrics(fragmentActivity as FragmentActivity)
+                    }
+                } else {
+                    Toast.makeText(requireContext(), 
+                        "Fingerprint not available: ${authViewModel.getBiometricAvailabilityMessage()}", 
+                        Toast.LENGTH_LONG).show()
+                }
             }
         }
 
@@ -192,7 +196,11 @@ class LoginFragment : Fragment() {
                 if (canUseBiometrics && isEnabled) {
                     biometricButton.visibility = View.VISIBLE
                     biometricButton.setOnClickListener {
-                        authViewModel.authenticateWithBiometrics(requireActivity() as FragmentActivity)
+                        if (isAdded && !isDetached) {
+                            activity?.let { fragmentActivity ->
+                                authViewModel.authenticateWithBiometrics(fragmentActivity as FragmentActivity)
+                            }
+                        }
                     }
                 } else {
                     biometricButton.visibility = View.GONE
@@ -211,10 +219,16 @@ class LoginFragment : Fragment() {
             .setTitle(getString(R.string.enable_biometric_login))
             .setMessage("Would you like to enable fingerprint login for faster access next time?")
             .setPositiveButton("Enable") { _, _ ->
-                authViewModel.authenticateWithBiometrics(requireActivity() as FragmentActivity)
+                activity?.let { fragmentActivity ->
+                    if (isAdded && !isDetached) {
+                        authViewModel.authenticateWithBiometrics(fragmentActivity as FragmentActivity)
+                    }
+                }
             }
             .setNegativeButton("Not now") { _, _ ->
-                findNavController().navigate(R.id.action_login_to_main)
+                if (isAdded && !isDetached) {
+                    findNavController().navigate(R.id.action_login_to_main)
+                }
             }
             .setCancelable(false)
             .show()
