@@ -76,6 +76,17 @@ class LoginFragment : Fragment() {
         val submitButton = view.findViewById<LinearLayout>(R.id.btn_login)
         val biometricButton = view.findViewById<LinearLayout>(R.id.btn_biometric_login)
         setupBiometricAuth(biometricButton)
+        
+        val testFingerprintButton = view.findViewById<LinearLayout>(R.id.btn_test_fingerprint)
+        testFingerprintButton.setOnClickListener {
+            if (authViewModel.canUseBiometrics()) {
+                authViewModel.authenticateWithBiometrics(requireActivity() as FragmentActivity)
+            } else {
+                Toast.makeText(requireContext(), 
+                    "Fingerprint not available: ${authViewModel.getBiometricAvailabilityMessage()}", 
+                    Toast.LENGTH_LONG).show()
+            }
+        }
 
         submitButton.setOnClickListener {
             val email = emailInput.text?.toString()?.trim() ?: ""
@@ -168,9 +179,17 @@ class LoginFragment : Fragment() {
     }
     
     private fun setupBiometricAuth(biometricButton: LinearLayout) {
+        val canUseBiometrics = authViewModel.canUseBiometrics()
+        
+        if (!canUseBiometrics) {
+            android.widget.Toast.makeText(requireContext(), 
+                "Device doesn't support fingerprint: ${authViewModel.getBiometricAvailabilityMessage()}", 
+                android.widget.Toast.LENGTH_LONG).show()
+        }
+        
         viewLifecycleOwner.lifecycleScope.launch {
             authViewModel.isBiometricEnabled.collect { isEnabled ->
-                if (authViewModel.canUseBiometrics() && isEnabled) {
+                if (canUseBiometrics && isEnabled) {
                     biometricButton.visibility = View.VISIBLE
                     biometricButton.setOnClickListener {
                         authViewModel.authenticateWithBiometrics(requireActivity() as FragmentActivity)
