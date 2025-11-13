@@ -18,6 +18,17 @@
     <string name="forgot_password_text"><u>Forgot password</u></string>
     <!-- Web client ID from Firebase Console - required for requestIdToken -->
     <string name="default_web_client_id">570014568272-akipotsp9timh1g4tescrdnh71tblmth.apps.googleusercontent.com</string>
+    
+    <!-- Biometric Authentication -->
+    <string name="biometric_prompt_title">Fingerprint Login</string>
+    <string name="biometric_prompt_subtitle">Use your fingerprint to sign in</string>
+    <string name="biometric_prompt_description">Place your finger on the sensor to authenticate</string>
+    <string name="biometric_prompt_negative_text">Use Password</string>
+    <string name="use_biometric_login">Use Fingerprint Login</string>
+    <string name="enable_biometric_login">Enable Fingerprint Login</string>
+    <string name="biometric_not_available">Fingerprint authentication not available on this device</string>
+    <string name="biometric_not_enrolled">No fingerprint enrolled. Please add fingerprint in device settings</string>
+    <string name="secret_key_name">biometric_sample_encryption_key</string>
 </resources>
 
 

@@ -1,6 +1,7 @@
 package dev.solora.auth
 
 import android.content.Context
+import androidx.biometric.BiometricManager
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -27,17 +28,27 @@ class AuthRepository(private val context: Context) {
     private val KEY_SURNAME = stringPreferencesKey("surname")
     private val KEY_EMAIL = stringPreferencesKey("email")
     private val KEY_HAS_SEEN_ONBOARDING = booleanPreferencesKey("has_seen_onboarding")
+    private val KEY_BIOMETRIC_ENABLED = booleanPreferencesKey("biometric_enabled")
+    companion object {
+        const val SHARED_PREFS_FILENAME = "biometric_prefs"
+        const val CIPHERTEXT_WRAPPER = "ciphertext_wrapper"
+        const val SECRET_KEY_NAME = "biometric_sample_encryption_key"
+    }
 
     val currentUser: FirebaseUser? get() = firebaseAuth.currentUser
     
-    // Simple check: has the user ever seen the onboarding screen?
     val hasSeenOnboarding: Flow<Boolean> = context.dataStore.data.catch { e ->
         if (e is IOException) emit(emptyPreferences()) else throw e
     }.map { prefs ->
         prefs[KEY_HAS_SEEN_ONBOARDING] ?: false
     }
     
-    // Mark that onboarding has been seen
+    val isBiometricEnabled: Flow<Boolean> = context.dataStore.data.catch { e ->
+        if (e is IOException) emit(emptyPreferences()) else throw e
+    }.map { prefs ->
+        prefs[KEY_BIOMETRIC_ENABLED] ?: false
+    }
+    
     suspend fun markOnboardingComplete() {
         context.dataStore.edit { prefs ->
             prefs[KEY_HAS_SEEN_ONBOARDING] = true
@@ -49,7 +60,6 @@ class AuthRepository(private val context: Context) {
             val result = firebaseAuth.signInWithEmailAndPassword(email, password).await()
             val user = result.user ?: throw Exception("Login failed: No user returned")
             
-            // Store user info locally and mark that user has logged in before
             context.dataStore.edit { prefs ->
                 prefs[KEY_USER_ID] = user.uid
                 prefs[KEY_EMAIL] = user.email ?: email
@@ -65,12 +75,10 @@ class AuthRepository(private val context: Context) {
 
     suspend fun loginWithGoogle(idToken: String): Result<FirebaseUser> {
         return try {
-            // Sign in with Google credential
             val credential = GoogleAuthProvider.getCredential(idToken, null)
             val authResult = firebaseAuth.signInWithCredential(credential).await()
             val user = authResult.user ?: throw Exception("Google login failed")
 
-            // Only store info locally, do NOT write to Firestore
             context.dataStore.edit { prefs ->
                 prefs[KEY_USER_ID] = user.uid
                 prefs[KEY_NAME] = user.displayName ?: ""
@@ -89,13 +97,11 @@ class AuthRepository(private val context: Context) {
             val result = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
             val user = result.user ?: throw Exception("Registration failed: No user returned")
             
-            // Update profile with display name
             val profileUpdates = com.google.firebase.auth.UserProfileChangeRequest.Builder()
                 .setDisplayName(name)
                 .build()
             user.updateProfile(profileUpdates).await()
             
-            // Store user info in Firestore
             val userDoc = hashMapOf(
                 "name" to name,
                 "surname" to surname,
@@ -104,7 +110,6 @@ class AuthRepository(private val context: Context) {
             )
             firestore.collection("users").document(user.uid).set(userDoc).await()
             
-            // Store user info locally and mark that user has registered
             context.dataStore.edit { prefs ->
                 prefs[KEY_USER_ID] = user.uid
                 prefs[KEY_NAME] = name
@@ -138,7 +143,6 @@ class AuthRepository(private val context: Context) {
 
             firestore.collection("users").document(user.uid).set(userDoc).await()
 
-            // Store user info locally and mark that user has registered
             context.dataStore.edit { prefs ->
                 prefs[KEY_USER_ID] = user.uid
                 prefs[KEY_NAME] = user.displayName ?: ""
@@ -178,18 +182,75 @@ class AuthRepository(private val context: Context) {
     
     suspend fun logout(): Result<Unit> {
         return try {
-            // Clear local data store but ALWAYS keep HAS_SEEN_ONBOARDING as true
-            // If user has logged in before, they should NEVER see onboarding again
             context.dataStore.edit { prefs ->
                 prefs.clear()
-                // Always set to true - if they're logging out, they've used the app before
                 prefs[KEY_HAS_SEEN_ONBOARDING] = true
             }
             
-            // Sign out from Firebase
             firebaseAuth.signOut()
             
             Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    fun canAuthenticateWithBiometrics(): Int {
+        val biometricManager = BiometricManager.from(context)
+        return biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG)
+    }
+    
+    suspend fun enableBiometric(): Result<Unit> {
+        return try {
+            context.dataStore.edit { prefs ->
+                prefs[KEY_BIOMETRIC_ENABLED] = true
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    suspend fun disableBiometric(): Result<Unit> {
+        return try {
+            context.dataStore.edit { prefs ->
+                prefs[KEY_BIOMETRIC_ENABLED] = false
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    fun getCiphertextWrapperFromSharedPrefs(): CiphertextWrapper? {
+        val cryptographyManager = CryptographyManager()
+        return cryptographyManager.getCiphertextWrapperFromSharedPrefs(
+            context,
+            SHARED_PREFS_FILENAME,
+            Context.MODE_PRIVATE,
+            CIPHERTEXT_WRAPPER
+        )
+    }
+    
+    fun storeCiphertextWrapperToSharedPrefs(ciphertextWrapper: CiphertextWrapper) {
+        val cryptographyManager = CryptographyManager()
+        cryptographyManager.persistCiphertextWrapperToSharedPrefs(
+            ciphertextWrapper,
+            context,
+            SHARED_PREFS_FILENAME,
+            Context.MODE_PRIVATE,
+            CIPHERTEXT_WRAPPER
+        )
+    }
+    
+    suspend fun storeBiometricToken(): Result<String> {
+        return try {
+            val token = getFirebaseIdToken()
+            if (token != null) {
+                Result.success(token)
+            } else {
+                Result.failure(Exception("No Firebase token available"))
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }

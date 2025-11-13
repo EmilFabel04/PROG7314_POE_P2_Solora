@@ -91,6 +91,10 @@ dependencies {
 
 	// Accompanist permissions
     implementation("com.google.accompanist:accompanist-permissions:0.36.0")
+	
+	// Biometric authentication
+	implementation("androidx.biometric:biometric:1.1.0")
+	implementation("com.google.code.gson:gson:2.10.1")
 
     // Fragments and Navigation Component (for fragment-based navigation)
     implementation("androidx.fragment:fragment-ktx:1.8.4")

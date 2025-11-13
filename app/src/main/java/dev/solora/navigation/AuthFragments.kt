@@ -10,7 +10,9 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.biometric.BiometricManager
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -21,6 +23,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import dev.solora.R
 import dev.solora.auth.AuthViewModel
+import dev.solora.auth.BiometricState
 
 // This is the welcome screen that shows when someone opens the app for the first time
 // It explains what the app does and lets them get started
@@ -71,6 +74,8 @@ class LoginFragment : Fragment() {
         val emailInput = view.findViewById<android.widget.EditText>(R.id.et_email)
         val passwordInput = view.findViewById<android.widget.EditText>(R.id.et_password)
         val submitButton = view.findViewById<LinearLayout>(R.id.btn_login)
+        val biometricButton = view.findViewById<LinearLayout>(R.id.btn_biometric_login)
+        setupBiometricAuth(biometricButton)
 
         submitButton.setOnClickListener {
             val email = emailInput.text?.toString()?.trim() ?: ""
@@ -101,18 +106,39 @@ class LoginFragment : Fragment() {
             startActivityForResult(signInIntent, RC_SIGN_IN)
         }
 
-        // Observe auth state for navigation
         viewLifecycleOwner.lifecycleScope.launch {
             authViewModel.authState.collect { state ->
                 when (state) {
                     is dev.solora.auth.AuthState.Success -> {
                         Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
                         authViewModel.clearAuthState()
-                        findNavController().navigate(R.id.action_login_to_main)
+                        
+                        if (authViewModel.canUseBiometrics() && !authViewModel.isBiometricEnabled.value) {
+                            offerBiometricSetup()
+                        } else {
+                            findNavController().navigate(R.id.action_login_to_main)
+                        }
                     }
                     is dev.solora.auth.AuthState.Error -> {
                         Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
                         authViewModel.clearAuthState()
+                    }
+                    else -> Unit
+                }
+            }
+        }
+        
+        viewLifecycleOwner.lifecycleScope.launch {
+            authViewModel.biometricState.collect { state ->
+                when (state) {
+                    is BiometricState.Success -> {
+                        Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+                        authViewModel.clearBiometricState()
+                        findNavController().navigate(R.id.action_login_to_main)
+                    }
+                    is BiometricState.Error -> {
+                        Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+                        authViewModel.clearBiometricState()
                     }
                     else -> Unit
                 }
@@ -139,6 +165,40 @@ class LoginFragment : Fragment() {
                 Toast.makeText(requireContext(), "Google login failed: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+    
+    private fun setupBiometricAuth(biometricButton: LinearLayout) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            authViewModel.isBiometricEnabled.collect { isEnabled ->
+                if (authViewModel.canUseBiometrics() && isEnabled) {
+                    biometricButton.visibility = View.VISIBLE
+                    biometricButton.setOnClickListener {
+                        authViewModel.authenticateWithBiometrics(requireActivity() as FragmentActivity)
+                    }
+                } else {
+                    biometricButton.visibility = View.GONE
+                }
+            }
+        }
+    }
+    
+    private fun offerBiometricSetup() {
+        if (!authViewModel.canUseBiometrics()) {
+            findNavController().navigate(R.id.action_login_to_main)
+            return
+        }
+        
+        androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle(getString(R.string.enable_biometric_login))
+            .setMessage("Would you like to enable fingerprint login for faster access next time?")
+            .setPositiveButton("Enable") { _, _ ->
+                authViewModel.authenticateWithBiometrics(requireActivity() as FragmentActivity)
+            }
+            .setNegativeButton("Not now") { _, _ ->
+                findNavController().navigate(R.id.action_login_to_main)
+            }
+            .setCancelable(false)
+            .show()
     }
 }
 
