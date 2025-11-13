@@ -23,12 +23,15 @@ import dev.solora.profile.ProfileViewModel
 import dev.solora.settings.SettingsViewModel
 import dev.solora.auth.AuthViewModel
 import dev.solora.api.FirebaseFunctionsApi
+import dev.solora.notifications.MotivationalNotificationManager
 import kotlinx.coroutines.launch
 
 class ProfileFragment : Fragment() {
     private val profileViewModel: ProfileViewModel by viewModels()
     private val settingsViewModel: SettingsViewModel by viewModels()
     private val authViewModel: AuthViewModel by viewModels()
+    
+    private lateinit var notificationManager: MotivationalNotificationManager
     private val auth = FirebaseAuth.getInstance()
     private val firebaseApi = FirebaseFunctionsApi()
     
@@ -44,6 +47,8 @@ class ProfileFragment : Fragment() {
     
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        
+        notificationManager = MotivationalNotificationManager(requireContext())
         
         initializeViews(view)
         setupClickListeners(view)
@@ -263,10 +268,15 @@ class ProfileFragment : Fragment() {
     }
     
     private fun handleNotificationToggle(isEnabled: Boolean) {
-        if (isEnabled) {
-            Toast.makeText(requireContext(), "Push notifications enabled", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(requireContext(), "Push notifications disabled", Toast.LENGTH_SHORT).show()
+        viewLifecycleOwner.lifecycleScope.launch {
+            notificationManager.enableMotivationalNotifications(isEnabled)
+            
+            if (isEnabled) {
+                Toast.makeText(requireContext(), "Motivational notifications enabled!", Toast.LENGTH_SHORT).show()
+                notificationManager.checkAndSendMotivationalMessage()
+            } else {
+                Toast.makeText(requireContext(), "Motivational notifications disabled", Toast.LENGTH_SHORT).show()
+            }
         }
     }
     

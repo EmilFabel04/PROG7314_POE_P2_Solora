@@ -20,6 +20,7 @@ import dev.solora.quote.QuoteInputs
 import dev.solora.quote.GeocodingService
 import dev.solora.quote.QuoteOutputs
 import dev.solora.settings.SettingsRepository
+import dev.solora.notifications.MotivationalNotificationManager
 import com.google.firebase.auth.FirebaseAuth
 
 class QuotesViewModel(app: Application) : AndroidViewModel(app) {
@@ -28,6 +29,7 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     private val calculator = QuoteCalculator
     private val geocodingService = GeocodingService(app)
     private val settingsRepository = SettingsRepository()
+    private val notificationManager = MotivationalNotificationManager(app)
 
     init {
         val currentUser = FirebaseAuth.getInstance().currentUser
@@ -230,6 +232,9 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                 val result = firebaseRepository.saveQuote(quote)
                 if (result.isSuccess) {
                     _lastQuote.value = quote.copy(id = result.getOrNull())
+                    viewModelScope.launch {
+                        notificationManager.checkAndSendMotivationalMessage()
+                    }
                 }
             } catch (e: Exception) {
                 // ("QuotesViewModel", "Error saving quote: ${e.message}", e)
@@ -301,9 +306,9 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                 if (result.isSuccess) {
                     val savedQuote = quote.copy(id = result.getOrNull())
                     _lastQuote.value = savedQuote
-                    // Quote saved successfully with ID: ${savedQuote.id}
-                } else {
-                    // Failed to save quote: ${result.exceptionOrNull()?.message}
+                    viewModelScope.launch {
+                        notificationManager.checkAndSendMotivationalMessage()
+                    }
                 }
             } catch (e: Exception) {
                 // ("QuotesViewModel", "Exception saving quote: ${e.message}", e)
@@ -407,6 +412,9 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
             if (result.isSuccess) {
                 val savedQuote = quote.copy(id = result.getOrNull())
                 _lastQuote.value = savedQuote
+                viewModelScope.launch {
+                    notificationManager.checkAndSendMotivationalMessage()
+                }
                 Result.success(savedQuote)
             } else {
                 Result.failure(result.exceptionOrNull() ?: Exception("Failed to save quote"))

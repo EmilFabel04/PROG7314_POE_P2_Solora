@@ -59,6 +59,7 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("com.google.firebase:firebase-functions-ktx:20.4.0")
+    implementation("com.google.firebase:firebase-messaging-ktx")
 
     // SSO - Google Sign-In
     implementation("com.google.android.gms:play-services-auth:20.7.0")
