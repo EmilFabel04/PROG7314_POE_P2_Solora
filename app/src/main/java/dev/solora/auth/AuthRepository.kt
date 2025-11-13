@@ -29,6 +29,8 @@ class AuthRepository(private val context: Context) {
     private val KEY_EMAIL = stringPreferencesKey("email")
     private val KEY_HAS_SEEN_ONBOARDING = booleanPreferencesKey("has_seen_onboarding")
     private val KEY_BIOMETRIC_ENABLED = booleanPreferencesKey("biometric_enabled")
+    private val KEY_LAST_LOGIN_TIME = longPreferencesKey("last_login_time")
+    private val KEY_STAY_LOGGED_IN = booleanPreferencesKey("stay_logged_in")
     companion object {
         const val SHARED_PREFS_FILENAME = "biometric_prefs"
         const val CIPHERTEXT_WRAPPER = "ciphertext_wrapper"
@@ -49,6 +51,12 @@ class AuthRepository(private val context: Context) {
         prefs[KEY_BIOMETRIC_ENABLED] ?: false
     }
     
+    val stayLoggedIn: Flow<Boolean> = context.dataStore.data.catch { e ->
+        if (e is IOException) emit(emptyPreferences()) else throw e
+    }.map { prefs ->
+        prefs[KEY_STAY_LOGGED_IN] ?: true 
+    }
+    
     suspend fun markOnboardingComplete() {
         context.dataStore.edit { prefs ->
             prefs[KEY_HAS_SEEN_ONBOARDING] = true
@@ -65,6 +73,7 @@ class AuthRepository(private val context: Context) {
                 prefs[KEY_EMAIL] = user.email ?: email
                 prefs[KEY_NAME] = user.displayName ?: email.substringBefore('@')
                 prefs[KEY_HAS_SEEN_ONBOARDING] = true  // User has logged in, skip onboarding next time
+                prefs[KEY_LAST_LOGIN_TIME] = System.currentTimeMillis()
             }
             
             Result.success(user)
@@ -84,6 +93,7 @@ class AuthRepository(private val context: Context) {
                 prefs[KEY_NAME] = user.displayName ?: ""
                 prefs[KEY_EMAIL] = user.email ?: ""
                 prefs[KEY_HAS_SEEN_ONBOARDING] = true  // User has logged in, skip onboarding next time
+                prefs[KEY_LAST_LOGIN_TIME] = System.currentTimeMillis()
             }
 
             Result.success(user)
@@ -187,11 +197,21 @@ class AuthRepository(private val context: Context) {
                 prefs[KEY_HAS_SEEN_ONBOARDING] = true
             }
             
+            clearBiometricData()
             firebaseAuth.signOut()
             
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+    
+    private fun clearBiometricData() {
+        try {
+            val sharedPrefs = context.getSharedPreferences(SHARED_PREFS_FILENAME, Context.MODE_PRIVATE)
+            sharedPrefs.edit().remove(CIPHERTEXT_WRAPPER).apply()
+        } catch (e: Exception) {
+            // Ignore errors when clearing biometric data
         }
     }
     
@@ -245,14 +265,55 @@ class AuthRepository(private val context: Context) {
     
     suspend fun storeBiometricToken(): Result<String> {
         return try {
-            val token = getFirebaseIdToken()
-            if (token != null) {
-                Result.success(token)
+            val user = firebaseAuth.currentUser
+            val email = user?.email ?: return Result.failure(Exception("No authenticated user"))
+            Result.success(email)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    suspend fun authenticateWithStoredData(storedData: String): Result<String> {
+        return try {
+            val currentUser = firebaseAuth.currentUser
+            if (currentUser != null && currentUser.email == storedData) {
+                updateLastLoginTime()
+                Result.success("User authenticated via biometric")
             } else {
-                Result.failure(Exception("No Firebase token available"))
+                clearBiometricData()
+                Result.failure(Exception("Biometric data mismatch - cleared for security"))
             }
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+    
+    suspend fun updateLastLoginTime() {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_LAST_LOGIN_TIME] = System.currentTimeMillis()
+        }
+    }
+    
+    suspend fun setStayLoggedIn(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_STAY_LOGGED_IN] = enabled
+        }
+    }
+    
+    suspend fun shouldAutoLogout(): Boolean {
+        val stayLoggedIn = stayLoggedIn.first()
+        if (stayLoggedIn) return false
+        
+        val dataStorePrefs = context.dataStore.data.first()
+        val lastLoginTime = dataStorePrefs[KEY_LAST_LOGIN_TIME] ?: return false
+        
+        val thirtyDaysInMillis = 30 * 24 * 60 * 60 * 1000L
+        val currentTime = System.currentTimeMillis()
+        
+        return (currentTime - lastLoginTime) > thirtyDaysInMillis
+    }
+    
+    fun isUserLoggedIn(): Boolean {
+        return firebaseAuth.currentUser != null
     }
 }

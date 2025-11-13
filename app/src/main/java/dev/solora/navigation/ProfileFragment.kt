@@ -189,7 +189,73 @@ class ProfileFragment : Fragment() {
     }
     
     private fun showAuthenticationDialog() {
-        Toast.makeText(requireContext(), "Authentication settings coming soon!", Toast.LENGTH_LONG).show()
+        val items = arrayOf("Fingerprint Authentication", "Stay Logged In (30 days)")
+        val checkedItems = booleanArrayOf(
+            authViewModel.isBiometricEnabled.value,
+            true // We'll get this from repository
+        )
+        
+        // Get current stay logged in preference
+        viewLifecycleOwner.lifecycleScope.launch {
+            authViewModel.getStayLoggedInPreference { stayLoggedIn ->
+                checkedItems[1] = stayLoggedIn
+                
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Authentication Settings")
+                    .setMultiChoiceItems(items, checkedItems) { _, which, isChecked ->
+                        when (which) {
+                            0 -> handleBiometricToggle(isChecked)
+                            1 -> handleStayLoggedInToggle(isChecked)
+                        }
+                    }
+                    .setPositiveButton("Close", null)
+                    .show()
+            }
+        }
+    }
+    
+    private fun handleBiometricToggle(enable: Boolean) {
+        if (enable) {
+            if (authViewModel.canUseBiometrics()) {
+                authViewModel.authenticateWithBiometrics(requireActivity() as androidx.fragment.app.FragmentActivity)
+                observeBiometricSetup()
+            } else {
+                Toast.makeText(requireContext(), 
+                    "Fingerprint not available: ${authViewModel.getBiometricAvailabilityMessage()}", 
+                    Toast.LENGTH_LONG).show()
+            }
+        } else {
+            authViewModel.disableBiometric()
+            Toast.makeText(requireContext(), "Fingerprint authentication disabled", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    private fun handleStayLoggedInToggle(enable: Boolean) {
+        authViewModel.setStayLoggedIn(enable)
+        val message = if (enable) {
+            "You'll stay logged in for 30 days"
+        } else {
+            "You'll be logged out after 30 days of inactivity"
+        }
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+    
+    private fun observeBiometricSetup() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            authViewModel.biometricState.collect { state ->
+                when (state) {
+                    is dev.solora.auth.BiometricState.Success -> {
+                        Toast.makeText(requireContext(), "Fingerprint authentication enabled", Toast.LENGTH_SHORT).show()
+                        authViewModel.clearBiometricState()
+                    }
+                    is dev.solora.auth.BiometricState.Error -> {
+                        Toast.makeText(requireContext(), "Failed to enable fingerprint: ${state.message}", Toast.LENGTH_SHORT).show()
+                        authViewModel.clearBiometricState()
+                    }
+                    else -> Unit
+                }
+            }
+        }
     }
     
     private fun showLanguageDialog() {

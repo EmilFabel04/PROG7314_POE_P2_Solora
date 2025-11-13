@@ -157,9 +157,16 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
             val biometricPrompt = BiometricPromptUtils.createBiometricPrompt(activity) { authResult ->
                 authResult.cryptoObject?.cipher?.let { 
                     try {
-                        cryptographyManager.decryptData(ciphertextWrapper.ciphertext, it)
-                        _biometricState.value = BiometricState.Success("Login successful")
-                        _authState.value = AuthState.Success("Fingerprint login successful")
+                        val decryptedData = cryptographyManager.decryptData(ciphertextWrapper.ciphertext, it)
+                        viewModelScope.launch {
+                            val result = repo.authenticateWithStoredData(decryptedData)
+                            if (result.isSuccess) {
+                                _biometricState.value = BiometricState.Success("Login successful")
+                                _authState.value = AuthState.Success("Fingerprint login successful")
+                            } else {
+                                _biometricState.value = BiometricState.Error("Authentication failed")
+                            }
+                        }
                     } catch (e: Exception) {
                         _biometricState.value = BiometricState.Error("Authentication failed")
                     }
@@ -196,6 +203,19 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
     
     fun clearBiometricState() {
         _biometricState.value = BiometricState.Idle
+    }
+    
+    fun setStayLoggedIn(enabled: Boolean) {
+        viewModelScope.launch {
+            repo.setStayLoggedIn(enabled)
+        }
+    }
+    
+    fun getStayLoggedInPreference(callback: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val stayLoggedIn = repo.stayLoggedIn.first()
+            callback(stayLoggedIn)
+        }
     }
 }
 
