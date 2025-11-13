@@ -198,7 +198,7 @@
                 android:layout_height="20dp"
                 android:layout_gravity="center"
                 android:layout_marginStart="20dp"
-                android:src="@android:drawable/ic_lock_idle_secure"
+                android:src="@android:drawable/ic_lock_lock"
                 android:tint="@color/solora_on_primary" />
 
             <TextView
