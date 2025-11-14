@@ -8,6 +8,43 @@
     <string name="calculate_quote">Bala Ikhowuti</string>
     <string name="export_pdf">Thumela kwiPDF</string>
     <string name="add_lead">Yongeza iLidi</string>
+    <string name="dashboard">Ibhodi yolawulo</string>
+    <string name="language">Ulwimi</string>
+    <string name="english">IsiNgesi</string>
+    <string name="afrikaans">iAfrikaans</string>
+    <string name="xhosa">isiXhosa</string>
+    <string name="login_text"><u>Ngena</u></string>
+    <string name="create_an_account_text"><u>Dala iakhawunti</u></string>
+    <string name="forgot_password_text"><u>Ulibele iphasiwedi</u></string>
+    <string name="welcome_back">Wamkelekile, %1$s</string>
+    <string name="company_subtitle">Izisombululo zeLanga</string>
+    <string name="total_leads">Iilidi zizonke</string>
+    <string name="total_quotes">Iikowuti zizonke</string>
+    <string name="create_new_solar_quotes">Yenza iikowuti ezintsha zelanga</string>
+    <string name="manage_potential_clients">Phatha abathengi abanokubakho</string>
+    <string name="recent_quotes">Iikowuti zakutshanje</string>
+    <string name="no_quotes_last_7_days">Akukho iikowuti ezivela kwiintsuku ezi-7 ezidlulileyo</string>
+    <string name="create_new_quote_here">Yenza ikowuti entsha ukuze uyibone apha</string>
+    <string name="solar_quotes">Iikowuti zeSolar</string>
+    <string name="calculate">Bala</string>
+    <string name="view_quotes">Jonga Iikowuti</string>
+    <string name="address">Idilesi</string>
+    <string name="monthly_usage">Ukusetyenziswa Kwanyanga</string>
+    <string name="monthly_bill">Ityala Lenyanga</string>
+    <string name="tariff">Irhafu</string>
+    <string name="panel_size">Ubungakanani bePaneli</string>
+    <string name="calculate_button">Bala</string>
+    <string name="calculating_button">Iya kubala...</string>
+    <string name="leads_title">Iilidi</string>
+    <string name="reference_number">Inombolo yesalathiso</string>
+    <string name="address_label">Idilesi</string>
+    <string name="no_leads_yet">Akukho lidi okwangoku</string>
+    <string name="start_adding_lead">Qalisa ngokongeza ilidi yakho yokuqala</string>
+    <string name="add_first_lead">Yongeza iLidi yokuqala</string>
+    <string name="edit_profile">Hlela Iprofayile</string>
+    <string name="change_password">Tshintsha Igama Lokungena</string>
+    <string name="authentication">Uqinisekiso</string>
+    <string name="push_notifications">Izaziso zokutyhala</string>
+    <string name="logout">Phuma</string>
+    <string name="sign_out_description">Phuma kwiakhawunti yakho</string>
 </resources>
-
-

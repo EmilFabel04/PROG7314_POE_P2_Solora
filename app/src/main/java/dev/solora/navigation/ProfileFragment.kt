@@ -1,5 +1,6 @@
 package dev.solora.navigation
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,7 +14,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
@@ -24,13 +24,14 @@ import dev.solora.settings.SettingsViewModel
 import dev.solora.auth.AuthViewModel
 import dev.solora.api.FirebaseFunctionsApi
 import dev.solora.notifications.MotivationalNotificationManager
+import dev.solora.profile.LocaleHelper
 import kotlinx.coroutines.launch
 
 class ProfileFragment : Fragment() {
     private val profileViewModel: ProfileViewModel by viewModels()
     private val settingsViewModel: SettingsViewModel by viewModels()
     private val authViewModel: AuthViewModel by viewModels()
-    
+
     private lateinit var notificationManager: MotivationalNotificationManager
     private val auth = FirebaseAuth.getInstance()
     private val firebaseApi = FirebaseFunctionsApi()
@@ -49,12 +50,12 @@ class ProfileFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         
         notificationManager = MotivationalNotificationManager(requireContext())
-        
+
         initializeViews(view)
         setupClickListeners(view)
         observeViewModel()
         loadNotificationSettings()
-        
+
         // Load user profile
         profileViewModel.loadUserProfile()
     }
@@ -200,12 +201,12 @@ class ProfileFragment : Fragment() {
             authViewModel.isBiometricEnabled.value,
             true // We'll get this from repository
         )
-        
+
         // Get current stay logged in preference
         viewLifecycleOwner.lifecycleScope.launch {
             authViewModel.getStayLoggedInPreference { stayLoggedIn ->
                 checkedItems[1] = stayLoggedIn
-                
+
                 MaterialAlertDialogBuilder(requireContext())
                     .setTitle("Authentication Settings")
                     .setMultiChoiceItems(items, checkedItems) { _, which, isChecked ->
@@ -219,15 +220,15 @@ class ProfileFragment : Fragment() {
             }
         }
     }
-    
+
     private fun handleBiometricToggle(enable: Boolean) {
         if (enable) {
             if (authViewModel.canUseBiometrics()) {
                 authViewModel.authenticateWithBiometrics(requireActivity() as androidx.fragment.app.FragmentActivity)
                 observeBiometricSetup()
             } else {
-                Toast.makeText(requireContext(), 
-                    "Fingerprint not available: ${authViewModel.getBiometricAvailabilityMessage()}", 
+                Toast.makeText(requireContext(),
+                    "Fingerprint not available: ${authViewModel.getBiometricAvailabilityMessage()}",
                     Toast.LENGTH_LONG).show()
             }
         } else {
@@ -235,7 +236,7 @@ class ProfileFragment : Fragment() {
             Toast.makeText(requireContext(), "Fingerprint authentication disabled", Toast.LENGTH_SHORT).show()
         }
     }
-    
+
     private fun handleStayLoggedInToggle(enable: Boolean) {
         authViewModel.setStayLoggedIn(enable)
         val message = if (enable) {
@@ -245,7 +246,7 @@ class ProfileFragment : Fragment() {
         }
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
-    
+
     private fun observeBiometricSetup() {
         viewLifecycleOwner.lifecycleScope.launch {
             authViewModel.biometricState.collect { state ->
@@ -265,24 +266,47 @@ class ProfileFragment : Fragment() {
     }
     
     private fun showLanguageDialog() {
-        Toast.makeText(requireContext(), "Language settings coming soon!", Toast.LENGTH_LONG).show()
+        val languages = arrayOf(
+            getString(R.string.english),
+            getString(R.string.afrikaans),
+            getString(R.string.xhosa)
+        )
+
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle(getString(R.string.language))
+        builder.setItems(languages) { _, which ->
+            when (which) {
+                0 -> changeLanguage("en") // set to english
+                1 -> changeLanguage("af") // set to afrikaans
+                2 -> changeLanguage("xh") // set to isixhosa
+                else -> changeLanguage("en") // by default its set to english
+            }
+        }
+        builder.show()
     }
-    
+
+    private fun changeLanguage(languageCode: String) {
+        val sharedPrefs = requireActivity().getSharedPreferences("Settings", Context.MODE_PRIVATE)
+        sharedPrefs.edit().putString("My_Lang", languageCode).apply()
+
+        requireActivity().recreate()
+    }
+
     private fun loadNotificationSettings() {
         viewLifecycleOwner.lifecycleScope.launch {
             // Sync with Firebase first
             notificationManager.syncNotificationPreference()
-            
+
             // Then load the synced preference
             val isEnabled = notificationManager.isNotificationsEnabled()
             switchNotifications.isChecked = isEnabled
         }
     }
-    
+
     private fun handleNotificationToggle(isEnabled: Boolean) {
         viewLifecycleOwner.lifecycleScope.launch {
             notificationManager.enableMotivationalNotifications(isEnabled)
-            
+
             if (isEnabled) {
                 Toast.makeText(requireContext(), "Motivational notifications enabled!", Toast.LENGTH_SHORT).show()
                 notificationManager.checkAndSendMotivationalMessage()

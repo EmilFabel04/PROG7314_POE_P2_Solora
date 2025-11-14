@@ -8,6 +8,45 @@
     <string name="calculate_quote">Bereken Kwotasie</string>
     <string name="export_pdf">Voer na PDF uit</string>
     <string name="add_lead">Voeg Lead by</string>
+    <string name="dashboard">Beheerpaneel</string>
+    <string name="language">Taal</string>
+    <string name="english">Engels</string>
+    <string name="afrikaans">Afrikaans</string>
+    <string name="xhosa">isiXhosa</string>
+    <string name="login_text"><u>Teken aan</u></string>
+    <string name="create_an_account_text"><u>Skep \'n rekening</u></string>
+    <string name="forgot_password_text"><u>Vergeet wagwoord</u></string>
+    <string name="welcome_back">Welkom terug, %1$s</string>
+    <string name="company_subtitle">Sonoplossings</string>
+    <string name="total_leads">Totale Leads</string>
+    <string name="total_quotes">Totale Kwotasies</string>
+    <string name="create_new_solar_quotes">Skep nuwe sonkwotasies</string>
+    <string name="manage_potential_clients">Bestuur potensiële kliënte</string>
+    <string name="recent_quotes">Onlangse Kwotasies</string>
+    <string name="no_quotes_last_7_days">Geen kwotasies van die laaste 7 dae nie</string>
+    <string name="create_new_quote_here">Skep \'n nuwe kwotasie om dit hier te sien</string>
+    <string name="solar_quotes">Sonkragkwotasies</string>
+    <string name="calculate">Bereken</string>
+    <string name="view_quotes">Bekyk Kwotasies</string>
+    <string name="address">Adres</string>
+    <string name="monthly_usage">Maandelikse Verbruik</string>
+    <string name="monthly_bill">Maandelikse Rekening</string>
+    <string name="tariff">Tarief</string>
+    <string name="panel_size">Paneelgrootte</string>
+    <string name="calculate_button">Bereken</string>
+    <string name="calculating_button">Besig om te bereken...</string>
+    <string name="leads_title">Leidrade</string>
+    <string name="reference_number">Verw. nr.</string>
+    <string name="address_label">Adres</string>
+    <string name="no_leads_yet">Nog geen leidrade nie</string>
+    <string name="start_adding_lead">Begin deur jou eerste leidraad by te voeg</string>
+    <string name="add_first_lead">Voeg Eerste Leidraad By</string>
+    <string name="edit_profile">Wysig Profiel</string>
+    <string name="change_password">Verander Wagwoord</string>
+    <string name="authentication">Verifikasie</string>
+    <string name="push_notifications">Stootkennisgewings</string>
+    <string name="logout">Meld af</string>
+    <string name="sign_out_description">Meld uit jou rekening</string>
 </resources>
 
 
