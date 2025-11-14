@@ -51,17 +51,7 @@ class MotivationalNotificationManager(private val context: Context) {
     }
 
     suspend fun isNotificationsEnabled(): Boolean {
-        // Try to get from Firebase user_settings first for cross-device sync
-        val firebasePreference = getFromUserSettings("notificationsEnabled") as? Boolean
-        if (firebasePreference != null) {
-            // Update local DataStore with Firebase value
-            context.motivationalDataStore.edit { prefs ->
-                prefs[KEY_NOTIFICATIONS_ENABLED] = firebasePreference
-            }
-            return firebasePreference
-        }
-        
-        // Fall back to local DataStore, default to true
+        // Use local DataStore during session (fast)
         return context.motivationalDataStore.data.first()[KEY_NOTIFICATIONS_ENABLED] ?: true
     }
     
@@ -88,15 +78,23 @@ class MotivationalNotificationManager(private val context: Context) {
             
             val quoteCount = quotesSnapshot.size()
             
-            val message = generateMotivationalMessage(quoteCount)
-            
-            if (message != null) {
-                showLocalNotification(message.first, message.second)
+            // Check if we should send a notification for this milestone
+            if (shouldSendNotificationForCount(quoteCount)) {
+                val message = generateMotivationalMessage(quoteCount)
+                
+                if (message != null) {
+                    showLocalNotification(message.first, message.second)
+                    // Mark this milestone as notified
+                    markMilestoneAsNotified(quoteCount)
+                }
             }
             
         } catch (e: Exception) {
-            // Fallback message if Firestore fails
-            showLocalNotification("Great job!", "You've created a new quote!")
+            // Only send fallback if it's a new quote
+            if (shouldSendFallbackNotification()) {
+                showLocalNotification("Great job!", "You've created a new quote!")
+                markFallbackNotificationSent()
+            }
         }
     }
 
@@ -204,6 +202,49 @@ class MotivationalNotificationManager(private val context: Context) {
             // Handle error silently, return null to fall back to local storage
             null
         }
+    }
+    
+    private suspend fun shouldSendNotificationForCount(quoteCount: Int): Boolean {
+        val notifiedMilestones = getFromUserSettings("notifiedMilestones") as? List<*>
+        val milestonesList = notifiedMilestones?.filterIsInstance<Long>()?.map { it.toInt() } ?: emptyList()
+        
+        val currentMilestone = when {
+            quoteCount == 1 -> 1
+            quoteCount in 2..4 -> 2 // Represents "2-4 quotes" milestone
+            quoteCount in 5..9 -> 5 // Represents "5-9 quotes" milestone
+            quoteCount >= 10 -> 10 // Represents "10+ quotes" milestone
+            else -> 0 // No milestone
+        }
+        
+        return currentMilestone > 0 && !milestonesList.contains(currentMilestone)
+    }
+    
+    private suspend fun markMilestoneAsNotified(quoteCount: Int) {
+        val currentMilestone = when {
+            quoteCount == 1 -> 1
+            quoteCount in 2..4 -> 2
+            quoteCount in 5..9 -> 5
+            quoteCount >= 10 -> 10
+            else -> return
+        }
+        
+        val notifiedMilestones = getFromUserSettings("notifiedMilestones") as? List<*>
+        val milestonesList = notifiedMilestones?.filterIsInstance<Long>()?.map { it.toInt() }?.toMutableList() ?: mutableListOf()
+        
+        if (!milestonesList.contains(currentMilestone)) {
+            milestonesList.add(currentMilestone)
+            saveToUserSettings("notifiedMilestones", milestonesList)
+        }
+    }
+    
+    private suspend fun shouldSendFallbackNotification(): Boolean {
+        val lastFallback = getFromUserSettings("lastFallbackNotification") as? Long ?: 0L
+        val oneDayAgo = System.currentTimeMillis() - (24 * 60 * 60 * 1000L)
+        return lastFallback < oneDayAgo
+    }
+    
+    private suspend fun markFallbackNotificationSent() {
+        saveToUserSettings("lastFallbackNotification", System.currentTimeMillis())
     }
 
 }
