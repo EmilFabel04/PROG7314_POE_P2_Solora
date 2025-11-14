@@ -50,7 +50,9 @@ class AuthRepository(private val context: Context) {
     val isBiometricEnabled: Flow<Boolean> = context.dataStore.data.catch { e ->
         if (e is IOException) emit(emptyPreferences()) else throw e
     }.map { prefs ->
-        prefs[KEY_BIOMETRIC_ENABLED] ?: false
+        val flagEnabled = prefs[KEY_BIOMETRIC_ENABLED] ?: false
+        val dataExists = getCiphertextWrapperFromSharedPrefs() != null
+        flagEnabled && dataExists
     }
     
     val stayLoggedIn: Flow<Boolean> = context.dataStore.data.catch { e ->
@@ -208,10 +210,14 @@ class AuthRepository(private val context: Context) {
         }
     }
     
-    private fun clearBiometricData() {
+    private suspend fun clearBiometricData() {
         try {
             val sharedPrefs = context.getSharedPreferences(SHARED_PREFS_FILENAME, Context.MODE_PRIVATE)
             sharedPrefs.edit().remove(CIPHERTEXT_WRAPPER).apply()
+            
+            context.dataStore.edit { prefs ->
+                prefs[KEY_BIOMETRIC_ENABLED] = false
+            }
         } catch (e: Exception) {
             // Ignore errors when clearing biometric data
         }

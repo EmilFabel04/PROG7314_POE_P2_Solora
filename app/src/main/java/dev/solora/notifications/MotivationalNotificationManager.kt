@@ -56,12 +56,16 @@ class MotivationalNotificationManager(private val context: Context) {
     }
     
     suspend fun syncNotificationPreference() {
-        // Sync preference from Firebase when user logs in
         val firebasePreference = getFromUserSettings("notificationsEnabled") as? Boolean
+        
         if (firebasePreference != null) {
             context.motivationalDataStore.edit { prefs ->
                 prefs[KEY_NOTIFICATIONS_ENABLED] = firebasePreference
             }
+        } else {
+            // Initialize Firebase with default value if it doesn't exist
+            val currentLocalValue = context.motivationalDataStore.data.first()[KEY_NOTIFICATIONS_ENABLED] ?: true
+            saveToUserSettings("notificationsEnabled", currentLocalValue)
         }
     }
 
@@ -178,15 +182,10 @@ class MotivationalNotificationManager(private val context: Context) {
         
         try {
             firestore.collection("user_settings").document(userId)
-                .update(key, value)
+                .set(mapOf(key to value), com.google.firebase.firestore.SetOptions.merge())
+                .await()
         } catch (e: Exception) {
-            // If document doesn't exist, create it
-            try {
-                firestore.collection("user_settings").document(userId)
-                    .set(mapOf(key to value))
-            } catch (createException: Exception) {
-                // Handle error silently
-            }
+            // Handle error silently
         }
     }
     

@@ -35,6 +35,8 @@ class ProfileFragment : Fragment() {
     private val auth = FirebaseAuth.getInstance()
     private val firebaseApi = FirebaseFunctionsApi()
     
+    private var isInitializingToggle = false
+    
     // UI Elements
     private lateinit var tvAvatar: TextView
     private lateinit var tvName: TextView
@@ -270,24 +272,24 @@ class ProfileFragment : Fragment() {
     
     private fun loadNotificationSettings() {
         viewLifecycleOwner.lifecycleScope.launch {
-            // Sync with Firebase first
+            isInitializingToggle = true
             notificationManager.syncNotificationPreference()
-            
-            // Then load the synced preference
             val isEnabled = notificationManager.isNotificationsEnabled()
             switchNotifications.isChecked = isEnabled
+            isInitializingToggle = false
         }
     }
     
     private fun handleNotificationToggle(isEnabled: Boolean) {
+        if (isInitializingToggle) return
+        
         viewLifecycleOwner.lifecycleScope.launch {
             notificationManager.enableMotivationalNotifications(isEnabled)
             
             if (isEnabled) {
-                Toast.makeText(requireContext(), "Motivational notifications enabled!", Toast.LENGTH_SHORT).show()
-                notificationManager.checkAndSendMotivationalMessage()
+                Toast.makeText(requireContext(), "Push notifications enabled", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(requireContext(), "Motivational notifications disabled", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Push notifications disabled", Toast.LENGTH_SHORT).show()
             }
         }
     }
