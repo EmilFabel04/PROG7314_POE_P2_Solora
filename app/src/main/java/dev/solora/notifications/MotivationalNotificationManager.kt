@@ -82,23 +82,47 @@ class MotivationalNotificationManager(private val context: Context) {
             
             val quoteCount = quotesSnapshot.size()
             
-            // Check if we should send a notification for this milestone
-            if (shouldSendNotificationForCount(quoteCount)) {
+            if (shouldSendNotificationForCount(quoteCount, "quotes")) {
                 val message = generateMotivationalMessage(quoteCount)
                 
                 if (message != null) {
                     showLocalNotification(message.first, message.second)
-                    // Mark this milestone as notified
-                    markMilestoneAsNotified(quoteCount)
+                    markMilestoneAsNotified(quoteCount, "quotes")
                 }
             }
             
         } catch (e: Exception) {
-            // Only send fallback if it's a new quote
             if (shouldSendFallbackNotification()) {
                 showLocalNotification("Great job!", "You've created a new quote!")
                 markFallbackNotificationSent()
             }
+        }
+    }
+
+    suspend fun checkAndSendLeadMessage() {
+        if (!isNotificationsEnabled()) return
+        
+        val userId = auth.currentUser?.uid ?: return
+        
+        try {
+            val leadsSnapshot = firestore.collection("leads")
+                .whereEqualTo("userId", userId)
+                .get()
+                .await()
+            
+            val leadCount = leadsSnapshot.size()
+            
+            if (shouldSendNotificationForCount(leadCount, "leads")) {
+                val message = generateLeadMotivationalMessage(leadCount)
+                
+                if (message != null) {
+                    showLocalNotification(message.first, message.second)
+                    markMilestoneAsNotified(leadCount, "leads")
+                }
+            }
+            
+        } catch (e: Exception) {
+            // Handle error silently
         }
     }
 
@@ -119,6 +143,26 @@ class MotivationalNotificationManager(private val context: Context) {
             }
             else -> {
                 "Great job!" to "You've created a new quote!"
+            }
+        }
+    }
+
+    private fun generateLeadMotivationalMessage(leadCount: Int): Pair<String, String>? {
+        return when {
+            leadCount == 1 -> {
+                "First lead!" to "You've added your first lead! Your pipeline is growing!"
+            }
+            leadCount in 2..4 -> {
+                "Building momentum!" to "You have $leadCount leads in your pipeline. Keep prospecting!"
+            }
+            leadCount in 5..9 -> {
+                "Excellent work!" to "$leadCount leads and counting! Your pipeline is looking strong!"
+            }
+            leadCount >= 10 -> {
+                "Sales superstar!" to "You've reached $leadCount leads! Your pipeline is thriving!"
+            }
+            else -> {
+                "New lead!" to "You've added a new lead to your pipeline!"
             }
         }
     }
@@ -203,36 +247,38 @@ class MotivationalNotificationManager(private val context: Context) {
         }
     }
     
-    private suspend fun shouldSendNotificationForCount(quoteCount: Int): Boolean {
-        val notifiedMilestones = getFromUserSettings("notifiedMilestones") as? List<*>
+    private suspend fun shouldSendNotificationForCount(count: Int, type: String): Boolean {
+        val key = if (type == "quotes") "notifiedQuoteMilestones" else "notifiedLeadMilestones"
+        val notifiedMilestones = getFromUserSettings(key) as? List<*>
         val milestonesList = notifiedMilestones?.filterIsInstance<Long>()?.map { it.toInt() } ?: emptyList()
         
         val currentMilestone = when {
-            quoteCount == 1 -> 1
-            quoteCount in 2..4 -> 2 // Represents "2-4 quotes" milestone
-            quoteCount in 5..9 -> 5 // Represents "5-9 quotes" milestone
-            quoteCount >= 10 -> 10 // Represents "10+ quotes" milestone
-            else -> 0 // No milestone
+            count == 1 -> 1
+            count in 2..4 -> 2
+            count in 5..9 -> 5
+            count >= 10 -> 10
+            else -> 0
         }
         
         return currentMilestone > 0 && !milestonesList.contains(currentMilestone)
     }
     
-    private suspend fun markMilestoneAsNotified(quoteCount: Int) {
+    private suspend fun markMilestoneAsNotified(count: Int, type: String) {
         val currentMilestone = when {
-            quoteCount == 1 -> 1
-            quoteCount in 2..4 -> 2
-            quoteCount in 5..9 -> 5
-            quoteCount >= 10 -> 10
+            count == 1 -> 1
+            count in 2..4 -> 2
+            count in 5..9 -> 5
+            count >= 10 -> 10
             else -> return
         }
         
-        val notifiedMilestones = getFromUserSettings("notifiedMilestones") as? List<*>
+        val key = if (type == "quotes") "notifiedQuoteMilestones" else "notifiedLeadMilestones"
+        val notifiedMilestones = getFromUserSettings(key) as? List<*>
         val milestonesList = notifiedMilestones?.filterIsInstance<Long>()?.map { it.toInt() }?.toMutableList() ?: mutableListOf()
         
         if (!milestonesList.contains(currentMilestone)) {
             milestonesList.add(currentMilestone)
-            saveToUserSettings("notifiedMilestones", milestonesList)
+            saveToUserSettings(key, milestonesList)
         }
     }
     

@@ -36,12 +36,14 @@ class ProfileFragment : Fragment() {
     private val firebaseApi = FirebaseFunctionsApi()
     
     private var isInitializingToggle = false
+    private var isInitializingFingerprint = false
     
     // UI Elements
     private lateinit var tvAvatar: TextView
     private lateinit var tvName: TextView
     private lateinit var tvTitle: TextView
     private lateinit var switchNotifications: Switch
+    private lateinit var switchFingerprint: Switch
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_profile, container, false)
@@ -56,8 +58,8 @@ class ProfileFragment : Fragment() {
         setupClickListeners(view)
         observeViewModel()
         loadNotificationSettings()
+        loadFingerprintSettings()
         
-        // Load user profile
         profileViewModel.loadUserProfile()
     }
     
@@ -66,6 +68,7 @@ class ProfileFragment : Fragment() {
         tvName = view.findViewById(R.id.tv_name)
         tvTitle = view.findViewById(R.id.tv_title)
         switchNotifications = view.findViewById(R.id.switch_notifications)
+        switchFingerprint = view.findViewById(R.id.switch_fingerprint)
     }
     
     private fun setupClickListeners(view: View) {
@@ -79,9 +82,13 @@ class ProfileFragment : Fragment() {
             showChangePasswordDialog()
         }
         
-        // Authentication
-        view.findViewById<View>(R.id.btn_authentication)?.setOnClickListener {
-            showAuthenticationDialog()
+        // Fingerprint Toggle
+        view.findViewById<View>(R.id.btn_fingerprint)?.setOnClickListener {
+            switchFingerprint.isChecked = !switchFingerprint.isChecked
+        }
+        
+        switchFingerprint.setOnCheckedChangeListener { _, isChecked ->
+            handleFingerprintToggle(isChecked)
         }
         
         // Language
@@ -196,56 +203,33 @@ class ProfileFragment : Fragment() {
         tvTitle.text = ""
     }
     
-    private fun showAuthenticationDialog() {
-        val items = arrayOf("Fingerprint Authentication", "Stay Logged In (30 days)")
-        val checkedItems = booleanArrayOf(
-            authViewModel.isBiometricEnabled.value,
-            true // We'll get this from repository
-        )
-        
-        // Get current stay logged in preference
+    private fun loadFingerprintSettings() {
         viewLifecycleOwner.lifecycleScope.launch {
-            authViewModel.getStayLoggedInPreference { stayLoggedIn ->
-                checkedItems[1] = stayLoggedIn
-                
-                MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("Authentication Settings")
-                    .setMultiChoiceItems(items, checkedItems) { _, which, isChecked ->
-                        when (which) {
-                            0 -> handleBiometricToggle(isChecked)
-                            1 -> handleStayLoggedInToggle(isChecked)
-                        }
-                    }
-                    .setPositiveButton("Close", null)
-                    .show()
+            isInitializingFingerprint = true
+            authViewModel.isBiometricEnabled.collect { isEnabled ->
+                switchFingerprint.isChecked = isEnabled
+                isInitializingFingerprint = false
             }
         }
     }
     
-    private fun handleBiometricToggle(enable: Boolean) {
+    private fun handleFingerprintToggle(enable: Boolean) {
+        if (isInitializingFingerprint) return
+        
         if (enable) {
             if (authViewModel.canUseBiometrics()) {
                 authViewModel.authenticateWithBiometrics(requireActivity() as androidx.fragment.app.FragmentActivity)
                 observeBiometricSetup()
             } else {
+                switchFingerprint.isChecked = false
                 Toast.makeText(requireContext(), 
                     "Fingerprint not available: ${authViewModel.getBiometricAvailabilityMessage()}", 
                     Toast.LENGTH_LONG).show()
             }
         } else {
             authViewModel.disableBiometric()
-            Toast.makeText(requireContext(), "Fingerprint authentication disabled", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Fingerprint login disabled", Toast.LENGTH_SHORT).show()
         }
-    }
-    
-    private fun handleStayLoggedInToggle(enable: Boolean) {
-        authViewModel.setStayLoggedIn(enable)
-        val message = if (enable) {
-            "You'll stay logged in for 30 days"
-        } else {
-            "You'll be logged out after 30 days of inactivity"
-        }
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
     
     private fun observeBiometricSetup() {
@@ -253,10 +237,11 @@ class ProfileFragment : Fragment() {
             authViewModel.biometricState.collect { state ->
                 when (state) {
                     is dev.solora.auth.BiometricState.Success -> {
-                        Toast.makeText(requireContext(), "Fingerprint authentication enabled", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Fingerprint login enabled", Toast.LENGTH_SHORT).show()
                         authViewModel.clearBiometricState()
                     }
                     is dev.solora.auth.BiometricState.Error -> {
+                        switchFingerprint.isChecked = false
                         Toast.makeText(requireContext(), "Failed to enable fingerprint: ${state.message}", Toast.LENGTH_SHORT).show()
                         authViewModel.clearBiometricState()
                     }

@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import dev.solora.data.FirebaseLead
 import dev.solora.data.FirebaseRepository
+import dev.solora.notifications.MotivationalNotificationManager
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.flow
@@ -15,6 +16,7 @@ import com.google.firebase.auth.FirebaseAuth
 
 class LeadsViewModel(app: Application) : AndroidViewModel(app) {
     private val firebaseRepository = FirebaseRepository()
+    private val notificationManager = MotivationalNotificationManager(app.applicationContext)
     private var leadsForSelection: List<FirebaseLead> = emptyList()
 
     init {
@@ -60,7 +62,7 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
             
             val result = firebaseRepository.saveLead(lead)
             if (result.isSuccess) {
-                // Lead saved to Firebase: ${result.getOrNull()}
+                notificationManager.checkAndSendLeadMessage()
             } else {
                 // Failed to save lead to Firebase: ${result.exceptionOrNull()?.message}
             }
@@ -126,14 +128,14 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
                     name = clientName,
                     email = email,
                     phone = phone,
-                    status = "qualified", // Leads from quotes are typically qualified
+                    status = "qualified",
                     notes = notes.ifEmpty { "Lead created from quote. Address: $address" },
                     quoteId = quoteId
                 )
                 
                 val result = firebaseRepository.saveLead(lead)
                 if (result.isSuccess) {
-                    // Lead from quote saved to Firebase: ${result.getOrNull()}
+                    notificationManager.checkAndSendLeadMessage()
                 } else {
                     // Failed to save lead from quote to Firebase: ${result.exceptionOrNull()?.message}
                 }
@@ -240,7 +242,6 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
         notes: String = ""
     ): Boolean {
         return try {
-            // Validate inputs
             if (quoteId.isBlank() || clientName.isBlank()) {
                 return false
             }
@@ -249,7 +250,7 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
                 name = clientName,
                 email = email,
                 phone = phone,
-                status = "qualified", // Leads from quotes are typically qualified
+                status = "qualified",
                 notes = notes.ifEmpty { "Lead created from quote. Address: $address" },
                 quoteId = quoteId
             )
@@ -258,6 +259,7 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
             if (result.isSuccess) {
                 val leadId = result.getOrNull()
                 if (!leadId.isNullOrBlank()) {
+                    notificationManager.checkAndSendLeadMessage()
                     true
                 } else {
                     false
