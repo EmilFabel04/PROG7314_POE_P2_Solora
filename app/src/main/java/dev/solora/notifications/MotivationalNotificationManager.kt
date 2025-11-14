@@ -9,7 +9,6 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -28,8 +27,6 @@ class MotivationalNotificationManager(private val context: Context) {
     
     companion object {
         private val KEY_NOTIFICATIONS_ENABLED = booleanPreferencesKey("motivational_enabled")
-        private val KEY_LAST_NOTIFICATION = longPreferencesKey("last_notification_time")
-        private const val NOTIFICATION_COOLDOWN = 24 * 60 * 60 * 1000L // 24 hours
         private const val CHANNEL_ID = "solora_motivational"
         private const val CHANNEL_NAME = "Motivational Messages"
         private const val CHANNEL_DESCRIPTION = "Encouraging messages for your solar sales journey"
@@ -56,7 +53,6 @@ class MotivationalNotificationManager(private val context: Context) {
 
     suspend fun checkAndSendMotivationalMessage() {
         if (!isNotificationsEnabled()) return
-        if (!canSendNotification()) return
         
         val userId = auth.currentUser?.uid ?: return
         
@@ -68,60 +64,36 @@ class MotivationalNotificationManager(private val context: Context) {
             
             val quoteCount = quotesSnapshot.size()
             
-            val leadsSnapshot = firestore.collection("leads")
-                .whereEqualTo("userId", userId)
-                .get()
-                .await()
-            
-            val leadCount = leadsSnapshot.size()
-            
-            val message = generateMotivationalMessage(quoteCount, leadCount)
+            val message = generateMotivationalMessage(quoteCount)
             
             if (message != null) {
                 showLocalNotification(message.first, message.second)
-                updateLastNotificationTime()
             }
             
         } catch (e: Exception) {
-            // Handle error silently
+            // Fallback message if Firestore fails
+            showLocalNotification("Great job!", "You've created a new quote!")
         }
     }
 
-    private suspend fun canSendNotification(): Boolean {
-        val lastNotification = context.motivationalDataStore.data.first()[KEY_LAST_NOTIFICATION] ?: 0L
-        return System.currentTimeMillis() - lastNotification > NOTIFICATION_COOLDOWN
-    }
 
-    private suspend fun updateLastNotificationTime() {
-        context.motivationalDataStore.edit { prefs ->
-            prefs[KEY_LAST_NOTIFICATION] = System.currentTimeMillis()
-        }
-    }
-
-    private fun generateMotivationalMessage(quoteCount: Int, leadCount: Int): Pair<String, String>? {
+    private fun generateMotivationalMessage(quoteCount: Int): Pair<String, String>? {
         return when {
-            quoteCount == 0 && leadCount == 0 -> {
-                "Welcome to Solora!" to "Ready to create your first quote? Every expert was once a beginner!"
-            }
             quoteCount == 1 -> {
-                "Congratulations! " to "You've created your first quote! You're on your way to solar success!"
+                "Congratulations!" to "You've created your first quote! You're on your way to solar success!"
             }
             quoteCount in 2..4 -> {
-                "Great progress! " to "You have $quoteCount quotes created. Keep up the excellent work!"
+                "Great progress!" to "You have $quoteCount quotes created. Keep up the excellent work!"
             }
             quoteCount in 5..9 -> {
-                "You're on fire! " to "Wow! $quoteCount quotes completed. You're becoming a solar expert!"
+                "You're on fire!" to "Wow! $quoteCount quotes completed. You're becoming a solar expert!"
             }
-            quoteCount in 10..19 -> {
-                "Amazing work! " to "You've reached $quoteCount quotes! Your clients are lucky to have you!"
+            quoteCount >= 10 -> {
+                "Amazing work!" to "You've reached $quoteCount quotes! You're a true solar professional!"
             }
-            quoteCount >= 20 -> {
-                "Solar Champion! " to "Incredible! $quoteCount quotes created. You're a true solar sales professional!"
+            else -> {
+                "Great job!" to "You've created a new quote!"
             }
-            leadCount >= 5 && quoteCount < 5 -> {
-                "Time to convert! " to "You have $leadCount leads waiting. Time to turn them into quotes!"
-            }
-            else -> null
         }
     }
 
@@ -179,14 +151,4 @@ class MotivationalNotificationManager(private val context: Context) {
         }
     }
 
-    private fun getRandomMotivationalQuote(): Pair<String, String> {
-        val quotes = listOf(
-            "Keep Shining! " to "Every solar panel you sell helps save the planet!",
-            "Solar Success! " to "You're not just selling solar, you're selling a brighter future!",
-            "Energy Expert! " to "Your dedication to renewable energy is inspiring!",
-            "Green Champion! " to "Thanks to you, more homes will run on clean energy!",
-            "Bright Future! " to "Every quote you create brings us closer to a sustainable world!"
-        )
-        return quotes.random()
-    }
 }

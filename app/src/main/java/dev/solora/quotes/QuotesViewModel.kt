@@ -249,10 +249,8 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
         address: String,
         calculation: QuoteOutputs
     ) {
-        // Prevent duplicate saves
-        if (_lastQuote.value != null) {
-            return
-        }
+        // Clear previous quote to allow new save
+        _lastQuote.value = null
         
         viewModelScope.launch {
             try {

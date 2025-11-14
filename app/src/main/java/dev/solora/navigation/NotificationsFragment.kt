@@ -38,7 +38,8 @@ class NotificationsFragment : Fragment() {
             enableNotificationsAfterPermission()
         } else {
             switchNotifications?.isChecked = false
-            Toast.makeText(requireContext(), "Notification permission denied", Toast.LENGTH_SHORT).show()
+            updateNotificationStatus(false)
+            Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -93,17 +94,13 @@ class NotificationsFragment : Fragment() {
         if (isEnabled) {
             // Check permission for Android 13+ (API 33+)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                when {
-                    ContextCompat.checkSelfPermission(
+                if (ContextCompat.checkSelfPermission(
                         requireContext(),
                         Manifest.permission.POST_NOTIFICATIONS
-                    ) == PackageManager.PERMISSION_GRANTED -> {
-                        enableNotificationsAfterPermission()
-                    }
-                    else -> {
-                        // Request permission
-                        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                    }
+                    ) == PackageManager.PERMISSION_GRANTED) {
+                    enableNotificationsAfterPermission()
+                } else {
+                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 }
             } else {
                 // No permission needed for Android 12 and below
