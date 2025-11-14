@@ -84,6 +84,10 @@ class NotificationsFragment : Fragment() {
     
     private fun loadNotificationSettings() {
         viewLifecycleOwner.lifecycleScope.launch {
+            // Sync with Firebase first
+            notificationManager.syncNotificationPreference()
+            
+            // Then load the synced preference
             val isEnabled = notificationManager.isNotificationsEnabled()
             switchNotifications?.isChecked = isEnabled
             updateNotificationStatus(isEnabled)

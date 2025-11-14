@@ -53,6 +53,7 @@ class ProfileFragment : Fragment() {
         initializeViews(view)
         setupClickListeners(view)
         observeViewModel()
+        loadNotificationSettings()
         
         // Load user profile
         profileViewModel.loadUserProfile()
@@ -265,6 +266,17 @@ class ProfileFragment : Fragment() {
     
     private fun showLanguageDialog() {
         Toast.makeText(requireContext(), "Language settings coming soon!", Toast.LENGTH_LONG).show()
+    }
+    
+    private fun loadNotificationSettings() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            // Sync with Firebase first
+            notificationManager.syncNotificationPreference()
+            
+            // Then load the synced preference
+            val isEnabled = notificationManager.isNotificationsEnabled()
+            switchNotifications.isChecked = isEnabled
+        }
     }
     
     private fun handleNotificationToggle(isEnabled: Boolean) {

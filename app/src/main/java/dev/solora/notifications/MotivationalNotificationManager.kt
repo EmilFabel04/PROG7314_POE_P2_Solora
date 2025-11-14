@@ -37,6 +37,9 @@ class MotivationalNotificationManager(private val context: Context) {
             prefs[KEY_NOTIFICATIONS_ENABLED] = enabled
         }
         
+        // Save to Firebase user_settings collection
+        saveToUserSettings("notificationsEnabled", enabled)
+        
         if (enabled) {
             try {
                 val token = FirebaseMessaging.getInstance().token.await()
@@ -48,7 +51,28 @@ class MotivationalNotificationManager(private val context: Context) {
     }
 
     suspend fun isNotificationsEnabled(): Boolean {
+        // Try to get from Firebase user_settings first for cross-device sync
+        val firebasePreference = getFromUserSettings("notificationsEnabled") as? Boolean
+        if (firebasePreference != null) {
+            // Update local DataStore with Firebase value
+            context.motivationalDataStore.edit { prefs ->
+                prefs[KEY_NOTIFICATIONS_ENABLED] = firebasePreference
+            }
+            return firebasePreference
+        }
+        
+        // Fall back to local DataStore, default to true
         return context.motivationalDataStore.data.first()[KEY_NOTIFICATIONS_ENABLED] ?: true
+    }
+    
+    suspend fun syncNotificationPreference() {
+        // Sync preference from Firebase when user logs in
+        val firebasePreference = getFromUserSettings("notificationsEnabled") as? Boolean
+        if (firebasePreference != null) {
+            context.motivationalDataStore.edit { prefs ->
+                prefs[KEY_NOTIFICATIONS_ENABLED] = firebasePreference
+            }
+        }
     }
 
     suspend fun checkAndSendMotivationalMessage() {
@@ -148,6 +172,37 @@ class MotivationalNotificationManager(private val context: Context) {
                 .update("fcmToken", token)
         } catch (e: Exception) {
             // Handle error silently
+        }
+    }
+    
+    private suspend fun saveToUserSettings(key: String, value: Any) {
+        val userId = auth.currentUser?.uid ?: return
+        
+        try {
+            firestore.collection("user_settings").document(userId)
+                .update(key, value)
+        } catch (e: Exception) {
+            // If document doesn't exist, create it
+            try {
+                firestore.collection("user_settings").document(userId)
+                    .set(mapOf(key to value))
+            } catch (createException: Exception) {
+                // Handle error silently
+            }
+        }
+    }
+    
+    private suspend fun getFromUserSettings(key: String): Any? {
+        val userId = auth.currentUser?.uid ?: return null
+        
+        return try {
+            val document = firestore.collection("user_settings").document(userId)
+                .get()
+                .await()
+            document.get(key)
+        } catch (e: Exception) {
+            // Handle error silently, return null to fall back to local storage
+            null
         }
     }
 
