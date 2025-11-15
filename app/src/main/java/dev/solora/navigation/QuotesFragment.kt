@@ -570,7 +570,7 @@ class QuotesFragment : Fragment() {
 
         if (topLocations.isEmpty()) {
             val emptyText = TextView(requireContext()).apply {
-                text = "No location data available"
+                text = getString(R.string.no_location_data)
                 textSize = 14f
                 setTextColor(resources.getColor(android.R.color.darker_gray, null))
                 setPadding(0, 16, 0, 16)
@@ -604,7 +604,7 @@ class QuotesFragment : Fragment() {
             }
 
             val countText = TextView(requireContext()).apply {
-                text = "${location.count} quotes"
+                text = getString(R.string.quotes_count, location.count)
                 textSize = 14f
                 setTextColor(resources.getColor(R.color.solora_orange, null))
                 setTypeface(null, android.graphics.Typeface.BOLD)
@@ -630,49 +630,48 @@ class QuotesFragment : Fragment() {
     private fun updateResultsTab(calculation: dev.solora.quote.QuoteOutputs) {
         // Update dashboard tab summary
         tvQuoteSummary.text = buildString {
-            appendLine("Number of Panels: ${calculation.panels}")
-            appendLine("Total System Size: ${String.format("%.1f", calculation.systemKw)} kW")
-            appendLine("Recommended Inverter: ${String.format("%.1f", calculation.inverterKw)} kW")
-            appendLine("Estimated Monthly Savings: R ${String.format("%.2f", calculation.monthlySavingsRands)}")
-            appendLine("Estimated Monthly Generation: ${String.format("%.0f", calculation.estimatedMonthlyGeneration)} kWh")
-            appendLine("Payback Period: ${calculation.paybackMonths} months")
+            appendLine(getString(R.string.panels_count, calculation.panels))
+            appendLine(getString(R.string.total_system_size, String.format("%.1f", calculation.systemKw)))
+            appendLine(getString(R.string.recommended_inverter, String.format("%.1f", calculation.inverterKw)))
+            appendLine(getString(R.string.estimated_monthly_savings, String.format("%.2f", calculation.monthlySavingsRands)))
+            appendLine(getString(R.string.estimated_monthly_generation, String.format("%.0f", calculation.estimatedMonthlyGeneration)))
+            appendLine(getString(R.string.payback_period, calculation.paybackMonths))
 
             // Add NASA data if available
             calculation.detailedAnalysis?.let { analysis ->
                 appendLine("")
-                appendLine("NASA Solar Data:")
+                appendLine(getString(R.string.nasa_solar_data))
                 analysis.locationData?.let { location ->
-                    appendLine("Location: ${String.format("%.4f", location.latitude)}, ${String.format("%.4f", location.longitude)}")
-                    appendLine("Average Annual Irradiance: ${String.format("%.1f", location.averageAnnualIrradiance)} kWh/m²/day")
-                    appendLine("Average Annual Sun Hours: ${String.format("%.1f", location.averageAnnualSunHours)} hours/day")
+                    appendLine(getString(R.string.location_coords, String.format("%.4f", location.latitude), String.format("%.4f", location.longitude)))
+                    appendLine(getString(R.string.avg_annual_irradiance, String.format("%.1f", location.averageAnnualIrradiance)))
+                    appendLine(getString(R.string.avg_annual_sun_hours, String.format("%.1f", location.averageAnnualSunHours)))
                 }
                 analysis.optimalMonth?.let { month ->
-                    appendLine("Optimal Solar Month: ${getMonthName(month)}")
+                    appendLine(getString(R.string.optimal_solar_month, getMonthName(month)))
                 }
                 analysis.averageTemperature?.let { temp ->
-                    appendLine("Average Temperature: ${String.format("%.1f", temp)}°C")
+                    appendLine(getString(R.string.average_temperature, String.format("%.1f", temp)))
                 }
             }
         }
-
         // Results updated: ${calculation.systemKw}kW system, R${calculation.monthlySavingsRands} savings
     }
 
     private fun getMonthName(month: Int): String {
         return when (month) {
-            1 -> "January"
-            2 -> "February"
-            3 -> "March"
-            4 -> "April"
-            5 -> "May"
-            6 -> "June"
-            7 -> "July"
-            8 -> "August"
-            9 -> "September"
-            10 -> "October"
-            11 -> "November"
-            12 -> "December"
-            else -> "Unknown"
+            1 -> getString(R.string.january)
+            2 -> getString(R.string.february)
+            3 -> getString(R.string.march)
+            4 -> getString(R.string.april)
+            5 -> getString(R.string.may)
+            6 -> getString(R.string.june)
+            7 -> getString(R.string.july)
+            8 -> getString(R.string.august)
+            9 -> getString(R.string.september)
+            10 -> getString(R.string.october)
+            11 -> getString(R.string.november)
+            12 -> getString(R.string.december)
+            else -> getString(R.string.unknown)
         }
     }
 
@@ -757,10 +756,10 @@ class QuotesFragment : Fragment() {
                 if (quote != null) {
                     // Update dashboard tab summary
                     tvQuoteSummary.text = buildString {
-                        appendLine("Number of Panels: ${(quote.systemKwp * 1000 / quote.panelWatt).toInt()}")
-                        appendLine("Total System Size: ${String.format("%.1f", quote.systemKwp)} kW")
-                        appendLine("Recommended Inverter: ${String.format("%.1f", quote.systemKwp * 0.8)} kW")
-                        appendLine("Estimated Monthly Savings: R ${String.format("%.2f", quote.monthlySavings)}")
+                        appendLine(getString(R.string.panels_count, (quote.systemKwp * 1000 / quote.panelWatt).toInt()))
+                        appendLine(getString(R.string.total_system_size, String.format("%.1f", quote.systemKwp)))
+                        appendLine(getString(R.string.recommended_inverter, String.format("%.1f", quote.systemKwp * 0.8)))
+                        appendLine(getString(R.string.estimated_monthly_savings, String.format("%.2f", quote.monthlySavings)))
                     }
                     
                     // Pre-fill client address from calculation
@@ -923,8 +922,8 @@ class QuotesFragment : Fragment() {
     private fun clearDateFilterDashboard() {
         fromDate = null
         toDate = null
-        tvDateFilterFrom.text = "Select Date"
-        tvDateFilterTo.text = "Select Date"
+        tvDateFilterFrom.text = getString(R.string.select_date)
+        tvDateFilterTo.text = getString(R.string.select_date)
         applyDateFilterToDashboard()
     }
     
